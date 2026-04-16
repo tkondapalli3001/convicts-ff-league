@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/records',  label: 'Records', icon: '🏆' },
   { href: '/trends',   label: 'Trends',  icon: '📈' },
   { href: '/gamelog',  label: 'Games',   icon: '📋' },
+  { href: '/luck',     label: 'Luck',    icon: '🎲' },
 ]
 
 export default function MobileNav() {
