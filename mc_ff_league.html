@@ -292,7 +292,12 @@
 </div>
 
 <div id="page-records" class="page">
-  <div id="records-content"></div>
+  <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto;scrollbar-width:none">
+    <button id="rtab-records" class="tab active" onclick="recordsTabSwitch('records')">Records</button>
+    <button id="rtab-luck" class="tab" onclick="recordsTabSwitch('luck')">Luck Index</button>
+  </div>
+  <div id="rcontent-records"></div>
+  <div id="rcontent-luck" style="display:none"></div>
 </div>
 
 <div id="page-trends" class="page">
@@ -449,6 +454,7 @@ const state = {
   ownerMap: {},      // display_name -> user_id (latest)
   ownerSeasons: {},  // display_name -> [season stats]
   allMatchups: [],   // flat list of all {year,week,team1,pts1,team2,pts2,type,winner}
+  luckIndex: [],     // all-play luck index per owner-season
   leagueChain: [],   // list of league IDs (oldest first)
   loaded: false,
   error: null,
@@ -600,6 +606,7 @@ async function loadAllData() {
     // Process all matchups into flat game log
     buildFlatMatchups();
     buildOwnerSeasons();
+    buildLuckIndex();
 
     state.loaded = true;
     document.getElementById('nav-status').textContent = `${YEARS[0]}–${YEARS[YEARS.length-1]} · ${chain.length} seasons`;
@@ -752,6 +759,95 @@ function buildOwnerSeasons() {
     }
     if (seasons.length > 0) state.ownerSeasons[name] = seasons;
   });
+}
+
+// =============================
+// ALL-PLAY LUCK INDEX
+// =============================
+function buildLuckIndex() {
+  const REGULAR_WEEKS = 14;
+  const results = {}; // ownerName -> { year -> { actualWins, expectedWins, weeks } }
+
+  YEARS.forEach(year => {
+    const rMap = state.rosters[year]?._rosterUserMap || {};
+    const numTeams = state.leagues[year]?.settings?.num_teams || 10;
+    const isMedianYear = state.leagues[year]?.settings?.league_average_match_p === 1;
+    const maxH2HId = isMedianYear ? numTeams / 2 : Infinity;
+
+    for (let week = 1; week <= REGULAR_WEEKS; week++) {
+      const weekData = state.matchups[year]?.[week];
+      if (!weekData || weekData.isPlayoff) continue;
+      const raw = weekData.matchups || [];
+
+      // One score per roster — deduplicate (median years list each team twice)
+      const seen = new Set();
+      const teamScores = [];
+      raw.forEach(entry => {
+        if (seen.has(entry.roster_id)) return;
+        if (parseInt(entry.matchup_id) > maxH2HId) return;
+        seen.add(entry.roster_id);
+        const ownerName = rMap[entry.roster_id];
+        if (!ownerName) return;
+        teamScores.push({ ownerName, pts: entry.points || 0 });
+      });
+
+      const n = teamScores.length;
+      if (n < 2) continue;
+
+      // All-play: expected wins = fraction of other teams beaten this week
+      teamScores.forEach(({ ownerName, pts }) => {
+        let allPlayWins = 0;
+        teamScores.forEach(other => {
+          if (other.ownerName === ownerName) return;
+          if (pts > other.pts) allPlayWins++;
+          else if (pts === other.pts) allPlayWins += 0.5;
+        });
+        const expectedWins = allPlayWins / (n - 1);
+        if (!results[ownerName]) results[ownerName] = {};
+        if (!results[ownerName][year]) results[ownerName][year] = { actualWins: 0, expectedWins: 0, weeks: 0 };
+        results[ownerName][year].expectedWins += expectedWins;
+        results[ownerName][year].weeks++;
+      });
+    }
+
+    // Actual H2H wins from ownerSeasons (already H2H-corrected for 2024)
+    Object.keys(results).forEach(name => {
+      if (!results[name][year]) return;
+      const season = (state.ownerSeasons[name] || []).find(s => s.year === year);
+      results[name][year].actualWins = season?.wins || 0;
+    });
+  });
+
+  state.luckIndex = [];
+  Object.entries(results).forEach(([name, byYear]) => {
+    let careerActual = 0, careerExpected = 0;
+    const yearEntries = Object.entries(byYear).sort((a, b) => a[0] - b[0]);
+    yearEntries.forEach(([yr, d]) => {
+      const luckIdx = d.actualWins - d.expectedWins;
+      state.luckIndex.push({
+        name,
+        year: parseInt(yr),
+        actualWins: d.actualWins,
+        expectedWins: parseFloat(d.expectedWins.toFixed(2)),
+        luckIndex: parseFloat(luckIdx.toFixed(2)),
+        narrative: luckIdx < -2.0 ? 'The League Martyr' : luckIdx > 2.0 ? 'Blessed' : '',
+      });
+      careerActual += d.actualWins;
+      careerExpected += d.expectedWins;
+    });
+    const careerLuck = careerActual - careerExpected;
+    state.luckIndex.push({
+      name,
+      year: 'Career',
+      actualWins: careerActual,
+      expectedWins: parseFloat(careerExpected.toFixed(2)),
+      luckIndex: parseFloat(careerLuck.toFixed(2)),
+      narrative: careerLuck < -2.0 ? 'The League Martyr' : careerLuck > 2.0 ? 'Blessed' : '',
+    });
+  });
+
+  // Sort: most unlucky first
+  state.luckIndex.sort((a, b) => a.luckIndex - b.luckIndex);
 }
 
 function getFinishFromBracket(bracket, rosterId, rosters) {
@@ -1449,15 +1545,25 @@ function buildOwnerDetail(name) {
 }
 
 function ownerTabSwitch(tab, name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  const tabs = document.querySelectorAll('.tabs .tab');
+  const detail = document.getElementById('owner-detail');
+  (detail || document).querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  (detail || document).querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  const tabs = (detail || document).querySelectorAll('.tabs .tab');
   const contents = ['ot-seasons','ot-h2h','ot-gamelog'];
   const tabMap = { seasons: 0, h2h: 1, gamelog: 2 };
   const idx = tabMap[tab];
   if (tabs[idx]) tabs[idx].classList.add('active');
   const el = document.getElementById(contents[idx]);
   if (el) el.classList.add('active');
+}
+
+function recordsTabSwitch(tab) {
+  ['records', 'luck'].forEach(t => {
+    const btn = document.getElementById('rtab-' + t);
+    const content = document.getElementById('rcontent-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+    if (content) content.style.display = t === tab ? 'block' : 'none';
+  });
 }
 
 function showH2HModal(p1, p2) {
@@ -1554,30 +1660,6 @@ function renderRecords() {
   const topWinStreaks = Object.entries(streaks).sort((a,b)=>b[1].maxWin-a[1].maxWin).slice(0,6);
   const topLossStreaks = Object.entries(streaks).sort((a,b)=>b[1].maxLoss-a[1].maxLoss).slice(0,6);
 
-  // Potential points (luck) — ppts is available from roster settings
-  const pptsData = {};
-  Object.keys(state.ownerSeasons).forEach(name => {
-    let totalPPts = 0, totalFPts = 0, count = 0;
-    const loadedYrs = Object.keys(state.rosters).map(Number);
-    loadedYrs.forEach(year => {
-      const users = state.users[year]||[];
-      const umap = {};
-      users.forEach(u=>umap[u.user_id]=u);
-      (state.rosters[year]||[]).forEach(r=>{
-        const u = umap[r.owner_id];
-        if(!u) return;
-        const ownerName = resolveOwnerName(u.user_id, u.display_name);
-        if(ownerName !== name) return;
-        const ppts = (r.settings?.ppts||0)+(r.settings?.ppts_decimal||0)/100;
-        const fpts = (r.settings?.fpts||0)+(r.settings?.fpts_decimal||0)/100;
-        if(ppts>0){totalPPts+=ppts;totalFPts+=fpts;count++;}
-      });
-    });
-    if(count>0) pptsData[name]={ppts:totalPPts/count,fpts:totalFPts/count,luck:((totalFPts-totalPPts)/count),seasons:count};
-  });
-  const luckiestOwner = Object.entries(pptsData).sort((a,b)=>b[1].luck-a[1].luck)[0];
-  const unluckiestOwner = Object.entries(pptsData).sort((a,b)=>a[1].luck-b[1].luck)[0];
-
   // Rivalry — most played H2H matchup
   const h2hCount = {};
   allGames.forEach(g=>{
@@ -1586,24 +1668,6 @@ function renderRecords() {
   });
   const topRivalry = Object.entries(h2hCount).sort((a,b)=>b[1]-a[1])[0];
   const [rv1,rv2] = topRivalry?.[0]?.split('|||')||['—','—'];
-
-  // Waiver activity per owner
-  const waiverData = {};
-  Object.keys(state.ownerSeasons).forEach(name=>{
-    let total=0;
-    Object.keys(state.rosters).forEach(year=>{
-      const users=state.users[year]||[];
-      const umap={};users.forEach(u=>umap[u.user_id]=u);
-      (state.rosters[year]||[]).forEach(r=>{
-        const u=umap[r.owner_id];
-        if(!u)return;
-        if(resolveOwnerName(u.user_id,u.display_name)===name) total+=(r.settings?.waiver_budget_used||0);
-      });
-    });
-    waiverData[name]=total;
-  });
-  const mostActiveWaiver = Object.entries(waiverData).sort((a,b)=>b[1]-a[1])[0];
-  const leastActiveWaiver = Object.entries(waiverData).filter(e=>e[1]>0).sort((a,b)=>a[1]-b[1])[0];
 
   const scoreRow = (s,rank) => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bg3);font-size:12px">
     <span style="width:20px;color:var(--text3);font-size:10px">${rank}</span>
@@ -1624,7 +1688,7 @@ function renderRecords() {
     </div>`;
   };
 
-  document.getElementById('records-content').innerHTML = `
+  document.getElementById('rcontent-records').innerHTML = `
   <div class="page-title">League Records</div>
   <div class="page-sub">All-time milestones, extremes &amp; fun stats across ${YEARS.length} seasons</div>
 
@@ -1772,34 +1836,62 @@ function renderRecords() {
     </div>
   </div>
 
-  <div class="section-label" style="margin-top:4px">🎲 Luck &amp; Waiver Activity</div>
-  <div class="grid-2">
-    <div>
-      ${luckiestOwner ? `<div class="record-item"><div class="record-icon">🍀</div><div>
-        <div class="record-label">Luckiest Owner (Actual pts vs Potential pts)</div>
-        <div class="record-value">${luckiestOwner[0]}</div>
-        <div class="record-ctx">Avg PF ${luckiestOwner[1].fpts.toFixed(0)} vs potential ${luckiestOwner[1].ppts.toFixed(0)} — above max ${Math.abs(luckiestOwner[1].luck).toFixed(0)} pts/season</div>
-      </div></div>` : ''}
-      ${unluckiestOwner ? `<div class="record-item"><div class="record-icon">😤</div><div>
-        <div class="record-label">Most Unlucky (Left pts on bench)</div>
-        <div class="record-value">${unluckiestOwner[0]}</div>
-        <div class="record-ctx">Avg ${Math.abs(unluckiestOwner[1].luck).toFixed(0)} pts/season left on bench</div>
-      </div></div>` : ''}
-    </div>
-    <div>
-      ${mostActiveWaiver ? `<div class="record-item"><div class="record-icon">🛒</div><div>
-        <div class="record-label">Most Waiver FAAB Used (All-Time)</div>
-        <div class="record-value">$${mostActiveWaiver[1]}</div>
-        <div class="record-ctx">${mostActiveWaiver[0]} — most aggressive waiver spender</div>
-      </div></div>` : ''}
-      ${leastActiveWaiver ? `<div class="record-item"><div class="record-icon">😴</div><div>
-        <div class="record-label">Least Waiver FAAB Used</div>
-        <div class="record-value">$${leastActiveWaiver[1]}</div>
-        <div class="record-ctx">${leastActiveWaiver[0]} — set it and forget it</div>
-      </div></div>` : ''}
-    </div>
-  </div>`;
+  `;
 }
+
+// =============================
+// LUCK INDEX TAB
+// =============================
+function renderLuckIndex() {
+  const el = document.getElementById('rcontent-luck');
+  if (!el) return;
+  const data = state.luckIndex || [];
+  if (!data.length) {
+    el.innerHTML = '<div class="empty-state">No luck data available.</div>';
+    return;
+  }
+
+  const rows = data.map(d => {
+    const li = d.luckIndex;
+    const liColor = li < 0 ? 'color:#e05555' : li > 0 ? 'color:#4caf50' : 'color:var(--text2)';
+    const liSign = li > 0 ? '+' : '';
+    const isCareer = d.year === 'Career';
+    const rowStyle = isCareer ? 'border-top:2px solid var(--border);font-style:italic;' : '';
+    const narrativeBadge = d.narrative === 'The League Martyr'
+      ? `<span class="badge badge-red">${d.narrative}</span>`
+      : d.narrative === 'Blessed'
+        ? `<span class="badge badge-gold">${d.narrative}</span>`
+        : '—';
+    return `<tr style="${rowStyle}">
+      <td><span style="font-weight:600;color:${ownerColor(d.name)}">${d.name}</span></td>
+      <td style="color:${isCareer?'var(--text3)':'var(--text2)'}">${d.year}</td>
+      <td>${d.actualWins}</td>
+      <td>${d.expectedWins.toFixed(2)}</td>
+      <td style="${liColor};font-weight:700">${liSign}${li.toFixed(2)}</td>
+      <td>${narrativeBadge}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="page-title">Luck Index</div>
+    <div class="page-sub">All-play schedule luck across ${YEARS.length} seasons — sorted unlucky to lucky</div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:18px;max-width:580px;line-height:1.6">
+      <b style="color:var(--text2)">Expected Wins</b> = each week, your score is compared against every other team's score.
+      If you'd have beaten 9 of 11 opponents, you earn 0.818 expected wins that week. Sum across all 14 regular-season weeks.
+      <b style="color:var(--text2)">Luck Index</b> = Actual Wins − Expected Wins.
+      Positive = you had a favorable schedule; negative = you were robbed.
+    </p>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr>
+          <th>Owner</th><th>Season</th><th>Actual W</th><th>Expected W</th>
+          <th>Luck Index</th><th>Narrative</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
 // =============================
 // TRENDS PAGE
 // =============================
