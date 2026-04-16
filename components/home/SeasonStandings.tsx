@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 
 import FinishBadge from '@/components/shared/FinishBadge'
@@ -24,6 +25,7 @@ interface Row {
 export default function SeasonStandings() {
   const { state } = useLeague()
   const { ownerSeasons, years } = state
+  const router = useRouter()
 
   const [activeYears, setActiveYears] = useState<Set<number>>(new Set(years))
   const [sortKey, setSortKey] = useState<SortKey>('year')
@@ -135,7 +137,7 @@ export default function SeasonStandings() {
               return (
                 <tr
                   key={`${r.manager}-${r.year}`}
-                  onDoubleClick={() => window.location.href = `/owners/${r.manager}`}
+                  onDoubleClick={() => router.push(`/owners/${r.manager}`)}
                 >
                   <td className="sticky-col font-bold text-s-text">{r.manager}</td>
                   <td>

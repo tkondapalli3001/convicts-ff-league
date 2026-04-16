@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/constants'
 import WinPctBadge from '@/components/shared/WinPctBadge'
@@ -14,6 +15,7 @@ export default function CareerLeaderboard() {
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
   const [sortDir, setSortDir] = useState<1 | -1>(-1)
   const [playoffOnly, setPlayoffOnly] = useState(false)
+  const router = useRouter()
 
   const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
   const names = canonicalNames.filter(n => ownerSeasons[n]).sort()
@@ -113,7 +115,7 @@ export default function CareerLeaderboard() {
               const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg4 text-s-text3'
               const pct = (d.winpct * 100).toFixed(1)
               return (
-                <tr key={d.name} onClick={() => window.location.href = `/owners/${d.name}`}>
+                <tr key={d.name} onClick={() => router.push(`/owners/${d.name}`)}>
                   <td>
                     <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold ${rankCls}`}>{i + 1}</span>
                   </td>

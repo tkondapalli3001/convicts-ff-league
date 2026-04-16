@@ -37,8 +37,8 @@ export default function QuickStats() {
       />
       <StatBox
         label="Toilet Bowl 🚽"
-        value="Nathan & Teja"
-        sub="2x losers each 💀"
+        value="Nathan"
+        sub="2x loser (2020, 2022)"
         valueColor="#ef4444"
       />
       <StatBox

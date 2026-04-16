@@ -18,7 +18,7 @@ const config: Config = {
         's-border2': '#243552',
         's-text':    '#e2e8f0',
         's-text2':   '#94a3b8',
-        's-text3':   '#475569',
+        's-text3':   '#64748b',
         's-gold':    '#f59e0b',
         's-gold2':   '#fbbf24',
         's-green':   '#22c55e',
