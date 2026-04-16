@@ -1,0 +1,2 @@
+:HL["/convicts-ff-league/_next/static/chunks/150yn~tqb59po.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"owners","param":null,"prefetchHints":0,"slots":{"children":{"name":"name","param":{"type":"d","key":"Manu","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"QfFKl2YcStO0OxACSRon7"}
