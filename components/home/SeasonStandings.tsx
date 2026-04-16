@@ -23,7 +23,7 @@ interface Row {
 }
 
 interface Props {
-  onYearChange?: (year: number) => void
+  onYearChange?: (year: number | null) => void
 }
 
 export default function SeasonStandings({ onYearChange }: Props) {
@@ -32,14 +32,14 @@ export default function SeasonStandings({ onYearChange }: Props) {
   const router = useRouter()
 
   const [activeYears, setActiveYears] = useState<Set<number>>(new Set(years))
-  const [sortKey, setSortKey] = useState<SortKey>('year')
-  const [sortDir, setSortDir] = useState<1 | -1>(1)
+  const [sortKey, setSortKey] = useState<SortKey>('winpct')
+  const [sortDir, setSortDir] = useState<1 | -1>(-1)
 
   // Keep activeYears in sync when years load from Sleeper
   useEffect(() => {
     if (years.length) {
       setActiveYears(new Set(years))
-      onYearChange?.(Math.max(...years))
+      onYearChange?.(null)
     }
   }, [years.length])  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -51,7 +51,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
   function toggleYear(y: number) {
     setActiveYears(prev => {
       if (prev.size === 1 && prev.has(y)) {
-        onYearChange?.(Math.max(...years))
+        onYearChange?.(null)
         return new Set(years)
       }
       onYearChange?.(y)

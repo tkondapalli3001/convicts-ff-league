@@ -4,7 +4,6 @@ import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import RecordItem from '@/components/shared/RecordItem'
-import EarningsBars from '@/components/earnings/EarningsBars'
 import AnnualBreakdown from '@/components/earnings/AnnualBreakdown'
 
 export default function EarningsPage() {
@@ -21,7 +20,6 @@ export default function EarningsPage() {
         Net payout across all seasons · Buy-ins: $20→$30→$40→$50→$75→$100→$125
       </p>
 
-      <EarningsBars />
       <AnnualBreakdown />
 
       {/* Fun Facts */}

@@ -85,42 +85,6 @@ function MatchupCard({ result }: { result: MatchupResult }) {
   )
 }
 
-function BracketSection({
-  title,
-  titleColor,
-  byRound,
-  roundLabels,
-}: {
-  title: string
-  titleColor: string
-  byRound: Map<number, MatchupResult[]>
-  roundLabels: (round: number, playoffStart: number) => string
-  playoffStart: number
-}) {
-  const rounds = [...byRound.keys()].sort((a, b) => a - b)
-  if (!rounds.length) return null
-
-  return (
-    <div>
-      <div className={`text-[10px] font-bold tracking-[2px] uppercase mb-3`} style={{ color: titleColor }}>
-        {title}
-      </div>
-      <div className="grid gap-[14px]" style={{ gridTemplateColumns: `repeat(${rounds.length}, 1fr)` }}>
-        {rounds.map(r => (
-          <div key={r}>
-            <div className="text-[9px] text-s-text3 uppercase tracking-[1px] mb-2">
-              {roundLabels(r, 0)}
-            </div>
-            {(byRound.get(r) ?? []).map((result, i) => (
-              <MatchupCard key={i} result={result} />
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 interface Props {
   year: number
 }

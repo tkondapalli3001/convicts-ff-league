@@ -1,5 +1,4 @@
 import { Matchup } from '@/types'
-import { ownerColor } from '@/lib/utils'
 
 interface ScoreRow {
   owner: string

@@ -37,8 +37,8 @@ export default function TrophySection() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-5">
 
       {/* Hall of Fame */}
-      <div className="bg-[#1a1000] border border-[#3a2400] rounded-[12px] p-[18px]">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#a37a1a] mb-3">
+      <div className="bg-[#221500] border border-[#5a3800] rounded-[12px] p-[18px]">
+        <div className="text-[13px] font-bold tracking-[3px] uppercase text-[#a37a1a] mb-3">
           🏆 Hall of Fame — Champions
         </div>
         <table className="w-full border-collapse text-[12px]">
@@ -61,7 +61,7 @@ export default function TrophySection() {
               return (
                 <tr key={year} className="border-b border-[#2a1800] last:border-0 hover:bg-[#221500] transition-colors">
                   <td className="py-[7px] pr-3 text-[#7a5a10] font-bold">{year}</td>
-                  <td className="py-[7px] pr-3 font-extrabold text-s-gold">
+                  <td className="py-[7px] pr-3 font-extrabold text-[14px] text-s-gold">
                     {c.winner}
                     {(c as { shared?: boolean }).shared && (
                       <span className="ml-1 text-[9px] font-normal text-[#7a5a10]">(shared)</span>
@@ -78,8 +78,8 @@ export default function TrophySection() {
       </div>
 
       {/* Wall of Shame */}
-      <div className="bg-[#1a0000] border border-[#3a0000] rounded-[12px] p-[18px]">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#7a1010] mb-3">
+      <div className="bg-[#220000] border border-[#5a0000] rounded-[12px] p-[18px]">
+        <div className="text-[13px] font-bold tracking-[3px] uppercase text-[#7a1010] mb-3">
           🚽 Wall of Shame — Toilet Bowl
         </div>
         <table className="w-full border-collapse text-[12px]">
@@ -104,7 +104,7 @@ export default function TrophySection() {
               return (
                 <tr key={year} className="border-b border-[#2a0000] last:border-0 hover:bg-[#220000] transition-colors">
                   <td className="py-[7px] pr-3 text-[#5a1010] font-bold">{year}</td>
-                  <td className="py-[7px] pr-3 font-extrabold text-s-red">{s.loser}</td>
+                  <td className="py-[7px] pr-3 font-extrabold text-[14px] text-s-red">{s.loser}</td>
                   <td className="py-[7px] text-right text-[#5a1010]">
                     {seed != null ? `#${seed}` : '—'}
                   </td>

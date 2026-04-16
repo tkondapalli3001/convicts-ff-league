@@ -14,7 +14,17 @@ export default function RecordsPage() {
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
 
-  const allScores = allMatchups.flatMap(g => [
+  const EXCLUDED_SCORES = [
+    { owner: 'Teja', year: 2019, week: 14 },
+    { owner: 'Eric', year: 2021, week: 17 },
+  ]
+
+  const filteredMatchups = allMatchups.filter(g =>
+    !EXCLUDED_SCORES.some(e => e.year === g.year && e.week === g.week &&
+      (e.owner === g.team1 || e.owner === g.team2))
+  )
+
+  const allScores = filteredMatchups.flatMap(g => [
     { owner: g.team1, pts: g.pts1, year: g.year, week: g.week, opp: g.team2, oppPts: g.pts2, result: (g.pts1 >= g.pts2 ? 'W' : 'L') as 'W' | 'L' },
     { owner: g.team2, pts: g.pts2, year: g.year, week: g.week, opp: g.team1, oppPts: g.pts1, result: (g.pts2 > g.pts1 ? 'W' : 'L') as 'W' | 'L' },
   ])
@@ -22,8 +32,8 @@ export default function RecordsPage() {
   const validScores = allScores.filter(s => s.pts > 0)
   const highScore   = validScores.reduce((m, s) => s.pts > m.pts ? s : m, validScores[0])
   const lowScore    = validScores.reduce((m, s) => s.pts < m.pts ? s : m, validScores[0])
-  const maxMargin   = allMatchups.reduce((m, g) => g.margin > m.margin ? g : m, allMatchups[0])
-  const minMargin   = allMatchups.reduce((m, g) => g.margin < m.margin ? g : m, allMatchups[0])
+  const maxMargin   = filteredMatchups.reduce((m, g) => g.margin > m.margin ? g : m, filteredMatchups[0])
+  const minMargin   = filteredMatchups.reduce((m, g) => g.margin < m.margin ? g : m, filteredMatchups[0])
 
   const allSeasonStats = Object.entries(ownerSeasons).flatMap(([name, seasons]) =>
     seasons.map(s => ({ ...s, name }))
@@ -35,7 +45,7 @@ export default function RecordsPage() {
   const lowPF  = allSeasonStats.reduce((m, s) => s.pf < m.pf ? s : m, allSeasonStats[0])
   const bestMarginSeason  = allSeasonStats.reduce((m, s) => (s.pf - s.pa) > (m.pf - m.pa) ? s : m, allSeasonStats[0])
   const worstMarginSeason = allSeasonStats.reduce((m, s) => (s.pf - s.pa) < (m.pf - m.pa) ? s : m, allSeasonStats[0])
-  const playoffGames = allMatchups.filter(g => g.type === 'P')
+  const playoffGames = filteredMatchups.filter(g => g.type === 'P')
   const biggestPlayoffBlowout = playoffGames.length ? playoffGames.reduce((m, g) => g.margin > m.margin ? g : m, playoffGames[0]) : null
 
   // 140+ and sub-80 games
@@ -50,7 +60,7 @@ export default function RecordsPage() {
 
   // H2H rivalry
   const h2hCount: Record<string, number> = {}
-  allMatchups.forEach(g => {
+  filteredMatchups.forEach(g => {
     const key = [g.team1, g.team2].sort().join('|||')
     h2hCount[key] = (h2hCount[key] || 0) + 1
   })
@@ -59,7 +69,7 @@ export default function RecordsPage() {
 
   // Win/Loss streaks
   const ownerGameList: Record<string, { won: boolean; year: number; week: number }[]> = {}
-  allMatchups.forEach(g => {
+  filteredMatchups.forEach(g => {
     [g.team1, g.team2].forEach((o, i) => {
       if (!ownerGameList[o]) ownerGameList[o] = []
       const myPts  = i === 0 ? g.pts1 : g.pts2

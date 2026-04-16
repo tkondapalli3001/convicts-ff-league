@@ -10,11 +10,24 @@ type SortKey = 'name' | 'numSeasons' | 'allW' | 'allL' | 'winpct' | 'avgPF' | 'a
 
 export default function CareerLeaderboard() {
   const { state } = useLeague()
-  const { ownerSeasons, allMatchups } = state
+  const { ownerSeasons, allMatchups, brackets, rosterUserMaps } = state
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
   const [sortDir, setSortDir] = useState<1 | -1>(-1)
   const [playoffOnly, setPlayoffOnly] = useState(false)
   const router = useRouter()
+
+  const winnersBracketOwners = useMemo(() => {
+    const set = new Set<string>()
+    for (const [yearStr, bracket] of Object.entries(brackets)) {
+      const year = Number(yearStr)
+      const rMap = rosterUserMaps[year] ?? {}
+      ;(bracket.winners ?? []).forEach(g => {
+        if (g.t1) set.add(`${year}|||${rMap[String(g.t1)] ?? `Team${g.t1}`}`)
+        if (g.t2) set.add(`${year}|||${rMap[String(g.t2)] ?? `Team${g.t2}`}`)
+      })
+    }
+    return set
+  }, [brackets, rosterUserMaps])
 
   const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
   const names = canonicalNames.filter(n => ownerSeasons[n]).sort()
@@ -38,7 +51,10 @@ export default function CareerLeaderboard() {
       if (playoffOnly) {
         // Use actual playoff game records from allMatchups
         const playoffGames = allMatchups.filter(
-          g => g.type === 'P' && (g.team1 === name || g.team2 === name)
+          g => g.type === 'P' &&
+               (g.team1 === name || g.team2 === name) &&
+               winnersBracketOwners.has(`${g.year}|||${g.team1}`) &&
+               winnersBracketOwners.has(`${g.year}|||${g.team2}`)
         )
         allW = playoffGames.filter(g => g.winner === name).length
         allL = playoffGames.filter(g => g.loser === name).length
@@ -65,7 +81,7 @@ export default function CareerLeaderboard() {
         avgFinish,
       }
     })
-  }, [names.join(','), ownerSeasons, allMatchups, playoffOnly])
+  }, [names.join(','), ownerSeasons, allMatchups, winnersBracketOwners, playoffOnly])
 
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {
