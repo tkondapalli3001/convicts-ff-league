@@ -1,2 +1,2 @@
-:HL["/convicts-ff-league/_next/static/chunks/11cayr_o42clk.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"owners","param":null,"prefetchHints":0,"slots":{"children":{"name":"name","param":{"type":"d","key":"Hamza","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"E4hmYozTWbnW_2vkeHPjz"}
+:HL["/convicts-ff-league/_next/static/chunks/0ifya.nbu15gn.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"owners","param":null,"prefetchHints":0,"slots":{"children":{"name":"name","param":{"type":"d","key":"Hamza","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"lR0G-zGW39JW4KcKIeLsr"}
