@@ -1,6 +1,5 @@
 'use client'
 
-import { useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
@@ -10,7 +9,7 @@ import StreakList from '@/components/records/StreakList'
 
 export default function RecordsPage() {
   const { state } = useLeague()
-  const { loaded, error, allMatchups, ownerSeasons, rosters, users, rosterUserMaps, years } = state
+  const { loaded, error, allMatchups, ownerSeasons, years } = state
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
@@ -97,28 +96,6 @@ export default function RecordsPage() {
     .sort((a, b) => b[1].maxLoss - a[1].maxLoss).slice(0, 6)
     .map(([owner, d]) => ({ owner, streak: d.maxLoss, startYear: d.lossStart.year, startWeek: d.lossStart.week, endYear: d.lossEnd.year, endWeek: d.lossEnd.week }))
 
-  // Luck (potential points)
-  const pptsData: Record<string, { ppts: number; fpts: number; luck: number }> = {}
-  Object.keys(ownerSeasons).forEach(name => {
-    let totalPPts = 0, totalFPts = 0, count = 0
-    Object.keys(rosters).map(Number).forEach(year => {
-      const yearUsers = users[year] || []
-      const umap: Record<string, string> = {}
-      yearUsers.forEach(u => { umap[u.user_id] = u.display_name })
-      ;(rosters[year] || []).forEach(r => {
-        if (!r.owner_id || !umap[r.owner_id]) return
-        const rMap = rosterUserMaps[year] || {}
-        if (rMap[String(r.roster_id)] !== name) return
-        const ppts = (r.settings?.ppts || 0) + (r.settings?.ppts_decimal || 0) / 100
-        const fpts = (r.settings?.fpts  || 0) + (r.settings?.fpts_decimal  || 0) / 100
-        if (ppts > 0) { totalPPts += ppts; totalFPts += fpts; count++ }
-      })
-    })
-    if (count > 0) pptsData[name] = { ppts: totalPPts / count, fpts: totalFPts / count, luck: (totalFPts - totalPPts) / count }
-  })
-  const luckiest   = Object.entries(pptsData).sort((a, b) => b[1].luck - a[1].luck)[0]
-  const unluckiest = Object.entries(pptsData).sort((a, b) => a[1].luck - b[1].luck)[0]
-
   return (
     <div className="animate-fade-in">
       <h1 className="text-[26px] font-extrabold text-s-text mb-1">League Records</h1>
@@ -156,9 +133,9 @@ export default function RecordsPage() {
         <div>
           <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">Career Milestones</div>
           <RecordItem icon="💰" label="All-Time Most Money Won"   value="+$450"  context="Kerry — won 2025 for +$675 in biggest single-year payout" />
-          <RecordItem icon="🩸" label="All-Time Most Money Lost"  value="-$410"  context="Teja — 7 seasons, 0 rings, 2x toilet bowl 💔" />
+          <RecordItem icon="🩸" label="All-Time Most Money Lost"  value="-$410"  context="Teja — 7 seasons, 0 rings, 1x toilet bowl (2021) 💔" />
           <RecordItem icon="👑" label="Most Championships"        value="2x — Daniyaal" context="2020 & 2023 · Armaan & Dustin share 0.5x (2022 co-champs)" />
-          <RecordItem icon="🚽" label="Most Toilet Bowls"         value="2x — Teja & Nathan" context="Teja: 2021 & 2024 · Nathan: 2020 & 2022" />
+          <RecordItem icon="🚽" label="Most Toilet Bowls"         value="2x — Nathan" context="Nathan: 2020 & 2022 · Teja: 2021 · Kerry: 2023 · Dustin: 2024 · Sonu: 2025" />
         </div>
       </div>
 
@@ -181,30 +158,6 @@ export default function RecordsPage() {
         <StreakList title="Longest Losing Streaks" streaks={topLossStreaks} variant="loss" />
       </div>
 
-      {/* Luck */}
-      {(luckiest || unluckiest) && (
-        <>
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">🎲 Luck & Potential Points</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
-            {luckiest && (
-              <RecordItem
-                icon="🍀"
-                label="Luckiest Owner (Actual vs Potential)"
-                value={luckiest[0]}
-                context={`Avg PF ${luckiest[1].fpts.toFixed(0)} vs potential ${luckiest[1].ppts.toFixed(0)} — scored above max`}
-              />
-            )}
-            {unluckiest && (
-              <RecordItem
-                icon="😤"
-                label="Most Unlucky (Left pts on bench)"
-                value={unluckiest[0]}
-                context={`Avg ${Math.abs(unluckiest[1].luck).toFixed(0)} pts/season left on bench`}
-              />
-            )}
-          </div>
-        </>
-      )}
     </div>
   )
 }

@@ -2,7 +2,6 @@
 
 import { useLeague } from '@/context/LeagueContext'
 import { EARNINGS_DATA } from '@/lib/constants'
-import { ownerColor } from '@/lib/utils'
 
 export default function AnnualBreakdown() {
   const { state } = useLeague()
@@ -27,11 +26,10 @@ export default function AnnualBreakdown() {
           </thead>
           <tbody>
             {EARNINGS_DATA.map(e => {
-              const color = ownerColor(e.owner)
               const tc = e.total >= 0 ? 'text-s-green' : 'text-s-red'
               return (
                 <tr key={e.owner}>
-                  <td className="table-sticky-col font-bold" style={{ color }}>{e.owner}</td>
+                  <td className="table-sticky-col font-bold text-s-text">{e.owner}</td>
                   <td className={`font-bold ${tc}`}>{e.total >= 0 ? '+' : ''}${e.total}</td>
                   {displayYears.map(y => {
                     const v = e[`y${y}` as keyof typeof e] as number | null

@@ -40,7 +40,7 @@ export default function EarningsPage() {
             icon="🩸"
             label="All-Time Money Lost"
             value="-$410"
-            context="Teja — 7 seasons, 0 championships, 2x toilet bowl"
+            context="Teja — 7 seasons, 0 championships, 1x toilet bowl (2021)"
           />
           <RecordItem
             icon="📈"

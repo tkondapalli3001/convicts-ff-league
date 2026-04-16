@@ -62,7 +62,7 @@ export default function FinishTracker() {
         seasons.forEach(s => { finishByYear[s.year] = s.finish })
         return (
           <div key={name} className="flex items-center gap-1 my-1">
-            <div className="w-[70px] text-[11px] text-s-text2 font-semibold flex-shrink-0 text-right pr-2">{name}</div>
+            <div className="w-[70px] text-[11px] text-s-text font-semibold flex-shrink-0 text-right pr-2">{name}</div>
             <div className="flex gap-1 flex-wrap">
               {years.map(y => {
                 const totalTeams = leagues[y]?.settings?.num_teams || 10

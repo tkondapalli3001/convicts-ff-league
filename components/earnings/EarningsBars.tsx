@@ -1,5 +1,4 @@
 import { EARNINGS_DATA } from '@/lib/constants'
-import { ownerColor } from '@/lib/utils'
 
 export default function EarningsBars() {
   const maxAbs = Math.max(...EARNINGS_DATA.map(e => Math.abs(e.total)))
@@ -13,7 +12,6 @@ export default function EarningsBars() {
         {EARNINGS_DATA.map((e, i) => {
           const pct = (Math.abs(e.total) / maxAbs * 100).toFixed(1)
           const pos = e.total >= 0
-          const color = ownerColor(e.owner)
           const rankColors = ['bg-[#3d2000] text-s-gold', 'bg-[#1a2030] text-[#b0c4de]', 'bg-[#1a1000] text-[#cd7f32]']
           const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg4 text-s-text3'
 
@@ -22,7 +20,7 @@ export default function EarningsBars() {
               <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold flex-shrink-0 ${rankCls}`}>
                 {i + 1}
               </span>
-              <div className="w-[80px] text-[12px] font-bold text-right flex-shrink-0" style={{ color }}>
+              <div className="w-[80px] text-[12px] font-bold text-right flex-shrink-0 text-s-text">
                 {e.owner}
               </div>
               <div className="flex-1 h-6 bg-s-bg3 rounded-[5px] overflow-hidden relative border border-s-border">

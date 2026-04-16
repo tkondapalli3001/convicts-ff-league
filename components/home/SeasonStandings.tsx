@@ -22,7 +22,11 @@ interface Row {
   playoffs: boolean
 }
 
-export default function SeasonStandings() {
+interface Props {
+  onYearChange?: (year: number) => void
+}
+
+export default function SeasonStandings({ onYearChange }: Props) {
   const { state } = useLeague()
   const { ownerSeasons, years } = state
   const router = useRouter()
@@ -33,7 +37,10 @@ export default function SeasonStandings() {
 
   // Keep activeYears in sync when years load from Sleeper
   useEffect(() => {
-    if (years.length) setActiveYears(new Set(years))
+    if (years.length) {
+      setActiveYears(new Set(years))
+      onYearChange?.(Math.max(...years))
+    }
   }, [years.length])  // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSort(key: SortKey) {
@@ -43,9 +50,11 @@ export default function SeasonStandings() {
 
   function toggleYear(y: number) {
     setActiveYears(prev => {
-      // If this is already the only active year, reset to all years
-      if (prev.size === 1 && prev.has(y)) return new Set(years)
-      // Otherwise, select only this year
+      if (prev.size === 1 && prev.has(y)) {
+        onYearChange?.(Math.max(...years))
+        return new Set(years)
+      }
+      onYearChange?.(y)
       return new Set([y])
     })
   }
@@ -125,8 +134,8 @@ export default function SeasonStandings() {
               <SortTh k="wins"    label="W" />
               <SortTh k="losses"  label="L" />
               <SortTh k="winpct"  label="Win%" />
-              <SortTh k="pf"      label="PF"    hideOnMobile />
-              <SortTh k="pa"      label="PA"    hideOnMobile />
+              <SortTh k="pf"      label="PF/Gm" hideOnMobile />
+              <SortTh k="pa"      label="PA/Gm" hideOnMobile />
               <SortTh k="margin"  label="+/−"   hideOnMobile />
               <th className="hidden md:table-cell">Playoffs</th>
             </tr>
@@ -149,8 +158,8 @@ export default function SeasonStandings() {
                   <td className="text-s-green font-bold">{r.wins}</td>
                   <td className="text-s-red">{r.losses}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="text-s-blue hidden md:table-cell">{r.pf.toFixed(1)}</td>
-                  <td className="text-[#f87171] hidden md:table-cell">{r.pa.toFixed(1)}</td>
+                  <td className="text-s-blue hidden md:table-cell">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="text-[#f87171] hidden md:table-cell">{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
                   <td className="hidden md:table-cell">
                     <span className={r.margin >= 0 ? 'text-s-green' : 'text-s-red'}>
                       {r.margin >= 0 ? '+' : ''}{r.margin.toFixed(1)}

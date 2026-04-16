@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/constants'
 import WinPctBadge from '@/components/shared/WinPctBadge'
-import FinishBadge from '@/components/shared/FinishBadge'
 
-type SortKey = 'name' | 'numSeasons' | 'allW' | 'allL' | 'winpct' | 'avgPF' | 'avgFinish' | 'bestFinish' | 'playoffApps' | 'champs' | 'shame' | 'earn'
+type SortKey = 'name' | 'numSeasons' | 'allW' | 'allL' | 'winpct' | 'avgPF' | 'avgFinish' | 'playoffApps' | 'champs' | 'shame' | 'earn'
 
 export default function CareerLeaderboard() {
   const { state } = useLeague()
-  const { ownerSeasons } = state
+  const { ownerSeasons, allMatchups } = state
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
   const [sortDir, setSortDir] = useState<1 | -1>(-1)
   const [playoffOnly, setPlayoffOnly] = useState(false)
@@ -28,29 +27,45 @@ export default function CareerLeaderboard() {
   const data = useMemo(() => {
     return names.map(name => {
       const allSeasons = ownerSeasons[name] || []
-      // seasons is what we compute stats from (respects the playoffs-only filter)
-      const seasons = playoffOnly ? allSeasons.filter(s => s.inPlayoffs) : allSeasons
-      const allW = seasons.reduce((a, s) => a + s.wins, 0)
-      const allL = seasons.reduce((a, s) => a + s.losses, 0)
-      const avgPF = seasons.length ? seasons.reduce((a, s) => a + s.pf, 0) / seasons.length : 0
-      // playoffApps is always the career total, not filtered
       const playoffApps = allSeasons.filter(s => s.inPlayoffs).length
       const champs = MANUAL_CHAMPS.filter(c => c.winner?.includes(name))
         .reduce((sum, c) => sum + (c.half ? 0.5 : 1), 0)
       const shame = MANUAL_SHAME.filter(s => s.loser === name).length
       const earn = EARNINGS_DATA.find(e => e.owner === name)
-      const finishes = seasons.filter(s => s.finish != null).map(s => s.finish as number)
-      const avgFinish = finishes.length ? finishes.reduce((a, b) => a + b, 0) / finishes.length : null
-      const bestFinish = finishes.length ? Math.min(...finishes) : null
+
+      let allW: number, allL: number, avgPF: number, numSeasons: number, avgFinish: number | null
+
+      if (playoffOnly) {
+        // Use actual playoff game records from allMatchups
+        const playoffGames = allMatchups.filter(
+          g => g.type === 'P' && (g.team1 === name || g.team2 === name)
+        )
+        allW = playoffGames.filter(g => g.winner === name).length
+        allL = playoffGames.filter(g => g.loser === name).length
+        avgPF = playoffGames.length
+          ? playoffGames.reduce((sum, g) => sum + (g.team1 === name ? g.pts1 : g.pts2), 0) / playoffGames.length
+          : 0
+        numSeasons = playoffApps
+        const playoffFinishes = allSeasons.filter(s => s.inPlayoffs && s.finish != null).map(s => s.finish as number)
+        avgFinish = playoffFinishes.length ? playoffFinishes.reduce((a, b) => a + b, 0) / playoffFinishes.length : null
+      } else {
+        allW = allSeasons.reduce((a, s) => a + s.wins, 0)
+        allL = allSeasons.reduce((a, s) => a + s.losses, 0)
+        avgPF = allSeasons.length ? allSeasons.reduce((a, s) => a + s.pf, 0) / allSeasons.length : 0
+        numSeasons = allSeasons.length
+        const finishes = allSeasons.filter(s => s.finish != null).map(s => s.finish as number)
+        avgFinish = finishes.length ? finishes.reduce((a, b) => a + b, 0) / finishes.length : null
+      }
+
       return {
-        name, numSeasons: seasons.length, allW, allL,
+        name, numSeasons, allW, allL,
         winpct: allW / (allW + allL || 1),
         avgPF, playoffApps, champs, shame,
         earn: earn ? earn.total : null,
-        avgFinish, bestFinish,
+        avgFinish,
       }
     })
-  }, [names.join(','), ownerSeasons, playoffOnly])
+  }, [names.join(','), ownerSeasons, allMatchups, playoffOnly])
 
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {
@@ -76,7 +91,9 @@ export default function CareerLeaderboard() {
   return (
     <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">Career Leaderboard</div>
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
+          Career Leaderboard{playoffOnly ? ' — Playoff Games Only' : ''}
+        </div>
         <button
           onClick={() => setPlayoffOnly(p => !p)}
           className={[
@@ -96,14 +113,13 @@ export default function CareerLeaderboard() {
             <tr>
               <th>#</th>
               <SortTh k="name"        label="Manager" />
-              <SortTh k="numSeasons"  label="Seasons"  hideOnMobile />
+              <SortTh k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'}  hideOnMobile />
               <SortTh k="allW"        label="W" />
               <SortTh k="allL"        label="L" />
               <SortTh k="winpct"      label="Win%" />
-              <SortTh k="avgPF"       label="Avg PF"   hideOnMobile />
+              <SortTh k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'Avg PF'}   hideOnMobile />
               <SortTh k="avgFinish"   label="Avg Fin"  hideOnMobile />
-              <SortTh k="bestFinish"  label="Best"     hideOnMobile />
-              <SortTh k="playoffApps" label="Playoffs" hideOnMobile />
+              {!playoffOnly && <SortTh k="playoffApps" label="Playoffs" hideOnMobile />}
               <SortTh k="champs"      label="🏆" />
               <SortTh k="shame"       label="🚽" />
               <SortTh k="earn"        label="Net $" />
@@ -115,7 +131,7 @@ export default function CareerLeaderboard() {
               const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg4 text-s-text3'
               const pct = (d.winpct * 100).toFixed(1)
               return (
-                <tr key={d.name} onClick={() => router.push(`/owners/${d.name}`)}>
+                <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}>
                   <td>
                     <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold ${rankCls}`}>{i + 1}</span>
                   </td>
@@ -124,10 +140,9 @@ export default function CareerLeaderboard() {
                   <td className="text-s-green font-bold">{d.allW}</td>
                   <td className="text-s-red">{d.allL}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="hidden md:table-cell text-s-blue">{d.avgPF.toFixed(0)}</td>
+                  <td className="hidden md:table-cell text-s-blue">{d.avgPF.toFixed(1)}</td>
                   <td className="hidden md:table-cell text-s-text2">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
-                  <td className="hidden md:table-cell"><FinishBadge finish={d.bestFinish} /></td>
-                  <td className="hidden md:table-cell text-s-text2">{d.playoffApps}/{d.numSeasons}</td>
+                  {!playoffOnly && <td className="hidden md:table-cell text-s-text2">{d.playoffApps}/{d.numSeasons}</td>}
                   <td>{d.champs > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d2000] text-s-gold border border-[#5a3200]">🏆 {d.champs}x</span> : <span className="text-s-text3">—</span>}</td>
                   <td>{d.shame > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d0000] text-s-red border border-[#5a0000]">🚽 {d.shame}x</span> : <span className="text-s-text3">—</span>}</td>
                   <td className={d.earn != null ? (d.earn >= 0 ? 'text-s-green font-bold' : 'text-s-red font-bold') : 'text-s-text3'}>

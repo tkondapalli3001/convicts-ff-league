@@ -3,6 +3,7 @@ import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
 interface Props {
   entries: LuckEntry[]
+  year: number
 }
 
 function NarrativeBadge({ narrative }: { narrative: LuckEntry['narrative'] }) {
@@ -33,11 +34,11 @@ function fmt(n: number, decimals = 2): string {
   return n.toFixed(decimals)
 }
 
-export default function LuckTable({ entries }: Props) {
+export default function LuckTable({ entries, year }: Props) {
   return (
     <div className="rounded-[12px] bg-[#252535] p-[18px]">
       <p className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-3">
-        All-Play Luck Rankings
+        All-Play Luck Rankings — {year} Season
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-[620px] w-full border-collapse text-[12px]">

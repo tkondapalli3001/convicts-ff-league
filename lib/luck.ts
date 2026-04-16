@@ -11,13 +11,15 @@ export interface LuckEntry {
 export function computeLuckIndex(
   matchups: LeagueState['matchups'],
   rosterUserMaps: LeagueState['rosterUserMaps'],
-  ownerSeasons: LeagueState['ownerSeasons']
+  ownerSeasons: LeagueState['ownerSeasons'],
+  filterYear?: number
 ): LuckEntry[] {
   const expectedWinsMap: Record<string, number> = {}
 
   // Step 1: accumulate expected wins from weekly matchup data (regular season only)
   for (const yearStr of Object.keys(matchups)) {
     const year = Number(yearStr)
+    if (filterYear != null && year !== filterYear) continue
     const weekMap = matchups[year]
     const rosterMap = rosterUserMaps[year] ?? {}
 
@@ -49,7 +51,10 @@ export function computeLuckIndex(
   const entries: LuckEntry[] = Object.keys(ownerSeasons)
     .filter(owner => expectedWinsMap[owner] !== undefined)
     .map(owner => {
-      const actualWins = ownerSeasons[owner].reduce((sum, s) => sum + s.wins, 0)
+      const seasons = filterYear != null
+        ? ownerSeasons[owner].filter(s => s.year === filterYear)
+        : ownerSeasons[owner]
+      const actualWins = seasons.reduce((sum, s) => sum + s.wins, 0)
       const expectedWins = expectedWinsMap[owner]
       const luckIndex = actualWins - expectedWins
 

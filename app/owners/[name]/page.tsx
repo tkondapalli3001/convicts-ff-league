@@ -7,7 +7,8 @@ export function generateStaticParams() {
   return names.map(name => ({ name: encodeURIComponent(name) }))
 }
 
-export default function OwnerPage({ params }: { params: { name: string } }) {
-  const ownerName = decodeURIComponent(params.name)
+export default async function OwnerPage({ params }: { params: Promise<{ name: string }> }) {
+  const { name } = await params
+  const ownerName = decodeURIComponent(name)
   return <OwnerDetail ownerName={ownerName} />
 }

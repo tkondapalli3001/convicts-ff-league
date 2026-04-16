@@ -1,5 +1,5 @@
 import { USER_ID_TO_OWNER, DISPLAY_NAME_TO_OWNER, MANUAL_CHAMPS, MANUAL_SHAME, MANUAL_PLAYOFF_OVERRIDES } from '@/lib/constants'
-import type { LeagueState, Matchup, OwnerSeason, BracketGame, SleeperUser, SleeperRoster } from '@/types'
+import type { LeagueState, Matchup, OwnerSeason, BracketGame } from '@/types'
 
 // ─── Owner name resolution ────────────────────────────────────────────────────
 
@@ -141,16 +141,31 @@ export function buildOwnerSeasons(state: LeagueState): Record<string, OwnerSeaso
       if (!entry) continue
       const roster_id = parseInt(entry[0])
 
-      const roster = state.rosters[year]?.find(r => r.roster_id === roster_id)
-      const wins   = roster?.settings?.wins || 0
-      const losses = roster?.settings?.losses || 0
-      const ties   = roster?.settings?.ties || 0
-      const pf     = parseFloat(
-        ((roster?.settings?.fpts || 0) + (roster?.settings?.fpts_decimal || 0) / 100).toFixed(2)
-      )
-      const pa     = parseFloat(
-        ((roster?.settings?.fpts_against || 0) + (roster?.settings?.fpts_against_decimal || 0) / 100).toFixed(2)
-      )
+      // Compute H2H wins/losses/PF/PA from matchup data (correctly excludes 2024 median games,
+      // since those produce groups of size ≠ 2 and are filtered out by the group.length !== 2 check)
+      let wins = 0, losses = 0, ties = 0, pf = 0, pa = 0
+      for (const [, { matchups: weekMatchups, isPlayoff }] of Object.entries(state.matchups[year] || {})) {
+        if (isPlayoff) continue
+        const groups: Record<number, typeof weekMatchups> = {}
+        weekMatchups.forEach(m => {
+          if (!groups[m.matchup_id]) groups[m.matchup_id] = []
+          groups[m.matchup_id].push(m)
+        })
+        for (const group of Object.values(groups)) {
+          if (group.length !== 2) continue
+          const mine = group.find(m => m.roster_id === roster_id)
+          if (!mine) continue
+          const opp = group.find(m => m.roster_id !== roster_id)!
+          if (!opp) continue
+          const myPts = mine.points || 0
+          const oppPts = opp.points || 0
+          pf += myPts
+          pa += oppPts
+          if (myPts > oppPts) wins++
+          else if (myPts < oppPts) losses++
+          else ties++
+        }
+      }
 
       const bracket = state.brackets[year]
       const lgSettings = state.leagues[year]?.settings || {}
