@@ -158,8 +158,8 @@ export default function SeasonStandings({ onYearChange }: Props) {
                   <td className="text-s-green font-bold">{r.wins}</td>
                   <td className="text-s-red">{r.losses}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="text-s-blue hidden md:table-cell">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="text-[#f87171] hidden md:table-cell">{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="text-s-text2 hidden md:table-cell">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="text-s-text2 hidden md:table-cell">{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
                   <td className="hidden md:table-cell">
                     <span className={r.margin >= 0 ? 'text-s-green' : 'text-s-red'}>
                       {r.margin >= 0 ? '+' : ''}{r.margin.toFixed(1)}

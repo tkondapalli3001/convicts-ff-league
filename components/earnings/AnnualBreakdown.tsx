@@ -15,6 +15,18 @@ export default function AnnualBreakdown() {
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[14px]">
         Annual Breakdown
       </div>
+
+      {/* Buy-in row — above the scrollable table */}
+      <div className="flex flex-wrap gap-2 items-center mb-[14px] pb-[14px] border-b border-s-border">
+        <span className="text-[10px] font-bold uppercase tracking-[1px] text-s-text3">Buy-In</span>
+        {displayYears.map(y => (
+          <span key={y} className="inline-flex items-center gap-1 px-2 py-[2px] rounded-[4px] bg-s-bg3 border border-s-border text-[10px]">
+            <span className="text-s-text3">{y}:</span>
+            <span className="font-bold text-s-text2">${BUY_INS[y] ?? '—'}</span>
+          </span>
+        ))}
+      </div>
+
       <div className="overflow-x-auto">
         <table className="w-full border-collapse" style={{ minWidth: `${displayYears.length * 60 + 160}px` }}>
           <thead>
@@ -25,13 +37,6 @@ export default function AnnualBreakdown() {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-s-border bg-s-bg3">
-              <td className="table-sticky-col font-bold text-s-text3 text-[10px] uppercase tracking-[1px]">Buy-In</td>
-              <td className="text-s-text3 font-bold">—</td>
-              {displayYears.map(y => (
-                <td key={y} className="text-s-text2 font-semibold">${BUY_INS[y] ?? '—'}</td>
-              ))}
-            </tr>
             {EARNINGS_DATA.map(e => {
               const tc = e.total >= 0 ? 'text-s-green' : 'text-s-red'
               return (

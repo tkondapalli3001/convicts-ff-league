@@ -15,10 +15,7 @@ export default function EarningsPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-[26px] font-extrabold text-s-text mb-1">Earnings Ledger</h1>
-      <p className="text-[13px] text-s-text3 mb-6">
-        Net payout across all seasons · Buy-ins: $20→$30→$40→$50→$75→$100→$125
-      </p>
+      <h1 className="text-[26px] font-extrabold text-s-text mb-6">Earnings Ledger</h1>
 
       <AnnualBreakdown />
 

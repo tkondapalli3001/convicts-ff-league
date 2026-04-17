@@ -10,24 +10,36 @@ type SortKey = 'name' | 'numSeasons' | 'allW' | 'allL' | 'winpct' | 'avgPF' | 'a
 
 export default function CareerLeaderboard() {
   const { state } = useLeague()
-  const { ownerSeasons, allMatchups, brackets, rosterUserMaps } = state
+  const { ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues } = state
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
   const [sortDir, setSortDir] = useState<1 | -1>(-1)
   const [playoffOnly, setPlayoffOnly] = useState(false)
   const router = useRouter()
 
-  const winnersBracketOwners = useMemo(() => {
+  // Build a set of exact game keys (year|||week|||team1|||team2) for championship-path games only.
+  // Excludes 3rd/5th place consolation games (g.p === 3 or g.p === 5) and the losers bracket.
+  const winnersBracketGameKeys = useMemo(() => {
     const set = new Set<string>()
     for (const [yearStr, bracket] of Object.entries(brackets)) {
       const year = Number(yearStr)
       const rMap = rosterUserMaps[year] ?? {}
-      ;(bracket.winners ?? []).forEach(g => {
-        if (g.t1) set.add(`${year}|||${rMap[String(g.t1)] ?? `Team${g.t1}`}`)
-        if (g.t2) set.add(`${year}|||${rMap[String(g.t2)] ?? `Team${g.t2}`}`)
-      })
+      const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
+      ;(bracket.winners ?? [])
+        .filter(g => !g.p || g.p === 1)  // keep unplaced rounds + championship; exclude 3rd/5th
+        .forEach(g => {
+          const t1Id = g.t1 ?? null
+          const t2Id = g.t2 ?? null
+          if (t1Id != null && t2Id != null) {
+            const week = playoffStart + (g.r - 1)
+            const t1Name = rMap[String(t1Id)] ?? `Team${t1Id}`
+            const t2Name = rMap[String(t2Id)] ?? `Team${t2Id}`
+            set.add(`${year}|||${week}|||${t1Name}|||${t2Name}`)
+            set.add(`${year}|||${week}|||${t2Name}|||${t1Name}`)
+          }
+        })
     }
     return set
-  }, [brackets, rosterUserMaps])
+  }, [brackets, rosterUserMaps, leagues])
 
   const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
   const names = canonicalNames.filter(n => ownerSeasons[n]).sort()
@@ -53,8 +65,7 @@ export default function CareerLeaderboard() {
         const playoffGames = allMatchups.filter(
           g => g.type === 'P' &&
                (g.team1 === name || g.team2 === name) &&
-               winnersBracketOwners.has(`${g.year}|||${g.team1}`) &&
-               winnersBracketOwners.has(`${g.year}|||${g.team2}`)
+               winnersBracketGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
         )
         allW = playoffGames.filter(g => g.winner === name).length
         allL = playoffGames.filter(g => g.loser === name).length
@@ -81,7 +92,7 @@ export default function CareerLeaderboard() {
         avgFinish,
       }
     })
-  }, [names.join(','), ownerSeasons, allMatchups, winnersBracketOwners, playoffOnly])
+  }, [names.join(','), ownerSeasons, allMatchups, winnersBracketGameKeys, playoffOnly])
 
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {
