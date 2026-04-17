@@ -149,6 +149,25 @@ export default function RecordsPage() {
         </div>
       </div>
 
+      {/* All-time top 10 scores */}
+      <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">🏅 All-Time Top Scores</div>
+      <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[14px] mb-4">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">
+          Top 10 Highest Single-Game Scores (All Seasons)
+        </div>
+        {[...validScores].sort((a, b) => b.pts - a.pts).slice(0, 10).map((s, rank) => (
+          <div key={`top-${s.owner}-${s.year}-${s.week}`} className="flex items-center gap-2 py-[6px] border-b border-s-bg3 text-[12px]">
+            <span className="w-5 text-s-text3 text-[10px]">{rank + 1}</span>
+            <span className="font-bold w-[70px] flex-shrink-0 text-s-text">{s.owner}</span>
+            <span className="font-mono text-s-gold w-[55px]">{s.pts.toFixed(2)}</span>
+            <span className="text-s-text3 text-[10px] flex-1 truncate">vs {s.opp} · {s.year} W{s.week}</span>
+            <span className={`px-[6px] py-[1px] rounded-[4px] text-[10px] font-extrabold ml-auto flex-shrink-0 ${s.result === 'W' ? 'bg-[#052e16] text-s-green' : 'bg-[#450a0a] text-s-red'}`}>
+              {s.result}
+            </span>
+          </div>
+        ))}
+      </div>
+
       {/* 140+ explosions */}
       <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">
         🔥 140+ Point Explosions ({high140.length} total)

@@ -167,7 +167,7 @@ export default function CareerLeaderboard() {
                   <td className="text-s-green font-bold">{d.allW}</td>
                   <td className="text-s-red">{d.allL}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="hidden md:table-cell text-s-blue">{d.avgPF.toFixed(1)}</td>
+                  <td className="hidden md:table-cell text-s-text2">{d.avgPF.toFixed(1)}</td>
                   <td className="hidden md:table-cell text-s-text2">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
                   {!playoffOnly && <td className="hidden md:table-cell text-s-text2">{d.playoffApps}/{d.numSeasons}</td>}
                   <td>{d.champs > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d2000] text-s-gold border border-[#5a3200]">🏆 {d.champs}x</span> : <span className="text-s-text3">—</span>}</td>

@@ -41,6 +41,9 @@ export interface SleeperMatchup {
   matchup_id: number
   roster_id: number
   points: number
+  starters?: string[]
+  starters_points?: number[]
+  players_points?: Record<string, number>
 }
 
 export interface BracketGame {

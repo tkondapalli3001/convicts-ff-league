@@ -64,7 +64,8 @@ export default function SeasonStandings({ onYearChange }: Props) {
     for (const [name, seasons] of Object.entries(ownerSeasons)) {
       seasons.forEach(s => {
         if (!activeYears.has(s.year)) return
-        const margin = parseFloat((s.pf - s.pa).toFixed(2))
+        const games = s.wins + s.losses
+        const margin = games > 0 ? parseFloat(((s.pf - s.pa) / games).toFixed(2)) : 0
         result.push({
           manager: name,
           year: s.year,
@@ -136,7 +137,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
               <SortTh k="winpct"  label="Win%" />
               <SortTh k="pf"      label="PF/Gm" hideOnMobile />
               <SortTh k="pa"      label="PA/Gm" hideOnMobile />
-              <SortTh k="margin"  label="+/−"   hideOnMobile />
+              <SortTh k="margin"  label="+/−/Gm" hideOnMobile />
               <th className="hidden md:table-cell">Playoffs</th>
             </tr>
           </thead>

@@ -5,10 +5,10 @@ import { fmtPts } from '@/lib/utils'
 
 interface Props {
   matchups: Matchup[]
-  onDoubleClick?: (m: Matchup) => void
+  onClick?: (m: Matchup) => void
 }
 
-export default function GameLogTable({ matchups, onDoubleClick }: Props) {
+export default function GameLogTable({ matchups, onClick }: Props) {
   if (!matchups.length) {
     return (
       <div className="text-center py-10 text-s-text3">No matchups match your filters</div>
@@ -24,7 +24,7 @@ export default function GameLogTable({ matchups, onDoubleClick }: Props) {
             <div
               key={`${g.year}-${g.week}-${g.team1}-${g.team2}`}
               className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] cursor-pointer hover:bg-[#0f172a]"
-              onDoubleClick={() => onDoubleClick?.(g)}
+              onClick={() => onClick?.(g)}
             >
               <span className="w-[60px] text-s-text3 text-[10px] flex-shrink-0">{g.year} W{g.week}</span>
 

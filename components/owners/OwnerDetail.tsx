@@ -99,7 +99,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       {/* Stat boxes */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-[10px] mb-5">
         <StatBox label="Career Record" value={`${totalW}-${totalL}`} sub={`${pct}% win rate`} />
-        <StatBox label="Avg PF/Game" value={(seasons.reduce((a,s)=>a+s.pf,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPF.toFixed(0)} pts/season`} valueColor="#60a5fa" />
+        <StatBox label="Avg PF/Game" value={(seasons.reduce((a,s)=>a+s.pf,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPF.toFixed(0)} pts/season`} />
         <StatBox label="Avg PA/Game" value={(seasons.reduce((a,s)=>a+s.pa,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPA.toFixed(0)} pts allowed/season`} valueColor="#f87171" />
         <StatBox label="Best Season"   value={String(best.year)}  sub={`${best.wins}-${best.losses} record`}  valueColor="#22c55e" />
         <StatBox label="Worst Season"  value={String(worst.year)} sub={`${worst.wins}-${worst.losses} record`} valueColor="#ef4444" />
@@ -150,7 +150,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                     <td className="text-s-green font-bold">{s.wins}</td>
                     <td className="text-s-red">{s.losses}</td>
                     <td><WinPctBadge pct={spct} /></td>
-                    <td className="text-s-blue">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
+                    <td className="text-s-text2">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
                     <td className="text-[#f87171]">{s.wins + s.losses > 0 ? (s.pa / (s.wins + s.losses)).toFixed(1) : '—'}</td>
                     <td className={margin >= 0 ? 'text-s-green' : 'text-s-red'}>
                       {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
