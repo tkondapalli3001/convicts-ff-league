@@ -142,7 +142,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => {
+            {rows.map((r) => {
               const pct = (r.winpct * 100).toFixed(1)
               return (
                 <tr
@@ -151,7 +151,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
                 >
                   <td className="sticky-col font-bold text-s-text">{r.manager}</td>
                   <td>
-                    <span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text3 border border-s-border">
+                    <span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text2 border border-s-border">
                       {r.year}
                     </span>
                   </td>

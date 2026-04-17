@@ -219,5 +219,61 @@ export function buildOwnerSeasons(state: LeagueState): Record<string, OwnerSeaso
     if (seasons.length > 0) ownerSeasons[name] = seasons
   })
 
+  // Post-processing: assign 9th-place finish (toilet bowl winner) for each year.
+  // Sleeper bracket data often omits g.p on losers-bracket games, so we cross-reference
+  // with MANUAL_SHAME (confirmed last-place losers) and the bracket/matchup data.
+  for (const year of loadedYears) {
+    const shameEntry = MANUAL_SHAME.find(s => s.year === year)
+    if (!shameEntry) continue
+    const shameSeason = ownerSeasons[shameEntry.loser]?.find(s => s.year === year)
+    if (!shameSeason) continue
+
+    const shameRosterId = shameSeason.roster_id
+    const totalRosters = shameSeason.totalRosters
+    const ninthPlace = totalRosters - 1
+
+    let ninthRosterId: number | null = null
+
+    // First try: find toilet bowl game in losers bracket (g.l === shame loser's roster_id)
+    const bracket = state.brackets[year]
+    if (bracket?.losers?.length) {
+      const maxR = Math.max(...bracket.losers.map(g => g.r))
+      const tbGame = bracket.losers.find(g => g.r === maxR && g.l === shameRosterId)
+      if (tbGame?.w) ninthRosterId = tbGame.w
+    }
+
+    // Second try: scan playoff matchups for the shame loser's last losing game (= toilet bowl)
+    if (!ninthRosterId) {
+      const yearMUs = state.matchups[year]
+      if (yearMUs) {
+        const playoffWks = Object.entries(yearMUs)
+          .filter(([, w]) => w.isPlayoff)
+          .sort(([a], [b]) => +b - +a)  // latest week first
+        outer: for (const [, { matchups: mups }] of playoffWks) {
+          const grps: Record<number, typeof mups> = {}
+          mups.forEach(m => { if (!grps[m.matchup_id]) grps[m.matchup_id] = []; grps[m.matchup_id].push(m) })
+          for (const grp of Object.values(grps)) {
+            if (grp.length !== 2) continue
+            const mine = grp.find(m => m.roster_id === shameRosterId)
+            if (!mine) continue
+            const opp = grp.find(m => m.roster_id !== shameRosterId)!
+            if ((mine.points || 0) < (opp.points || 0)) {
+              ninthRosterId = opp.roster_id
+              break outer
+            }
+          }
+        }
+      }
+    }
+
+    if (!ninthRosterId) continue
+    const rMap = state.rosterUserMaps[year] ?? {}
+    const ninthName = rMap[String(ninthRosterId)]
+    const ninthSeason = ownerSeasons[ninthName]?.find(s => s.year === year)
+    if (ninthSeason && (ninthSeason.finish == null || ninthSeason.finish > ninthPlace)) {
+      ninthSeason.finish = ninthPlace
+    }
+  }
+
   return ownerSeasons
 }

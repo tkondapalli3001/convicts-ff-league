@@ -28,7 +28,7 @@ export default function ScoreLeaderboard({ title, scores, variant, countByOwner 
             <span className="w-5 text-s-text3 text-[10px]">{rank + 1}</span>
             <span className="font-bold w-[70px] flex-shrink-0 text-s-text">{s.owner}</span>
             <span className="font-mono text-s-gold w-[55px]">{s.pts.toFixed(2)}</span>
-            <span className="text-s-text3 text-[10px] flex-1 truncate">vs {s.opp} · {s.year} W{s.week}</span>
+            <span className="text-s-text2 text-[10px] flex-1 truncate">vs {s.opp} · {s.year} W{s.week}</span>
             <span className={`px-[6px] py-[1px] rounded-[4px] text-[10px] font-extrabold ml-auto flex-shrink-0 ${s.result === 'W' ? 'bg-[#052e16] text-s-green' : 'bg-[#450a0a] text-s-red'}`}>
               {s.result}
             </span>

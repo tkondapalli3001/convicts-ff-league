@@ -24,7 +24,7 @@ export default function StreakList({ title, streaks, variant }: Props) {
           <span className={`text-[20px] font-extrabold w-8 ${variant === 'win' ? 'text-s-green' : 'text-s-red'}`}>
             {streak}
           </span>
-          <span className="text-s-text3 text-[10px]">
+          <span className="text-s-text2 text-[10px]">
             {startYear} W{startWeek} → {endYear} W{endWeek}
           </span>
         </div>

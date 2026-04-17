@@ -26,7 +26,7 @@ export default function GameLogTable({ matchups, onClick }: Props) {
               className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] cursor-pointer hover:bg-[#0f172a]"
               onClick={() => onClick?.(g)}
             >
-              <span className="w-[60px] text-s-text3 text-[10px] flex-shrink-0">{g.year} W{g.week}</span>
+              <span className="w-[60px] text-s-text2 text-[10px] flex-shrink-0">{g.year} W{g.week}</span>
 
               {/* Team 1 */}
               <span className={`font-bold w-[70px] flex-shrink-0 overflow-hidden text-ellipsis ${winner1 ? 'text-s-text' : 'text-s-text2'}`}>

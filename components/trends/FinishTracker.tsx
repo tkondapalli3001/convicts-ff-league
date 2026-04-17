@@ -15,7 +15,7 @@ function FinishDot({ finish, year, totalTeams }: { finish: number | null | undef
     return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#3d0000] text-[#f87171] flex-shrink-0" title={`${year}: 🚽 Last`}>{finish}</span>
   if (finish <= Math.floor(totalTeams / 2))
     return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-s-bg4 text-s-text2 flex-shrink-0" title={`${year}: ${finish}th`}>{finish}</span>
-  return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#15202b] text-s-text3 flex-shrink-0" title={`${year}: ${finish}th`}>{finish}</span>
+  return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#15202b] text-s-text2 flex-shrink-0" title={`${year}: ${finish}th`}>{finish}</span>
 }
 
 export default function FinishTracker() {

@@ -12,7 +12,7 @@ export default function CareerLeaderboard() {
   const { state } = useLeague()
   const { ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues } = state
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
-  const [sortDir, setSortDir] = useState<1 | -1>(-1)
+  const [sortDir, setSortDir] = useState<1 | -1>(1)
   const [playoffOnly, setPlayoffOnly] = useState(false)
   const router = useRouter()
 
@@ -46,7 +46,7 @@ export default function CareerLeaderboard() {
 
   function handleSort(k: SortKey) {
     if (sortKey === k) setSortDir(d => (d === 1 ? -1 : 1))
-    else { setSortKey(k); setSortDir(-1) }
+    else { setSortKey(k); setSortDir(1) }
   }
 
   const data = useMemo(() => {

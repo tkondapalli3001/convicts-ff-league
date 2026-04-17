@@ -145,7 +145,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 const spct = (s.wins / (s.wins + s.losses || 1) * 100).toFixed(1)
                 return (
                   <tr key={s.year}>
-                    <td><span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text3 border border-s-border">{s.year}</span></td>
+                    <td><span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text2 border border-s-border">{s.year}</span></td>
                     <td><FinishBadge finish={s.finish} /></td>
                     <td className="text-s-green font-bold">{s.wins}</td>
                     <td className="text-s-red">{s.losses}</td>
@@ -187,7 +187,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 key={`${g.year}-${g.week}-${g.team1}`}
                 className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] hover:bg-[#0f172a]"
               >
-                <span className="w-[60px] text-s-text3 text-[10px] flex-shrink-0">{g.year} W{g.week}</span>
+                <span className="w-[60px] text-s-text2 text-[10px] flex-shrink-0">{g.year} W{g.week}</span>
                 <span className="font-bold w-[72px] flex-shrink-0 overflow-hidden text-ellipsis text-s-text">
                   {ownerName}
                 </span>
