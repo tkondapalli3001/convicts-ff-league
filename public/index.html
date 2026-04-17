@@ -1137,7 +1137,7 @@ function renderHome() {
           <th onclick="sortStandings('winpct')">Win%</th>
           <th onclick="sortStandings('pf')" class="hide-mobile">PF</th>
           <th onclick="sortStandings('pa')" class="hide-mobile">PA</th>
-          <th onclick="sortStandings('margin')" class="hide-mobile">+/−</th>
+          <th onclick="sortStandings('margin')" class="hide-mobile">+/−/Gm</th>
           <th class="hide-mobile">Playoffs</th>
         </tr></thead>
         <tbody id="standings-tbody">${standingsRows}</tbody>
@@ -1182,7 +1182,8 @@ function buildStandingsRows(activeYears) {
   for (const [name, seasons] of Object.entries(state.ownerSeasons)) {
     seasons.forEach(s => {
       if (!activeYears.includes(s.year)) return;
-      const margin = parseFloat((s.pf - s.pa).toFixed(2));
+      const games = s.wins + s.losses;
+      const margin = games > 0 ? parseFloat(((s.pf - s.pa) / games).toFixed(2)) : 0;
       const inPlayoffs = s.inPlayoffs === true;
       rows.push({ manager: name, year: s.year, finish: s.finish, wins: s.wins, losses: s.losses, winpct: s.wins / (s.wins + s.losses + s.ties || 1), pf: s.pf, pa: s.pa, margin, playoffs: inPlayoffs });
     });
@@ -1206,8 +1207,8 @@ function buildStandingsRows(activeYears) {
       <td class="text-green bold">${r.wins}</td>
       <td class="text-red">${r.losses}</td>
       <td><span class="pct-badge ${pctClass(pctVal)}">${pctVal}%</span></td>
-      <td class="text-blue hide-mobile">${r.pf.toFixed(1)}</td>
-      <td style="color:#f87171" class="hide-mobile">${r.pa.toFixed(1)}</td>
+      <td class="hide-mobile">${r.pf.toFixed(1)}</td>
+      <td class="hide-mobile">${r.pa.toFixed(1)}</td>
       <td class="hide-mobile">${marginStr}</td>
       <td class="hide-mobile">${r.playoffs ? badge('✓ Playoffs', 'gold') : badge('—', 'gray')}</td>
     </tr>`;
@@ -1254,7 +1255,6 @@ function renderEarnings() {
 
   document.getElementById('earnings-content').innerHTML = `
   <div class="page-title">Earnings Ledger</div>
-  <div class="page-sub">Net payout across all seasons · Buy-ins: $20→$30→$40→$50→$75→$100→$125</div>
 
   <div class="card">
     <div class="card-title">Net Payout Ranking</div>
@@ -1268,7 +1268,14 @@ function renderEarnings() {
         <thead><tr>
           <th>Owner</th><th>Total</th>${YEARS.map(y=>`<th>${y}</th>`).join('')}
         </tr></thead>
-        <tbody>${ytrs}</tbody>
+        <tbody>
+          <tr style="background:var(--bg3);border-bottom:2px solid var(--border2)">
+            <td class="sticky-col" style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);background:var(--bg3)">Buy-In</td>
+            <td style="color:var(--text3);font-size:11px">—</td>
+            ${YEARS.map(y => `<td style="font-size:12px;font-weight:700;color:var(--gold)">$${BUY_INS[y] || '—'}</td>`).join('')}
+          </tr>
+          ${ytrs}
+        </tbody>
       </table>
     </div>
   </div>
@@ -1375,7 +1382,7 @@ function renderOwners() {
         <td class="text-green bold">${d.allW}</td>
         <td class="text-red">${d.allL}</td>
         <td><span class="pct-badge ${pctClass(pct)}">${pct}%</span></td>
-        <td class="text-blue hide-mobile">${d.avgPF.toFixed(0)}</td>
+        <td class="hide-mobile">${d.avgPF.toFixed(0)}</td>
         <td class="hide-mobile">${d.avgFinish}</td>
         <td class="hide-mobile">${bf}</td>
         <td class="hide-mobile">${d.playoffApps}/${d.numSeasons}</td>
@@ -1474,7 +1481,7 @@ function buildOwnerDetail(name) {
       <td class="text-green bold">${s.wins}</td>
       <td class="text-red">${s.losses}</td>
       <td><span class="pct-badge ${pctClass((s.wins/(s.wins+s.losses||1)*100).toFixed(0))}">${(s.wins/(s.wins+s.losses||1)*100).toFixed(1)}%</span></td>
-      <td class="text-blue">${s.pf.toFixed(1)}</td>
+      <td>${s.pf.toFixed(1)}</td>
       <td style="color:#f87171">${s.pa.toFixed(1)}</td>
       <td class="${margin>=0?'text-green':'text-red'}">${margin>=0?'+':''}${m}</td>
       <td>${s.inPlayoffs ? badge('✓','gold') : badge('—','gray')}</td>
@@ -1545,7 +1552,7 @@ function buildOwnerDetail(name) {
 
   <div class="grid-auto" style="margin-bottom:20px">
     <div class="stat-box"><div class="stat-label">Career Record</div><div class="stat-value" style="font-size:18px">${totalW}-${totalL}</div><div class="stat-sub"><span class="pct-badge ${pctClass(pct)}">${pct}%</span></div></div>
-    <div class="stat-box"><div class="stat-label">Avg PF/Season</div><div class="stat-value" style="font-size:18px;color:var(--blue)">${avgPF.toFixed(0)}</div><div class="stat-sub">${(avgPF/14).toFixed(1)} pts/wk avg</div></div>
+    <div class="stat-box"><div class="stat-label">Avg PF/Season</div><div class="stat-value" style="font-size:18px">${avgPF.toFixed(0)}</div><div class="stat-sub">${(avgPF/14).toFixed(1)} pts/wk avg</div></div>
     <div class="stat-box"><div class="stat-label">Avg PA/Season</div><div class="stat-value" style="font-size:18px;color:#f87171">${avgPA.toFixed(0)}</div><div class="stat-sub">points allowed</div></div>
     <div class="stat-box"><div class="stat-label">Best Season</div><div class="stat-value" style="font-size:16px;color:var(--green)">${best.year}</div><div class="stat-sub">${best.wins}-${best.losses} record</div></div>
     <div class="stat-box"><div class="stat-label">Worst Season</div><div class="stat-value" style="font-size:16px;color:var(--red)">${worst.year}</div><div class="stat-sub">${worst.wins}-${worst.losses} record</div></div>
@@ -1818,6 +1825,12 @@ function renderRecords() {
     </div>
   </div>
 
+  <div class="section-label" style="margin-top:8px">🏅 All-Time Top Scores</div>
+  <div class="card" style="padding:14px;margin-bottom:16px">
+    <div class="card-title">Top 10 Highest Single-Game Scores (All Seasons)</div>
+    ${validScores.sort((a,b)=>b.pts-a.pts).slice(0,10).map((s,i)=>scoreRow(s,i+1)).join('')}
+  </div>
+
   <div class="section-label" style="margin-top:8px">🔥 140+ Point Explosions (${highWeeks140.length} total)</div>
   <div class="grid-2">
     <div class="card" style="padding:14px">
@@ -2057,7 +2070,7 @@ function renderGameLog() {
 
   document.getElementById('gamelog-content').innerHTML = `
   <div class="page-title">Full Game Log</div>
-  <div class="page-sub">${state.allMatchups.length} total matchups · Double-click any row to filter by those two teams</div>
+  <div class="page-sub">${state.allMatchups.length} total matchups · Click any row to see lineup details</div>
 
   <div class="card" style="padding:12px">
     <div class="section-label" style="margin-bottom:8px">Filter by Year</div>
@@ -2096,7 +2109,7 @@ function refreshGLTable() {
   const rows = games.map(g => {
     const c1 = ownerColor(g.team1), c2 = ownerColor(g.team2);
     const margin = g.pts1 - g.pts2;
-    return `<div class="gl-row" ondblclick="quickFilterGL2('${g.team1}','${g.team2}')">
+    return `<div class="gl-row" onclick="openGameDetails(${g.year},${g.week},${g.roster1},${g.roster2})">
       <span class="gl-year-wk">${g.year} W${g.week}</span>
       <span class="gl-team" style="color:${c1}">${g.team1}</span>
       <span class="gl-pts">${fmtPts(g.pts1)}</span>
@@ -2121,6 +2134,105 @@ function quickFilterGL2(t1, t2) {
   });
   showToast(`Filtered: ${t1} vs ${t2}`);
   refreshGLTable();
+}
+
+// =============================
+// GAME DETAILS MODAL
+// =============================
+let _playersCache = null;
+
+async function ensurePlayersCache() {
+  if (_playersCache) return _playersCache;
+  try {
+    _playersCache = await sleepFetch(`${SLEEPER_API}/players/nfl`);
+  } catch(e) {
+    _playersCache = {};
+  }
+  return _playersCache;
+}
+
+async function openGameDetails(year, week, roster1Id, roster2Id) {
+  const weekData = state.matchups[year]?.[week];
+  if (!weekData) {
+    showModal('Game Details', '<div style="color:var(--text3);padding:20px;text-align:center">Matchup data not available</div>');
+    return;
+  }
+
+  const m1 = weekData.matchups.find(m => m.roster_id == roster1Id);
+  const m2 = weekData.matchups.find(m => m.roster_id == roster2Id);
+  if (!m1 || !m2) {
+    showModal('Game Details', '<div style="color:var(--text3);padding:20px;text-align:center">Roster data not found for this matchup</div>');
+    return;
+  }
+
+  const rMap = state.rosters[year]?._rosterUserMap || {};
+  const name1 = rMap[roster1Id] || `Team${roster1Id}`;
+  const name2 = rMap[roster2Id] || `Team${roster2Id}`;
+  const typeLabel = weekData.isPlayoff ? 'Playoff' : 'Reg Season';
+
+  // Show modal immediately with loading state
+  showModal(`${name1} vs ${name2} · ${year} Wk${week}`, `
+    <div style="text-align:center;padding:30px;color:var(--text3)">
+      <div class="spinner" style="margin:0 auto 14px"></div>
+      <div style="font-size:12px;letter-spacing:1px">Loading player data…</div>
+    </div>
+  `);
+
+  const players = await ensurePlayersCache();
+
+  // Build starter rows for one team
+  const rosterPositions = (state.leagues[year]?.roster_positions || []).filter(p => p !== 'BN');
+
+  function starterRows(entry) {
+    const starters = entry.starters || [];
+    const starterPts = entry.starters_points || [];
+    return starters.map((pid, i) => {
+      const pts = typeof starterPts[i] === 'number' ? starterPts[i] : (entry.players_points?.[pid] ?? 0);
+      const pos = rosterPositions[i] || '?';
+      const p = players[pid];
+      const playerName = p ? (p.full_name || `${p.first_name || ''} ${p.last_name || ''}`.trim() || pid) : `#${pid}`;
+      const nflTeam = p?.team || '';
+      const ptsColor = pts >= 20 ? 'var(--green)' : pts >= 10 ? 'var(--text2)' : pts > 0 ? 'var(--text3)' : '#475569';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(30,41,59,0.5)">
+        <span style="width:36px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);flex-shrink:0">${pos}</span>
+        <span style="flex:1;font-size:12px;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${playerName}${nflTeam ? `<span style="font-size:10px;color:var(--text3);font-weight:400;margin-left:4px">${nflTeam}</span>` : ''}</span>
+        <span style="font-family:monospace;font-size:12px;font-weight:700;color:${ptsColor};flex-shrink:0">${pts.toFixed(2)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const c1 = ownerColor(name1), c2 = ownerColor(name2);
+  const pts1 = m1.points || 0, pts2 = m2.points || 0;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border2)">
+      <div style="flex:1;text-align:center">
+        <div style="font-size:13px;font-weight:800;color:${c1};margin-bottom:2px">${name1}</div>
+        <div style="font-size:30px;font-weight:800;color:${pts1>=pts2?'var(--green)':'var(--red)'};line-height:1">${pts1.toFixed(2)}</div>
+      </div>
+      <div style="text-align:center;flex-shrink:0">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)">${typeLabel}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Week ${week}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text3);margin-top:4px">vs</div>
+      </div>
+      <div style="flex:1;text-align:center">
+        <div style="font-size:13px;font-weight:800;color:${c2};margin-bottom:2px">${name2}</div>
+        <div style="font-size:30px;font-weight:800;color:${pts2>=pts1?'var(--green)':'var(--red)'};line-height:1">${pts2.toFixed(2)}</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:14px;align-items:start">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${c1};margin-bottom:8px">${name1}</div>
+        ${starterRows(m1)}
+        <div style="padding-top:8px;font-size:11px;font-weight:700;color:var(--text2);text-align:right">Total: <span style="color:${c1}">${pts1.toFixed(2)}</span></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${c2};margin-bottom:8px">${name2}</div>
+        ${starterRows(m2)}
+        <div style="padding-top:8px;font-size:11px;font-weight:700;color:var(--text2);text-align:right">Total: <span style="color:${c2}">${pts2.toFixed(2)}</span></div>
+      </div>
+    </div>
+  `;
 }
 
 // =============================
