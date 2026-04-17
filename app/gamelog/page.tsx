@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, type ReactNode } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
@@ -25,7 +25,7 @@ async function ensurePlayersCache() {
 
 interface ModalState {
   title: string
-  body: React.ReactNode
+  body: ReactNode
 }
 
 export default function GameLogPage() {
@@ -95,7 +95,7 @@ export default function GameLogPage() {
     }
 
     const players = await ensurePlayersCache()
-    const rosterPositions = (leagues[year]?.settings as Record<string, unknown> & { roster_positions?: string[] })?.roster_positions?.filter((p: string) => p !== 'BN') ?? []
+    const rosterPositions = ((leagues[year]?.settings as unknown) as { roster_positions?: string[] } | undefined)?.roster_positions?.filter(p => p !== 'BN') ?? []
 
     function StarterRows({ entry }: { entry: SleeperMatchup }) {
       const starters = entry.starters ?? []
