@@ -1,5 +1,5 @@
 import { LEAGUE_ID, SLEEPER_API } from '@/lib/constants'
-import type { SleeperLeague, SleeperUser, SleeperRoster, SleeperMatchup, BracketGame, LeagueChainEntry } from '@/types'
+import type { SleeperLeague, SleeperUser, SleeperRoster, SleeperMatchup, BracketGame, LeagueChainEntry, SleeperDraft, DraftPick, Transaction } from '@/types'
 
 // ─── Core fetch wrapper ────────────────────────────────────────────────────────
 
@@ -72,4 +72,20 @@ export function fetchWinnersBracket(leagueId: string): Promise<BracketGame[]> {
 
 export function fetchLosersBracket(leagueId: string): Promise<BracketGame[]> {
   return sleepFetch(`${SLEEPER_API}/league/${leagueId}/losers_bracket`)
+}
+
+// ─── Draft fetchers ───────────────────────────────────────────────────────────
+
+export function fetchDrafts(leagueId: string): Promise<SleeperDraft[]> {
+  return sleepFetch(`${SLEEPER_API}/league/${leagueId}/drafts`)
+}
+
+export function fetchDraftPicks(draftId: string): Promise<DraftPick[]> {
+  return sleepFetch(`${SLEEPER_API}/draft/${draftId}/picks`)
+}
+
+// ─── Transaction fetcher ──────────────────────────────────────────────────────
+
+export function fetchTransactions(leagueId: string, week: number): Promise<Transaction[]> {
+  return sleepFetch(`${SLEEPER_API}/league/${leagueId}/transactions/${week}`)
 }

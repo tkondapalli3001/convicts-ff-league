@@ -15,7 +15,7 @@ export default function StatBox({ label, value, sub, valueColor }: Props) {
       >
         {value}
       </div>
-      {sub && <div className="text-[11px] text-s-text3 mt-1">{sub}</div>}
+      {sub && <div className="text-[11px] text-s-text2 mt-1">{sub}</div>}
     </div>
   )
 }

@@ -10,8 +10,10 @@ const NAV_ITEMS = [
   { href: '/owners',   label: 'Owners'   },
   { href: '/records',  label: 'Records'  },
   { href: '/trends',   label: 'Trends'   },
-  { href: '/gamelog',  label: 'Game Log' },
-  { href: '/luck',     label: 'Luck Index' },
+  { href: '/gamelog',       label: 'Game Log'     },
+  { href: '/luck',          label: 'Luck Index'   },
+  { href: '/players',       label: 'Players'      },
+  { href: '/transactions',  label: 'Transactions' },
 ]
 
 export default function Navbar() {

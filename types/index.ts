@@ -123,6 +123,67 @@ export interface ShameLoser {
   note?: string
 }
 
+// ─── Draft Types ──────────────────────────────────────────────────────────────
+
+export interface SleeperDraft {
+  draft_id: string
+  league_id: string
+  season: string
+  type: 'snake' | 'auction'
+  status: 'complete' | 'drafting' | 'pre_draft'
+}
+
+export interface DraftPick {
+  player_id: string
+  round: number
+  pick_no: number
+  draft_slot: number
+  roster_id: number
+  picked_by: string
+  is_keeper?: boolean
+  draft_id: string
+  metadata: {
+    position: string
+    team?: string
+    first_name?: string
+    last_name?: string
+  }
+}
+
+export interface PlayerStat {
+  player_id: string
+  name: string
+  position: string
+  team: string
+  games: number
+  wins: number
+  winRate: number
+  topOwner: string
+}
+
+// ─── Transaction Types ────────────────────────────────────────────────────────
+
+export interface TradedPick {
+  season: number
+  round: number
+  roster_id: number
+  previous_owner_id: number
+  owner_id: number
+}
+
+export interface Transaction {
+  transaction_id: string
+  type: 'trade' | 'waiver' | 'free_agent'
+  status: 'complete' | 'pending'
+  roster_ids: number[]
+  leg: number
+  created: number
+  adds?: Record<string, number>
+  drops?: Record<string, number>
+  draft_picks?: TradedPick[]
+  settings?: { waiver_bid?: number }
+}
+
 // ─── Global State ─────────────────────────────────────────────────────────────
 
 export interface LeagueState {

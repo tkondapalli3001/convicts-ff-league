@@ -1,22 +1,8 @@
 'use client'
 
 import { useState, useEffect, type ReactNode } from 'react'
-import { SLEEPER_API } from '@/lib/constants'
+import { getPlayersCache, type PlayerMetadata } from '@/lib/players-cache'
 import type { Matchup, SleeperMatchup, LeagueState } from '@/types'
-
-// Module-level cache so it persists across re-renders without being in state
-let _playersCache: Record<string, { full_name?: string; first_name?: string; last_name?: string; team?: string }> | null = null
-
-async function ensurePlayersCache() {
-  if (_playersCache) return _playersCache
-  try {
-    const res = await fetch(`${SLEEPER_API}/players/nfl`, { headers: { Accept: 'application/json' } })
-    _playersCache = await res.json()
-  } catch {
-    _playersCache = {}
-  }
-  return _playersCache!
-}
 
 interface ModalState {
   title: string
@@ -26,7 +12,7 @@ interface ModalState {
 function StarterRows({ entry, rosterPositions, players }: {
   entry: SleeperMatchup
   rosterPositions: string[]
-  players: NonNullable<typeof _playersCache>
+  players: Record<string, PlayerMetadata>
 }) {
   const starters = entry.starters ?? []
   const starterPts = entry.starters_points ?? []
@@ -90,7 +76,7 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
         return
       }
 
-      const players = await ensurePlayersCache()
+      const players = await getPlayersCache()
       const rosterPositions = ((leagues[year]?.settings as unknown) as { roster_positions?: string[] } | undefined)?.roster_positions?.filter(p => p !== 'BN') ?? []
 
       const pts1 = m1.points ?? 0

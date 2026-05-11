@@ -9,8 +9,10 @@ const NAV_ITEMS = [
   { href: '/owners',   label: 'Owners',  icon: '👤' },
   { href: '/records',  label: 'Records', icon: '🏆' },
   { href: '/trends',   label: 'Trends',  icon: '📈' },
-  { href: '/gamelog',  label: 'Games',   icon: '📋' },
-  { href: '/luck',     label: 'Luck',    icon: '🎲' },
+  { href: '/gamelog',       label: 'Games',  icon: '📋' },
+  { href: '/luck',          label: 'Luck',   icon: '🎲' },
+  { href: '/players',       label: 'Players', icon: '🏃' },
+  { href: '/transactions',  label: 'Trades',  icon: '🔄' },
 ]
 
 export default function MobileNav() {
