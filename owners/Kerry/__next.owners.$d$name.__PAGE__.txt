@@ -1,6 +1,6 @@
 1:"$Sreact.fragment"
-2:I[11426,["/convicts-ff-league/_next/static/chunks/0vrl_le9druxh.js","/convicts-ff-league/_next/static/chunks/1860zsbcg5z1o.js","/convicts-ff-league/_next/static/chunks/08cbk8rmf.8ie.js"],"default"]
-3:I[97367,["/convicts-ff-league/_next/static/chunks/0vrl_le9druxh.js","/convicts-ff-league/_next/static/chunks/1860zsbcg5z1o.js"],"OutletBoundary"]
+2:I[11426,["/convicts-ff-league/_next/static/chunks/065sh18o0~tc_.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js","/convicts-ff-league/_next/static/chunks/0mfb5jr7dfer~.js"],"default"]
+3:I[97367,["/convicts-ff-league/_next/static/chunks/065sh18o0~tc_.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js"],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"ownerName":"Kerry"}],[["$","script","script-0",{"src":"/convicts-ff-league/_next/static/chunks/08cbk8rmf.8ie.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"VS-tkwBgPoC0Bm7t7OBUQ"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"ownerName":"Kerry"}],[["$","script","script-0",{"src":"/convicts-ff-league/_next/static/chunks/0mfb5jr7dfer~.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"zykAqh-vWJpzM5XJUdcg0"}
 5:null
