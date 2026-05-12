@@ -18,6 +18,7 @@ export interface SleeperUser {
   user_id: string
   display_name: string
   username: string
+  avatar?: string | null
 }
 
 export interface SleeperRoster {
@@ -198,6 +199,8 @@ export interface LeagueState {
   brackets: Record<number, { winners: BracketGame[]; losers: BracketGame[] }>
   /** canonical owner name → user_id */
   ownerMap: Record<string, string>
+  /** canonical owner name → Sleeper avatar thumb URL */
+  ownerAvatarMap: Record<string, string>
   /** canonical owner name → array of per-season stats */
   ownerSeasons: Record<string, OwnerSeason[]>
   allMatchups: Matchup[]

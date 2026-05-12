@@ -1,4 +1,4 @@
-import { OWNER_COLORS } from '@/lib/constants'
+import { OWNER_COLORS, OWNER_FULL_NAMES } from '@/lib/constants'
 
 // ─── Owner Utilities ──────────────────────────────────────────────────────────
 
@@ -10,6 +10,16 @@ export function ownerColor(name: string): string {
 }
 
 export function avatarLetters(name: string): string {
+  return (name || '?').substring(0, 2).toUpperCase()
+}
+
+export function fullNameInitials(name: string): string {
+  const full = OWNER_FULL_NAMES[name]
+  if (full) {
+    const parts = full.trim().split(' ')
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    return full.substring(0, 2).toUpperCase()
+  }
   return (name || '?').substring(0, 2).toUpperCase()
 }
 
@@ -70,6 +80,21 @@ export function getChampion(year: number, state: LeagueState) {
     return { year, winner: rMap[String(champGame.w)] || `Team${champGame.w}`, seed: seedMap[champGame.w] ?? null }
   }
   return { year, winner: '—', seed: null }
+}
+
+export function getRunnerUp(year: number, state: LeagueState) {
+  const bracket = state.brackets[year]
+  const rMap = state.rosterUserMaps[year] || {}
+  const winners = bracket?.winners ?? []
+
+  const seedMap = buildSeedMap(winners)
+  const champGame = winners.find(g => g.p === 1)
+    ?? (winners.length ? winners.reduce((best, g) => (g.r > best.r ? g : best)) : undefined)
+
+  if (champGame?.l != null) {
+    return { year, name: rMap[String(champGame.l)] || `Team${champGame.l}`, seed: seedMap[champGame.l] ?? null }
+  }
+  return { year, name: '—', seed: null }
 }
 
 export function getShameLoser(year: number, state: LeagueState) {

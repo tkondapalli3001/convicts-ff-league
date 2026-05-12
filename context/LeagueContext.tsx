@@ -16,6 +16,7 @@ const initialState: LeagueState = {
   matchups: {},
   brackets: {},
   ownerMap: {},
+  ownerAvatarMap: {},
   ownerSeasons: {},
   allMatchups: [],
   leagueChain: [],
@@ -76,6 +77,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       const matchups: LeagueState['matchups'] = {}
       const brackets: LeagueState['brackets'] = {}
       const ownerMap: LeagueState['ownerMap'] = {}
+      const ownerAvatarMap: LeagueState['ownerAvatarMap'] = {}
 
       for (const { id, year, data } of chain) {
         leagues[year] = data
@@ -101,10 +103,13 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         })
         rosterUserMaps[year] = rMap
 
-        // Update ownerMap
+        // Update ownerMap + ownerAvatarMap
         fetchedUsers.forEach(u => {
           const name = resolveOwnerName(u.user_id, u.display_name)
           ownerMap[name] = u.user_id
+          if (u.avatar && name && !ownerAvatarMap[name]) {
+            ownerAvatarMap[name] = `https://sleepercdn.com/avatars/thumbs/${u.avatar}`
+          }
         })
 
         // Fetch matchups
@@ -145,6 +150,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         matchups,
         brackets,
         ownerMap,
+        ownerAvatarMap,
         ownerSeasons: {},
         allMatchups: [],
         leagueChain: chain,

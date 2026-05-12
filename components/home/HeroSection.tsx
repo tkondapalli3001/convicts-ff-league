@@ -1,20 +1,28 @@
+import { OWNER_FULL_NAMES } from '@/lib/constants'
+
 interface HeroProps {
-  highScore: number
-  highScoreOwner: string
-  highScoreOwnerColor: string
-  champName: string
+  champName: string       // canonical first name (for color lookup)
   champColor: string
+  runnerUpName: string
+  runnerUpColor: string
+  shameName: string
+  shameColor: string
   totalSeasons: number
   totalGames: number
   yearRange: string
 }
 
+function fullName(name: string): string {
+  return OWNER_FULL_NAMES[name] || name
+}
+
 export default function HeroSection({
-  highScore,
-  highScoreOwner,
-  highScoreOwnerColor,
   champName,
   champColor,
+  runnerUpName,
+  runnerUpColor,
+  shameName,
+  shameColor,
   totalSeasons,
   totalGames,
   yearRange,
@@ -49,9 +57,9 @@ export default function HeroSection({
         }}
       />
 
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
         {/* Left — headline */}
-        <div className="max-w-2xl">
+        <div className="max-w-xl">
           <div className="text-[10px] font-bold tracking-[4px] uppercase text-s-teal mb-4 flex items-center gap-2">
             <span className="w-4 h-px bg-s-teal inline-block" />
             The Convicts League · {totalSeasons} Seasons · {yearRange}
@@ -61,11 +69,8 @@ export default function HeroSection({
             <span className="block text-s-text3 font-semibold text-[13px] md:text-[15px] tracking-[3px] uppercase mb-2">
               Reigning Champion
             </span>
-            <span
-              className="relative inline-block"
-              style={{ color: champColor }}
-            >
-              {champName}
+            <span className="relative inline-block" style={{ color: champColor }}>
+              {fullName(champName)}
             </span>
           </h1>
 
@@ -85,30 +90,45 @@ export default function HeroSection({
           </div>
         </div>
 
-        {/* Right — all-time high score */}
-        <div className="flex-shrink-0 lg:text-right">
-          <div className="text-[9px] font-bold tracking-[4px] uppercase text-s-text3 mb-2">
-            All-Time High Score
-          </div>
-          <div
-            className="text-[56px] md:text-[72px] font-black leading-none tabular-nums tracking-tight"
-            style={{
-              background: 'linear-gradient(135deg, #00ceb8 0%, #f59e0b 55%, #ff395c 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            {highScore > 0 ? highScore.toFixed(2) : '—'}
-          </div>
-          {highScoreOwner && (
-            <div className="text-[11px] text-s-text3 mt-2 font-medium">
-              by{' '}
-              <span className="font-bold" style={{ color: highScoreOwnerColor }}>
-                {highScoreOwner}
-              </span>
+        {/* Right — Runner-Up + Toilet Bowl */}
+        <div className="flex-shrink-0 flex flex-col gap-3 min-w-[200px]">
+          {/* Runner-Up */}
+          <div className="rounded-[14px] border border-s-border/50 p-4"
+            style={{ background: 'rgba(26,29,35,0.7)' }}>
+            <div className="flex items-center gap-3">
+              <span className="text-[28px] leading-none flex-shrink-0">🥈</span>
+              <div className="min-w-0">
+                <div className="text-[9px] font-bold tracking-[2px] uppercase text-s-text3 mb-0.5">
+                  Runner-Up
+                </div>
+                <div
+                  className="text-[17px] font-black leading-tight truncate"
+                  style={{ color: runnerUpColor !== '#64748b' ? runnerUpColor : '#e6edf3' }}
+                >
+                  {fullName(runnerUpName)}
+                </div>
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Toilet Bowl */}
+          <div className="rounded-[14px] border border-s-border/50 p-4"
+            style={{ background: 'rgba(26,29,35,0.7)' }}>
+            <div className="flex items-center gap-3">
+              <span className="text-[28px] leading-none flex-shrink-0">🚽</span>
+              <div className="min-w-0">
+                <div className="text-[9px] font-bold tracking-[2px] uppercase text-s-text3 mb-0.5">
+                  Toilet Bowl Loser
+                </div>
+                <div
+                  className="text-[17px] font-black leading-tight truncate"
+                  style={{ color: shameColor !== '#64748b' ? shameColor : '#e6edf3' }}
+                >
+                  {fullName(shameName)}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

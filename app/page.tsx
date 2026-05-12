@@ -11,7 +11,7 @@ import HeroSection from '@/components/home/HeroSection'
 import SearchBar from '@/components/home/SearchBar'
 import LeaguePulse from '@/components/home/LeaguePulse'
 import type { ManagerCardData } from '@/components/home/SearchBar'
-import { getChampion, getShameLoser, ownerColor, avatarLetters } from '@/lib/utils'
+import { getChampion, getShameLoser, getRunnerUp, ownerColor, avatarLetters, fullNameInitials } from '@/lib/utils'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/constants'
 
 // ─── Quick Stat Card ──────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ export default function HomePage() {
   const [standingsOpen, setStandingsOpen] = useState(false)
   const router = useRouter()
 
-  // All-time career stats per owner (enriched with bestSeason for SearchBar)
+  // All-time career stats per owner (enriched for SearchBar)
   const careerData = useMemo<ManagerCardData[]>(() => {
     const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
     return canonicalNames
@@ -71,12 +71,10 @@ export default function HomePage() {
         const shame = MANUAL_SHAME.filter(s => s.loser === name).length
         const earn = EARNINGS_DATA.find(e => e.owner === name)
 
-        // Sparkline: win% per season, oldest → newest
         const sparkData = [...seasons]
           .sort((a, b) => a.year - b.year)
           .map(s => (s.wins / (s.wins + s.losses || 1)) * 100)
 
-        // Best season by win%
         const eligibleSeasons = seasons.filter(s => s.wins + s.losses > 0)
         const bestSeason = eligibleSeasons.length
           ? eligibleSeasons.reduce((best, s) => {
@@ -86,6 +84,27 @@ export default function HomePage() {
             })
           : null
 
+        // Per-owner matchup stats
+        const ownerMatchups = allMatchups.filter(m => m.team1 === name || m.team2 === name)
+        let singleGameHigh: number | null = null
+        let singleGameLow: number | null = null
+        for (const m of ownerMatchups) {
+          const pts = m.team1 === name ? m.pts1 : m.pts2
+          if (pts > 0) {
+            if (singleGameHigh === null || pts > singleGameHigh) singleGameHigh = pts
+            if (singleGameLow === null || pts < singleGameLow) singleGameLow = pts
+          }
+        }
+
+        const lossesTo: Record<string, number> = {}
+        for (const m of ownerMatchups) {
+          if (m.loser === name && m.winner !== name) {
+            lossesTo[m.winner] = (lossesTo[m.winner] ?? 0) + 1
+          }
+        }
+        const topRivalEntry = Object.entries(lossesTo).sort((a, b) => b[1] - a[1])[0]
+        const topRival = topRivalEntry ? topRivalEntry[0] : null
+
         return {
           name,
           allW,
@@ -93,6 +112,7 @@ export default function HomePage() {
           winpct,
           avgPF,
           avgPFperGame,
+          totalPF,
           playoffApps,
           champs,
           shame,
@@ -103,10 +123,18 @@ export default function HomePage() {
           bestSeasonWins: bestSeason?.wins ?? null,
           bestSeasonLosses: bestSeason?.losses ?? null,
           bestSeasonFinish: bestSeason?.finish ?? null,
+          topRival,
+          singleGameHigh,
+          singleGameLow,
         }
       })
-      .sort((a, b) => b.winpct - a.winpct)
-  }, [ownerSeasons])
+      // Primary: win%, Secondary: total PF
+      .sort((a, b) => {
+        const diff = b.winpct - a.winpct
+        if (Math.abs(diff) > 0.0001) return diff
+        return b.totalPF - a.totalPF
+      })
+  }, [ownerSeasons, allMatchups])
 
   // All-time high score
   const { highScore, highScoreOwner } = useMemo(() => {
@@ -123,11 +151,18 @@ export default function HomePage() {
   const topWinPct  = careerData[0]
   const mostChamps = [...careerData].sort((a, b) => b.champs - a.champs)[0]
 
-  // Current champion (most recent season)
-  const latestYear  = years.length ? years[years.length - 1] : null
-  const champRecord = latestYear ? getChampion(latestYear, state) : null
-  const champName   = champRecord?.winner ?? 'TBD'
-  const champHex    = ownerColor(champName)
+  // Current season winner / runner-up / shame loser
+  const latestYear     = years.length ? years[years.length - 1] : null
+  const champRecord    = latestYear ? getChampion(latestYear, state) : null
+  const runnerUpRecord = latestYear ? getRunnerUp(latestYear, state) : null
+  const shameRecord    = latestYear ? getShameLoser(latestYear, state) : null
+
+  const champName    = champRecord?.winner ?? 'TBD'
+  const champColor   = ownerColor(champName)
+  const runnerUpName = runnerUpRecord?.name ?? '—'
+  const runnerUpColor = ownerColor(runnerUpName)
+  const shameName    = shameRecord?.loser ?? '—'
+  const shameColor   = ownerColor(shameName)
 
   const sortedYears = [...years].sort((a, b) => b - a)
 
@@ -144,11 +179,12 @@ export default function HomePage() {
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <HeroSection
-        highScore={highScore}
-        highScoreOwner={highScoreOwner}
-        highScoreOwnerColor={ownerColor(highScoreOwner)}
         champName={champName}
-        champColor={champHex}
+        champColor={champColor}
+        runnerUpName={runnerUpName}
+        runnerUpColor={runnerUpColor}
+        shameName={shameName}
+        shameColor={shameColor}
         totalSeasons={leagueChain.length}
         totalGames={allMatchups.length}
         yearRange={
@@ -212,7 +248,7 @@ export default function HomePage() {
                   <th>Manager</th>
                   <th>W–L</th>
                   <th>Win%</th>
-                  <th className="hidden sm:table-cell text-right">Avg PF</th>
+                  <th className="hidden sm:table-cell text-right">Avg PPG</th>
                   <th className="hidden md:table-cell text-center">🏆</th>
                   <th className="hidden md:table-cell text-right">Net $</th>
                 </tr>
@@ -220,6 +256,7 @@ export default function HomePage() {
               <tbody>
                 {careerData.map((d, i) => {
                   const color = ownerColor(d.name)
+                  const avatarUrl = state.ownerAvatarMap?.[d.name]
 
                   const rankColors = [
                     'bg-[#3d2000]/80 text-s-gold border border-[#5a3000]/60',
@@ -241,15 +278,29 @@ export default function HomePage() {
 
                       <td>
                         <div className="flex items-center gap-3">
-                          <div
-                            className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[12px] font-black text-white leading-none"
-                            style={{
-                              background: color,
-                              boxShadow: `0 0 0 2px #0e1117, 0 0 14px ${color}55`,
-                            }}
-                          >
-                            {avatarLetters(d.name)}
-                          </div>
+                          {/* Avatar: Sleeper image or gradient initials */}
+                          {avatarUrl ? (
+                            <div
+                              className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden"
+                              style={{ boxShadow: `0 0 0 2px #0e1117, 0 0 14px ${color}55` }}
+                            >
+                              <img src={avatarUrl} alt={d.name} className="w-full h-full object-cover"
+                                onError={e => {
+                                  const el = e.currentTarget.parentElement!
+                                  el.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;background:linear-gradient(135deg,${color} 0%,${color}88 100%)">${fullNameInitials(d.name)}</div>`
+                                }} />
+                            </div>
+                          ) : (
+                            <div
+                              className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[12px] font-black text-white leading-none"
+                              style={{
+                                background: `linear-gradient(135deg, ${color} 0%, ${color}88 100%)`,
+                                boxShadow: `0 0 0 2px #0e1117, 0 0 14px ${color}55`,
+                              }}
+                            >
+                              {fullNameInitials(d.name)}
+                            </div>
+                          )}
                           <div>
                             <div className="text-[13px] font-bold text-s-text leading-none">{d.name}</div>
                             <div className="text-[10px] text-s-text3 mt-0.5">
@@ -269,12 +320,7 @@ export default function HomePage() {
                         <span
                           className="text-[13px] font-bold"
                           style={{
-                            color:
-                              d.winpct >= 0.55
-                                ? '#00ceb8'
-                                : d.winpct >= 0.45
-                                ? '#8b949e'
-                                : '#ff395c',
+                            color: d.winpct >= 0.55 ? '#00ceb8' : d.winpct >= 0.45 ? '#8b949e' : '#ff395c',
                           }}
                         >
                           {(d.winpct * 100).toFixed(1)}%
@@ -354,7 +400,7 @@ export default function HomePage() {
                     </div>
                     {(c as { seed?: number | string | null }).seed != null && (
                       <span className="text-[10px] text-[#7a5a10] font-bold">
-                        #{(c as { seed?: number | string | null }).seed}
+                        Seed #{(c as { seed?: number | string | null }).seed}
                       </span>
                     )}
                   </div>
@@ -394,7 +440,7 @@ export default function HomePage() {
                     </div>
                     {(s as { seed?: number | null }).seed != null && (
                       <span className="text-[10px] text-[#5a1010] font-bold">
-                        #{(s as { seed?: number | null }).seed}
+                        Seed #{(s as { seed?: number | null }).seed}
                       </span>
                     )}
                   </div>

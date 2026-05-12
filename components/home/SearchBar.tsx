@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePlayersData } from '@/hooks/usePlayersData'
-import SparklineMini from '@/components/home/SparklineMini'
-import { ownerColor, avatarLetters } from '@/lib/utils'
+import { ownerColor, fullNameInitials } from '@/lib/utils'
+import { OWNER_FULL_NAMES } from '@/lib/constants'
+import { useLeague } from '@/context/LeagueContext'
 import type { OwnershipEntry } from '@/lib/data-processing'
 import type { PlayerStat } from '@/types'
 
@@ -17,6 +18,7 @@ export interface ManagerCardData {
   winpct: number
   avgPF: number
   avgPFperGame: number
+  totalPF: number
   playoffApps: number
   champs: number
   shame: number
@@ -27,6 +29,9 @@ export interface ManagerCardData {
   bestSeasonWins: number | null
   bestSeasonLosses: number | null
   bestSeasonFinish: number | null
+  topRival: string | null
+  singleGameHigh: number | null
+  singleGameLow: number | null
 }
 
 const POS_COLORS: Record<string, string> = {
@@ -42,12 +47,13 @@ const POS_COLORS: Record<string, string> = {
 
 function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => void }) {
   const router = useRouter()
+  const { state } = useLeague()
+  const [imgError, setImgError] = useState(false)
   const color = ownerColor(data.name)
   const winpctColor = data.winpct >= 0.55 ? '#00ceb8' : data.winpct >= 0.45 ? '#8b949e' : '#ff395c'
-  const trendColor =
-    data.sparkData.length >= 2 && data.sparkData[data.sparkData.length - 1] >= data.sparkData[0]
-      ? '#00ceb8'
-      : '#ff395c'
+  const avatarUrl = state.ownerAvatarMap?.[data.name]
+  const initials = fullNameInitials(data.name)
+  const fullDisplayName = OWNER_FULL_NAMES[data.name] || data.name
 
   return (
     <div className="bento-card animate-fade-in">
@@ -65,20 +71,30 @@ function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => 
 
         <div className="flex items-start gap-4">
           {/* Avatar */}
-          <div
-            className="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-[18px] font-black text-white"
-            style={{
-              background: color,
-              boxShadow: `0 0 0 3px #1a1d23, 0 0 24px ${color}55`,
-            }}
-          >
-            {avatarLetters(data.name)}
-          </div>
+          {avatarUrl && !imgError ? (
+            <div
+              className="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden"
+              style={{ boxShadow: `0 0 0 3px #1a1d23, 0 0 24px ${color}55` }}
+            >
+              <img src={avatarUrl} alt={data.name} className="w-full h-full object-cover"
+                onError={() => setImgError(true)} />
+            </div>
+          ) : (
+            <div
+              className="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-[18px] font-black text-white"
+              style={{
+                background: `linear-gradient(135deg, ${color} 0%, ${color}88 100%)`,
+                boxShadow: `0 0 0 3px #1a1d23, 0 0 24px ${color}55`,
+              }}
+            >
+              {initials}
+            </div>
+          )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-0.5">
               <span className="text-[22px] font-black text-s-text tracking-tight leading-none">
-                {data.name}
+                {fullDisplayName}
               </span>
               {data.champs > 0 && <span className="text-base">🏆</span>}
               {data.shame > 0 && <span className="text-base">🚽</span>}
@@ -99,12 +115,12 @@ function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => 
         </div>
       </div>
 
-      {/* Stats grid 2×2 on mobile, 4-col on sm+ */}
+      {/* Stats grid — 4 columns */}
       <div className="grid grid-cols-2 sm:grid-cols-4 border-t border-s-border/60">
         {(
           [
             { label: 'W – L', value: `${data.allW} – ${data.allL}` },
-            { label: 'Avg PF / Season', value: data.avgPF > 0 ? data.avgPF.toFixed(0) : '—' },
+            { label: 'Avg PPG', value: data.avgPFperGame > 0 ? data.avgPFperGame.toFixed(1) : '—' },
             {
               label: 'Championships',
               value: data.champs > 0 ? `${data.champs % 1 === 0 ? data.champs : data.champs.toFixed(1)}× 🏆` : '—',
@@ -132,37 +148,61 @@ function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => 
         ))}
       </div>
 
-      {/* Best season row + sparkline */}
-      <div className="px-5 py-4 border-t border-s-border/60 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">Best Season</div>
-          {data.bestSeasonYear ? (
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-[16px] font-bold text-s-text">{data.bestSeasonYear}</span>
-              <span className="text-[12px] font-semibold text-s-green">
-                {data.bestSeasonWins}W–{data.bestSeasonLosses}L
+      {/* Best season */}
+      <div className="px-5 py-4 border-t border-s-border/60">
+        <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">Best Season</div>
+        {data.bestSeasonYear ? (
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-[16px] font-bold text-s-text">{data.bestSeasonYear}</span>
+            <span className="text-[12px] font-semibold text-s-green">
+              {data.bestSeasonWins}W–{data.bestSeasonLosses}L
+            </span>
+            {data.bestSeasonFinish != null && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-s-gold/10 text-s-gold border border-s-gold/20 font-bold">
+                #{data.bestSeasonFinish} Finish
               </span>
-              {data.bestSeasonFinish != null && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-s-gold/10 text-s-gold border border-s-gold/20 font-bold">
-                  #{data.bestSeasonFinish} Finish
-                </span>
-              )}
-            </div>
-          ) : (
-            <span className="text-s-text3 text-[12px]">—</span>
-          )}
-        </div>
-
-        {data.sparkData.length >= 2 && (
-          <div>
-            <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">Win% Trend</div>
-            <SparklineMini data={data.sparkData} color={trendColor} width={120} height={32} />
+            )}
           </div>
+        ) : (
+          <span className="text-s-text3 text-[12px]">—</span>
         )}
       </div>
 
+      {/* Extended stats — Top Rival / High / Low */}
+      <div className="grid grid-cols-3 border-t border-s-border/60">
+        {(
+          [
+            {
+              label: 'Top Rival',
+              value: data.topRival ?? '—',
+              color: data.topRival ? ownerColor(data.topRival) : undefined,
+            },
+            {
+              label: 'Single Game High',
+              value: data.singleGameHigh != null ? data.singleGameHigh.toFixed(2) : '—',
+              color: '#00ceb8',
+            },
+            {
+              label: 'Single Game Low',
+              value: data.singleGameLow != null ? data.singleGameLow.toFixed(2) : '—',
+              color: '#ff395c',
+            },
+          ] as { label: string; value: string; color?: string }[]
+        ).map((s, i) => (
+          <div
+            key={s.label}
+            className={['p-4', i > 0 ? 'border-l border-s-border/60' : ''].join(' ')}
+          >
+            <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1">{s.label}</div>
+            <div className="text-[14px] font-bold num" style={{ color: s.color ?? '#e6edf3' }}>
+              {s.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* CTA */}
-      <div className="px-5 pb-5">
+      <div className="px-5 pb-5 pt-3">
         <button
           onClick={() => router.push(`/owners/${encodeURIComponent(data.name)}`)}
           className="text-[11px] font-bold text-s-teal hover:opacity-70 transition-opacity flex items-center gap-1"
@@ -285,7 +325,6 @@ function PlayerCard({
         </div>
       )}
 
-      {/* Player data note */}
       {!ownership && (
         <div className="px-5 pb-4 text-[10px] text-s-text3">
           Draft history loads from the Players page.
@@ -313,7 +352,6 @@ export default function SearchBar({ managerData }: Props) {
 
   const { playerWinRates, ownership, loading: playersLoading } = usePlayersData(enabled)
 
-  // Merge playerWinRates + ownership by player_id
   const playerList = useMemo(() => {
     const map = new Map<string, { stat: PlayerStat; ownership: OwnershipEntry | null }>()
     playerWinRates.forEach(s => map.set(s.player_id, { stat: s, ownership: null }))
@@ -324,7 +362,6 @@ export default function SearchBar({ managerData }: Props) {
     return [...map.values()]
   }, [playerWinRates, ownership])
 
-  // Filtered results
   const { managerResults, playerResults } = useMemo(() => {
     const q = query.toLowerCase().trim()
     if (!q) return { managerResults: [], playerResults: [] }
@@ -337,7 +374,6 @@ export default function SearchBar({ managerData }: Props) {
     }
   }, [query, managerData, playerList])
 
-  // Flat list for keyboard nav
   type DropdownEntry =
     | { kind: 'manager'; data: ManagerCardData }
     | { kind: 'player'; data: { stat: PlayerStat; ownership: OwnershipEntry | null } }
@@ -347,7 +383,6 @@ export default function SearchBar({ managerData }: Props) {
     ...playerResults.map(p => ({ kind: 'player' as const, data: p })),
   ], [managerResults, playerResults])
 
-  // Click-outside close
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -359,7 +394,6 @@ export default function SearchBar({ managerData }: Props) {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  // ⌘K / Ctrl+K global shortcut
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -437,15 +471,7 @@ export default function SearchBar({ managerData }: Props) {
           showDropdown ? 'border-s-teal/60 rounded-b-none' : '',
         ].join(' ')}
       >
-        {/* Magnifier icon */}
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="flex-shrink-0"
-          style={{ color: '#6e7681' }}
-        >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="flex-shrink-0" style={{ color: '#6e7681' }}>
           <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.2" />
           <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
@@ -462,7 +488,6 @@ export default function SearchBar({ managerData }: Props) {
           spellCheck={false}
         />
 
-        {/* Player-data loading indicator */}
         {enabled && playersLoading && (
           <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] text-s-text3">
             <div className="w-3 h-3 border border-s-border2 border-t-s-teal rounded-full animate-spin" />
@@ -470,25 +495,17 @@ export default function SearchBar({ managerData }: Props) {
           </div>
         )}
 
-        {/* Clear */}
         {query && (
-          <button
-            onClick={clearSearch}
-            className="flex-shrink-0 w-5 h-5 rounded-full bg-s-bg3 flex items-center justify-center text-s-text3 hover:text-s-text hover:bg-s-bg4 text-[12px] leading-none transition-colors"
-          >
+          <button onClick={clearSearch}
+            className="flex-shrink-0 w-5 h-5 rounded-full bg-s-bg3 flex items-center justify-center text-s-text3 hover:text-s-text hover:bg-s-bg4 text-[12px] leading-none transition-colors">
             ×
           </button>
         )}
 
-        {/* ⌘K badge (hidden when typing) */}
         {!query && (
           <div className="hidden md:flex items-center gap-0.5 flex-shrink-0">
-            <kbd className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-s-bg3 border border-s-border text-s-text3">
-              ⌘
-            </kbd>
-            <kbd className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-s-bg3 border border-s-border text-s-text3">
-              K
-            </kbd>
+            <kbd className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-s-bg3 border border-s-border text-s-text3">⌘</kbd>
+            <kbd className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-s-bg3 border border-s-border text-s-text3">K</kbd>
           </div>
         )}
       </div>
@@ -499,75 +516,48 @@ export default function SearchBar({ managerData }: Props) {
           className="absolute top-full left-0 right-0 bg-s-surface border border-s-teal/40 border-t-0 rounded-b-[16px] z-[9999] overflow-hidden shadow-2xl shadow-black/70"
           style={{ maxHeight: '340px', overflowY: 'auto' }}
         >
-          {/* Managers */}
           {managerResults.length > 0 && (
             <div>
-              <div className="px-4 pt-3 pb-1 text-[9px] font-bold tracking-[3px] uppercase text-s-text3">
-                Managers
-              </div>
+              <div className="px-4 pt-3 pb-1 text-[9px] font-bold tracking-[3px] uppercase text-s-text3">Managers</div>
               {managerResults.map((m, i) => {
                 const color = ownerColor(m.name)
                 const isFocused = focusIdx === i
                 return (
-                  <button
-                    key={m.name}
+                  <button key={m.name}
                     onMouseDown={e => { e.preventDefault(); selectEntry({ kind: 'manager', data: m }) }}
-                    className={[
-                      'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
-                      isFocused ? 'bg-s-bg3' : 'hover:bg-s-bg3/60',
-                    ].join(' ')}
-                  >
-                    <div
-                      className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-black text-white"
-                      style={{ background: color, boxShadow: `0 0 8px ${color}44` }}
-                    >
-                      {avatarLetters(m.name)}
+                    className={['w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
+                      isFocused ? 'bg-s-bg3' : 'hover:bg-s-bg3/60'].join(' ')}>
+                    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-black text-white"
+                      style={{ background: `linear-gradient(135deg, ${color} 0%, ${color}88 100%)` }}>
+                      {fullNameInitials(m.name)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-bold text-s-text">{m.name}</div>
+                      <div className="text-[13px] font-bold text-s-text">{OWNER_FULL_NAMES[m.name] || m.name}</div>
                       <div className="text-[10px] text-s-text3">
-                        {m.numSeasons} seasons &middot; {(m.winpct * 100).toFixed(1)}% win &middot;{' '}
-                        {m.playoffApps}/{m.numSeasons} playoffs
+                        {m.numSeasons} seasons &middot; {(m.winpct * 100).toFixed(1)}% win &middot; {m.playoffApps}/{m.numSeasons} playoffs
                       </div>
                     </div>
-                    {m.champs > 0 && (
-                      <span className="text-[12px] flex-shrink-0" title={`${m.champs}× champion`}>
-                        🏆
-                      </span>
-                    )}
+                    {m.champs > 0 && <span className="text-[12px] flex-shrink-0" title={`${m.champs}× champion`}>🏆</span>}
                   </button>
                 )
               })}
             </div>
           )}
 
-          {/* Players */}
           {playerResults.length > 0 && (
             <div className={managerResults.length > 0 ? 'border-t border-s-border/60' : ''}>
-              <div className="px-4 pt-3 pb-1 text-[9px] font-bold tracking-[3px] uppercase text-s-text3">
-                Players
-              </div>
+              <div className="px-4 pt-3 pb-1 text-[9px] font-bold tracking-[3px] uppercase text-s-text3">Players</div>
               {playerResults.map(({ stat, ownership: own }, i) => {
                 const posColor = POS_COLORS[stat.position] ?? '#6e7681'
                 const globalIdx = managerResults.length + i
                 const isFocused = focusIdx === globalIdx
                 return (
-                  <button
-                    key={stat.player_id}
+                  <button key={stat.player_id}
                     onMouseDown={e => { e.preventDefault(); selectEntry({ kind: 'player', data: { stat, ownership: own } }) }}
-                    className={[
-                      'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
-                      isFocused ? 'bg-s-bg3' : 'hover:bg-s-bg3/60',
-                    ].join(' ')}
-                  >
-                    <div
-                      className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black"
-                      style={{
-                        background: `${posColor}20`,
-                        color: posColor,
-                        border: `1px solid ${posColor}40`,
-                      }}
-                    >
+                    className={['w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
+                      isFocused ? 'bg-s-bg3' : 'hover:bg-s-bg3/60'].join(' ')}>
+                    <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black"
+                      style={{ background: `${posColor}20`, color: posColor, border: `1px solid ${posColor}40` }}>
                       {stat.position}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -576,13 +566,8 @@ export default function SearchBar({ managerData }: Props) {
                         {stat.team ? `${stat.team} · ` : ''}{stat.games}G · Top owner: {stat.topOwner || '—'}
                       </div>
                     </div>
-                    <div
-                      className="text-[12px] font-bold flex-shrink-0"
-                      style={{
-                        color:
-                          stat.winRate >= 0.6 ? '#00ceb8' : stat.winRate >= 0.45 ? '#8b949e' : '#ff395c',
-                      }}
-                    >
+                    <div className="text-[12px] font-bold flex-shrink-0"
+                      style={{ color: stat.winRate >= 0.6 ? '#00ceb8' : stat.winRate >= 0.45 ? '#8b949e' : '#ff395c' }}>
                       {(stat.winRate * 100).toFixed(0)}%
                     </div>
                   </button>
@@ -591,7 +576,6 @@ export default function SearchBar({ managerData }: Props) {
             </div>
           )}
 
-          {/* Loading players */}
           {playersLoading && flatResults.length === 0 && (
             <div className="flex items-center gap-3 px-4 py-5 text-[12px] text-s-text3">
               <div className="w-4 h-4 border border-s-border2 border-t-s-teal rounded-full animate-spin flex-shrink-0" />
@@ -599,7 +583,6 @@ export default function SearchBar({ managerData }: Props) {
             </div>
           )}
 
-          {/* No results */}
           {showEmpty && (
             <div className="px-4 py-5 text-[12px] text-s-text3 text-center">
               No managers or players matching &ldquo;{query}&rdquo;
@@ -612,17 +595,11 @@ export default function SearchBar({ managerData }: Props) {
       {selected && !dropdownOpen && (
         <div className="mt-3">
           {selectedManager && (
-            <ManagerCard
-              data={selectedManager}
-              onClose={() => { setSelected(null); setQuery('') }}
-            />
+            <ManagerCard data={selectedManager} onClose={() => { setSelected(null); setQuery('') }} />
           )}
           {selectedPlayerEntry && (
-            <PlayerCard
-              stat={selectedPlayerEntry.stat}
-              ownership={selectedPlayerEntry.ownership}
-              onClose={() => { setSelected(null); setQuery('') }}
-            />
+            <PlayerCard stat={selectedPlayerEntry.stat} ownership={selectedPlayerEntry.ownership}
+              onClose={() => { setSelected(null); setQuery('') }} />
           )}
         </div>
       )}
