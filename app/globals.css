@@ -13,8 +13,8 @@
   }
   body {
     font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #0e1117;
-    color: #e6edf3;
+    background-color: #020617;
+    color: #e2e8f0;
     min-height: 100vh;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
@@ -23,24 +23,26 @@
   th {
     font-size: 11px;
     font-weight: 700;
-    color: #6e7681;
+    color: rgba(255, 255, 255, 0.3);
     letter-spacing: 1.5px;
     text-transform: uppercase;
     padding: 10px 12px;
     text-align: left;
-    border-bottom: 1px solid #2d333b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
+    transition: color 0.15s;
   }
   th:hover {
-    color: #8b949e;
+    color: rgba(255, 255, 255, 0.6);
   }
   td {
     padding: 10px 12px;
-    border-bottom: 1px solid #161b22;
-    color: #adbac7;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
     white-space: nowrap;
+    transition: background 0.12s;
   }
   tr:last-child td {
     border-bottom: none;
@@ -49,15 +51,18 @@
     cursor: pointer;
     transition: background 0.12s;
   }
+  tbody tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.02);
+  }
   tbody tr:hover td {
-    background: #1c2128;
+    background: rgba(139, 92, 246, 0.07);
   }
 }
 
 @layer base {
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
   }
   *::-webkit-scrollbar {
     width: 4px;
@@ -67,11 +72,11 @@
     background: transparent;
   }
   *::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 999px;
   }
   *::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(139, 92, 246, 0.35);
   }
 }
 
@@ -82,40 +87,48 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+
+  /* Sticky table columns */
   .sticky-col {
     position: sticky;
     left: 0;
-    background: #161b22;
+    background: #020617;
     z-index: 1;
   }
+  tbody tr:nth-child(even) .sticky-col {
+    background: #040c1e;
+  }
   tbody tr:hover .sticky-col {
-    background: #1c2128;
+    background: rgba(139, 92, 246, 0.09);
   }
   .table-sticky-col {
     position: sticky;
     left: 0;
-    background: #161b22;
+    background: #020617;
     z-index: 1;
   }
-  /* Glassmorphism nav/card */
+
+  /* Glassmorphism nav/overlay */
   .glass {
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
-    background: rgba(14, 17, 23, 0.82);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(2, 6, 23, 0.88);
   }
-  /* Standard glass card — use on data panels */
+
+  /* Standard glass card — data panels */
   .gl {
-    background: rgba(26, 29, 35, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
   }
-  /* Bento card base */
+
+  /* Bento card — interactive, hover lift + violet glow */
   .bento-card {
-    background: rgba(26, 29, 35, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     overflow: hidden;
@@ -123,26 +136,74 @@
   }
   .bento-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.13);
+    box-shadow: 0 16px 48px rgba(139, 92, 246, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    border-color: rgba(139, 92, 246, 0.32);
   }
+
+  /* Nebula card — glass + radial violet flare in top-right corner */
+  .nebula-card {
+    position: relative;
+    isolation: isolate;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .nebula-card::before {
+    content: '';
+    position: absolute;
+    top: -28px;
+    right: -28px;
+    width: 96px;
+    height: 96px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .nebula-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    border-color: rgba(139, 92, 246, 0.42);
+  }
+
   /* Owner avatar glow */
   .avatar-glow {
-    box-shadow: 0 0 0 2px #0e1117, 0 0 14px var(--glow-color, #00ceb840);
+    box-shadow: 0 0 0 2px #020617, 0 0 14px var(--glow-color, rgba(139, 92, 246, 0.35));
   }
+
   /* Tabular numbers for score/stat columns */
   .num {
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1;
     letter-spacing: -0.02em;
   }
-  /* Interactive card — hover lift */
+
+  /* Interactive card — hover scale */
   .ic {
     transition: transform 0.15s ease, filter 0.15s ease;
     cursor: pointer;
   }
   .ic:hover {
     transform: scale(1.02);
-    filter: brightness(1.15);
+    filter: brightness(1.12);
+  }
+
+  /* Gradient text — violet → blue */
+  .gradient-vb {
+    background: linear-gradient(135deg, #8B5CF6, #3B82F6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Gradient text — gold */
+  .gradient-gold {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }

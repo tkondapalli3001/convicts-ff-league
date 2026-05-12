@@ -1,21 +1,35 @@
+import type { ReactNode } from 'react'
+
 interface Props {
   label: string
   value: string | number
   sub?: string
   valueColor?: string
+  icon?: ReactNode
 }
 
-export default function StatBox({ label, value, sub, valueColor }: Props) {
+export default function StatBox({ label, value, sub, valueColor, icon }: Props) {
   return (
-    <div className="gl p-[14px]">
-      <div className="text-[10px] text-s-text3 tracking-[1.5px] uppercase mb-[5px]">{label}</div>
+    <div className="nebula-card p-[14px] group">
+      <div className="flex items-center justify-between mb-[6px]">
+        <div className="text-[10px] text-slate-500 tracking-[1.5px] uppercase font-semibold">
+          {label}
+        </div>
+        {icon && (
+          <div className="text-slate-600 group-hover:text-violet-400 transition-colors duration-200">
+            {icon}
+          </div>
+        )}
+      </div>
       <div
-        className="text-[22px] font-extrabold leading-none num"
-        style={valueColor ? { color: valueColor } : undefined}
+        className="text-[22px] font-extrabold leading-none font-mono tabular-nums tracking-tight"
+        style={valueColor ? { color: valueColor } : { color: '#e2e8f0' }}
       >
         {value}
       </div>
-      {sub && <div className="text-[11px] text-s-text2 mt-1">{sub}</div>}
+      {sub && (
+        <div className="text-[11px] text-slate-500 mt-[5px]">{sub}</div>
+      )}
     </div>
   )
 }

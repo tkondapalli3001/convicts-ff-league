@@ -2,6 +2,7 @@
 
 import { useLeague } from '@/context/LeagueContext'
 import StatBox from '@/components/shared/StatBox'
+import { CalendarDays, BarChart2, TrendingUp, Crown, Skull, DollarSign } from 'lucide-react'
 
 export default function QuickStats() {
   const { state } = useLeague()
@@ -18,33 +19,39 @@ export default function QuickStats() {
         label="Seasons"
         value={seasons || '—'}
         sub={years.length >= 2 ? `${years[0]}–${years[years.length - 1]}` : undefined}
+        icon={<CalendarDays size={14} />}
       />
       <StatBox
         label="Games Played"
         value={totalGames || '—'}
         sub="all matchups"
+        icon={<BarChart2 size={14} />}
       />
       <StatBox
         label="Avg Score"
         value={avgPts}
         sub="pts per team/game"
+        icon={<TrendingUp size={14} />}
       />
       <StatBox
-        label="Dynasty 👑"
+        label="Dynasty"
         value="Daniyaal"
         sub="2x Champ (most)"
         valueColor="#8b5cf6"
+        icon={<Crown size={14} />}
       />
       <StatBox
-        label="Toilet Bowl 🚽"
+        label="Toilet Bowl"
         value="Nathan"
         sub="2x loser (2020, 2022)"
         valueColor="#ef4444"
+        icon={<Skull size={14} />}
       />
       <StatBox
         label="Buy-in Rise"
         value="$20→$125"
         sub="6x escalation"
+        icon={<DollarSign size={14} />}
       />
     </div>
   )

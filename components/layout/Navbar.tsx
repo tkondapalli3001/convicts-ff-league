@@ -3,17 +3,21 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
+import {
+  Home, DollarSign, Users, Trophy, TrendingUp,
+  CalendarDays, Shuffle, Zap, ArrowLeftRight, Activity,
+} from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',             label: 'Home'         },
-  { href: '/earnings',     label: 'Earnings'     },
-  { href: '/owners',       label: 'Owners'       },
-  { href: '/records',      label: 'Records'      },
-  { href: '/trends',       label: 'Trends'       },
-  { href: '/gamelog',      label: 'Game Log'     },
-  { href: '/luck',         label: 'Luck Index'   },
-  { href: '/players',      label: 'Players'      },
-  { href: '/transactions', label: 'Transactions' },
+  { href: '/',             label: 'Home',         icon: Home           },
+  { href: '/earnings',     label: 'Earnings',     icon: DollarSign     },
+  { href: '/owners',       label: 'Owners',       icon: Users          },
+  { href: '/records',      label: 'Records',      icon: Trophy         },
+  { href: '/trends',       label: 'Trends',       icon: TrendingUp     },
+  { href: '/gamelog',      label: 'Game Log',     icon: CalendarDays   },
+  { href: '/luck',         label: 'Luck Index',   icon: Shuffle        },
+  { href: '/players',      label: 'Players',      icon: Zap            },
+  { href: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
 ]
 
 export default function Navbar() {
@@ -27,32 +31,35 @@ export default function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b border-s-border/60"
+      className="sticky top-0 z-50 border-b border-white/[0.07]"
       style={{
-        backdropFilter: 'blur(16px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-        background: 'rgba(14,17,23,0.85)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        background: 'rgba(2, 6, 23, 0.88)',
       }}
     >
       <div className="max-w-[1200px] mx-auto flex items-center overflow-x-auto scrollbar-none">
+
         {/* Brand */}
-        <div className="px-5 py-[15px] text-[12px] font-black tracking-[4px] uppercase whitespace-nowrap border-r border-s-border/50 flex-shrink-0 flex items-center gap-2">
+        <div className="px-5 py-[15px] flex-shrink-0 flex items-center gap-2 border-r border-white/[0.07]">
+          <Activity size={14} className="text-violet-500 flex-shrink-0" />
           <span
-            className="text-[13px] font-black tracking-[3px] uppercase"
+            className="text-[11px] font-black tracking-[3px] uppercase whitespace-nowrap"
             style={{
-              background: 'linear-gradient(135deg, #00ceb8, #f59e0b)',
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}
           >
-            🏈 MC FF
+            CONVICTS FF
           </span>
         </div>
 
         {/* Nav links — hidden on mobile */}
         <div className="hidden sm:flex">
           {NAV_ITEMS.map(item => {
+            const Icon = item.icon
             const isActive =
               item.href === '/'
                 ? pathname === '/'
@@ -62,13 +69,14 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={[
-                  'px-[13px] py-[15px] text-[10px] font-bold whitespace-nowrap',
+                  'flex items-center gap-[5px] px-[12px] py-[15px] text-[10px] font-bold whitespace-nowrap',
                   'tracking-[1.2px] uppercase border-b-2 transition-all duration-150',
                   isActive
-                    ? 'text-s-teal border-s-teal'
-                    : 'text-s-text3 border-transparent hover:text-s-text2 hover:border-s-border2',
+                    ? 'text-violet-400 border-violet-500'
+                    : 'text-slate-600 border-transparent hover:text-slate-300 hover:border-white/20',
                 ].join(' ')}
               >
+                <Icon size={11} className="flex-shrink-0" />
                 {item.label}
               </Link>
             )
@@ -77,7 +85,7 @@ export default function Navbar() {
 
         {/* Status pill */}
         <div className="ml-auto px-4 flex-shrink-0">
-          <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-s-text3 bg-s-bg3/60 px-3 py-1 rounded-full border border-s-border/50 whitespace-nowrap">
+          <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-600 bg-white/[0.04] px-3 py-1 rounded-full border border-white/[0.07] whitespace-nowrap">
             {statusText}
           </div>
         </div>

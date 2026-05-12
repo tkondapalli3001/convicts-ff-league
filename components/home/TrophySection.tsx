@@ -3,7 +3,6 @@
 import { useLeague } from '@/context/LeagueContext'
 import { getChampion, getShameLoser } from '@/lib/utils'
 
-/** Derive a team's playoff seed by ranking all rosters in a year by wins then PF. */
 function computeSeed(rosterId: number, year: number, state: ReturnType<typeof useLeague>['state']): number | null {
   const rosters = state.rosters[year]
   if (!rosters?.length) return null
@@ -18,7 +17,6 @@ function computeSeed(rosterId: number, year: number, state: ReturnType<typeof us
   return idx >= 0 ? idx + 1 : null
 }
 
-/** Find the roster_id for a given owner name in a given year. */
 function findRosterId(ownerName: string, year: number, state: ReturnType<typeof useLeague>['state']): number | null {
   const rMap = state.rosterUserMaps[year] ?? {}
   const entry = Object.entries(rMap).find(([, v]) => v === ownerName)
@@ -31,88 +29,104 @@ export default function TrophySection() {
 
   if (!years.length) return null
 
-  const sortedYears = [...years].sort((a, b) => b - a) // latest first
+  const sortedYears = [...years].sort((a, b) => b - a)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-5">
 
       {/* Hall of Fame */}
-      <div className="bg-[#221500] border border-[#5a3800] rounded-[12px] p-[18px]">
-        <div className="text-[13px] font-bold tracking-[3px] uppercase text-[#a37a1a] mb-3">
-          🏆 Hall of Fame — Champions
+      <div
+        className="relative overflow-hidden rounded-[14px] border border-amber-500/15 p-[18px]"
+        style={{ background: 'rgba(120, 53, 15, 0.12)', backdropFilter: 'blur(20px)' }}
+      >
+        {/* Corner flare */}
+        <div
+          className="absolute pointer-events-none top-[-20px] right-[-20px] w-[80px] h-[80px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%)' }}
+        />
+        <div className="relative z-10">
+          <div className="text-[11px] font-bold tracking-[2.5px] uppercase text-amber-400/80 mb-3 flex items-center gap-2">
+            <span>🏆</span> Hall of Fame — Champions
+          </div>
+          <table className="w-full border-collapse text-[12px]">
+            <thead>
+              <tr>
+                <th className="text-left py-[5px] pr-3 text-amber-500/40 border-b border-amber-500/10">Year</th>
+                <th className="text-left py-[5px] pr-3 text-amber-500/40 border-b border-amber-500/10">Champion</th>
+                <th className="text-right py-[5px] text-amber-500/40 border-b border-amber-500/10">Seed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedYears.map(year => {
+                const c = getChampion(year, state)
+                let seed: number | string | null = (c as { seed?: number | string | null }).seed ?? null
+                if (seed == null && c.winner && c.winner !== '—') {
+                  const rid = findRosterId(c.winner, year, state)
+                  if (rid != null) seed = computeSeed(rid, year, state)
+                }
+                return (
+                  <tr key={year} className="border-b border-amber-500/[0.06] last:border-0">
+                    <td className="py-[7px] pr-3 text-amber-500/50 font-bold">{year}</td>
+                    <td className="py-[7px] pr-3 font-extrabold text-[14px] text-amber-400">
+                      {c.winner}
+                      {(c as { shared?: boolean }).shared && (
+                        <span className="ml-1 text-[9px] font-normal text-amber-500/40">(shared)</span>
+                      )}
+                    </td>
+                    <td className="py-[7px] text-right text-amber-500/40 font-mono">
+                      {seed != null ? `#${seed}` : '—'}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
-        <table className="w-full border-collapse text-[12px]">
-          <thead>
-            <tr className="text-[10px] font-bold tracking-[1px] uppercase text-[#7a5a10] border-b border-[#3a2400]">
-              <th className="text-left py-[5px] pr-3">Year</th>
-              <th className="text-left py-[5px] pr-3">Champion</th>
-              <th className="text-right py-[5px]">Seed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedYears.map(year => {
-              const c = getChampion(year, state)
-              // Use manual seed if present; otherwise compute from roster standings
-              let seed: number | string | null = (c as { seed?: number | string | null }).seed ?? null
-              if (seed == null && c.winner && c.winner !== '—') {
-                const rid = findRosterId(c.winner, year, state)
-                if (rid != null) seed = computeSeed(rid, year, state)
-              }
-              return (
-                <tr key={year} className="border-b border-[#2a1800] last:border-0 hover:bg-[#221500] transition-colors">
-                  <td className="py-[7px] pr-3 text-[#7a5a10] font-bold">{year}</td>
-                  <td className="py-[7px] pr-3 font-extrabold text-[14px] text-s-gold">
-                    {c.winner}
-                    {(c as { shared?: boolean }).shared && (
-                      <span className="ml-1 text-[9px] font-normal text-[#7a5a10]">(shared)</span>
-                    )}
-                  </td>
-                  <td className="py-[7px] text-right text-[#7a5a10]">
-                    {seed != null ? `#${seed}` : '—'}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
       </div>
 
       {/* Wall of Shame */}
-      <div className="bg-[#220000] border border-[#5a0000] rounded-[12px] p-[18px]">
-        <div className="text-[13px] font-bold tracking-[3px] uppercase text-[#7a1010] mb-3">
-          🚽 Wall of Shame — Toilet Bowl
-        </div>
-        <table className="w-full border-collapse text-[12px]">
-          <thead>
-            <tr className="text-[10px] font-bold tracking-[1px] uppercase text-[#5a1010] border-b border-[#3a0000]">
-              <th className="text-left py-[5px] pr-3">Year</th>
-              <th className="text-left py-[5px] pr-3">Last Place</th>
-              <th className="text-right py-[5px]">Seed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedYears.map(year => {
-              const s = getShameLoser(year, state)
-              let seed: number | null = (s as { seed?: number | null }).seed ?? null
-              if (seed == null && s.loser && s.loser !== '—') {
-                const rid = findRosterId(s.loser, year, state)
-                if (rid != null) {
-                  // For shame losers, seed is their regular season rank (bottom = high seed number)
-                  seed = computeSeed(rid, year, state)
+      <div
+        className="relative overflow-hidden rounded-[14px] border border-red-500/15 p-[18px]"
+        style={{ background: 'rgba(127, 29, 29, 0.1)', backdropFilter: 'blur(20px)' }}
+      >
+        {/* Corner flare */}
+        <div
+          className="absolute pointer-events-none top-[-20px] right-[-20px] w-[80px] h-[80px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(239,68,68,0.15) 0%, transparent 70%)' }}
+        />
+        <div className="relative z-10">
+          <div className="text-[11px] font-bold tracking-[2.5px] uppercase text-red-400/70 mb-3 flex items-center gap-2">
+            <span>🚽</span> Wall of Shame — Toilet Bowl
+          </div>
+          <table className="w-full border-collapse text-[12px]">
+            <thead>
+              <tr>
+                <th className="text-left py-[5px] pr-3 text-red-500/35 border-b border-red-500/10">Year</th>
+                <th className="text-left py-[5px] pr-3 text-red-500/35 border-b border-red-500/10">Last Place</th>
+                <th className="text-right py-[5px] text-red-500/35 border-b border-red-500/10">Seed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedYears.map(year => {
+                const s = getShameLoser(year, state)
+                let seed: number | null = (s as { seed?: number | null }).seed ?? null
+                if (seed == null && s.loser && s.loser !== '—') {
+                  const rid = findRosterId(s.loser, year, state)
+                  if (rid != null) seed = computeSeed(rid, year, state)
                 }
-              }
-              return (
-                <tr key={year} className="border-b border-[#2a0000] last:border-0 hover:bg-[#220000] transition-colors">
-                  <td className="py-[7px] pr-3 text-[#5a1010] font-bold">{year}</td>
-                  <td className="py-[7px] pr-3 font-extrabold text-[14px] text-s-red">{s.loser}</td>
-                  <td className="py-[7px] text-right text-[#5a1010]">
-                    {seed != null ? `#${seed}` : '—'}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                return (
+                  <tr key={year} className="border-b border-red-500/[0.06] last:border-0">
+                    <td className="py-[7px] pr-3 text-red-500/40 font-bold">{year}</td>
+                    <td className="py-[7px] pr-3 font-extrabold text-[14px] text-red-400">{s.loser}</td>
+                    <td className="py-[7px] text-right text-red-500/35 font-mono">
+                      {seed != null ? `#${seed}` : '—'}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

@@ -2,26 +2,38 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import {
+  Home, DollarSign, Users, Trophy, TrendingUp,
+  CalendarDays, Shuffle, Zap, ArrowLeftRight,
+} from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',         label: 'Home',    icon: '🏠' },
-  { href: '/earnings', label: 'Cash',    icon: '💰' },
-  { href: '/owners',   label: 'Owners',  icon: '👤' },
-  { href: '/records',  label: 'Records', icon: '🏆' },
-  { href: '/trends',   label: 'Trends',  icon: '📈' },
-  { href: '/gamelog',       label: 'Games',  icon: '📋' },
-  { href: '/luck',          label: 'Luck',   icon: '🎲' },
-  { href: '/players',       label: 'Players', icon: '🏃' },
-  { href: '/transactions',  label: 'Trades',  icon: '🔄' },
+  { href: '/',             label: 'Home',    icon: Home           },
+  { href: '/earnings',     label: 'Cash',    icon: DollarSign     },
+  { href: '/owners',       label: 'Owners',  icon: Users          },
+  { href: '/records',      label: 'Records', icon: Trophy         },
+  { href: '/trends',       label: 'Trends',  icon: TrendingUp     },
+  { href: '/gamelog',      label: 'Games',   icon: CalendarDays   },
+  { href: '/luck',         label: 'Luck',    icon: Shuffle        },
+  { href: '/players',      label: 'Players', icon: Zap            },
+  { href: '/transactions', label: 'Trades',  icon: ArrowLeftRight },
 ]
 
 export default function MobileNav() {
   const pathname = usePathname()
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-s-bg2 border-t border-s-border z-50">
+    <div
+      className="sm:hidden fixed bottom-0 left-0 right-0 border-t border-white/[0.07] z-50"
+      style={{
+        background: 'rgba(2, 6, 23, 0.96)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+      }}
+    >
       <div className="flex">
         {NAV_ITEMS.map(item => {
+          const Icon = item.icon
           const isActive =
             item.href === '/'
               ? pathname === '/'
@@ -33,10 +45,13 @@ export default function MobileNav() {
               className={[
                 'flex-1 flex flex-col items-center justify-center py-2 gap-[3px]',
                 'text-[9px] font-bold tracking-[0.5px] uppercase transition-colors duration-150',
-                isActive ? 'text-s-gold' : 'text-s-text3',
+                isActive ? 'text-violet-400' : 'text-slate-600',
               ].join(' ')}
             >
-              <span className="text-[18px] leading-none">{item.icon}</span>
+              <Icon
+                size={18}
+                className={isActive ? 'text-violet-400' : 'text-slate-600'}
+              />
               {item.label}
             </Link>
           )
