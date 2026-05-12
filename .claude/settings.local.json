@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:docs.sleeper.com)"
+      "WebFetch(domain:docs.sleeper.com)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"$env:APPDATA\\\\npm\" -ErrorAction SilentlyContinue | Select-Object Name -First 5; Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name -First 5)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Teja\\\\\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"node|nvm|fnm\" } | Select-Object FullName)"
     ]
   }
 }

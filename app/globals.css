@@ -12,32 +12,34 @@
     scroll-behavior: smooth;
   }
   body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background-color: #080c14;
-    color: #e2e8f0;
+    font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #0e1117;
+    color: #e6edf3;
     min-height: 100vh;
     font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   th {
     font-size: 10px;
     font-weight: 700;
-    color: #94a3b8;
+    color: #6e7681;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     padding: 10px 12px;
     text-align: left;
-    border-bottom: 1px solid #1e2d45;
+    border-bottom: 1px solid #2d333b;
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
   }
   th:hover {
-    color: #cbd5e1;
+    color: #8b949e;
   }
   td {
     padding: 10px 12px;
-    border-bottom: 1px solid #0d1219;
-    color: #cbd5e1;
+    border-bottom: 1px solid #161b22;
+    color: #adbac7;
     white-space: nowrap;
   }
   tr:last-child td {
@@ -45,10 +47,10 @@
   }
   tbody tr {
     cursor: pointer;
-    transition: background 0.1s;
+    transition: background 0.12s;
   }
   tbody tr:hover td {
-    background: #0f172a;
+    background: #1c2128;
   }
 }
 
@@ -62,16 +64,33 @@
   .sticky-col {
     position: sticky;
     left: 0;
-    background: #0d1219;
+    background: #161b22;
     z-index: 1;
   }
   tbody tr:hover .sticky-col {
-    background: #0f172a;
+    background: #1c2128;
   }
   .table-sticky-col {
     position: sticky;
     left: 0;
-    background: #0d1219;
+    background: #161b22;
     z-index: 1;
+  }
+  /* Glassmorphism nav/card */
+  .glass {
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    background: rgba(14, 17, 23, 0.82);
+  }
+  /* Bento card base */
+  .bento-card {
+    background: #1a1d23;
+    border: 1px solid #2d333b;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  /* Owner avatar glow */
+  .avatar-glow {
+    box-shadow: 0 0 0 2px #0e1117, 0 0 14px var(--glow-color, #00ceb840);
   }
 }

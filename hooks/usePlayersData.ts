@@ -17,7 +17,7 @@ interface PlayersData {
   error: string | null
 }
 
-export function usePlayersData(): PlayersData {
+export function usePlayersData(enabled: boolean = true): PlayersData {
   const { state } = useLeague()
   const [playersCache, setPlayersCache] = useState<Record<string, PlayerMetadata> | null>(null)
   const [draftPicksByYear, setDraftPicksByYear] = useState<Record<number, DraftPick[]> | null>(null)
@@ -26,7 +26,7 @@ export function usePlayersData(): PlayersData {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!state.loaded || !state.leagueChain.length) return
+    if (!enabled || !state.loaded || !state.leagueChain.length) return
 
     let cancelled = false
 
@@ -64,7 +64,7 @@ export function usePlayersData(): PlayersData {
     })()
 
     return () => { cancelled = true }
-  }, [state.loaded, state.leagueChain.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled, state.loaded, state.leagueChain.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const playerWinRates = useMemo(() => {
     if (!state.loaded || !playersCache) return []
