@@ -16,6 +16,7 @@ export interface ManagerCardData {
   allL: number
   winpct: number
   avgPF: number
+  avgPFperGame: number
   playoffApps: number
   champs: number
   shame: number

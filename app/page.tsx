@@ -8,7 +8,6 @@ import ErrorState from '@/components/shared/ErrorState'
 import SeasonStandings from '@/components/home/SeasonStandings'
 import PlayoffBracket from '@/components/home/PlayoffBracket'
 import HeroSection from '@/components/home/HeroSection'
-import SparklineMini from '@/components/home/SparklineMini'
 import SearchBar from '@/components/home/SearchBar'
 import LeaguePulse from '@/components/home/LeaguePulse'
 import type { ManagerCardData } from '@/components/home/SearchBar'
@@ -57,15 +56,15 @@ export default function HomePage() {
   const careerData = useMemo<ManagerCardData[]>(() => {
     const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
     return canonicalNames
-      .filter(n => ownerSeasons[n])
+      .filter(n => ownerSeasons[n] && n !== 'Sangram' && n !== 'Hamza')
       .map(name => {
         const seasons = ownerSeasons[name] || []
         const allW = seasons.reduce((a, s) => a + s.wins, 0)
         const allL = seasons.reduce((a, s) => a + s.losses, 0)
         const winpct = allW / (allW + allL || 1)
-        const avgPF = seasons.length
-          ? seasons.reduce((a, s) => a + s.pf, 0) / seasons.length
-          : 0
+        const totalPF = seasons.reduce((a, s) => a + s.pf, 0)
+        const avgPF = seasons.length ? totalPF / seasons.length : 0
+        const avgPFperGame = (allW + allL) > 0 ? totalPF / (allW + allL) : 0
         const playoffApps = seasons.filter(s => s.inPlayoffs).length
         const champs = MANUAL_CHAMPS.filter(c => c.winner?.includes(name))
           .reduce((sum, c) => sum + (c.half ? 0.5 : 1), 0)
@@ -93,6 +92,7 @@ export default function HomePage() {
           allL,
           winpct,
           avgPF,
+          avgPFperGame,
           playoffApps,
           champs,
           shame,
@@ -138,7 +138,7 @@ export default function HomePage() {
     <div className="space-y-4">
 
       {/* ── SEARCH BAR ───────────────────────────────────────────── */}
-      <div className="animate-fade-in">
+      <div className="animate-fade-in relative z-10">
         <SearchBar managerData={careerData} />
       </div>
 
@@ -168,9 +168,9 @@ export default function HomePage() {
           animClass="animate-fade-in-1"
         />
         <StatChip
-          label="Total Matchups"
-          value={allMatchups.length}
-          sub={`${(allMatchups.length / leagueChain.length).toFixed(0)} avg per season`}
+          label="All-Time High Score"
+          value={highScore > 0 ? highScore.toFixed(2) : '—'}
+          sub={highScoreOwner || undefined}
           accent="#f59e0b"
           animClass="animate-fade-in-2"
         />
@@ -210,9 +210,9 @@ export default function HomePage() {
                 <tr>
                   <th className="w-10 text-center">#</th>
                   <th>Manager</th>
-                  <th className="hidden sm:table-cell text-center">Trend</th>
                   <th>W–L</th>
                   <th>Win%</th>
+                  <th className="hidden sm:table-cell text-right">Avg PF</th>
                   <th className="hidden md:table-cell text-center">🏆</th>
                   <th className="hidden md:table-cell text-right">Net $</th>
                 </tr>
@@ -220,9 +220,6 @@ export default function HomePage() {
               <tbody>
                 {careerData.map((d, i) => {
                   const color = ownerColor(d.name)
-                  const sparkFirst = d.sparkData[0] ?? 0
-                  const sparkLast  = d.sparkData[d.sparkData.length - 1] ?? 0
-                  const trendColor = sparkLast >= sparkFirst ? '#00ceb8' : '#ff395c'
 
                   const rankColors = [
                     'bg-[#3d2000]/80 text-s-gold border border-[#5a3000]/60',
@@ -262,12 +259,6 @@ export default function HomePage() {
                         </div>
                       </td>
 
-                      <td className="hidden sm:table-cell">
-                        <div className="flex justify-center">
-                          <SparklineMini data={d.sparkData} color={trendColor} />
-                        </div>
-                      </td>
-
                       <td>
                         <span className="text-s-green font-bold text-[13px]">{d.allW}</span>
                         <span className="text-s-text3 mx-1 text-[11px]">–</span>
@@ -287,6 +278,12 @@ export default function HomePage() {
                           }}
                         >
                           {(d.winpct * 100).toFixed(1)}%
+                        </span>
+                      </td>
+
+                      <td className="hidden sm:table-cell text-right">
+                        <span className="text-[13px] font-bold text-s-text2 num">
+                          {d.avgPFperGame.toFixed(1)}
                         </span>
                       </td>
 

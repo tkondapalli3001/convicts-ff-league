@@ -47,13 +47,15 @@ export interface SleeperMatchup {
 }
 
 export interface BracketGame {
-  r: number   // round
-  m: number   // match
-  t1?: number // team 1 roster_id (seeded)
-  t2?: number // team 2 roster_id (seeded)
-  w?: number  // winner roster_id
-  l?: number  // loser roster_id
-  p?: number  // place (1=championship, 3=third, etc.)
+  r: number         // round
+  m: number         // match
+  t1?: number       // team 1 roster_id (null if came from prev round)
+  t2?: number       // team 2 roster_id (null if came from prev round)
+  t1_seed?: number  // original seed of team 1
+  t2_seed?: number  // original seed of team 2
+  w?: number        // winner roster_id
+  l?: number        // loser roster_id
+  p?: number        // place (1=championship, 3=third, etc.)
 }
 
 // ─── Processed Data Types ─────────────────────────────────────────────────────

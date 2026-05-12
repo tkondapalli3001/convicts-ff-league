@@ -42,38 +42,54 @@ export function pctClass(pct: string | number): 'good' | 'mid' | 'bad' {
 import { MANUAL_CHAMPS, MANUAL_SHAME } from '@/lib/constants'
 import type { BracketGame, LeagueState } from '@/types'
 
+function buildSeedMap(games: BracketGame[]): Record<number, number> {
+  const map: Record<number, number> = {}
+  for (const g of games) {
+    if (g.t1 != null && g.t1_seed != null) map[g.t1] = g.t1_seed
+    if (g.t2 != null && g.t2_seed != null) map[g.t2] = g.t2_seed
+  }
+  return map
+}
+
 export function getChampion(year: number, state: LeagueState) {
   const manual = MANUAL_CHAMPS.find(c => c.year === year)
-  if (manual?.winner) return manual
-
   const bracket = state.brackets[year]
   const rMap = state.rosterUserMaps[year] || {}
-  if (bracket?.winners?.length) {
-    const champGame = bracket.winners.reduce(
-      (best, g) => (g.r > best.r ? g : best),
-      bracket.winners[0]
-    )
-    if (champGame?.w) {
-      return { year, winner: rMap[String(champGame.w)] || `Team${champGame.w}`, seed: null }
-    }
+  const winners = bracket?.winners ?? []
+
+  const seedMap = buildSeedMap(winners)
+  const champGame = winners.find(g => g.p === 1)
+    ?? (winners.length ? winners.reduce((best, g) => (g.r > best.r ? g : best)) : undefined)
+
+  if (manual?.winner) {
+    const bracketSeed = champGame?.w != null ? (seedMap[champGame.w] ?? null) : null
+    return { ...manual, seed: manual.seed ?? bracketSeed }
+  }
+
+  if (champGame?.w) {
+    return { year, winner: rMap[String(champGame.w)] || `Team${champGame.w}`, seed: seedMap[champGame.w] ?? null }
   }
   return { year, winner: '—', seed: null }
 }
 
 export function getShameLoser(year: number, state: LeagueState) {
   const manual = MANUAL_SHAME.find(s => s.year === year)
-  if (manual?.loser) return manual
-
   const bracket = state.brackets[year]
   const rMap = state.rosterUserMaps[year] || {}
-  if (bracket?.losers?.length) {
-    const lastGame = bracket.losers.reduce(
-      (best, g) => (g.r > best.r ? g : best),
-      bracket.losers[0]
-    )
-    if (lastGame?.l) {
-      return { year, loser: rMap[String(lastGame.l)] || `Team${lastGame.l}`, seed: null }
-    }
+  const losers = bracket?.losers ?? []
+
+  const seedMap = buildSeedMap(losers)
+  const maxRound = losers.length ? Math.max(...losers.map(g => g.r)) : 0
+  const toiletGame = losers.find(g => g.r === maxRound && g.p === 1)
+    ?? (losers.length ? losers.reduce((best, g) => (g.r > best.r ? g : best)) : undefined)
+
+  if (manual?.loser) {
+    const bracketSeed = toiletGame?.l != null ? (seedMap[toiletGame.l] ?? null) : null
+    return { ...manual, seed: manual.seed ?? bracketSeed }
+  }
+
+  if (toiletGame?.l) {
+    return { year, loser: rMap[String(toiletGame.l)] || `Team${toiletGame.l}`, seed: seedMap[toiletGame.l] ?? null }
   }
   return { year, loser: '—', seed: null }
 }

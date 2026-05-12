@@ -11,6 +11,7 @@ export default function LeaguePulse() {
   const router = useRouter()
 
   const { hotOwner, hotCount, coldOwner, coldCount, allStreaks } = useMemo(() => {
+    const INACTIVE = new Set(['Sangram', 'Hamza'])
     const ownerGames: Record<string, { won: boolean; year: number; week: number }[]> = {}
 
     for (const g of allMatchups) {
@@ -24,6 +25,7 @@ export default function LeaguePulse() {
     let hotOwner = '', hotCount = 0, coldOwner = '', coldCount = 0
 
     for (const [owner, games] of Object.entries(ownerGames)) {
+      if (INACTIVE.has(owner)) continue
       const sorted = [...games].sort((a, b) => b.year - a.year || b.week - a.week)
       if (!sorted.length) continue
       const type: 'W' | 'L' = sorted[0].won ? 'W' : 'L'

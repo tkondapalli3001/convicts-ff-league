@@ -52,21 +52,20 @@ export default function HeroSection({
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
         {/* Left — headline */}
         <div className="max-w-2xl">
-          <div className="text-[9px] font-bold tracking-[5px] uppercase text-s-text3 mb-4 flex items-center gap-2">
+          <div className="text-[10px] font-bold tracking-[4px] uppercase text-s-teal mb-4 flex items-center gap-2">
             <span className="w-4 h-px bg-s-teal inline-block" />
             The Convicts League · {totalSeasons} Seasons · {yearRange}
           </div>
 
           <h1 className="text-[28px] md:text-[38px] lg:text-[44px] font-black text-s-text leading-[1.1] mb-4 tracking-tight">
-            Where{' '}
+            <span className="block text-s-text3 font-semibold text-[13px] md:text-[15px] tracking-[3px] uppercase mb-2">
+              Reigning Champion
+            </span>
             <span
               className="relative inline-block"
               style={{ color: champColor }}
             >
               {champName}
-            </span>{' '}
-            <span className="text-s-text2 font-semibold text-[22px] md:text-[30px] lg:text-[34px]">
-              currently reigns supreme.
             </span>
           </h1>
 
