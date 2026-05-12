@@ -1,12 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
-import SeasonStandings from '@/components/home/SeasonStandings'
-import PlayoffBracket from '@/components/home/PlayoffBracket'
 import HeroSection from '@/components/home/HeroSection'
 import SearchBar from '@/components/home/SearchBar'
 import LeaguePulse from '@/components/home/LeaguePulse'
@@ -48,8 +46,6 @@ function StatChip({
 export default function HomePage() {
   const { state } = useLeague()
   const { loaded, error, allMatchups, ownerSeasons, years, leagueChain } = state
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
-  const [standingsOpen, setStandingsOpen] = useState(false)
   const router = useRouter()
 
   // All-time career stats per owner (enriched for SearchBar)
@@ -453,34 +449,6 @@ export default function HomePage() {
 
       {/* ── LEAGUE PULSE ─────────────────────────────────────────── */}
       <LeaguePulse />
-
-      {/* ── SEASON-BY-SEASON (collapsible) ───────────────────────── */}
-      <div className="animate-fade-in-6">
-        <button
-          onClick={() => setStandingsOpen(o => !o)}
-          className="w-full flex items-center justify-between px-5 py-4 bento-card hover:border-s-border2 transition-colors duration-150 text-left"
-        >
-          <span className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3">
-            Season-by-Season Standings
-          </span>
-          <span
-            className="text-s-text3 text-[14px] leading-none transition-transform duration-200"
-            style={{
-              display: 'inline-block',
-              transform: standingsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            }}
-          >
-            ▾
-          </span>
-        </button>
-
-        {standingsOpen && (
-          <div className="mt-3 space-y-3">
-            <SeasonStandings onYearChange={setSelectedYear} />
-            {selectedYear !== null && <PlayoffBracket year={selectedYear} />}
-          </div>
-        )}
-      </div>
     </div>
   )
 }

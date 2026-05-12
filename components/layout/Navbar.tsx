@@ -5,19 +5,18 @@ import { usePathname } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import {
   Home, DollarSign, Users, Trophy, TrendingUp,
-  CalendarDays, Shuffle, Zap, ArrowLeftRight, Activity,
+  CalendarDays, Zap, ClipboardList, Activity,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',             label: 'Home',         icon: Home           },
-  { href: '/earnings',     label: 'Earnings',     icon: DollarSign     },
-  { href: '/owners',       label: 'Owners',       icon: Users          },
-  { href: '/records',      label: 'Records',      icon: Trophy         },
-  { href: '/trends',       label: 'Trends',       icon: TrendingUp     },
-  { href: '/gamelog',      label: 'Game Log',     icon: CalendarDays   },
-  { href: '/luck',         label: 'Luck Index',   icon: Shuffle        },
-  { href: '/players',      label: 'Players',      icon: Zap            },
-  { href: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
+  { href: '/',         label: 'Home',     icon: Home          },
+  { href: '/owners',   label: 'Owners',   icon: Users         },
+  { href: '/earnings', label: 'Earnings', icon: DollarSign    },
+  { href: '/draft',    label: 'Draft',    icon: ClipboardList },
+  { href: '/gamelog',  label: 'Seasons',  icon: CalendarDays  },
+  { href: '/records',  label: 'Records',  icon: Trophy        },
+  { href: '/trends',   label: 'Trends',   icon: TrendingUp    },
+  { href: '/players',  label: 'Players',  icon: Zap           },
 ]
 
 export default function Navbar() {

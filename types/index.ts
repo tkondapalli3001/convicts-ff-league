@@ -205,6 +205,8 @@ export interface LeagueState {
   ownerSeasons: Record<string, OwnerSeason[]>
   allMatchups: Matchup[]
   leagueChain: LeagueChainEntry[]
+  /** year → { draft, picks } */
+  draftData: Record<number, { draft: SleeperDraft; picks: DraftPick[] }>
   loaded: boolean
   error: string | null
   loadingText: string

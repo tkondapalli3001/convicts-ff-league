@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { SLEEPER_API } from '@/lib/constants'
-import { sleepFetch, buildLeagueChain, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket, fetchLosersBracket } from '@/lib/sleeper-api'
+import { sleepFetch, buildLeagueChain, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket, fetchLosersBracket, fetchDrafts, fetchDraftPicks } from '@/lib/sleeper-api'
 import { resolveOwnerName, buildFlatMatchups, buildOwnerSeasons } from '@/lib/data-processing'
 import type { LeagueState, SleeperUser } from '@/types'
 
@@ -20,6 +20,7 @@ const initialState: LeagueState = {
   ownerSeasons: {},
   allMatchups: [],
   leagueChain: [],
+  draftData: {},
   loaded: false,
   error: null,
   loadingText: 'Connecting to Sleeper...',
@@ -78,6 +79,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       const brackets: LeagueState['brackets'] = {}
       const ownerMap: LeagueState['ownerMap'] = {}
       const ownerAvatarMap: LeagueState['ownerAvatarMap'] = {}
+      const draftData: LeagueState['draftData'] = {}
 
       for (const { id, year, data } of chain) {
         leagues[year] = data
@@ -132,12 +134,18 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         }
         await Promise.all(weekPromises)
 
-        // Fetch brackets
-        const [winners, losers] = await Promise.all([
+        // Fetch brackets + drafts in parallel
+        const [winners, losers, drafts] = await Promise.all([
           fetchWinnersBracket(id).catch(() => []),
           fetchLosersBracket(id).catch(() => []),
+          fetchDrafts(id).catch(() => []),
         ])
         brackets[year] = { winners, losers }
+
+        if (drafts.length > 0) {
+          const picks = await fetchDraftPicks(drafts[0].draft_id).catch(() => [])
+          draftData[year] = { draft: drafts[0], picks }
+        }
       }
 
       // Build derived data
@@ -154,6 +162,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         ownerSeasons: {},
         allMatchups: [],
         leagueChain: chain,
+        draftData,
         years,
         loaded: false,
         error: null,

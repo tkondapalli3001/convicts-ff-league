@@ -4,19 +4,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, DollarSign, Users, Trophy, TrendingUp,
-  CalendarDays, Shuffle, Zap, ArrowLeftRight,
+  CalendarDays, Zap, ClipboardList,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',             label: 'Home',    icon: Home           },
-  { href: '/earnings',     label: 'Cash',    icon: DollarSign     },
-  { href: '/owners',       label: 'Owners',  icon: Users          },
-  { href: '/records',      label: 'Records', icon: Trophy         },
-  { href: '/trends',       label: 'Trends',  icon: TrendingUp     },
-  { href: '/gamelog',      label: 'Games',   icon: CalendarDays   },
-  { href: '/luck',         label: 'Luck',    icon: Shuffle        },
-  { href: '/players',      label: 'Players', icon: Zap            },
-  { href: '/transactions', label: 'Trades',  icon: ArrowLeftRight },
+  { href: '/',         label: 'Home',    icon: Home          },
+  { href: '/owners',   label: 'Owners',  icon: Users         },
+  { href: '/earnings', label: 'Cash',    icon: DollarSign    },
+  { href: '/draft',    label: 'Draft',   icon: ClipboardList },
+  { href: '/gamelog',  label: 'Seasons', icon: CalendarDays  },
+  { href: '/records',  label: 'Records', icon: Trophy        },
+  { href: '/trends',   label: 'Trends',  icon: TrendingUp    },
+  { href: '/players',  label: 'Players', icon: Zap           },
 ]
 
 export default function MobileNav() {
