@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { OwnerSeason } from '@/types'
 import { ownerColor, avatarLetters } from '@/lib/utils'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA } from '@/lib/constants'
+import React from 'react'
 
 interface Props {
   name: string
@@ -20,18 +21,18 @@ export default function OwnerCard({ name, seasons }: Props) {
 
   return (
     <Link href={`/owners/${encodeURIComponent(name)}`}>
-      <div className="bg-s-bg3 border border-s-border rounded-[10px] p-[14px] text-center cursor-pointer transition-all duration-150 hover:border-s-gold hover:bg-s-bg4">
+      <div className="gl ic p-[14px] text-center rounded-[12px]">
         {/* Avatar */}
         <div
-          className="w-11 h-11 rounded-full mx-auto mb-[10px] flex items-center justify-center text-[16px] font-extrabold"
-          style={{ background: `${col}22`, color: col }}
+          className="w-11 h-11 rounded-full mx-auto mb-[10px] flex items-center justify-center text-[16px] font-extrabold avatar-glow"
+          style={{ background: `${col}26`, color: col, '--glow-color': `${col}40` } as React.CSSProperties}
         >
           {avatarLetters(name)}
         </div>
 
         {/* Name & record */}
         <div className="text-[13px] font-bold text-s-text">{name}</div>
-        <div className="text-[10px] text-s-text3 mt-[3px]">{totalW}W-{totalL}L · {pct}%</div>
+        <div className="text-[10px] text-s-text3 mt-[3px] num">{totalW}W-{totalL}L · {pct}%</div>
 
         {/* Badges */}
         <div className="flex flex-wrap justify-center gap-1 mt-[6px]">
@@ -46,7 +47,7 @@ export default function OwnerCard({ name, seasons }: Props) {
             </span>
           )}
           {earn && (
-            <span className={`inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold border ${earn.total >= 0 ? 'bg-[#002d10] text-s-green border-[#004d1a]' : 'bg-[#3d0000] text-s-red border-[#5a0000]'}`}>
+            <span className={`inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold border num ${earn.total >= 0 ? 'bg-[#002d10] text-s-green border-[#004d1a]' : 'bg-[#3d0000] text-s-red border-[#5a0000]'}`}>
               {earn.total >= 0 ? '+' : ''}${earn.total}
             </span>
           )}

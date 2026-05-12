@@ -36,55 +36,44 @@ function fmt(n: number, decimals = 2): string {
 
 export default function LuckTable({ entries, year }: Props) {
   return (
-    <div className="rounded-[12px] bg-[#252535] p-[18px]">
+    <div className="gl p-[18px]">
       <p className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-3">
         All-Play Luck Rankings — {year} Season
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-[620px] w-full border-collapse text-[12px]">
           <thead>
-            <tr className="text-[10px] font-bold tracking-[1px] uppercase text-s-text3 border-b border-s-border">
-              <th className="text-left py-[8px] pr-3 w-8">#</th>
-              <th className="text-left py-[8px] pr-3">Manager</th>
-              <th className="text-right py-[8px] pr-3 whitespace-nowrap">Actual W</th>
-              <th className="text-right py-[8px] pr-3 whitespace-nowrap">Expected W</th>
-              <th className="text-right py-[8px] pr-3 whitespace-nowrap">Luck Index</th>
-              <th className="text-left py-[8px]">Narrative</th>
+            <tr>
+              <th className="text-left w-8">#</th>
+              <th className="text-left">Manager</th>
+              <th className="text-right whitespace-nowrap">Actual W</th>
+              <th className="text-right whitespace-nowrap">Expected W</th>
+              <th className="text-right whitespace-nowrap">Luck Index</th>
+              <th className="text-left">Narrative</th>
             </tr>
           </thead>
           <tbody>
             {entries.map((entry, i) => (
               <tr
                 key={entry.owner}
-                className="border-b border-s-border last:border-0 hover:bg-[#2a2a3a] transition-colors duration-100"
+                className="border-b border-s-border last:border-0 hover:bg-s-bg3 transition-colors duration-100"
               >
-                {/* Rank */}
-                <td className="py-[10px] pr-3 text-s-text3 font-bold">{i + 1}</td>
-
-                {/* Manager */}
+                <td className="py-[10px] pr-3 text-s-text3 font-bold num">{i + 1}</td>
                 <td className="py-[10px] pr-3">
                   <div className="flex items-center gap-2">
                     <OwnerAvatar name={entry.owner} size="sm" />
                     <span className="text-s-text font-semibold whitespace-nowrap">{entry.owner}</span>
                   </div>
                 </td>
-
-                {/* Actual Wins */}
-                <td className="py-[10px] pr-3 text-right text-s-text font-semibold">
+                <td className="py-[10px] pr-3 text-right text-s-text font-semibold num">
                   {entry.actualWins}
                 </td>
-
-                {/* Expected Wins */}
-                <td className="py-[10px] pr-3 text-right text-s-text2">
+                <td className="py-[10px] pr-3 text-right text-s-text2 num">
                   {fmt(entry.expectedWins)}
                 </td>
-
-                {/* Luck Index */}
-                <td className={`py-[10px] pr-3 text-right font-bold ${luckColor(entry.luckIndex)}`}>
+                <td className={`py-[10px] pr-3 text-right font-bold num ${luckColor(entry.luckIndex)}`}>
                   {entry.luckIndex > 0 ? '+' : ''}{fmt(entry.luckIndex)}
                 </td>
-
-                {/* Narrative */}
                 <td className="py-[10px]">
                   <NarrativeBadge narrative={entry.narrative} />
                 </td>
@@ -94,7 +83,6 @@ export default function LuckTable({ entries, year }: Props) {
         </table>
       </div>
 
-      {/* Legend */}
       <p className="mt-4 text-[10px] text-s-text3 leading-relaxed">
         <strong className="text-s-text2">Luck Index</strong> = Actual Wins − All-Play Expected Wins.
         Each week, a team's score is compared against every other team. Expected wins for that week = wins / (teams − 1).

@@ -82,6 +82,17 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
       const pts1 = m1.points ?? 0
       const pts2 = m2.points ?? 0
 
+      // Points left on bench: difference between optimal lineup and actual starters
+      const calcBenchAgony = (m: typeof m1) => {
+        if (!m.starters?.length || !m.players_points) return null
+        const allPts = Object.values(m.players_points).sort((a, b) => b - a)
+        const maxPossible = allPts.slice(0, m.starters.length).reduce((a, b) => a + b, 0)
+        const left = maxPossible - (m.points ?? 0)
+        return left > 0.01 ? left : 0
+      }
+      const agony1 = calcBenchAgony(m1)
+      const agony2 = calcBenchAgony(m2)
+
       setModal({
         title: `${team1} vs ${team2} · ${year} Wk${week}`,
         body: (
@@ -109,11 +120,21 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
                 <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-s-text2 mb-2">{team1}</div>
                 <StarterRows entry={m1} rosterPositions={rosterPositions} players={players!} />
                 <div className="pt-2 text-[11px] font-bold text-s-text2 text-right">Total: <span className="text-s-text">{pts1.toFixed(2)}</span></div>
+                {agony1 != null && agony1 > 0 && (
+                  <div className="text-right text-[10px] font-medium text-[#f87171] mt-0.5">
+                    🩸 {agony1.toFixed(2)} left on bench
+                  </div>
+                )}
               </div>
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-s-text2 mb-2">{team2}</div>
                 <StarterRows entry={m2} rosterPositions={rosterPositions} players={players!} />
                 <div className="pt-2 text-[11px] font-bold text-s-text2 text-right">Total: <span className="text-s-text">{pts2.toFixed(2)}</span></div>
+                {agony2 != null && agony2 > 0 && (
+                  <div className="text-right text-[10px] font-medium text-[#f87171] mt-0.5">
+                    🩸 {agony2.toFixed(2)} left on bench
+                  </div>
+                )}
               </div>
             </div>
           </div>

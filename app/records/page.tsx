@@ -7,6 +7,7 @@ import ErrorState from '@/components/shared/ErrorState'
 import RecordItem from '@/components/shared/RecordItem'
 import ScoreLeaderboard from '@/components/records/ScoreLeaderboard'
 import StreakList from '@/components/records/StreakList'
+import RivalryCalc from '@/components/records/RivalryCalc'
 
 export default function RecordsPage() {
   const { state } = useLeague()
@@ -84,6 +85,10 @@ export default function RecordsPage() {
         <StreakList title="Longest Win Streaks"   streaks={topWinStreaks}  variant="win" />
         <StreakList title="Longest Losing Streaks" streaks={topLossStreaks} variant="loss" />
       </div>
+
+      {/* Rivalry Calculator */}
+      <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">⚔️ Head-to-Head Rivalry</div>
+      <RivalryCalc />
 
     </div>
   )

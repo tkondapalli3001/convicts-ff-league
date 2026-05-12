@@ -7,10 +7,10 @@ interface Props {
 
 export default function StatBox({ label, value, sub, valueColor }: Props) {
   return (
-    <div className="bg-s-bg3 border border-s-border rounded-[10px] p-[14px]">
-      <div className="text-[10px] text-s-text3 tracking-[1px] uppercase mb-[5px]">{label}</div>
+    <div className="gl p-[14px]">
+      <div className="text-[10px] text-s-text3 tracking-[1.5px] uppercase mb-[5px]">{label}</div>
       <div
-        className="text-[22px] font-extrabold leading-none"
+        className="text-[22px] font-extrabold leading-none num"
         style={valueColor ? { color: valueColor } : undefined}
       >
         {value}

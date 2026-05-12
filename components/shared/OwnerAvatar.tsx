@@ -1,3 +1,4 @@
+import React from 'react'
 import { ownerColor, avatarLetters } from '@/lib/utils'
 
 interface Props {
@@ -16,8 +17,8 @@ export default function OwnerAvatar({ name, size = 'md', className = '' }: Props
   const color = ownerColor(name)
   return (
     <div
-      className={`rounded-full flex items-center justify-center font-extrabold flex-shrink-0 ${SIZES[size]} ${className}`}
-      style={{ background: `${color}22`, color }}
+      className={`rounded-full flex items-center justify-center font-extrabold flex-shrink-0 avatar-glow ${SIZES[size]} ${className}`}
+      style={{ background: `${color}26`, color, '--glow-color': `${color}40` } as React.CSSProperties}
     >
       {avatarLetters(name)}
     </div>

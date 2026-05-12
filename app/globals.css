@@ -21,7 +21,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
   th {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     color: #6e7681;
     letter-spacing: 1.5px;
@@ -54,6 +54,27 @@
   }
 }
 
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+}
+
 @layer utilities {
   .scrollbar-none {
     scrollbar-width: none;
@@ -82,15 +103,40 @@
     -webkit-backdrop-filter: blur(14px) saturate(160%);
     background: rgba(14, 17, 23, 0.82);
   }
+  /* Standard glass card — use on data panels */
+  .gl {
+    background: rgba(26, 29, 35, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+  }
   /* Bento card base */
   .bento-card {
-    background: #1a1d23;
-    border: 1px solid #2d333b;
+    background: rgba(26, 29, 35, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     overflow: hidden;
   }
   /* Owner avatar glow */
   .avatar-glow {
     box-shadow: 0 0 0 2px #0e1117, 0 0 14px var(--glow-color, #00ceb840);
+  }
+  /* Tabular numbers for score/stat columns */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    letter-spacing: -0.02em;
+  }
+  /* Interactive card — hover lift */
+  .ic {
+    transition: transform 0.15s ease, filter 0.15s ease;
+    cursor: pointer;
+  }
+  .ic:hover {
+    transform: scale(1.02);
+    filter: brightness(1.15);
   }
 }

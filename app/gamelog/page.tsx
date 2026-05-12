@@ -18,9 +18,9 @@ export default function GameLogPage() {
   const [activeOwners, setActiveOwners] = useState<Set<string>>(new Set())
   const [selectedGame, setSelectedGame] = useState<Matchup | null>(null)
 
-  // Initialize year filters once data loads
+  // Initialize year filters once data loads — default to most recent year
   useEffect(() => {
-    if (years.length) setActiveYears(new Set(years))
+    if (years.length) setActiveYears(new Set([years[years.length - 1]]))
   }, [years.length])  // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) return <ErrorState error={error} />
@@ -43,13 +43,15 @@ export default function GameLogPage() {
   }
 
   const filtered = useMemo(() => {
-    return allMatchups.filter(g => {
-      if (!activeYears.has(g.year)) return false
-      if (activeOwners.size > 0) {
-        if (!activeOwners.has(g.team1) && !activeOwners.has(g.team2)) return false
-      }
-      return true
-    })
+    return allMatchups
+      .filter(g => {
+        if (!activeYears.has(g.year)) return false
+        if (activeOwners.size > 0) {
+          if (!activeOwners.has(g.team1) && !activeOwners.has(g.team2)) return false
+        }
+        return true
+      })
+      .sort((a, b) => b.year - a.year || b.week - a.week)
   }, [allMatchups, activeYears, activeOwners])
 
   return (

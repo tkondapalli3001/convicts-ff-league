@@ -10,6 +10,7 @@ import PlayoffBracket from '@/components/home/PlayoffBracket'
 import HeroSection from '@/components/home/HeroSection'
 import SparklineMini from '@/components/home/SparklineMini'
 import SearchBar from '@/components/home/SearchBar'
+import LeaguePulse from '@/components/home/LeaguePulse'
 import type { ManagerCardData } from '@/components/home/SearchBar'
 import { getChampion, getShameLoser, ownerColor, avatarLetters } from '@/lib/utils'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/constants'
@@ -346,7 +347,10 @@ export default function HomePage() {
                       >
                         {avatarLetters(c.winner)}
                       </div>
-                      <span className="text-[13px] font-extrabold text-s-gold">{c.winner}</span>
+                      <span
+                        className="text-[13px] font-extrabold text-s-gold hover:underline cursor-pointer"
+                        onClick={() => router.push(`/owners/${encodeURIComponent(c.winner)}`)}
+                      >{c.winner}</span>
                       {(c as { shared?: boolean }).shared && (
                         <span className="text-[9px] text-[#7a5a10] font-medium">(shared)</span>
                       )}
@@ -386,7 +390,10 @@ export default function HomePage() {
                       >
                         {avatarLetters(s.loser)}
                       </div>
-                      <span className="text-[13px] font-extrabold text-s-red">{s.loser}</span>
+                      <span
+                        className="text-[13px] font-extrabold text-s-red hover:underline cursor-pointer"
+                        onClick={() => router.push(`/owners/${encodeURIComponent(s.loser)}`)}
+                      >{s.loser}</span>
                     </div>
                     {(s as { seed?: number | null }).seed != null && (
                       <span className="text-[10px] text-[#5a1010] font-bold">
@@ -400,6 +407,9 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* ── LEAGUE PULSE ─────────────────────────────────────────── */}
+      <LeaguePulse />
 
       {/* ── SEASON-BY-SEASON (collapsible) ───────────────────────── */}
       <div className="animate-fade-in-6">

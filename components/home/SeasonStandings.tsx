@@ -6,8 +6,9 @@ import { useLeague } from '@/context/LeagueContext'
 
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
+import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
-type SortKey = 'manager' | 'year' | 'finish' | 'wins' | 'losses' | 'winpct' | 'pf' | 'pa' | 'margin'
+type SortKey = 'manager' | 'year' | 'finish' | 'wins' | 'losses' | 'winpct' | 'pf' | 'pa' | 'margin' | 'allPlayW'
 
 interface Row {
   manager: string
@@ -20,6 +21,8 @@ interface Row {
   pa: number
   margin: number
   playoffs: boolean
+  allPlayW: number
+  allPlayL: number
 }
 
 interface Props {
@@ -28,18 +31,19 @@ interface Props {
 
 export default function SeasonStandings({ onYearChange }: Props) {
   const { state } = useLeague()
-  const { ownerSeasons, years } = state
+  const { ownerSeasons, years, matchups, rosterUserMaps } = state
   const router = useRouter()
 
-  const [activeYears, setActiveYears] = useState<Set<number>>(new Set(years))
+  const [activeYears, setActiveYears] = useState<Set<number>>(new Set())
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
   const [sortDir, setSortDir] = useState<1 | -1>(-1)
 
-  // Keep activeYears in sync when years load from Sleeper
+  // Default to the most recent year once data loads
   useEffect(() => {
     if (years.length) {
-      setActiveYears(new Set(years))
-      onYearChange?.(null)
+      const latest = years[years.length - 1]
+      setActiveYears(new Set([latest]))
+      onYearChange?.(latest)
     }
   }, [years.length])  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -59,6 +63,33 @@ export default function SeasonStandings({ onYearChange }: Props) {
     })
   }
 
+  // Compute All-Play W/L per owner per year from raw weekly matchup data
+  const allPlayMap = useMemo<Record<string, { w: number; l: number }>>(() => {
+    const result: Record<string, { w: number; l: number }> = {}
+    for (const [yearStr, weekMap] of Object.entries(matchups)) {
+      const year = Number(yearStr)
+      const rMap = rosterUserMaps[year] ?? {}
+      for (const weekData of Object.values(weekMap)) {
+        if (weekData.isPlayoff) continue
+        const teamScores = weekData.matchups
+          .map(m => ({
+            owner: rMap[String(m.roster_id)] ?? `Team${m.roster_id}`,
+            score: m.points ?? 0,
+          }))
+          .filter(t => t.score > 0)
+        const N = teamScores.length
+        if (N < 2) continue
+        for (const team of teamScores) {
+          const key = `${team.owner}:${year}`
+          if (!result[key]) result[key] = { w: 0, l: 0 }
+          result[key].w += teamScores.filter(t => t.owner !== team.owner && t.score < team.score).length
+          result[key].l += teamScores.filter(t => t.owner !== team.owner && t.score > team.score).length
+        }
+      }
+    }
+    return result
+  }, [matchups, rosterUserMaps])
+
   const rows = useMemo<Row[]>(() => {
     const result: Row[] = []
     for (const [name, seasons] of Object.entries(ownerSeasons)) {
@@ -66,6 +97,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
         if (!activeYears.has(s.year)) return
         const games = s.wins + s.losses
         const margin = games > 0 ? parseFloat(((s.pf - s.pa) / games).toFixed(2)) : 0
+        const ap = allPlayMap[`${name}:${s.year}`] ?? { w: 0, l: 0 }
         result.push({
           manager: name,
           year: s.year,
@@ -77,6 +109,8 @@ export default function SeasonStandings({ onYearChange }: Props) {
           pa: s.pa,
           margin,
           playoffs: s.inPlayoffs,
+          allPlayW: ap.w,
+          allPlayL: ap.l,
         })
       })
     }
@@ -88,7 +122,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
       return ((av as number) - (bv as number)) * sortDir
     })
     return result
-  }, [ownerSeasons, activeYears, sortKey, sortDir])
+  }, [ownerSeasons, activeYears, sortKey, sortDir, allPlayMap])
 
   const SortTh = ({ k, label, hideOnMobile }: { k: SortKey; label: string; hideOnMobile?: boolean }) => (
     <th
@@ -101,7 +135,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
   )
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
+    <div className="gl p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[14px]">
         Season Standings — Click year to isolate · Double-click row to view owner
       </div>
@@ -126,7 +160,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
 
       {/* Table */}
       <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
-        <table className="w-full border-collapse min-w-[500px]">
+        <table className="w-full border-collapse min-w-[560px]">
           <thead>
             <tr>
               <SortTh k="manager" label="Manager" />
@@ -138,6 +172,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
               <SortTh k="pf"      label="PF/Gm" hideOnMobile />
               <SortTh k="pa"      label="PA/Gm" hideOnMobile />
               <SortTh k="margin"  label="+/−/Gm" hideOnMobile />
+              <SortTh k="allPlayW" label="All-Play" hideOnMobile />
               <th className="hidden md:table-cell">Playoffs</th>
             </tr>
           </thead>
@@ -147,30 +182,44 @@ export default function SeasonStandings({ onYearChange }: Props) {
               return (
                 <tr
                   key={`${r.manager}-${r.year}`}
-                  onDoubleClick={() => router.push(`/owners/${r.manager}`)}
+                  onDoubleClick={() => router.push(`/owners/${encodeURIComponent(r.manager)}`)}
                 >
-                  <td className="sticky-col font-bold text-s-text">{r.manager}</td>
+                  <td className="sticky-col font-bold text-s-text">
+                    <div className="flex items-center gap-2">
+                      <OwnerAvatar name={r.manager} size="sm" />
+                      {r.manager}
+                    </div>
+                  </td>
                   <td>
-                    <span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text2 border border-s-border">
+                    <span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text2 border border-s-border num">
                       {r.year}
                     </span>
                   </td>
                   <td><FinishBadge finish={r.finish} /></td>
-                  <td className="text-s-green font-bold">{r.wins}</td>
-                  <td className="text-s-red">{r.losses}</td>
+                  <td className="text-s-green font-bold num">{r.wins}</td>
+                  <td className="text-s-red num">{r.losses}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="text-s-text2 hidden md:table-cell">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="text-s-text2 hidden md:table-cell">{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="hidden md:table-cell">
+                  <td className="text-s-text2 hidden md:table-cell num">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="text-s-text2 hidden md:table-cell num">{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="hidden md:table-cell num">
                     <span className={r.margin >= 0 ? 'text-s-green' : 'text-s-red'}>
                       {r.margin >= 0 ? '+' : ''}{r.margin.toFixed(1)}
                     </span>
                   </td>
+                  <td className="hidden md:table-cell num">
+                    <span className="text-s-green font-bold">{r.allPlayW}</span>
+                    <span className="text-s-text3 mx-0.5">−</span>
+                    <span className="text-s-red">{r.allPlayL}</span>
+                  </td>
                   <td className="hidden md:table-cell">
                     {r.playoffs ? (
-                      <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d2000] text-s-gold border border-[#5a3200]">✓ Playoffs</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#052e16] text-s-green border border-[#166534]" style={{ boxShadow: '0 0 8px #22c55e30' }}>
+                        ● Clinched
+                      </span>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text3 border border-s-border">—</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#450a0a] text-s-red border border-[#7f1d1d]">
+                        ✕ Eliminated
+                      </span>
                     )}
                   </td>
                 </tr>

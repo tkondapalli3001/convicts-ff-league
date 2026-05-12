@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/constants'
 import WinPctBadge from '@/components/shared/WinPctBadge'
+import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
 type SortKey = 'name' | 'numSeasons' | 'allW' | 'allL' | 'winpct' | 'avgPF' | 'avgFinish' | 'playoffApps' | 'champs' | 'shame' | 'earn'
 
@@ -116,7 +117,7 @@ export default function CareerLeaderboard() {
   )
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
+    <div className="gl p-[18px]">
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
           Career Leaderboard{playoffOnly ? ' — Playoff Games Only' : ''}
@@ -160,19 +161,24 @@ export default function CareerLeaderboard() {
               return (
                 <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}>
                   <td>
-                    <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold ${rankCls}`}>{i + 1}</span>
+                    <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold num ${rankCls}`}>{i + 1}</span>
                   </td>
-                  <td className="font-bold text-s-text">{d.name}</td>
-                  <td className="hidden md:table-cell text-s-text3">{d.numSeasons}</td>
-                  <td className="text-s-green font-bold">{d.allW}</td>
-                  <td className="text-s-red">{d.allL}</td>
+                  <td className="font-bold text-s-text">
+                    <div className="flex items-center gap-2">
+                      <OwnerAvatar name={d.name} size="sm" />
+                      {d.name}
+                    </div>
+                  </td>
+                  <td className="hidden md:table-cell text-s-text3 num">{d.numSeasons}</td>
+                  <td className="text-s-green font-bold num">{d.allW}</td>
+                  <td className="text-s-red num">{d.allL}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="hidden md:table-cell text-s-text2">{d.avgPF.toFixed(1)}</td>
-                  <td className="hidden md:table-cell text-s-text2">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
-                  {!playoffOnly && <td className="hidden md:table-cell text-s-text2">{d.playoffApps}/{d.numSeasons}</td>}
+                  <td className="hidden md:table-cell text-s-text2 num">{d.avgPF.toFixed(1)}</td>
+                  <td className="hidden md:table-cell text-s-text2 num">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
+                  {!playoffOnly && <td className="hidden md:table-cell text-s-text2 num">{d.playoffApps}/{d.numSeasons}</td>}
                   <td>{d.champs > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d2000] text-s-gold border border-[#5a3200]">🏆 {d.champs}x</span> : <span className="text-s-text3">—</span>}</td>
                   <td>{d.shame > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d0000] text-s-red border border-[#5a0000]">🚽 {d.shame}x</span> : <span className="text-s-text3">—</span>}</td>
-                  <td className={d.earn != null ? (d.earn >= 0 ? 'text-s-green font-bold' : 'text-s-red font-bold') : 'text-s-text3'}>
+                  <td className={`num ${d.earn != null ? (d.earn >= 0 ? 'text-s-green font-bold' : 'text-s-red font-bold') : 'text-s-text3'}`}>
                     {d.earn != null ? `${d.earn >= 0 ? '+' : ''}$${d.earn}` : '—'}
                   </td>
                 </tr>

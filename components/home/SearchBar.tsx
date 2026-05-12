@@ -495,7 +495,7 @@ export default function SearchBar({ managerData }: Props) {
       {/* ── Dropdown ─────────────────────────────────────────────── */}
       {showDropdown && (
         <div
-          className="absolute top-full left-0 right-0 bg-s-surface border border-s-teal/40 border-t-0 rounded-b-[16px] z-50 overflow-hidden shadow-2xl shadow-black/70"
+          className="absolute top-full left-0 right-0 bg-s-surface border border-s-teal/40 border-t-0 rounded-b-[16px] z-[9999] overflow-hidden shadow-2xl shadow-black/70"
           style={{ maxHeight: '340px', overflowY: 'auto' }}
         >
           {/* Managers */}

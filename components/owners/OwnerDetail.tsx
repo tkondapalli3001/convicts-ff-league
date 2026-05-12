@@ -131,7 +131,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
       {/* Season Log */}
       {tab === 'seasons' && (
-        <div className="overflow-x-auto bg-s-bg2 border border-s-border rounded-[12px]">
+        <div className="overflow-x-auto gl">
           <table className="w-full border-collapse min-w-[500px]">
             <thead>
               <tr>
@@ -145,20 +145,20 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 const spct = (s.wins / (s.wins + s.losses || 1) * 100).toFixed(1)
                 return (
                   <tr key={s.year}>
-                    <td><span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text2 border border-s-border">{s.year}</span></td>
+                    <td><span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text2 border border-s-border num">{s.year}</span></td>
                     <td><FinishBadge finish={s.finish} /></td>
-                    <td className="text-s-green font-bold">{s.wins}</td>
-                    <td className="text-s-red">{s.losses}</td>
+                    <td className="text-s-green font-bold num">{s.wins}</td>
+                    <td className="text-s-red num">{s.losses}</td>
                     <td><WinPctBadge pct={spct} /></td>
-                    <td className="text-s-text2">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
-                    <td className="text-[#f87171]">{s.wins + s.losses > 0 ? (s.pa / (s.wins + s.losses)).toFixed(1) : '—'}</td>
-                    <td className={margin >= 0 ? 'text-s-green' : 'text-s-red'}>
+                    <td className="text-s-text2 num">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
+                    <td className="text-[#f87171] num">{s.wins + s.losses > 0 ? (s.pa / (s.wins + s.losses)).toFixed(1) : '—'}</td>
+                    <td className={`num ${margin >= 0 ? 'text-s-green' : 'text-s-red'}`}>
                       {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
                     </td>
                     <td>
                       {s.inPlayoffs
-                        ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d2000] text-s-gold border border-[#5a3200]">✓</span>
-                        : <span className="text-s-text3">—</span>}
+                        ? <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#052e16] text-s-green border border-[#166534]" style={{ boxShadow: '0 0 8px #22c55e30' }}>● Clinched</span>
+                        : <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#450a0a] text-s-red border border-[#7f1d1d]">✕ Elim.</span>}
                     </td>
                   </tr>
                 )
@@ -175,7 +175,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
       {/* Game Log */}
       {tab === 'gamelog' && (
-        <div className="max-h-[500px] overflow-y-auto rounded-[10px] bg-s-bg2 border border-s-border">
+        <div className="max-h-[500px] overflow-y-auto gl rounded-[12px]">
           {ownerGames.map(g => {
             const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
             const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
@@ -185,25 +185,25 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
             return (
               <div
                 key={`${g.year}-${g.week}-${g.team1}`}
-                className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] hover:bg-[#0f172a]"
+                className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] hover:bg-s-bg3 transition-colors duration-100"
               >
-                <span className="w-[60px] text-s-text2 text-[10px] flex-shrink-0">{g.year} W{g.week}</span>
+                <span className="w-[60px] text-s-text2 text-[10px] flex-shrink-0 num">{g.year} W{g.week}</span>
                 <span className="font-bold w-[72px] flex-shrink-0 overflow-hidden text-ellipsis text-s-text">
                   {ownerName}
                 </span>
-                <span className="w-[50px] flex-shrink-0 font-mono">{fmtPts(myPts)}</span>
+                <span className="w-[50px] flex-shrink-0 num">{fmtPts(myPts)}</span>
                 <span className="text-s-text3 text-[10px] flex-shrink-0">vs</span>
                 <span className="font-bold w-[72px] flex-shrink-0 overflow-hidden text-ellipsis text-s-text2">
                   {opp}
                 </span>
-                <span className="w-[50px] flex-shrink-0 font-mono">{fmtPts(oppPts)}</span>
+                <span className="w-[50px] flex-shrink-0 num">{fmtPts(oppPts)}</span>
                 <span className={`px-[6px] py-[1px] rounded-[4px] text-[10px] font-extrabold flex-shrink-0 ${won ? 'bg-[#052e16] text-s-green' : 'bg-[#450a0a] text-s-red'}`}>
                   {won ? 'W' : 'L'}
                 </span>
                 <span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text3 border border-s-border flex-shrink-0">
                   {g.type === 'R' ? 'REG' : 'PLY'}
                 </span>
-                <span className={`font-mono text-[11px] ml-auto flex-shrink-0 ${margin >= 0 ? 'text-s-green' : 'text-s-red'}`}>
+                <span className={`text-[11px] ml-auto flex-shrink-0 num ${margin >= 0 ? 'text-s-green' : 'text-s-red'}`}>
                   {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
                 </span>
               </div>
