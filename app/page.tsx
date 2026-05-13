@@ -75,7 +75,10 @@ export default function HomePage() {
           ? eligibleSeasons.reduce((best, s) => {
               const pct = s.wins / (s.wins + s.losses)
               const bestPct = best.wins / (best.wins + best.losses)
-              return pct > bestPct ? s : best
+              if (pct !== bestPct) return pct > bestPct ? s : best
+              const sFinish = s.finish ?? Infinity
+              const bestFinish = best.finish ?? Infinity
+              return sFinish < bestFinish ? s : best
             })
           : null
 
