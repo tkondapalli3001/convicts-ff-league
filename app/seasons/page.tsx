@@ -14,7 +14,7 @@ type Tab = 'standings' | 'finish' | 'avgscore'
 const TABS: { id: Tab; label: string }[] = [
   { id: 'standings', label: 'Standings'      },
   { id: 'finish',    label: 'Finish Tracker' },
-  { id: 'avgscore',  label: 'Avg Score'      },
+  { id: 'avgscore',  label: 'Scoring Trend'  },
 ]
 
 export default function SeasonsPage() {

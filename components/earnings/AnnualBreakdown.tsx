@@ -21,7 +21,7 @@ export default function AnnualBreakdown() {
         <table className="w-full border-collapse" style={{ minWidth: `${displayYears.length * 60 + 160}px` }}>
           <thead>
             <tr>
-              <th className="sticky left-0 bg-transparent" style={{ zIndex: 1 }}>Owner</th>
+              <th className="sticky left-0 bg-transparent" style={{ zIndex: 1 }}>Manager</th>
               <th className="text-s-gold font-bold">Total</th>
               {displayYears.map(y => <th key={y}>{y}</th>)}
             </tr>

@@ -40,7 +40,7 @@ export default function ScoreLeaderboard({ title, scores, variant, countByOwner 
 
       <div className="gl p-[14px]">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">
-          Most {variant === 'high' ? '140+' : 'Sub-80'} Games by Owner
+          Most {variant === 'high' ? '140+' : 'Sub-80'} Games by Manager
         </div>
         {countByOwner.slice(0, 8).map(([owner, count], i) => (
           <div key={owner} className="flex items-center gap-2 py-[5px] border-b border-s-bg3">

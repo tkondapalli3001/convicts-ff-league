@@ -11,8 +11,8 @@ const NAV_ITEMS = [
   { href: '/',         label: 'Home',    icon: Home          },
   { href: '/owners',   label: 'Owners',  icon: Users         },
   { href: '/earnings', label: 'Cash',    icon: DollarSign    },
-  { href: '/draft',    label: 'Draft',   icon: ClipboardList },
   { href: '/seasons',  label: 'Seasons', icon: CalendarDays  },
+  { href: '/draft',    label: 'Draft',   icon: ClipboardList },
   { href: '/records',  label: 'Records', icon: Trophy        },
   { href: '/players',  label: 'Players', icon: Zap           },
 ]

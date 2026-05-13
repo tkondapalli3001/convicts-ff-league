@@ -113,10 +113,11 @@ export function useFunFacts(): FunFactsData {
       .slice(0, 3)
 
     // ── Card 4: The Owner ─────────────────────────────────────────────────────
+    const INACTIVE = new Set(['Hamza', 'Sangram'])
     const pairGames: Record<string, number> = {}
     const dirWins: Record<string, number> = {}
 
-    for (const m of filteredMatchups) {
+    for (const m of filteredMatchups.filter(m => !INACTIVE.has(m.team1) && !INACTIVE.has(m.team2))) {
       const sortedKey = [m.team1, m.team2].sort().join('|||')
       pairGames[sortedKey] = (pairGames[sortedKey] ?? 0) + 1
       const winKey = `${m.winner}|||${m.loser}`

@@ -142,7 +142,7 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
               <SortTh k="position" label="Pos" />
               <SortTh k="timesOwned" label={ownerFilter === 'ALL' ? 'Times Drafted' : `By ${ownerFilter}`} right />
               <SortTh k="avgPickNo" label="Avg Pick" right />
-              <th className="text-left">Owners (seasons)</th>
+              <th className="text-left">Managers (seasons)</th>
             </tr>
           </thead>
           <tbody>

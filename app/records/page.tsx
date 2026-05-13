@@ -18,8 +18,8 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'extremes',  label: 'Extremes'   },
   { id: 'records',   label: 'Records'    },
   { id: 'streaks',   label: 'Streaks'    },
-  { id: 'trashtalk', label: 'Trash Talk' },
   { id: 'funfacts',  label: 'Fun Facts'  },
+  { id: 'trashtalk', label: 'Trash Talk' },
 ]
 
 export default function RecordsPage() {

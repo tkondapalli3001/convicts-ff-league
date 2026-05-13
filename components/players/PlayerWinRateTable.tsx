@@ -98,7 +98,7 @@ export default function PlayerWinRateTable({ players, minGames = 10, onPlayerCli
               <SortTh k="games" label="G" right />
               <SortTh k="wins" label="W" right />
               <SortTh k="winRate" label="Win%" right />
-              <SortTh k="topOwner" label="Top Owner" />
+              <SortTh k="topOwner" label="Top Manager" />
             </tr>
           </thead>
           <tbody>
