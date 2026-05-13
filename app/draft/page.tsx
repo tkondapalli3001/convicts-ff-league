@@ -49,27 +49,63 @@ function DraftSlotTable() {
       const rMap = rosterUserMaps[year] ?? {}
 
       // ownerSlot: one canonical slot per owner per year.
-      // Prefer slot_to_roster_id (Sleeper's pre-trade draft order) so traded picks
-      // don't create a second slot entry for the manager who acquired them.
+      // Three tiers to handle pick trades correctly:
+      //   Tier 1 — slot_to_roster_id: Sleeper's pre-trade assignment, most reliable
+      //   Tier 2 — draft_order: user_id→slot map, catches gaps when rMap lookup fails
+      //   Tier 3 — snake math on rounds 2+: finds managers whose round-1 pick was
+      //            traded away (they have no round-1 entry at all)
       const ownerSlot: Record<string, number> = {}
-      const draftAny = data.draft as unknown as { slot_to_roster_id?: Record<string, number> }
-      if (draftAny.slot_to_roster_id) {
-        for (const [slotStr, rosterId] of Object.entries(draftAny.slot_to_roster_id)) {
+      const draftAny = data.draft as unknown as {
+        slot_to_roster_id?: Record<string, number> | null
+        draft_order?: Record<string, number> | null
+      }
+      const isSnake = data.draft.type === 'snake'
+      const N = Math.max(...data.picks.map(p => p.draft_slot), 0) || 10
+
+      // Tier 1: slot_to_roster_id → look up roster_id in rMap
+      const s2r = draftAny.slot_to_roster_id
+      if (s2r && typeof s2r === 'object') {
+        for (const [slotStr, rosterId] of Object.entries(s2r)) {
           const ownerName = rMap[String(rosterId)]
-          if (ownerName) ownerSlot[ownerName] = Number(slotStr)
-        }
-      } else {
-        // Fallback: scan round-1 picks; if an owner appears twice, keep the lower slot
-        // (the earlier pick in round 1 is more likely to be their original assignment).
-        for (const pick of data.picks) {
-          if (pick.round !== 1) continue
-          const ownerName = rMap[String(pick.roster_id)]
-            ?? resolveOwnerName(pick.picked_by, '')
-          if (!ownerName) continue
-          if (!(ownerName in ownerSlot) || pick.draft_slot < ownerSlot[ownerName]) {
-            ownerSlot[ownerName] = pick.draft_slot
+          if (ownerName && !ownerName.startsWith('Team ')) {
+            ownerSlot[ownerName] = Number(slotStr)
           }
         }
+      }
+
+      // Tier 2: draft_order → resolve user_id directly (bypasses rMap issues)
+      const dOrder = draftAny.draft_order
+      if (dOrder && typeof dOrder === 'object') {
+        for (const [userId, slot] of Object.entries(dOrder)) {
+          const ownerName = resolveOwnerName(userId, '')
+          if (ownerName && ownerName !== 'Unknown' && !(ownerName in ownerSlot)) {
+            ownerSlot[ownerName] = Number(slot)
+          }
+        }
+      }
+
+      // Tier 3: infer slot from rounds 2+ via snake/linear math.
+      // A manager who traded away their round-1 pick has no round-1 entry but still
+      // picks in rounds 2–N at their original slot position. Vote across all rounds
+      // and take the mode so a single traded later-round pick can't corrupt the result.
+      const slotVotes: Record<string, Record<number, number>> = {}
+      for (const pick of data.picks) {
+        if (pick.round < 2) continue
+        const ownerName = rMap[String(pick.roster_id)]
+          ?? resolveOwnerName(pick.picked_by, '')
+        if (!ownerName || ownerName in ownerSlot) continue
+        const s = (isSnake && pick.round % 2 === 0)
+          ? pick.round * N - pick.pick_no + 1
+          : pick.pick_no - (pick.round - 1) * N
+        if (s >= 1 && s <= N) {
+          if (!slotVotes[ownerName]) slotVotes[ownerName] = {}
+          slotVotes[ownerName][s] = (slotVotes[ownerName][s] ?? 0) + 1
+        }
+      }
+      for (const [owner, freq] of Object.entries(slotVotes)) {
+        if (owner in ownerSlot) continue
+        const best = Object.entries(freq).sort((a, b) => b[1] - a[1])[0]
+        if (best) ownerSlot[owner] = Number(best[0])
       }
 
       for (const [owner, slot] of Object.entries(ownerSlot)) {
