@@ -109,8 +109,8 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         fetchedUsers.forEach(u => {
           const name = resolveOwnerName(u.user_id, u.display_name)
           ownerMap[name] = u.user_id
-          if (u.avatar && name && !ownerAvatarMap[name]) {
-            ownerAvatarMap[name] = `https://sleepercdn.com/avatars/thumbs/${u.avatar}`
+          if (u.avatar && name) {
+            ownerAvatarMap[name] = `https://sleepercdn.com/avatars/${u.avatar}`
           }
         })
 

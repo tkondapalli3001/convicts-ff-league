@@ -17,9 +17,23 @@ function computeSeed(rosterId: number, year: number, state: ReturnType<typeof us
   return idx >= 0 ? idx + 1 : null
 }
 
+function computeSeedFromOwnerSeasons(ownerName: string, year: number, state: ReturnType<typeof useLeague>['state']): number | null {
+  const entries = Object.entries(state.ownerSeasons)
+    .map(([name, seasons]) => {
+      const s = seasons.find(x => x.year === year)
+      return s ? { name, wins: s.wins, pf: s.pf } : null
+    })
+    .filter((x): x is { name: string; wins: number; pf: number } => x !== null)
+    .sort((a, b) => b.wins - a.wins || b.pf - a.pf)
+  const idx = entries.findIndex(x => x.name.toLowerCase() === ownerName.toLowerCase())
+  return idx >= 0 ? idx + 1 : null
+}
+
 function findRosterId(ownerName: string, year: number, state: ReturnType<typeof useLeague>['state']): number | null {
   const rMap = state.rosterUserMaps[year] ?? {}
-  const entry = Object.entries(rMap).find(([, v]) => v === ownerName)
+  const entry = Object.entries(rMap).find(([, v]) =>
+    typeof v === 'string' && v.toLowerCase() === ownerName.toLowerCase()
+  )
   return entry ? parseInt(entry[0]) : null
 }
 
@@ -63,6 +77,7 @@ export default function TrophySection() {
                 if (seed == null && c.winner && c.winner !== '—') {
                   const rid = findRosterId(c.winner, year, state)
                   if (rid != null) seed = computeSeed(rid, year, state)
+                  if (seed == null) seed = computeSeedFromOwnerSeasons(c.winner, year, state)
                 }
                 return (
                   <tr key={year} className="border-b border-amber-500/[0.06] last:border-0">
@@ -113,6 +128,7 @@ export default function TrophySection() {
                 if (seed == null && s.loser && s.loser !== '—') {
                   const rid = findRosterId(s.loser, year, state)
                   if (rid != null) seed = computeSeed(rid, year, state)
+                  if (seed == null) seed = computeSeedFromOwnerSeasons(s.loser, year, state)
                 }
                 return (
                   <tr key={year} className="border-b border-red-500/[0.06] last:border-0">

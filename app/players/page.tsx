@@ -12,6 +12,7 @@ import DraftStructureTable from '@/components/players/DraftStructureTable'
 import TransactionFilters from '@/components/transactions/TransactionFilters'
 import TransactionTable from '@/components/transactions/TransactionTable'
 import TransactionDetailModal from '@/components/transactions/TransactionDetailModal'
+import TradesByYearChart from '@/components/players/TradesByYearChart'
 import { USER_ID_TO_OWNER } from '@/lib/constants'
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 import type { Transaction } from '@/types'
@@ -131,7 +132,7 @@ export default function PlayersPage() {
       )}
 
       {activeTab === 'winrate' && (
-        <PlayerWinRateTable players={playerWinRates} minGames={5} />
+        <PlayerWinRateTable players={playerWinRates} />
       )}
       {activeTab === 'ownership' && (
         loading && !ownership.length
@@ -167,6 +168,14 @@ export default function PlayersPage() {
             onToggleOwner={toggleOwner}
             onToggleType={toggleType}
           />
+          {!txLoading && (
+            <TradesByYearChart
+              transactions={transactions}
+              activeYears={activeYears}
+              activeOwners={activeOwners}
+              years={years}
+            />
+          )}
           <div className="text-[10px] text-s-text3 mb-2">
             {filteredTx.length} transactions · {tradeCount} trades · {waiverCount} waiver/FA moves
           </div>

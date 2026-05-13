@@ -3,15 +3,17 @@
 import type { DraftStructureEntry } from '@/lib/data-processing'
 
 const STRATEGY_DESCRIPTIONS: Record<string, string> = {
-  'Zero-RB':  'No RBs in rounds 1–3. Prioritizes WR/TE early.',
-  'Hero-RB':  'RB taken with first-round pick. Build around one elite RB.',
-  'WR-Heavy': '2+ WRs in rounds 1–3. Volume receiver approach.',
-  'Balanced': 'Mix of positions in early rounds.',
+  'Zero-RB':  'No RBs in rounds 1–5. Loads up on WRs and TEs early, grabs RBs on the waiver wire.',
+  'Hero-RB':  'First-round pick is a RB. Bet on one elite workhorse, fill the rest with receivers.',
+  'RB-Heavy': '3+ RBs in rounds 1–5. Running back by committee — quantity over quality at the position.',
+  'WR-Heavy': '3+ WRs in rounds 1–5 with at most 1 RB. Volume pass-catcher approach, stream RBs.',
+  'Balanced': '2 RBs and 2 WRs in rounds 1–5. Mix of skills, no strong positional commitment.',
 }
 
 const STRATEGY_COLORS: Record<string, string> = {
   'Zero-RB':  'text-[#60a5fa]',
   'Hero-RB':  'text-[#22c55e]',
+  'RB-Heavy': 'text-[#f97316]',
   'WR-Heavy': 'text-[#a78bfa]',
   'Balanced': 'text-[#94a3b8]',
 }
@@ -37,7 +39,7 @@ export default function DraftStructureTable({ data }: Props) {
         Draft Strategy vs Season Outcome
       </div>
       <div className="text-[11px] text-s-text3 mb-4">
-        Based on rounds 1–3 position selection across all seasons
+        Based on rounds 1–5 position selection across all seasons
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">

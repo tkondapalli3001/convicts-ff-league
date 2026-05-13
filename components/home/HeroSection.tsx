@@ -126,7 +126,7 @@ export default function HeroSection({
                   className="text-[17px] font-black leading-tight truncate"
                   style={{ color: runnerUpColor !== '#64748b' ? runnerUpColor : '#e2e8f0' }}
                 >
-                  {fullName(runnerUpName)}
+                  {runnerUpName}
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function HeroSection({
                   className="text-[17px] font-black leading-tight truncate"
                   style={{ color: shameColor !== '#64748b' ? shameColor : '#e2e8f0' }}
                 >
-                  {fullName(shameName)}
+                  {shameName}
                 </div>
               </div>
             </div>

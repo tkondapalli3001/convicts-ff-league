@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import {
-  Home, DollarSign, Users, Trophy, TrendingUp,
+  Home, DollarSign, Users, Trophy,
   CalendarDays, Zap, ClipboardList, Activity,
 } from 'lucide-react'
 
@@ -15,7 +15,6 @@ const NAV_ITEMS = [
   { href: '/draft',    label: 'Draft',    icon: ClipboardList },
   { href: '/gamelog',  label: 'Seasons',  icon: CalendarDays  },
   { href: '/records',  label: 'Records',  icon: Trophy        },
-  { href: '/trends',   label: 'Trends',   icon: TrendingUp    },
   { href: '/players',  label: 'Players',  icon: Zap           },
 ]
 

@@ -162,6 +162,8 @@ export interface PlayerStat {
   wins: number
   winRate: number
   topOwner: string
+  ownerCounts: Record<string, number>
+  yearStats: { year: number; games: number; wins: number }[]
 }
 
 // ─── Transaction Types ────────────────────────────────────────────────────────

@@ -8,13 +8,20 @@ import ErrorState from '@/components/shared/ErrorState'
 import RecordItem from '@/components/shared/RecordItem'
 import ScoreLeaderboard from '@/components/records/ScoreLeaderboard'
 import StreakList from '@/components/records/StreakList'
+import FinishTracker from '@/components/trends/FinishTracker'
+import AvgScoreChart from '@/components/trends/AvgScoreChart'
+import TrashTalkCard from '@/components/trends/TrashTalkCard'
+import { TRASH_TALK } from '@/lib/constants'
 
-type Tab = 'extremes' | 'records' | 'streaks'
+type Tab = 'extremes' | 'records' | 'streaks' | 'finish' | 'scoring' | 'trashtalk'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'extremes', label: 'Extremes' },
-  { id: 'records',  label: 'Records'  },
-  { id: 'streaks',  label: 'Streaks'  },
+  { id: 'extremes',  label: 'Extremes'       },
+  { id: 'records',   label: 'Records'        },
+  { id: 'streaks',   label: 'Streaks'        },
+  { id: 'finish',    label: 'Finish Tracker' },
+  { id: 'scoring',   label: 'Scoring'        },
+  { id: 'trashtalk', label: 'Trash Talk'     },
 ]
 
 export default function RecordsPage() {
@@ -116,6 +123,21 @@ export default function RecordsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
           <StreakList title="Longest Win Streaks"    streaks={topWinStreaks}  variant="win" />
           <StreakList title="Longest Losing Streaks" streaks={topLossStreaks} variant="loss" />
+        </div>
+      )}
+
+      {/* ── FINISH TRACKER TAB ───────────────────────────────────── */}
+      {activeTab === 'finish' && <FinishTracker />}
+
+      {/* ── SCORING TAB ──────────────────────────────────────────── */}
+      {activeTab === 'scoring' && <AvgScoreChart />}
+
+      {/* ── TRASH TALK TAB ───────────────────────────────────────── */}
+      {activeTab === 'trashtalk' && (
+        <div>
+          {TRASH_TALK.map(t => (
+            <TrashTalkCard key={t.owner} {...t} />
+          ))}
         </div>
       )}
     </div>

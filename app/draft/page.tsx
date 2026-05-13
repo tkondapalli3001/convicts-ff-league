@@ -5,6 +5,8 @@ import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import StockStandings from '@/components/draft/StockStandings'
+import DraftBoardModal from '@/components/draft/DraftBoardModal'
+import StealsBusts from '@/components/draft/StealsBusts'
 import {
   STOCK_PICKS_2026,
   MARKET_BENCHMARK_2026,
@@ -12,28 +14,36 @@ import {
 } from '@/lib/stock-picks'
 import { resolveOwnerName } from '@/lib/data-processing'
 
-type Tab = 'pickorder' | 'history' | 'slots'
+type Tab = 'pickorder' | 'history' | 'slots' | 'steals'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'pickorder', label: '2026 Pick Order' },
-  { id: 'history',   label: 'Past Drafts'     },
-  { id: 'slots',     label: 'Slot Analysis'   },
+  { id: 'pickorder', label: '2026 Pick Order'  },
+  { id: 'history',   label: 'Past Drafts'      },
+  { id: 'slots',     label: 'Slot Analysis'    },
+  { id: 'steals',    label: 'Steals & Busts'   },
 ]
 
-// ─── Draft Slot vs Final Standings ───────────────────────────────────────────
+function ordinal(n: number) {
+  if (n === 1) return 'st'
+  if (n === 2) return 'nd'
+  if (n === 3) return 'rd'
+  return 'th'
+}
+
+// ─── Draft Slot Analysis ──────────────────────────────────────────────────────
 
 function DraftSlotTable() {
   const { state } = useLeague()
   const { draftData, rosterUserMaps, ownerSeasons, years } = state
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
 
   const rows = useMemo(() => {
-    const out: { year: number; owner: string; slot: number; finish: number | null; wl: string }[] = []
+    const out: { year: number; owner: string; slot: number; finish: number | null; madePlayoffs: boolean }[] = []
     for (const year of [...years].sort((a, b) => b - a)) {
       const data = draftData[year]
       if (!data?.picks?.length) continue
       const rMap = rosterUserMaps[year] ?? {}
 
-      // slot → owner name (from round 1 only)
       const slotMap: Record<number, string> = {}
       for (const pick of data.picks) {
         if (pick.round !== 1) continue
@@ -49,28 +59,22 @@ function DraftSlotTable() {
           owner,
           slot: Number(slot),
           finish: season?.finish ?? null,
-          wl: season ? `${season.wins}–${season.losses}` : '—',
+          madePlayoffs: season?.inPlayoffs ?? false,
         })
       }
     }
     return out
   }, [draftData, rosterUserMaps, ownerSeasons, years])
 
-  // Average finish by slot
   const avgBySlot = useMemo(() => {
-    const acc: Record<number, number[]> = {}
+    const acc: Record<number, { finishes: number[]; playoffs: number; total: number }> = {}
     for (const row of rows) {
-      if (row.finish !== null) {
-        if (!acc[row.slot]) acc[row.slot] = []
-        acc[row.slot].push(row.finish)
-      }
+      if (!acc[row.slot]) acc[row.slot] = { finishes: [], playoffs: 0, total: 0 }
+      if (row.finish !== null) acc[row.slot].finishes.push(row.finish)
+      acc[row.slot].total++
+      if (row.madePlayoffs) acc[row.slot].playoffs++
     }
-    return Object.fromEntries(
-      Object.entries(acc).map(([slot, vals]) => [
-        slot,
-        (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1),
-      ])
-    )
+    return acc
   }, [rows])
 
   if (!rows.length) {
@@ -84,68 +88,113 @@ function DraftSlotTable() {
   const slots = [...new Set(rows.map(r => r.slot))].sort((a, b) => a - b)
 
   return (
-    <div className="gl overflow-x-auto">
-      <table className="w-full border-collapse min-w-[480px]">
-        <thead>
-          <tr>
-            <th className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Year</th>
-            <th className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Owner</th>
-            <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Draft Slot</th>
-            <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Final Finish</th>
-            <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">W–L</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={`${row.year}-${row.owner}`} className={`border-b border-s-border/40 hover:bg-s-bg3/40 transition-colors ${i > 0 && rows[i - 1].year !== row.year ? 'border-t border-s-border' : ''}`}>
-              <td className="px-4 py-2.5 text-[12px] font-bold text-s-text3">{row.year}</td>
-              <td className="px-4 py-2.5 text-[13px] font-semibold text-s-text">{row.owner}</td>
-              <td className="px-3 py-2.5 text-center text-[13px] font-bold text-s-text2">{row.slot}</td>
-              <td className="px-3 py-2.5 text-center">
-                <span className={`text-[13px] font-bold ${
-                  row.finish === 1 ? 'text-s-gold'
-                  : row.finish === 2 ? 'text-[#8b949e]'
-                  : row.finish !== null && row.finish >= 9 ? 'text-s-red'
-                  : 'text-s-text2'
-                }`}>
-                  {row.finish === null ? '—' : row.finish === 1 ? '🏆 1st' : `${row.finish}${ordinal(row.finish)}`}
-                </span>
-              </td>
-              <td className="px-3 py-2.5 text-center text-[12px] text-s-text3">{row.wl}</td>
+    <div className="space-y-3">
+      <div className="gl overflow-hidden">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Slot</th>
+              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Avg Finish</th>
+              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border"># Seasons</th>
+              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Made Playoffs</th>
             </tr>
-          ))}
-        </tbody>
-        {/* Average finish by slot */}
-        <tfoot>
-          <tr className="border-t-2 border-s-border bg-s-bg3/40">
-            <td className="px-4 py-3 text-[10px] font-extrabold tracking-[2px] uppercase text-s-text3" colSpan={2}>
-              Avg Finish by Slot
-            </td>
-            {slots.map(slot => (
-              <td key={slot} className="px-3 py-3 text-center text-[12px] font-bold text-s-text2">
-                {avgBySlot[slot] ?? '—'}
-              </td>
-            ))}
-            <td />
-          </tr>
-          <tr className="bg-s-bg3/20">
-            <td className="px-4 py-1.5 text-[9px] text-s-text3" colSpan={2}>Slot</td>
-            {slots.map(slot => (
-              <td key={slot} className="px-3 py-1.5 text-center text-[9px] text-s-text3">#{slot}</td>
-            ))}
-            <td />
-          </tr>
-        </tfoot>
-      </table>
+          </thead>
+          <tbody>
+            {slots.map(slot => {
+              const d = avgBySlot[slot]
+              const avg = d?.finishes.length
+                ? (d.finishes.reduce((a, b) => a + b, 0) / d.finishes.length)
+                : null
+              const isOpen = selectedSlot === slot
+              const slotRows = rows.filter(r => r.slot === slot)
+
+              return (
+                <>
+                  <tr
+                    key={`slot-${slot}`}
+                    className={`border-b border-s-border/40 cursor-pointer transition-colors ${
+                      isOpen ? 'bg-s-bg3/60' : 'hover:bg-s-bg3/30'
+                    }`}
+                    onClick={() => setSelectedSlot(isOpen ? null : slot)}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-extrabold text-s-text">Slot {slot}</span>
+                        <span
+                          className="text-s-text3 text-[11px] leading-none transition-transform duration-200"
+                          style={{ display: 'inline-block', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        >
+                          ▾
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 text-center">
+                      <span className={`text-[14px] font-bold ${
+                        avg !== null && avg <= 3 ? 'text-s-gold'
+                        : avg !== null && avg >= 9 ? 'text-s-red'
+                        : 'text-s-text2'
+                      }`}>
+                        {avg !== null ? avg.toFixed(1) : '—'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-center text-[13px] text-s-text3">{d?.total ?? 0}</td>
+                    <td className="px-3 py-3 text-center text-[12px] text-s-text2">
+                      {d ? `${d.playoffs} / ${d.total}` : '—'}
+                    </td>
+                  </tr>
+
+                  {isOpen && (
+                    <tr key={`slot-${slot}-detail`}>
+                      <td colSpan={4} className="px-4 py-0 border-b border-s-border/40 bg-s-bg3/20">
+                        <div className="py-3">
+                          <div className="text-[10px] font-bold tracking-[2px] uppercase text-s-text3 mb-2">
+                            {slotRows.length} manager{slotRows.length !== 1 ? 's' : ''} from Slot {slot} —&nbsp;
+                            {d?.playoffs ?? 0} of {d?.total ?? 0} made playoffs
+                          </div>
+                          <table className="w-full border-collapse text-[12px]">
+                            <thead>
+                              <tr>
+                                <th className="text-left py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Year</th>
+                                <th className="text-left py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Manager</th>
+                                <th className="text-center py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Finish</th>
+                                <th className="text-center py-1.5 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Playoffs</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {slotRows.sort((a, b) => b.year - a.year).map(r => (
+                                <tr key={`${r.year}-${r.owner}`}>
+                                  <td className="py-1 pr-4 text-s-text3 font-bold">{r.year}</td>
+                                  <td className="py-1 pr-4 font-semibold text-s-text">{r.owner}</td>
+                                  <td className="py-1 pr-4 text-center font-bold text-s-text2">
+                                    {r.finish === null ? '—'
+                                      : r.finish === 1 ? '🏆 1st'
+                                      : `${r.finish}${ordinal(r.finish)}`}
+                                  </td>
+                                  <td className="py-1 text-center">
+                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                      r.madePlayoffs
+                                        ? 'bg-green-500/20 text-green-400'
+                                        : 'bg-red-500/20 text-red-400'
+                                    }`}>
+                                      {r.madePlayoffs ? 'Yes' : 'No'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
-}
-
-function ordinal(n: number) {
-  if (n === 1) return 'st'
-  if (n === 2) return 'nd'
-  if (n === 3) return 'rd'
-  return 'th'
 }
 
 // ─── Past Draft History ───────────────────────────────────────────────────────
@@ -153,8 +202,7 @@ function ordinal(n: number) {
 function PastDrafts() {
   const { state } = useLeague()
   const { draftData, rosterUserMaps, years } = state
-
-  const [openYear, setOpenYear] = useState<number | null>(null)
+  const [modalYear, setModalYear] = useState<number | null>(null)
 
   const sortedYears = [...years].sort((a, b) => b - a)
 
@@ -166,93 +214,52 @@ function PastDrafts() {
     )
   }
 
+  const modalData = modalYear !== null ? draftData[modalYear] : null
+
   return (
-    <div className="space-y-2">
-      {sortedYears.map(year => {
-        const data = draftData[year]
-        if (!data) return null
-        const { draft, picks } = data
-        const rMap = rosterUserMaps[year] ?? {}
-        const isOpen = openYear === year
+    <>
+      <div className="space-y-2">
+        {sortedYears.map(year => {
+          const data = draftData[year]
+          if (!data) return null
+          const { draft, picks } = data
+          const roundCount = Math.max(...picks.map(p => p.round), 0)
 
-        // Group picks by round
-        const rounds = picks.reduce<Record<number, typeof picks>>((acc, p) => {
-          if (!acc[p.round]) acc[p.round] = []
-          acc[p.round].push(p)
-          return acc
-        }, {})
-        const roundNums = Object.keys(rounds).map(Number).sort((a, b) => a - b)
-
-        return (
-          <div key={year} className="bento-card overflow-hidden">
-            <button
-              onClick={() => setOpenYear(isOpen ? null : year)}
-              className="w-full flex items-center justify-between px-5 py-4 hover:bg-s-bg3/30 transition-colors text-left"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-[14px] font-extrabold text-s-text">{year}</span>
-                <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-s-text3 bg-s-bg3 px-2 py-0.5 rounded-full border border-s-border">
-                  {draft.type.toUpperCase()}
-                </span>
-                <span className="text-[11px] text-s-text3">
-                  {picks.length} picks · {roundNums.length} rounds
-                </span>
-              </div>
-              <span
-                className="text-s-text3 text-[14px] leading-none transition-transform duration-200"
-                style={{ display: 'inline-block', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          return (
+            <div key={year} className="bento-card overflow-hidden">
+              <button
+                onClick={() => setModalYear(year)}
+                className="w-full flex items-center justify-between px-5 py-4 hover:bg-s-bg3/30 transition-colors text-left"
               >
-                ▾
-              </span>
-            </button>
+                <div className="flex items-center gap-3">
+                  <span className="text-[14px] font-extrabold text-s-text">{year}</span>
+                  <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-s-text3 bg-s-bg3 px-2 py-0.5 rounded-full border border-s-border">
+                    {draft.type.toUpperCase()}
+                  </span>
+                  <span className="text-[11px] text-s-text3">
+                    {picks.length} picks · {roundCount} rounds
+                  </span>
+                </div>
+                <span className="text-[12px] text-s-text3 flex items-center gap-1.5 font-semibold">
+                  View Board
+                  <span className="text-[14px]">→</span>
+                </span>
+              </button>
+            </div>
+          )
+        })}
+      </div>
 
-            {isOpen && (
-              <div className="border-t border-s-border overflow-x-auto">
-                <table className="w-full border-collapse text-[12px] min-w-[480px]">
-                  <thead>
-                    <tr>
-                      <th className="text-left px-4 py-2.5 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border/60 w-12">Rd</th>
-                      <th className="text-left px-3 py-2.5 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border/60 w-8">Pick</th>
-                      <th className="text-left px-3 py-2.5 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border/60">Manager</th>
-                      <th className="text-left px-3 py-2.5 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border/60">Player</th>
-                      <th className="text-left px-3 py-2.5 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border/60">Pos</th>
-                      <th className="text-left px-3 py-2.5 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border/60">Team</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roundNums.map(rnd =>
-                      (rounds[rnd] ?? [])
-                        .sort((a, b) => a.pick_no - b.pick_no)
-                        .map(pick => {
-                          const owner = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
-                          const playerName = [pick.metadata.first_name, pick.metadata.last_name].filter(Boolean).join(' ') || pick.player_id
-                          return (
-                            <tr key={pick.pick_no} className="border-b border-s-border/30 hover:bg-s-bg3/30 transition-colors">
-                              <td className="px-4 py-2 text-s-text3 font-bold">{rnd}</td>
-                              <td className="px-3 py-2 text-s-text3">{pick.pick_no}</td>
-                              <td className="px-3 py-2 font-semibold text-s-text">
-                                {owner}
-                                {pick.is_keeper && (
-                                  <span className="ml-1.5 text-[9px] font-bold text-s-gold bg-[#3d2000]/60 px-1.5 py-0.5 rounded border border-[#5a3000]/50">
-                                    KEEP
-                                  </span>
-                                )}
-                              </td>
-                              <td className="px-3 py-2 text-s-text">{playerName}</td>
-                              <td className="px-3 py-2 text-s-text3 font-medium">{pick.metadata.position ?? '—'}</td>
-                              <td className="px-3 py-2 text-s-text3">{pick.metadata.team ?? '—'}</td>
-                            </tr>
-                          )
-                        })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
+      {modalYear !== null && modalData && (
+        <DraftBoardModal
+          year={modalYear}
+          draft={modalData.draft}
+          picks={modalData.picks}
+          rMap={rosterUserMaps[modalYear] ?? {}}
+          onClose={() => setModalYear(null)}
+        />
+      )}
+    </>
   )
 }
 
@@ -288,7 +295,7 @@ export default function DraftPage() {
     <div className="animate-fade-in">
       <h1 className="text-[26px] font-extrabold text-s-text mb-1">Draft Hub</h1>
       <p className="text-[13px] text-s-text3 mb-5">
-        Draft history, 2026 pick order standings, and slot vs outcome analysis
+        Draft history, 2026 pick order standings, slot vs outcome analysis, and historical steals & busts
       </p>
 
       {/* Tab nav */}
@@ -307,7 +314,6 @@ export default function DraftPage() {
             {tab.label}
           </button>
         ))}
-        {/* Refresh button inline when on pick order tab */}
         {activeTab === 'pickorder' && (
           <button
             onClick={fetchPrices}
@@ -322,7 +328,7 @@ export default function DraftPage() {
       {/* ── 2026 PICK ORDER TAB ───────────────────────────────────── */}
       {activeTab === 'pickorder' && (
         <>
-          <div className="text-[11px] text-s-text3 mb-3">Jan 12 → Jul 15 · Best ROI drafts first</div>
+          <div className="text-[11px] text-s-text3 mb-3">Jan 12 → Jul 15 · Best ROI picks first</div>
           <StockStandings
             picks={STOCK_PICKS_2026}
             currentPrices={currentPrices}
@@ -339,9 +345,19 @@ export default function DraftPage() {
       {activeTab === 'slots' && (
         <>
           <p className="text-[11px] text-s-text3 mb-3">
-            Did early picks translate to better finishes?
+            Click any slot to see historical managers, finishes, and playoff rates.
           </p>
           <DraftSlotTable />
+        </>
+      )}
+
+      {/* ── STEALS & BUSTS TAB ───────────────────────────────────── */}
+      {activeTab === 'steals' && (
+        <>
+          <p className="text-[11px] text-s-text3 mb-3">
+            Based on draft position within each position group vs actual points scored that season.
+          </p>
+          <StealsBusts />
         </>
       )}
     </div>

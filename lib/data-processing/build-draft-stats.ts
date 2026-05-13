@@ -9,6 +9,7 @@ interface WinRateAccum {
   games: number
   wins: number
   ownerCounts: Record<string, number>
+  yearCounts: Record<number, { games: number; wins: number }>
   position: string
   team: string
   name: string
@@ -48,6 +49,7 @@ export function computePlayerWinRates(
                 games: 0,
                 wins: 0,
                 ownerCounts: {},
+                yearCounts: {},
                 position: p?.position ?? '?',
                 team: p?.team ?? '',
                 name: playerDisplayName(p, pid),
@@ -56,6 +58,9 @@ export function computePlayerWinRates(
             accum[pid].games++
             if (won) accum[pid].wins++
             accum[pid].ownerCounts[owner] = (accum[pid].ownerCounts[owner] ?? 0) + 1
+            if (!accum[pid].yearCounts[year]) accum[pid].yearCounts[year] = { games: 0, wins: 0 }
+            accum[pid].yearCounts[year].games++
+            if (won) accum[pid].yearCounts[year].wins++
           }
         }
       }
@@ -66,6 +71,9 @@ export function computePlayerWinRates(
     .filter(([, a]) => a.games >= 3)
     .map(([player_id, a]) => {
       const topOwner = Object.entries(a.ownerCounts).sort((x, y) => y[1] - x[1])[0]?.[0] ?? ''
+      const yearStats = Object.entries(a.yearCounts)
+        .sort(([ya], [yb]) => Number(ya) - Number(yb))
+        .map(([year, s]) => ({ year: Number(year), games: s.games, wins: s.wins }))
       return {
         player_id,
         name: a.name,
@@ -75,6 +83,8 @@ export function computePlayerWinRates(
         wins: a.wins,
         winRate: a.games > 0 ? a.wins / a.games : 0,
         topOwner,
+        ownerCounts: a.ownerCounts,
+        yearStats,
       }
     })
     .sort((a, b) => b.games - a.games)
@@ -133,7 +143,7 @@ export function computeDraftOwnership(
 
 // ─── Draft Structure Win Rate ─────────────────────────────────────────────────
 
-export type DraftStrategy = 'Zero-RB' | 'Hero-RB' | 'WR-Heavy' | 'Balanced'
+export type DraftStrategy = 'Zero-RB' | 'Hero-RB' | 'RB-Heavy' | 'WR-Heavy' | 'Balanced'
 
 export interface DraftStructureEntry {
   strategy: DraftStrategy
@@ -143,13 +153,14 @@ export interface DraftStructureEntry {
   examples: { owner: string; year: number }[]
 }
 
-function classifyStrategy(picks: DraftPick[], round1To3Count: { rb: number; wr: number }): DraftStrategy {
-  const { rb, wr } = round1To3Count
+function classifyStrategy(picks: DraftPick[], earlyCount: { rb: number; wr: number }): DraftStrategy {
+  const { rb, wr } = earlyCount
   if (rb === 0) return 'Zero-RB'
-  // Round 1 pick is RB
+  if (rb >= 3) return 'RB-Heavy'
+  // Round 1 pick is RB = Hero-RB
   const r1Pick = picks.find(p => p.round === 1)
   if (r1Pick?.metadata?.position === 'RB') return 'Hero-RB'
-  if (wr >= 2) return 'WR-Heavy'
+  if (wr >= 3 && rb <= 1) return 'WR-Heavy'
   return 'Balanced'
 }
 
@@ -161,6 +172,7 @@ export function computeDraftStructure(
   const strategyMap: Record<DraftStrategy, { wins: number[]; finishes: number[]; examples: { owner: string; year: number }[] }> = {
     'Zero-RB':  { wins: [], finishes: [], examples: [] },
     'Hero-RB':  { wins: [], finishes: [], examples: [] },
+    'RB-Heavy': { wins: [], finishes: [], examples: [] },
     'WR-Heavy': { wins: [], finishes: [], examples: [] },
     'Balanced': { wins: [], finishes: [], examples: [] },
   }
@@ -178,7 +190,7 @@ export function computeDraftStructure(
 
     for (const [rosterIdStr, rPicks] of Object.entries(byRoster)) {
       const owner = rMap[rosterIdStr] ?? `Team${rosterIdStr}`
-      const early = rPicks.filter(p => p.round <= 3)
+      const early = rPicks.filter(p => p.round <= 5)
       const count = {
         rb: early.filter(p => p.metadata?.position === 'RB').length,
         wr: early.filter(p => p.metadata?.position === 'WR').length,

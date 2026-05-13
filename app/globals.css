@@ -92,20 +92,26 @@
   .sticky-col {
     position: sticky;
     left: 0;
-    background: #020617;
+    background: #0d1117;
     z-index: 1;
   }
   tbody tr:nth-child(even) .sticky-col {
-    background: #040c1e;
+    background: #131820;
   }
   tbody tr:hover .sticky-col {
-    background: rgba(139, 92, 246, 0.09);
+    background: rgba(139, 92, 246, 0.13);
   }
   .table-sticky-col {
     position: sticky;
     left: 0;
-    background: #020617;
+    background: #0d1117;
     z-index: 1;
+  }
+  tbody tr:nth-child(even) .table-sticky-col {
+    background: #131820;
+  }
+  tbody tr:hover .table-sticky-col {
+    background: rgba(139, 92, 246, 0.13);
   }
 
   /* Glassmorphism nav/overlay */
