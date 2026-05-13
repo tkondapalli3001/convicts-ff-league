@@ -61,6 +61,20 @@ function buildSeedMap(games: BracketGame[]): Record<number, number> {
   return map
 }
 
+function computeRegularSeasonSeed(rosterId: number, year: number, state: LeagueState): number | null {
+  const rosters = state.rosters[year]
+  if (!rosters?.length) return null
+  const ranked = [...rosters]
+    .map(r => ({
+      roster_id: r.roster_id,
+      wins: r.settings?.wins ?? 0,
+      pf: (r.settings?.fpts ?? 0) + (r.settings?.fpts_decimal ?? 0) / 100,
+    }))
+    .sort((a, b) => b.wins - a.wins || b.pf - a.pf)
+  const idx = ranked.findIndex(r => r.roster_id === rosterId)
+  return idx >= 0 ? idx + 1 : null
+}
+
 export function getChampion(year: number, state: LeagueState) {
   const manual = MANUAL_CHAMPS.find(c => c.year === year)
   const bracket = state.brackets[year]
@@ -72,8 +86,11 @@ export function getChampion(year: number, state: LeagueState) {
     ?? (winners.length ? winners.reduce((best, g) => (g.r > best.r ? g : best)) : undefined)
 
   if (manual?.winner) {
-    const bracketSeed = champGame?.w != null ? (seedMap[champGame.w] ?? null) : null
-    return { ...manual, seed: manual.seed ?? bracketSeed }
+    let seed: number | string | null = manual.seed ?? null
+    if (seed == null && champGame?.w != null) {
+      seed = seedMap[champGame.w] ?? computeRegularSeasonSeed(champGame.w, year, state)
+    }
+    return { ...manual, seed }
   }
 
   if (champGame?.w) {
@@ -109,8 +126,11 @@ export function getShameLoser(year: number, state: LeagueState) {
     ?? (losers.length ? losers.reduce((best, g) => (g.r > best.r ? g : best)) : undefined)
 
   if (manual?.loser) {
-    const bracketSeed = toiletGame?.l != null ? (seedMap[toiletGame.l] ?? null) : null
-    return { ...manual, seed: manual.seed ?? bracketSeed }
+    let seed: number | null = manual.seed ?? null
+    if (seed == null && toiletGame?.l != null) {
+      seed = seedMap[toiletGame.l] ?? computeRegularSeasonSeed(toiletGame.l, year, state)
+    }
+    return { ...manual, seed }
   }
 
   if (toiletGame?.l) {

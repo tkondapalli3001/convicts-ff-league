@@ -86,7 +86,7 @@ function DraftSlotTable() {
     }
     return Object.entries(totals)
       .map(([owner, { sum, count }]) => ({ owner, avgSlot: sum / count, count }))
-      .sort((a, b) => b.avgSlot - a.avgSlot)
+      .sort((a, b) => a.avgSlot - b.avgSlot)
   }, [rows])
 
   if (!rows.length) {
@@ -210,7 +210,7 @@ function DraftSlotTable() {
       <div className="gl overflow-hidden">
         <div className="px-4 py-3 border-b border-s-border">
           <span className="text-[12px] font-extrabold tracking-[1.5px] uppercase text-s-text">Avg Draft Slot by Manager</span>
-          <span className="text-[11px] text-s-text3 ml-2">· higher = later slots on average</span>
+          <span className="text-[11px] text-s-text3 ml-2">· lower = earlier draft slot on average</span>
         </div>
         <table className="w-full border-collapse">
           <thead>

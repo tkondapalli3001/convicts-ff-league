@@ -78,6 +78,8 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
               fontSize: 12,
               color: '#e2e8f0',
             }}
+            itemStyle={{ color: '#e2e8f0' }}
+            labelStyle={{ color: '#94a3b8' }}
             formatter={(val: number) => [val, 'Trades']}
             labelFormatter={(label) => `${label} Season`}
           />

@@ -98,6 +98,7 @@
   tbody tr:hover .sticky-col {
     background: rgba(139, 92, 246, 0.13);
   }
+  tbody tr:nth-child(even) .sticky-col { background: #0d1117; }
   .table-sticky-col {
     position: sticky;
     left: 0;
@@ -107,6 +108,7 @@
   tbody tr:hover .table-sticky-col {
     background: rgba(139, 92, 246, 0.13);
   }
+  tbody tr:nth-child(even) .table-sticky-col { background: #0d1117; }
 
   /* Glassmorphism nav/overlay */
   .glass {

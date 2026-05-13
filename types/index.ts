@@ -132,8 +132,9 @@ export interface SleeperDraft {
   draft_id: string
   league_id: string
   season: string
-  type: 'snake' | 'auction'
+  type: 'snake' | 'auction' | string
   status: 'complete' | 'drafting' | 'pre_draft'
+  settings?: { rounds?: number; [key: string]: unknown }
 }
 
 export interface DraftPick {

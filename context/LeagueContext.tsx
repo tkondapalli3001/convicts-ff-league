@@ -143,8 +143,11 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         brackets[year] = { winners, losers }
 
         if (drafts.length > 0) {
-          const picks = await fetchDraftPicks(drafts[0].draft_id).catch(() => [])
-          draftData[year] = { draft: drafts[0], picks }
+          const mainDraft = [...drafts].sort(
+            (a, b) => (b.settings?.rounds ?? 0) - (a.settings?.rounds ?? 0)
+          )[0]
+          const picks = await fetchDraftPicks(mainDraft.draft_id).catch(() => [])
+          draftData[year] = { draft: mainDraft, picks }
         }
       }
 
