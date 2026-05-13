@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 import type { PlayerStat } from '@/types'
 
@@ -19,6 +19,16 @@ interface Props {
 }
 
 export default function MostTradedPlayersTable({ transactions, playerWinRates }: Props) {
+  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all')
+
+  const tradeYears = useMemo(() => {
+    const years = new Set<number>()
+    for (const tx of transactions) {
+      if (tx.type === 'trade') years.add(tx.year)
+    }
+    return [...years].sort((a, b) => b - a)
+  }, [transactions])
+
   const winRateMap = useMemo(() => {
     const map = new Map<string, PlayerStat>()
     playerWinRates.forEach(p => map.set(p.player_id, p))
@@ -29,6 +39,7 @@ export default function MostTradedPlayersTable({ transactions, playerWinRates }:
     const counts = new Map<string, { name: string; count: number }>()
     for (const tx of transactions) {
       if (tx.type !== 'trade') continue
+      if (selectedYear !== 'all' && tx.year !== selectedYear) continue
       for (const p of tx.addedPlayers) {
         const existing = counts.get(p.playerId)
         if (existing) existing.count++
@@ -42,14 +53,26 @@ export default function MostTradedPlayersTable({ transactions, playerWinRates }:
         const stat = winRateMap.get(playerId)
         return { playerId, name, count, position: stat?.position ?? '—', winRate: stat?.winRate ?? null }
       })
-  }, [transactions, winRateMap])
+  }, [transactions, winRateMap, selectedYear])
 
   if (topTraded.length === 0) return null
 
   return (
     <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px] mb-3">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text2 mb-3">
-        Most Traded Players
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text2">
+          Most Traded Players
+        </div>
+        <select
+          value={selectedYear}
+          onChange={e => setSelectedYear(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+          className="bg-s-bg3 border border-s-border text-s-text2 text-[11px] font-semibold rounded-[6px] px-2 py-1 cursor-pointer outline-none hover:border-s-border2 transition-colors"
+        >
+          <option value="all">All Time</option>
+          {tradeYears.map(y => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-[12px] min-w-[380px]">
