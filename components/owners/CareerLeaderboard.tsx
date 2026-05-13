@@ -115,7 +115,7 @@ export default function CareerLeaderboard() {
       ].filter(Boolean).join(' ')}
       style={{
         color: sortKey === k ? '#f59e0b' : undefined,
-        background: stickyFirst ? '#080c14' : undefined,
+        background: stickyFirst ? '#090f21' : undefined,
       }}
     >
       {label}
@@ -143,18 +143,18 @@ export default function CareerLeaderboard() {
 
       <div className="relative">
         <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <table className="w-full border-collapse sm:min-w-[700px] ss-table">
+          <table className="w-full border-collapse min-w-[700px] ss-table">
             <thead>
               <tr>
                 <th className="w-8">#</th>
                 <SortTh k="name"        label="Manager" stickyFirst />
-                <SortTh k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'}  hideOnMobile />
+                <SortTh k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'} />
                 <SortTh k="allW"        label="W" />
                 <SortTh k="allL"        label="L" />
                 <SortTh k="winpct"      label="Win%" />
-                <SortTh k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'Avg PF'}   hideOnMobile />
-                <SortTh k="avgFinish"   label="Avg Fin"  hideOnMobile />
-                {!playoffOnly && <SortTh k="playoffApps" label="Playoffs" hideOnMobile />}
+                <SortTh k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'Avg PF'} />
+                <SortTh k="avgFinish"   label="Avg Fin" />
+                {!playoffOnly && <SortTh k="playoffApps" label="Playoffs" />}
                 <SortTh k="champs"      label="🏆" />
                 <SortTh k="shame"       label="🚽" />
                 <SortTh k="earn"        label="Net $" />
@@ -176,13 +176,13 @@ export default function CareerLeaderboard() {
                         {d.name}
                       </div>
                     </td>
-                  <td className="hidden md:table-cell text-s-text3 num">{d.numSeasons}</td>
+                  <td className="text-s-text3 num">{d.numSeasons}</td>
                   <td className="text-s-green font-bold num">{d.allW}</td>
                   <td className="text-s-red num">{d.allL}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="hidden md:table-cell text-s-text2 num">{d.avgPF.toFixed(1)}</td>
-                  <td className="hidden md:table-cell text-s-text2 num">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
-                  {!playoffOnly && <td className="hidden md:table-cell text-s-text2 num">{d.playoffApps}/{d.numSeasons}</td>}
+                  <td className="text-s-text2 num">{d.avgPF.toFixed(1)}</td>
+                  <td className="text-s-text2 num">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
+                  {!playoffOnly && <td className="text-s-text2 num">{d.playoffApps}/{d.numSeasons}</td>}
                   <td>{d.champs > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d2000] text-s-gold border border-[#5a3200]">🏆 {d.champs}x</span> : <span className="text-s-text3">—</span>}</td>
                   <td>{d.shame > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d0000] text-s-red border border-[#5a0000]">🚽 {d.shame}x</span> : <span className="text-s-text3">—</span>}</td>
                   <td className={`num ${d.earn != null ? (d.earn >= 0 ? 'text-s-green font-bold' : 'text-s-red font-bold') : 'text-s-text3'}`}>

@@ -237,16 +237,16 @@ export default function HomePage() {
 
           <div className="relative">
             <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <table className="w-full border-collapse sm:min-w-[480px] ss-table">
+            <table className="w-full border-collapse min-w-[560px] ss-table">
               <thead>
                 <tr>
                   <th className="w-10 text-center">#</th>
-                  <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#080c14' }}>Manager</th>
+                  <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#090f21' }}>Manager</th>
                   <th>W–L</th>
                   <th>Win%</th>
-                  <th className="hidden sm:table-cell text-right">Avg PPG</th>
-                  <th className="hidden md:table-cell text-center">🏆</th>
-                  <th className="hidden md:table-cell text-right">Net $</th>
+                  <th className="text-right">Avg PPG</th>
+                  <th className="text-center">🏆</th>
+                  <th className="text-right">Net $</th>
                 </tr>
               </thead>
               <tbody>
@@ -324,13 +324,13 @@ export default function HomePage() {
                         </span>
                       </td>
 
-                      <td className="hidden sm:table-cell text-right">
+                      <td className="text-right">
                         <span className="text-[13px] font-bold text-s-text2 num">
                           {d.avgPFperGame.toFixed(1)}
                         </span>
                       </td>
 
-                      <td className="hidden md:table-cell text-center">
+                      <td className="text-center">
                         {d.champs > 0 ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#3d2000]/50 text-s-gold border border-[#5a3200]/50">
                             🏆 {d.champs % 1 === 0 ? d.champs : d.champs.toFixed(1)}×
@@ -340,7 +340,7 @@ export default function HomePage() {
                         )}
                       </td>
 
-                      <td className="hidden md:table-cell text-right">
+                      <td className="text-right">
                         {d.earn != null ? (
                           <span
                             className="text-[12px] font-bold"

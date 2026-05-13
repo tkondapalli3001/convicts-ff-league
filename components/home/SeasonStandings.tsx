@@ -135,7 +135,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
       className={[hideOnMobile ? 'hidden md:table-cell' : '', stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : ''].filter(Boolean).join(' ')}
       style={{
         color: sortKey === k ? '#f59e0b' : undefined,
-        background: stickyFirst ? '#080c14' : undefined,
+        background: stickyFirst ? '#090f21' : undefined,
       }}
     >
       {label} {sortKey === k ? (sortDir === 1 ? '↑' : '↓') : ''}
@@ -169,7 +169,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
       {/* Table */}
       <div className="relative">
         <div className="overflow-x-auto scrollbar-hide ss-table" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <table className="w-full border-collapse sm:min-w-[560px]">
+          <table className="w-full border-collapse min-w-[640px]">
             <thead>
               <tr>
                 <SortTh k="manager" label="Manager" stickyFirst />
@@ -178,11 +178,11 @@ export default function SeasonStandings({ onYearChange }: Props) {
                 <SortTh k="wins"    label="W" />
                 <SortTh k="losses"  label="L" />
                 <SortTh k="winpct"  label="Win%" />
-                <SortTh k="pf"      label="PF/Gm" hideOnMobile />
-                <SortTh k="pa"      label="PA/Gm" hideOnMobile />
-                <SortTh k="margin"  label="+/−/Gm" hideOnMobile />
-                <SortTh k="luck"    label="Luck" hideOnMobile />
-                <th className="hidden md:table-cell">Playoffs</th>
+                <SortTh k="pf"      label="PF/Gm" />
+                <SortTh k="pa"      label="PA/Gm" />
+                <SortTh k="margin"  label="+/−/Gm" />
+                <SortTh k="luck"    label="Luck" />
+                <th>Playoffs</th>
               </tr>
             </thead>
           <tbody>
@@ -209,19 +209,19 @@ export default function SeasonStandings({ onYearChange }: Props) {
                   <td className="text-s-green font-bold num">{r.wins}</td>
                   <td className="text-s-red num">{r.losses}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="text-s-text2 hidden md:table-cell num">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="text-s-text2 hidden md:table-cell num">{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="hidden md:table-cell num">
+                  <td className="text-s-text2 num">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="text-s-text2 num">{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="num">
                     <span className={r.margin >= 0 ? 'text-s-green' : 'text-s-red'}>
                       {r.margin >= 0 ? '+' : ''}{r.margin.toFixed(1)}
                     </span>
                   </td>
-                  <td className="hidden md:table-cell num">
+                  <td className="num">
                     <span className={r.luck >= 0 ? 'text-s-green font-bold' : 'text-s-red font-bold'}>
                       {r.luck >= 0 ? '+' : ''}{r.luck.toFixed(1)}
                     </span>
                   </td>
-                  <td className="hidden md:table-cell">
+                  <td>
                     {r.playoffs ? (
                       <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#052e16] text-s-green border border-[#166534]" style={{ boxShadow: '0 0 8px #22c55e30' }}>
                         ● Clinched
