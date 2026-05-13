@@ -42,8 +42,9 @@ export default function CareerLeaderboard() {
     return set
   }, [brackets, rosterUserMaps, leagues])
 
+  const INACTIVE_OWNERS = new Set(['Hamza', 'Sangram'])
   const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
-  const names = canonicalNames.filter(n => ownerSeasons[n]).sort()
+  const names = canonicalNames.filter(n => ownerSeasons[n] && !INACTIVE_OWNERS.has(n)).sort()
 
   function handleSort(k: SortKey) {
     if (sortKey === k) setSortDir(d => (d === 1 ? -1 : 1))

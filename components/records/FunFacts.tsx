@@ -108,7 +108,7 @@ export default function FunFacts() {
         <div className="flex items-center gap-2 mb-4">
           <Crown className="w-4 h-4 text-s-gold" />
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
-            The Owner
+            Who&apos;s Your Daddy? 🍆
           </span>
           <span className="ml-auto text-[10px] text-s-text3">All-time · ≥75% win rate · min 4 games</span>
         </div>
