@@ -123,11 +123,13 @@
   }
   tbody tr:nth-child(even) .table-sticky-col { background: #0B0E11; }
 
-  /* Annual Breakdown + Season Standings: row-level banding, sticky cell inherits row color */
+  /* Annual Breakdown + Season Standings: transparent rows, solid sticky first col */
   .ab-table tbody tr td { background: transparent; }
-  .ab-table tbody tr .sticky-owner { background: inherit; }
+  .ab-table tbody tr .sticky-owner { background: #0B0E11; }
   .ss-table tbody tr td { background: transparent; }
-  .ss-table tbody tr .sticky-owner { background: inherit; }
+  .ss-table tbody tr .sticky-owner { background: #0B0E11; }
+  .ss-table tbody tr:hover .sticky-owner { background: rgba(99, 102, 241, 0.1); }
+  .ab-table tbody tr:hover .sticky-owner { background: rgba(99, 102, 241, 0.1); }
 
   /* Glassmorphism nav/overlay */
   .glass {

@@ -197,7 +197,7 @@ export default function CareerLeaderboard() {
           </table>
         </div>
         {/* Right-edge gradient fade — signals scrollable content */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(8,12,20,0.85)] z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] z-10" />
       </div>
     </div>
   )
