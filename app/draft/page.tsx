@@ -2,11 +2,13 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useLeague } from '@/context/LeagueContext'
+import { usePlayersData } from '@/hooks/usePlayersData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import StockStandings from '@/components/draft/StockStandings'
 import DraftBoardModal from '@/components/draft/DraftBoardModal'
 import StealsBusts from '@/components/draft/StealsBusts'
+import DraftStructureTable from '@/components/players/DraftStructureTable'
 import {
   STOCK_PICKS_2026,
   MARKET_BENCHMARK_2026,
@@ -14,13 +16,14 @@ import {
 } from '@/lib/stock-picks'
 import { resolveOwnerName } from '@/lib/data-processing'
 
-type Tab = 'pickorder' | 'history' | 'slots' | 'steals'
+type Tab = 'pickorder' | 'history' | 'slots' | 'steals' | 'strategy'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'pickorder', label: '2026 Pick Order'  },
   { id: 'history',   label: 'Past Drafts'      },
   { id: 'slots',     label: 'Slot Analysis'    },
   { id: 'steals',    label: 'Steals & Busts'   },
+  { id: 'strategy',  label: 'Draft Strategy'   },
 ]
 
 function ordinal(n: number) {
@@ -36,6 +39,7 @@ function DraftSlotTable() {
   const { state } = useLeague()
   const { draftData, rosterUserMaps, ownerSeasons, years } = state
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
+  const [selectedManager, setSelectedManager] = useState<string | null>(null)
 
   const rows = useMemo(() => {
     const out: { year: number; owner: string; slot: number; finish: number | null; madePlayoffs: boolean }[] = []
@@ -222,7 +226,11 @@ function DraftSlotTable() {
           </thead>
           <tbody>
             {managerAvgSlot.map((row, i) => (
-              <tr key={row.owner} className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors">
+              <tr
+                key={row.owner}
+                className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors cursor-pointer"
+                onClick={() => setSelectedManager(row.owner)}
+              >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-bold text-s-text3 w-5 text-right">{i + 1}</span>
@@ -238,6 +246,64 @@ function DraftSlotTable() {
           </tbody>
         </table>
       </div>
+
+      {selectedManager && (() => {
+        const history = rows.filter(r => r.owner === selectedManager).sort((a, b) => b.year - a.year)
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+            onClick={() => setSelectedManager(null)}
+          >
+            <div
+              className="bg-s-bg2 border border-s-border rounded-[14px] p-6 max-w-sm w-full mx-4"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[15px] font-extrabold text-s-text">{selectedManager}</span>
+                <button
+                  onClick={() => setSelectedManager(null)}
+                  className="text-s-text3 hover:text-s-text text-[20px] leading-none"
+                >×</button>
+              </div>
+              <div className="text-[10px] text-s-text3 uppercase tracking-[1.5px] font-bold mb-4">
+                {history.length} season{history.length !== 1 ? 's' : ''} · Draft slot history
+              </div>
+              <table className="w-full border-collapse text-[12px]">
+                <thead>
+                  <tr>
+                    <th className="text-left pb-2 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Year</th>
+                    <th className="text-center pb-2 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Slot</th>
+                    <th className="text-center pb-2 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Finish</th>
+                    <th className="text-center pb-2 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Playoffs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map(r => (
+                    <tr key={r.year} className="border-t border-s-border/30">
+                      <td className="py-2 font-bold text-s-text3">{r.year}</td>
+                      <td className="py-2 text-center font-mono font-bold text-s-text2">{r.slot}</td>
+                      <td className="py-2 text-center font-bold text-s-text2">
+                        {r.finish === null ? '—'
+                          : r.finish === 1 ? '🏆 1st'
+                          : `${r.finish}${ordinal(r.finish)}`}
+                      </td>
+                      <td className="py-2 text-center">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                          r.madePlayoffs
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {r.madePlayoffs ? 'Yes' : 'No'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
@@ -313,6 +379,7 @@ function PastDrafts() {
 export default function DraftPage() {
   const { state } = useLeague()
   const { loaded, error } = state
+  const { draftStructure, loading: strategyLoading } = usePlayersData()
 
   const [activeTab, setActiveTab] = useState<Tab>('pickorder')
   const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({})
@@ -403,6 +470,19 @@ export default function DraftPage() {
             Based on draft position within each position group vs actual points scored that season.
           </p>
           <StealsBusts />
+        </>
+      )}
+
+      {/* ── DRAFT STRATEGY TAB ───────────────────────────────────── */}
+      {activeTab === 'strategy' && (
+        <>
+          <p className="text-[11px] text-s-text3 mb-3">
+            Based on rounds 1–5 position selection across all seasons.
+          </p>
+          {strategyLoading && !draftStructure.length
+            ? <div className="text-s-text3 text-[12px] text-center py-12">Loading draft picks…</div>
+            : <DraftStructureTable data={draftStructure} />
+          }
         </>
       )}
     </div>

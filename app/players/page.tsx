@@ -8,7 +8,6 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PlayerWinRateTable from '@/components/players/PlayerWinRateTable'
 import PlayerOwnershipTable from '@/components/players/PlayerOwnershipTable'
-import DraftStructureTable from '@/components/players/DraftStructureTable'
 import PlayerCardModal from '@/components/players/PlayerCardModal'
 import TransactionFilters from '@/components/transactions/TransactionFilters'
 import TransactionTable from '@/components/transactions/TransactionTable'
@@ -19,19 +18,18 @@ import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 import type { PlayerStat } from '@/types'
 import type { TxTypeFilter } from '@/components/transactions/TransactionFilters'
 
-type Tab = 'winrate' | 'ownership' | 'strategy' | 'transactions'
+type Tab = 'winrate' | 'ownership' | 'transactions'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'winrate',      label: 'Win Rate'        },
   { id: 'ownership',   label: 'Draft Ownership'  },
-  { id: 'strategy',    label: 'Draft Strategy'   },
   { id: 'transactions', label: 'Transactions'    },
 ]
 
 export default function PlayersPage() {
   const { state } = useLeague()
   const { loaded, error, years, ownerSeasons } = state
-  const { playerWinRates, ownership, draftStructure, loading, loadingText, error: dataError } = usePlayersData()
+  const { playerWinRates, ownership, loading, loadingText, error: dataError } = usePlayersData()
   const { transactions, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData()
   const [activeTab, setActiveTab] = useState<Tab>('winrate')
 
@@ -145,12 +143,6 @@ export default function PlayersPage() {
           ? <div className="text-s-text3 text-[12px] text-center py-12">Loading draft picks…</div>
           : <PlayerOwnershipTable ownership={ownership} />
       )}
-      {activeTab === 'strategy' && (
-        loading && !draftStructure.length
-          ? <div className="text-s-text3 text-[12px] text-center py-12">Loading draft picks…</div>
-          : <DraftStructureTable data={draftStructure} />
-      )}
-
       {activeTab === 'transactions' && (
         <div>
           {txLoading && (
