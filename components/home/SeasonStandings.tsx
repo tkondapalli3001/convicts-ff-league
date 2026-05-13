@@ -132,7 +132,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
   const SortTh = ({ k, label, hideOnMobile, stickyFirst }: { k: SortKey; label: string; hideOnMobile?: boolean; stickyFirst?: boolean }) => (
     <th
       onClick={() => handleSort(k)}
-      className={[hideOnMobile ? 'hidden md:table-cell' : '', stickyFirst ? 'sticky left-0 z-10' : ''].filter(Boolean).join(' ')}
+      className={[hideOnMobile ? 'hidden md:table-cell' : '', stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : ''].filter(Boolean).join(' ')}
       style={{
         color: sortKey === k ? '#f59e0b' : undefined,
         background: stickyFirst ? '#080c14' : undefined,
@@ -168,7 +168,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
 
       {/* Table */}
       <div className="relative">
-        <div className="overflow-x-auto scrollbar-hide ss-table">
+        <div className="overflow-x-auto scrollbar-hide ss-table" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="w-full border-collapse sm:min-w-[560px]">
             <thead>
               <tr>
@@ -194,7 +194,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
                   onDoubleClick={() => router.push(`/owners/${encodeURIComponent(r.manager)}`)}
                   className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors"
                 >
-                  <td className="sticky-owner sticky left-0 z-[1] font-bold text-s-text">
+                  <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06] font-bold text-s-text">
                     <div className="flex items-center gap-2">
                       <OwnerAvatar name={r.manager} size="sm" />
                       {r.manager}

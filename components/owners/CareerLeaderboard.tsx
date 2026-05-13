@@ -111,7 +111,7 @@ export default function CareerLeaderboard() {
       onClick={() => handleSort(k)}
       className={[
         hideOnMobile ? 'hidden md:table-cell cursor-pointer' : 'cursor-pointer',
-        stickyFirst ? 'sticky left-0 z-10' : '',
+        stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : '',
       ].filter(Boolean).join(' ')}
       style={{
         color: sortKey === k ? '#f59e0b' : undefined,
@@ -142,8 +142,8 @@ export default function CareerLeaderboard() {
       </div>
 
       <div className="relative">
-        <div className="overflow-x-auto scrollbar-hide">
-          <table className="w-full border-collapse sm:min-w-[700px]">
+        <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full border-collapse sm:min-w-[700px] ss-table">
             <thead>
               <tr>
                 <th className="w-8">#</th>
@@ -166,11 +166,11 @@ export default function CareerLeaderboard() {
                 const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg4 text-s-text3'
                 const pct = (d.winpct * 100).toFixed(1)
                 return (
-                  <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}>
+                  <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)} className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors">
                     <td>
                       <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold num ${rankCls}`}>{i + 1}</span>
                     </td>
-                    <td className="sticky-col font-bold text-s-text">
+                    <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06] font-bold text-s-text">
                       <div className="flex items-center gap-2">
                         <OwnerAvatar name={d.name} size="sm" />
                         {d.name}

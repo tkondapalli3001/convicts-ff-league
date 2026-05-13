@@ -225,7 +225,7 @@ export default function HomePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in-5">
 
         {/* ── CAREER LEADERBOARD (2/3 width) ─────────────────────── */}
-        <div className="lg:col-span-2 bento-card">
+        <div className="lg:col-span-2 bento-card" style={{ overflow: 'visible' }}>
           <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-s-border/60">
             <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3">
               All-Time Career Standings
@@ -235,12 +235,13 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[480px]">
+          <div className="relative">
+            <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <table className="w-full border-collapse sm:min-w-[480px] ss-table">
               <thead>
                 <tr>
                   <th className="w-10 text-center">#</th>
-                  <th>Manager</th>
+                  <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#080c14' }}>Manager</th>
                   <th>W–L</th>
                   <th>Win%</th>
                   <th className="hidden sm:table-cell text-right">Avg PPG</th>
@@ -264,6 +265,7 @@ export default function HomePage() {
                     <tr
                       key={d.name}
                       onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}
+                      className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors"
                     >
                       <td className="text-center">
                         <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[10px] font-extrabold ${rankCls}`}>
@@ -271,7 +273,7 @@ export default function HomePage() {
                         </span>
                       </td>
 
-                      <td>
+                      <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06]">
                         <div className="flex items-center gap-3">
                           {/* Avatar: Sleeper image or gradient initials */}
                           {avatarUrl ? (
@@ -355,6 +357,8 @@ export default function HomePage() {
                 })}
               </tbody>
             </table>
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(8,12,20,0.85)] z-10" />
           </div>
         </div>
 

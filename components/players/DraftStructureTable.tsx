@@ -155,7 +155,6 @@ export default function DraftStructureTable({ data }: Props) {
         <thead>
           <tr className="text-[10px] font-bold tracking-[1px] uppercase text-s-text3 border-b border-s-border">
             <th className="text-left py-[5px] pr-3">Strategy</th>
-            <th className="text-right py-[5px] pr-3">Seasons</th>
             <th className="text-right py-[5px] pr-3">Avg W</th>
             <th className="text-right py-[5px]">Avg Finish</th>
           </tr>
@@ -166,7 +165,6 @@ export default function DraftStructureTable({ data }: Props) {
             return (
               <tr key={entry.strategy} className="border-b border-s-bg3">
                 <td className={`py-[7px] pr-3 font-bold ${color}`}>{entry.strategy}</td>
-                <td className="py-[7px] pr-3 text-right text-s-text2">{entry.count}</td>
                 <td className="py-[7px] pr-3 text-right font-bold text-s-text">{entry.avgWins.toFixed(1)}</td>
                 <td className="py-[7px] text-right font-bold text-s-text">#{entry.avgFinish.toFixed(1)}</td>
               </tr>

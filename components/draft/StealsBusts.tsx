@@ -150,7 +150,7 @@ function PickList({ title, emoji, picks, isSteal }: {
   isSteal: boolean
 }) {
   return (
-    <div className="gl overflow-hidden">
+    <div className="gl">
       <div className="px-4 py-3 border-b border-s-border flex items-center gap-2">
         <span className="text-[16px]">{emoji}</span>
         <span className="text-[12px] font-extrabold tracking-[1.5px] uppercase text-s-text">{title}</span>
