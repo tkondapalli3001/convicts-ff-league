@@ -13,6 +13,7 @@ import TransactionFilters from '@/components/transactions/TransactionFilters'
 import TransactionTable from '@/components/transactions/TransactionTable'
 import TransactionDetailModal from '@/components/transactions/TransactionDetailModal'
 import TradesByYearChart from '@/components/players/TradesByYearChart'
+import MostTradedPlayersTable from '@/components/players/MostTradedPlayersTable'
 import { USER_ID_TO_OWNER } from '@/lib/constants'
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 import type { PlayerStat } from '@/types'
@@ -172,6 +173,12 @@ export default function PlayersPage() {
               activeYears={activeYears}
               activeOwners={activeOwners}
               years={years}
+            />
+          )}
+          {!txLoading && (
+            <MostTradedPlayersTable
+              transactions={transactions}
+              playerWinRates={playerWinRates}
             />
           )}
           <div className="text-[10px] text-s-text3 mb-2">

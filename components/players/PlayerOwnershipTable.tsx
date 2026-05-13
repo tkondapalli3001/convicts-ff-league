@@ -13,6 +13,8 @@ const POS_COLORS: Record<string, string> = {
   DEF: 'text-[#94a3b8]',
 }
 
+const FLEX_POSITIONS = new Set(['RB', 'WR', 'TE'])
+
 type SortKey = 'name' | 'position' | 'timesOwned' | 'avgPickNo'
 
 interface Props {
@@ -32,7 +34,7 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
 
   const positions = useMemo(() => {
     const set = new Set(ownership.map(e => e.position).filter(Boolean))
-    return ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DEF'].filter(p => p === 'ALL' || set.has(p))
+    return ['ALL', 'QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DEF'].filter(p => p === 'ALL' || p === 'FLEX' || set.has(p))
   }, [ownership])
 
   function handleSort(k: SortKey) {
@@ -40,21 +42,27 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
     else { setSortKey(k); setSortDir(-1) }
   }
 
+  // When an owner is selected, timesOwned reflects that owner's pick count so
+  // sorting by timesOwned naturally surfaces their most-drafted players.
   const enriched = useMemo(() => {
-    return ownership.map(e => ({
-      ...e,
-      timesOwned: e.picks.length,
-      byOwner: e.picks.reduce<Record<string, number>>((acc, p) => {
+    return ownership.map(e => {
+      const byOwner = e.picks.reduce<Record<string, number>>((acc, p) => {
         acc[p.owner] = (acc[p.owner] ?? 0) + 1
         return acc
-      }, {}),
-    }))
-  }, [ownership])
+      }, {})
+      return {
+        ...e,
+        timesOwned: ownerFilter !== 'ALL' ? (byOwner[ownerFilter] ?? 0) : e.picks.length,
+        byOwner,
+      }
+    })
+  }, [ownership, ownerFilter])
 
   const filtered = useMemo(() => {
     return enriched
       .filter(e => {
-        if (posFilter !== 'ALL' && e.position !== posFilter) return false
+        if (posFilter === 'FLEX') { if (!FLEX_POSITIONS.has(e.position)) return false }
+        else if (posFilter !== 'ALL' && e.position !== posFilter) return false
         if (ownerFilter !== 'ALL' && !e.byOwner[ownerFilter]) return false
         return true
       })
@@ -90,7 +98,7 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
         Draft Ownership — most-drafted players across all seasons
       </div>
 
-      {/* Filters */}
+      {/* Position filter */}
       <div className="flex gap-[6px] flex-wrap mb-2">
         {positions.map(pos => (
           <button
@@ -107,6 +115,8 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
           </button>
         ))}
       </div>
+
+      {/* Owner filter */}
       <div className="flex gap-[6px] flex-wrap mb-4">
         {owners.map(owner => (
           <button
@@ -130,13 +140,13 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
             <tr className="text-[10px] font-bold tracking-[1px] uppercase text-s-text3 border-b border-s-border">
               <SortTh k="name" label="Player" />
               <SortTh k="position" label="Pos" />
-              <SortTh k="timesOwned" label="Times Drafted" right />
+              <SortTh k="timesOwned" label={ownerFilter === 'ALL' ? 'Times Drafted' : `By ${ownerFilter}`} right />
               <SortTh k="avgPickNo" label="Avg Pick" right />
               <th className="text-left">Owners (seasons)</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.slice(0, 100).map(e => {
+            {filtered.slice(0, 25).map(e => {
               const posColor = POS_COLORS[e.position] ?? 'text-s-text3'
               const ownersSummary = Object.entries(e.byOwner)
                 .sort((a, b) => b[1] - a[1])

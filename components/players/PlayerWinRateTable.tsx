@@ -102,7 +102,7 @@ export default function PlayerWinRateTable({ players, minGames = 10, onPlayerCli
             </tr>
           </thead>
           <tbody>
-            {filtered.slice(0, 100).map(p => {
+            {filtered.slice(0, 25).map(p => {
               const posColor = POS_COLORS[p.position] ?? 'text-s-text3'
               const pct = (p.winRate * 100).toFixed(1)
               return (
