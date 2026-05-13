@@ -155,48 +155,55 @@ function PickList({ title, emoji, picks, isSteal }: {
         <span className="text-[16px]">{emoji}</span>
         <span className="text-[12px] font-extrabold tracking-[1.5px] uppercase text-s-text">{title}</span>
       </div>
-      <table className="w-full border-collapse">
-        <thead>
-          <tr>
-            <th className="text-left px-4 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">#</th>
-            <th className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Player</th>
-            <th className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Owner</th>
-            <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Pick</th>
-            <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Pts</th>
-            <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {picks.map((p, i) => {
-            const posClass = POS_COLORS[p.position] ?? 'bg-slate-500/20 text-slate-400 border-slate-500/30'
-            return (
-              <tr key={`${p.year}-${p.playerName}-${p.pickNo}`} className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors">
-                <td className="px-4 py-2 text-[11px] font-bold text-s-text3">{i + 1}</td>
-                <td className="px-3 py-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-[9px] font-bold px-1 py-0 rounded border ${posClass}`}>{p.position}</span>
-                    <div>
-                      <div className="text-[12px] font-semibold text-s-text leading-tight">{p.playerName}</div>
-                      <div className="text-[9px] text-s-text3">{p.year}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-3 py-2 text-[11px] text-s-text2">{p.owner}</td>
-                <td className="px-3 py-2 text-center text-[11px] text-s-text3">
-                  <span className="font-mono">#{p.pickNo}</span>
-                  <span className="text-[9px] ml-1 text-s-text3">({p.pickRank} at pos)</span>
-                </td>
-                <td className="px-3 py-2 text-center text-[11px] font-mono text-s-text2">
-                  {p.totalPts.toFixed(1)}
-                </td>
-                <td className={`px-3 py-2 text-center text-[12px] font-extrabold ${isSteal ? 'text-s-green' : 'text-s-red'}`}>
-                  {isSteal ? `+${p.value}` : p.value}
-                </td>
+      {/* Scroll wrapper — overflow-hidden on parent clips gradient to card bounds */}
+      <div className="relative">
+        <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full border-collapse min-w-[420px]">
+            <thead>
+              <tr>
+                <th className="text-left px-4 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">#</th>
+                <th className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Player</th>
+                <th className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Owner</th>
+                <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Pick</th>
+                <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Pts</th>
+                <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Value</th>
               </tr>
-            )
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {picks.map((p, i) => {
+                const posClass = POS_COLORS[p.position] ?? 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                return (
+                  <tr key={`${p.year}-${p.playerName}-${p.pickNo}`} className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors">
+                    <td className="px-4 py-2 text-[11px] font-bold text-s-text3">{i + 1}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[9px] font-bold px-1 py-0 rounded border ${posClass}`}>{p.position}</span>
+                        <div>
+                          <div className="text-[12px] font-semibold text-s-text leading-tight">{p.playerName}</div>
+                          <div className="text-[9px] text-s-text3">{p.year}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 text-[11px] text-s-text2">{p.owner}</td>
+                    <td className="px-3 py-2 text-center text-[11px] text-s-text3">
+                      <span className="font-mono">#{p.pickNo}</span>
+                      <span className="text-[9px] ml-1 text-s-text3">({p.pickRank} at pos)</span>
+                    </td>
+                    <td className="px-3 py-2 text-center text-[11px] font-mono text-s-text2">
+                      {p.totalPts.toFixed(1)}
+                    </td>
+                    <td className={`px-3 py-2 text-center text-[12px] font-extrabold ${isSteal ? 'text-s-green' : 'text-s-red'}`}>
+                      {isSteal ? `+${p.value}` : p.value}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+        {/* Right-edge gradient fade — clipped by parent overflow-hidden to card bounds */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(8,12,20,0.85)] z-10" />
+      </div>
     </div>
   )
 }

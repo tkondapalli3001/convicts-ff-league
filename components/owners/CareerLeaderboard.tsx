@@ -106,11 +106,17 @@ export default function CareerLeaderboard() {
     })
   }, [data, sortKey, sortDir])
 
-  const SortTh = ({ k, label, hideOnMobile }: { k: SortKey; label: string; hideOnMobile?: boolean }) => (
+  const SortTh = ({ k, label, hideOnMobile, stickyFirst }: { k: SortKey; label: string; hideOnMobile?: boolean; stickyFirst?: boolean }) => (
     <th
       onClick={() => handleSort(k)}
-      className={hideOnMobile ? 'hidden md:table-cell cursor-pointer' : 'cursor-pointer'}
-      style={{ color: sortKey === k ? '#f59e0b' : undefined }}
+      className={[
+        hideOnMobile ? 'hidden md:table-cell cursor-pointer' : 'cursor-pointer',
+        stickyFirst ? 'sticky left-0 z-10' : '',
+      ].filter(Boolean).join(' ')}
+      style={{
+        color: sortKey === k ? '#f59e0b' : undefined,
+        background: stickyFirst ? '#080c14' : undefined,
+      }}
     >
       {label}
     </th>
@@ -135,40 +141,41 @@ export default function CareerLeaderboard() {
         </button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse min-w-[700px]">
-          <thead>
-            <tr>
-              <th>#</th>
-              <SortTh k="name"        label="Manager" />
-              <SortTh k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'}  hideOnMobile />
-              <SortTh k="allW"        label="W" />
-              <SortTh k="allL"        label="L" />
-              <SortTh k="winpct"      label="Win%" />
-              <SortTh k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'Avg PF'}   hideOnMobile />
-              <SortTh k="avgFinish"   label="Avg Fin"  hideOnMobile />
-              {!playoffOnly && <SortTh k="playoffApps" label="Playoffs" hideOnMobile />}
-              <SortTh k="champs"      label="🏆" />
-              <SortTh k="shame"       label="🚽" />
-              <SortTh k="earn"        label="Net $" />
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((d, i) => {
-              const rankColors = ['bg-[#3d2000] text-s-gold', 'bg-[#1a2030] text-[#b0c4de]', 'bg-[#1a1000] text-[#cd7f32]']
-              const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg4 text-s-text3'
-              const pct = (d.winpct * 100).toFixed(1)
-              return (
-                <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}>
-                  <td>
-                    <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold num ${rankCls}`}>{i + 1}</span>
-                  </td>
-                  <td className="font-bold text-s-text">
-                    <div className="flex items-center gap-2">
-                      <OwnerAvatar name={d.name} size="sm" />
-                      {d.name}
-                    </div>
-                  </td>
+      <div className="relative">
+        <div className="overflow-x-auto scrollbar-hide">
+          <table className="w-full border-collapse sm:min-w-[700px]">
+            <thead>
+              <tr>
+                <th className="w-8">#</th>
+                <SortTh k="name"        label="Manager" stickyFirst />
+                <SortTh k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'}  hideOnMobile />
+                <SortTh k="allW"        label="W" />
+                <SortTh k="allL"        label="L" />
+                <SortTh k="winpct"      label="Win%" />
+                <SortTh k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'Avg PF'}   hideOnMobile />
+                <SortTh k="avgFinish"   label="Avg Fin"  hideOnMobile />
+                {!playoffOnly && <SortTh k="playoffApps" label="Playoffs" hideOnMobile />}
+                <SortTh k="champs"      label="🏆" />
+                <SortTh k="shame"       label="🚽" />
+                <SortTh k="earn"        label="Net $" />
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((d, i) => {
+                const rankColors = ['bg-[#3d2000] text-s-gold', 'bg-[#1a2030] text-[#b0c4de]', 'bg-[#1a1000] text-[#cd7f32]']
+                const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg4 text-s-text3'
+                const pct = (d.winpct * 100).toFixed(1)
+                return (
+                  <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}>
+                    <td>
+                      <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold num ${rankCls}`}>{i + 1}</span>
+                    </td>
+                    <td className="sticky-col font-bold text-s-text">
+                      <div className="flex items-center gap-2">
+                        <OwnerAvatar name={d.name} size="sm" />
+                        {d.name}
+                      </div>
+                    </td>
                   <td className="hidden md:table-cell text-s-text3 num">{d.numSeasons}</td>
                   <td className="text-s-green font-bold num">{d.allW}</td>
                   <td className="text-s-red num">{d.allL}</td>
@@ -184,8 +191,11 @@ export default function CareerLeaderboard() {
                 </tr>
               )
             })}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
+        {/* Right-edge gradient fade — signals scrollable content */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(8,12,20,0.85)] z-10" />
       </div>
     </div>
   )

@@ -108,13 +108,16 @@ export default function DraftStructureTable({ data }: Props) {
           <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#93c5fd] mb-3">
             {selectedEntry.strategy} · {selectedEntry.examples.length} instance{selectedEntry.examples.length !== 1 ? 's' : ''}
           </div>
-          <table className="w-full border-collapse text-[12px]">
+          {/* Scroll wrapper ensures the "Made Playoffs" column is reachable on narrow screens */}
+          <div className="relative">
+            <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full border-collapse text-[12px] min-w-[300px]">
             <thead>
               <tr>
                 <th className="text-left py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Year</th>
                 <th className="text-left py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Manager</th>
                 <th className="text-center py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Finish</th>
-                <th className="text-center py-1.5 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Playoffs</th>
+                <th className="text-center py-1.5 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Made Playoffs</th>
               </tr>
             </thead>
             <tbody>
@@ -142,6 +145,9 @@ export default function DraftStructureTable({ data }: Props) {
                 ))}
             </tbody>
           </table>
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(8,14,26,0.85)] z-10" />
+          </div>
         </div>
       )}
 

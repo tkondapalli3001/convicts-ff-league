@@ -88,6 +88,19 @@
     display: none;
   }
 
+  /* Alias used by mobile-first table refactor */
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* iOS momentum scrolling for all horizontal scroll containers */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Sticky table columns */
   .sticky-col {
     position: sticky;
@@ -213,5 +226,15 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+}
+
+/* Mobile: tighter cell spacing to maximise screen real-estate */
+@media (max-width: 639px) {
+  th {
+    padding: 8px 8px;
+  }
+  td {
+    padding: 8px 8px;
   }
 }

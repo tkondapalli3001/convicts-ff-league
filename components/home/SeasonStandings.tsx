@@ -129,11 +129,14 @@ export default function SeasonStandings({ onYearChange }: Props) {
     return result
   }, [ownerSeasons, activeYears, sortKey, sortDir, allPlayMap])
 
-  const SortTh = ({ k, label, hideOnMobile }: { k: SortKey; label: string; hideOnMobile?: boolean }) => (
+  const SortTh = ({ k, label, hideOnMobile, stickyFirst }: { k: SortKey; label: string; hideOnMobile?: boolean; stickyFirst?: boolean }) => (
     <th
       onClick={() => handleSort(k)}
-      className={hideOnMobile ? 'hidden md:table-cell' : ''}
-      style={{ color: sortKey === k ? '#f59e0b' : undefined }}
+      className={[hideOnMobile ? 'hidden md:table-cell' : '', stickyFirst ? 'sticky left-0 z-10' : ''].filter(Boolean).join(' ')}
+      style={{
+        color: sortKey === k ? '#f59e0b' : undefined,
+        background: stickyFirst ? '#080c14' : undefined,
+      }}
     >
       {label} {sortKey === k ? (sortDir === 1 ? '↑' : '↓') : ''}
     </th>
@@ -164,23 +167,24 @@ export default function SeasonStandings({ onYearChange }: Props) {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto -webkit-overflow-scrolling-touch ss-table">
-        <table className="w-full border-collapse min-w-[560px]">
-          <thead>
-            <tr>
-              <SortTh k="manager" label="Manager" />
-              <SortTh k="year"    label="Year" />
-              <SortTh k="finish"  label="Finish" />
-              <SortTh k="wins"    label="W" />
-              <SortTh k="losses"  label="L" />
-              <SortTh k="winpct"  label="Win%" />
-              <SortTh k="pf"      label="PF/Gm" hideOnMobile />
-              <SortTh k="pa"      label="PA/Gm" hideOnMobile />
-              <SortTh k="margin"  label="+/−/Gm" hideOnMobile />
-              <SortTh k="luck" label="Luck" hideOnMobile />
-              <th className="hidden md:table-cell">Playoffs</th>
-            </tr>
-          </thead>
+      <div className="relative">
+        <div className="overflow-x-auto scrollbar-hide ss-table">
+          <table className="w-full border-collapse sm:min-w-[560px]">
+            <thead>
+              <tr>
+                <SortTh k="manager" label="Manager" stickyFirst />
+                <SortTh k="year"    label="Year" />
+                <SortTh k="finish"  label="Finish" />
+                <SortTh k="wins"    label="W" />
+                <SortTh k="losses"  label="L" />
+                <SortTh k="winpct"  label="Win%" />
+                <SortTh k="pf"      label="PF/Gm" hideOnMobile />
+                <SortTh k="pa"      label="PA/Gm" hideOnMobile />
+                <SortTh k="margin"  label="+/−/Gm" hideOnMobile />
+                <SortTh k="luck"    label="Luck" hideOnMobile />
+                <th className="hidden md:table-cell">Playoffs</th>
+              </tr>
+            </thead>
           <tbody>
             {rows.map((r) => {
               const pct = (r.winpct * 100).toFixed(1)
@@ -232,7 +236,10 @@ export default function SeasonStandings({ onYearChange }: Props) {
               )
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
+        {/* Right-edge gradient fade — signals scrollable content */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(8,12,20,0.85)] z-10" />
       </div>
 
       <p className="mt-3 px-1 text-[10px] text-s-text3 leading-relaxed">
