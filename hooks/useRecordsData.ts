@@ -7,7 +7,27 @@ const EXCLUDED_SCORES = [
 
 export function useRecordsData() {
   const { state } = useLeague()
-  const { allMatchups, ownerSeasons } = state
+  const { allMatchups, ownerSeasons, brackets, rosterUserMaps, leagues } = state
+
+  const consolationGameKeys = new Set<string>()
+  for (const [yearStr, bracket] of Object.entries(brackets)) {
+    const year = Number(yearStr)
+    const rMap = rosterUserMaps[year] ?? {}
+    const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
+    ;(bracket.winners ?? [])
+      .filter(g => g.p && g.p !== 1)
+      .forEach(g => {
+        const t1Id = g.t1 ?? null
+        const t2Id = g.t2 ?? null
+        if (t1Id != null && t2Id != null) {
+          const week = playoffStart + (g.r - 1)
+          const t1Name = rMap[String(t1Id)] ?? `Team${t1Id}`
+          const t2Name = rMap[String(t2Id)] ?? `Team${t2Id}`
+          consolationGameKeys.add(`${year}|||${week}|||${t1Name}|||${t2Name}`)
+          consolationGameKeys.add(`${year}|||${week}|||${t2Name}|||${t1Name}`)
+        }
+      })
+  }
 
   const filteredMatchups = allMatchups.filter(g =>
     !EXCLUDED_SCORES.some(e => e.year === g.year && e.week === g.week &&
@@ -39,7 +59,7 @@ export function useRecordsData() {
   const biggestPlayoffBlowout = playoffGames.length ? playoffGames.reduce((m, g) => g.margin > m.margin ? g : m, playoffGames[0]) : null
 
   const high140 = validScores.filter(s => s.pts >= 140).sort((a, b) => b.pts - a.pts)
-  const low80   = validScores.filter(s => s.pts <= 80).sort((a, b) => a.pts - b.pts)
+  const low80   = validScores.filter(s => s.pts <= 80 && !consolationGameKeys.has(`${s.year}|||${s.week}|||${s.owner}|||${s.opp}`)).sort((a, b) => a.pts - b.pts)
 
   const countByOwner = (scores: typeof validScores) => {
     const map: Record<string, number> = {}

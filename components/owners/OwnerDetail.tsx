@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
 import { fmtPts } from '@/lib/utils'
@@ -17,8 +17,107 @@ type Tab = 'seasons' | 'h2h' | 'gamelog'
 
 export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const { state } = useLeague()
-  const { loaded, error, ownerSeasons, allMatchups } = state
+  const { loaded, error, ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, draftData } = state
   const [tab, setTab] = useState<Tab>('seasons')
+
+  // Must be before early returns (React hook rules)
+  const ownerGames = useMemo(
+    () => allMatchups.filter(g => g.team1 === ownerName || g.team2 === ownerName),
+    [allMatchups, ownerName]
+  )
+
+  const consolationGameKeys = useMemo(() => {
+    const set = new Set<string>()
+    for (const [yearStr, bracket] of Object.entries(brackets)) {
+      const year = Number(yearStr)
+      const rMap = rosterUserMaps[year] ?? {}
+      const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
+      ;(bracket.winners ?? [])
+        .filter(g => g.p && g.p !== 1)
+        .forEach(g => {
+          const t1Id = g.t1 ?? null
+          const t2Id = g.t2 ?? null
+          if (t1Id != null && t2Id != null) {
+            const week = playoffStart + (g.r - 1)
+            const t1Name = rMap[String(t1Id)] ?? `Team${t1Id}`
+            const t2Name = rMap[String(t2Id)] ?? `Team${t2Id}`
+            set.add(`${year}|||${week}|||${t1Name}|||${t2Name}`)
+            set.add(`${year}|||${week}|||${t2Name}|||${t1Name}`)
+          }
+        })
+    }
+    return set
+  }, [brackets, rosterUserMaps, leagues])
+
+  const funStats = useMemo(() => {
+    // Scores excluding consolation games
+    const validGames = ownerGames.filter(g =>
+      g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
+    )
+    const scores = validGames.map(g => ({
+      pts: g.team1 === ownerName ? g.pts1 : g.pts2,
+      opp: g.team1 === ownerName ? g.team2 : g.team1,
+      year: g.year,
+      week: g.week,
+    })).filter(s => s.pts > 0)
+
+    const bestGame  = scores.length ? scores.reduce((m, s) => s.pts > m.pts ? s : m, scores[0]) : null
+    const worstGame = scores.length ? scores.reduce((m, s) => s.pts < m.pts ? s : m, scores[0]) : null
+
+    // Top rival (all games)
+    const rivalCount: Record<string, number> = {}
+    ownerGames.forEach(g => {
+      const opp = g.team1 === ownerName ? g.team2 : g.team1
+      rivalCount[opp] = (rivalCount[opp] || 0) + 1
+    })
+    const topRivalName = Object.entries(rivalCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+    let rivalW = 0, rivalL = 0
+    if (topRivalName) {
+      ownerGames.forEach(g => {
+        const opp = g.team1 === ownerName ? g.team2 : g.team1
+        if (opp !== topRivalName) return
+        const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
+        const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
+        if (myPts >= oppPts) rivalW++; else rivalL++
+      })
+    }
+
+    // Longest win streak (all games)
+    const sorted = [...ownerGames].sort((a, b) => a.year - b.year || a.week - b.week)
+    let maxStreak = 0, curStreak = 0
+    let streakStart = sorted.length > 0 ? sorted[0] : null
+    let streakEnd   = sorted.length > 0 ? sorted[0] : null
+    let tmpStart    = sorted.length > 0 ? sorted[0] : null
+    sorted.forEach(g => {
+      const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
+      const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
+      if (myPts >= oppPts) {
+        if (curStreak === 0) tmpStart = g
+        curStreak++
+        if (curStreak > maxStreak) { maxStreak = curStreak; streakStart = tmpStart; streakEnd = g }
+      } else {
+        curStreak = 0
+      }
+    })
+
+    // Most drafted players
+    const playerCount: Record<string, { name: string; count: number; pos: string }> = {}
+    Object.entries(draftData).forEach(([yearStr, { picks }]) => {
+      const year = Number(yearStr)
+      const rMap = rosterUserMaps[year] ?? {}
+      picks
+        .filter(p => rMap[String(p.roster_id)] === ownerName)
+        .forEach(p => {
+          const name = [p.metadata.first_name, p.metadata.last_name].filter(Boolean).join(' ')
+          if (!name) return
+          if (!playerCount[p.player_id]) playerCount[p.player_id] = { name, count: 0, pos: p.metadata.position ?? '' }
+          playerCount[p.player_id].count++
+        })
+    })
+    const topPlayers = Object.values(playerCount).sort((a, b) => b.count - a.count).slice(0, 3)
+
+    return { bestGame, worstGame, topRivalName, rivalW, rivalL, maxStreak, streakStart, streakEnd, topPlayers }
+  }, [ownerGames, ownerName, consolationGameKeys, draftData, rosterUserMaps])
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
@@ -47,8 +146,6 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const shame  = MANUAL_SHAME.filter(s => s.loser === ownerName)
   const earn   = EARNINGS_DATA.find(e => e.owner === ownerName)
 
-  // All matchups for this owner
-  const ownerGames = allMatchups.filter(g => g.team1 === ownerName || g.team2 === ownerName)
   const allOwnerNames = [...new Set(allMatchups.flatMap(g => [g.team1, g.team2]))]
 
   const TABS: { id: Tab; label: string }[] = [
@@ -96,8 +193,8 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         </div>
       </div>
 
-      {/* Stat boxes */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-[10px] mb-5">
+      {/* Core stat boxes */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-[10px] mb-[10px]">
         <StatBox label="Career Record" value={`${totalW}-${totalL}`} sub={`${pct}% win rate`} />
         <StatBox label="Avg PF/Game" value={(seasons.reduce((a,s)=>a+s.pf,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPF.toFixed(0)} pts/season`} />
         <StatBox label="Avg PA/Game" value={(seasons.reduce((a,s)=>a+s.pa,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPA.toFixed(0)} pts allowed/season`} valueColor="#f87171" />
@@ -109,6 +206,56 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
           valueColor={earn ? (earn.total >= 0 ? '#22c55e' : '#ef4444') : undefined}
         />
       </div>
+
+      {/* Fun stat boxes */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-[10px] mb-5">
+        <StatBox
+          label="Top Rival"
+          value={funStats.topRivalName ?? '—'}
+          sub={funStats.topRivalName ? `${funStats.rivalW}-${funStats.rivalL} all-time` : undefined}
+        />
+        <StatBox
+          label="Best Game"
+          value={funStats.bestGame ? fmtPts(funStats.bestGame.pts) : '—'}
+          sub={funStats.bestGame ? `${funStats.bestGame.year} W${funStats.bestGame.week} vs ${funStats.bestGame.opp}` : undefined}
+          valueColor="#22c55e"
+        />
+        <StatBox
+          label="Worst Game"
+          value={funStats.worstGame ? fmtPts(funStats.worstGame.pts) : '—'}
+          sub={funStats.worstGame ? `${funStats.worstGame.year} W${funStats.worstGame.week} vs ${funStats.worstGame.opp}` : undefined}
+          valueColor="#ef4444"
+        />
+        <StatBox
+          label="Longest Win Streak"
+          value={funStats.maxStreak > 0 ? `${funStats.maxStreak}W` : '—'}
+          sub={funStats.maxStreak > 0 && funStats.streakStart && funStats.streakEnd
+            ? `${funStats.streakStart.year} W${funStats.streakStart.week}–W${funStats.streakEnd.week}`
+            : undefined}
+          valueColor="#f59e0b"
+        />
+      </div>
+
+      {/* Draft Darlings */}
+      {funStats.topPlayers.length > 0 && (
+        <div className="gl p-[14px] mb-5">
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[10px]">Most Drafted</div>
+          <div className="flex flex-wrap gap-2">
+            {funStats.topPlayers.map(p => (
+              <span
+                key={p.name}
+                className="inline-flex items-center gap-[6px] px-3 py-[5px] rounded-full text-[11px] font-semibold bg-s-bg3 border border-s-border text-s-text2"
+              >
+                <span className="text-s-text">{p.name}</span>
+                <span className="text-s-text3">·</span>
+                <span className="text-s-text3">{p.pos}</span>
+                <span className="text-s-text3">·</span>
+                <span className="text-s-gold font-bold">{p.count}x</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-s-border mb-4 overflow-x-auto scrollbar-none">
