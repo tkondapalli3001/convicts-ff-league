@@ -1,11 +1,11 @@
 'use client'
 
-import { HeartCrack, Zap, TrendingUp, Activity, Crown } from 'lucide-react'
+import { HeartCrack, Zap, Activity, Crown } from 'lucide-react'
 import { useFunFacts } from '@/hooks/useFunFacts'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
 export default function FunFacts() {
-  const { heartbreak, perfectStorm, paperTigers, boomBust, theOwner } = useFunFacts()
+  const { heartbreak, perfectStorm, boomBust, theOwner } = useFunFacts()
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -71,40 +71,6 @@ export default function FunFacts() {
         ))}
       </div>
 
-      {/* ── The Paper Tiger ────────────────────────────────────────────────── */}
-      <div className="bento-card p-[18px]">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-4 h-4 text-amber-400" />
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
-            The Paper Tiger
-          </span>
-        </div>
-        {paperTigers.length === 0 ? (
-          <div className="py-6 text-s-text3 text-[12px] text-center">
-            No paper tigers found — everyone earns their wins
-          </div>
-        ) : paperTigers.map(entry => (
-          <div
-            key={entry.owner}
-            className="flex items-center gap-2 py-[6px] border-b border-s-bg3 text-[12px] last:border-b-0"
-          >
-            <OwnerAvatar name={entry.owner} size="sm" />
-            <div className="flex-1 min-w-0">
-              <div className="text-s-text font-bold">{entry.owner}</div>
-              <div className="text-[10px] text-s-text3">
-                Win% #{entry.winPctRank} · PF #{entry.pfRank} worst
-              </div>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <div className="text-amber-400 font-bold num text-[13px]">
-                {(entry.winPct * 100).toFixed(1)}%
-              </div>
-              <div className="text-[10px] text-s-text3 num">{entry.totalPF.toFixed(0)} PF</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* ── Boom-Bust Specialist ───────────────────────────────────────────── */}
       <div className="bento-card p-[18px]">
         <div className="flex items-center gap-2 mb-4">
@@ -112,6 +78,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Boom-Bust Specialist
           </span>
+          <span className="ml-auto text-[10px] text-s-text3">All-time</span>
         </div>
         {boomBust.length === 0 ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">Insufficient data</div>
@@ -130,24 +97,24 @@ export default function FunFacts() {
               <div className="text-orange-400 font-bold num text-[14px]">
                 ±{entry.stdDev.toFixed(1)}
               </div>
-              <div className="text-[9px] text-s-text3">std dev</div>
+              <div className="text-[9px] text-s-text3">pts/game</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ── The Owner ──────────────────────────────────────────────────────── */}
-      <div className="bento-card p-[18px]">
+      {/* ── The Owner (col-span-2) ─────────────────────────────────────────── */}
+      <div className="md:col-span-2 bento-card p-[18px]">
         <div className="flex items-center gap-2 mb-4">
           <Crown className="w-4 h-4 text-s-gold" />
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             The Owner
           </span>
-          <span className="ml-auto text-[10px] text-s-text3">Last 3 seasons</span>
+          <span className="ml-auto text-[10px] text-s-text3">All-time · ≥75% win rate · min 4 games</span>
         </div>
         {theOwner.length === 0 ? (
           <div className="py-6 text-s-text3 text-[12px] text-center">
-            No dominant rivalries in the last 3 seasons
+            No dominant rivalries found all-time
           </div>
         ) : theOwner.map(entry => (
           <div

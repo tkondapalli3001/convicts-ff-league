@@ -19,14 +19,6 @@ interface PerfectStormEntry {
   week: number
 }
 
-interface PaperTigerEntry {
-  owner: string
-  winPct: number
-  totalPF: number
-  winPctRank: number
-  pfRank: number
-}
-
 interface BoomBustEntry {
   owner: string
   stdDev: number
@@ -44,7 +36,6 @@ interface TheOwnerEntry {
 export interface FunFactsData {
   heartbreak: HeartbreakEntry[]
   perfectStorm: PerfectStormEntry[]
-  paperTigers: PaperTigerEntry[]
   boomBust: BoomBustEntry[]
   theOwner: TheOwnerEntry[]
 }
@@ -54,8 +45,6 @@ export function useFunFacts(): FunFactsData {
   const { allScores, filteredMatchups } = useRecordsData()
 
   return useMemo(() => {
-    const last3Years = new Set(state.years.slice(-3))
-
     // ── Card 1: Heartbreak Hotel ──────────────────────────────────────────────
     const heartbreak: HeartbreakEntry[] = allScores
       .filter(s => s.result === 'L' && s.pts > 0)
@@ -105,40 +94,10 @@ export function useFunFacts(): FunFactsData {
     }
     const perfectStorm = playerScores.sort((a, b) => b.pts - a.pts).slice(0, 5)
 
-    // ── Card 3: The Paper Tiger ───────────────────────────────────────────────
-    type CareerStat = { owner: string; wins: number; losses: number; totalPF: number }
-    const careerMap: Record<string, CareerStat> = {}
-    for (const [owner, seasons] of Object.entries(state.ownerSeasons)) {
-      const wins = seasons.reduce((s, x) => s + x.wins, 0)
-      const losses = seasons.reduce((s, x) => s + x.losses, 0)
-      const totalPF = seasons.reduce((s, x) => s + x.pf, 0)
-      careerMap[owner] = { owner, wins, losses, totalPF }
-    }
-    const careerList = Object.values(careerMap).filter(c => c.wins + c.losses > 0)
-
-    const byWinPct = [...careerList].sort(
-      (a, b) => b.wins / (b.wins + b.losses) - a.wins / (a.wins + a.losses)
-    )
-    const byPF = [...careerList].sort((a, b) => a.totalPF - b.totalPF)
-
-    const top3WinPct = new Set(byWinPct.slice(0, 3).map(c => c.owner))
-    const bottom5PF = new Set(byPF.slice(0, 5).map(c => c.owner))
-
-    const paperTigers: PaperTigerEntry[] = careerList
-      .filter(c => top3WinPct.has(c.owner) && bottom5PF.has(c.owner))
-      .map(c => ({
-        owner: c.owner,
-        winPct: c.wins / (c.wins + c.losses),
-        totalPF: c.totalPF,
-        winPctRank: byWinPct.findIndex(x => x.owner === c.owner) + 1,
-        pfRank: byPF.findIndex(x => x.owner === c.owner) + 1,
-      }))
-      .sort((a, b) => a.winPctRank - b.winPctRank)
-
-    // ── Card 4: The Boom-Bust Specialist ─────────────────────────────────────
+    // ── Card 3: The Boom-Bust Specialist ─────────────────────────────────────
     const scoresByOwner: Record<string, number[]> = {}
     for (const s of allScores) {
-      if (!last3Years.has(s.year) || s.pts <= 0) continue
+      if (s.pts <= 0) continue
       if (!scoresByOwner[s.owner]) scoresByOwner[s.owner] = []
       scoresByOwner[s.owner].push(s.pts)
     }
@@ -153,12 +112,11 @@ export function useFunFacts(): FunFactsData {
       .sort((a, b) => b.stdDev - a.stdDev)
       .slice(0, 3)
 
-    // ── Card 5: The Owner ─────────────────────────────────────────────────────
-    const recentMatchups = filteredMatchups.filter(m => last3Years.has(m.year))
+    // ── Card 4: The Owner ─────────────────────────────────────────────────────
     const pairGames: Record<string, number> = {}
     const dirWins: Record<string, number> = {}
 
-    for (const m of recentMatchups) {
+    for (const m of filteredMatchups) {
       const sortedKey = [m.team1, m.team2].sort().join('|||')
       pairGames[sortedKey] = (pairGames[sortedKey] ?? 0) + 1
       const winKey = `${m.winner}|||${m.loser}`
@@ -179,6 +137,6 @@ export function useFunFacts(): FunFactsData {
     }
     theOwner.sort((a, b) => b.winPct - a.winPct || b.wins - a.wins)
 
-    return { heartbreak, perfectStorm, paperTigers, boomBust, theOwner }
+    return { heartbreak, perfectStorm, boomBust, theOwner }
   }, [state, allScores, filteredMatchups])
 }
