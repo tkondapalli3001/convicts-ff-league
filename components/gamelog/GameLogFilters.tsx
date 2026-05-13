@@ -11,8 +11,10 @@ interface Props {
 
 export default function GameLogFilters({ years, ownerNames, activeYears, activeOwners, onToggleYear, onToggleOwner }: Props) {
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-3 mb-4">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-2">Filter by Year</div>
+    <div className="gl relative overflow-hidden p-3 mb-4">
+      <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
+      <div className="relative z-10">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-2">Filter by Year</div>
       <div className="flex gap-[6px] flex-wrap mb-3">
         {years.map(y => (
           <button
@@ -22,7 +24,7 @@ export default function GameLogFilters({ years, ownerNames, activeYears, activeO
               'px-3 py-[5px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150 whitespace-nowrap',
               activeYears.has(y)
                 ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
             ].join(' ')}
           >
             {y}
@@ -30,7 +32,7 @@ export default function GameLogFilters({ years, ownerNames, activeYears, activeO
         ))}
       </div>
 
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-2">Filter by Owner — click to isolate, click again to reset</div>
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-2">Filter by Owner — click to isolate, click again to reset</div>
       <div className="flex gap-[6px] flex-wrap">
         {ownerNames.map(name => (
           <button
@@ -40,12 +42,13 @@ export default function GameLogFilters({ years, ownerNames, activeYears, activeO
               'px-3 py-[5px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150 whitespace-nowrap',
               activeOwners.has(name)
                 ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
             ].join(' ')}
           >
             {name}
           </button>
         ))}
+      </div>
       </div>
     </div>
   )

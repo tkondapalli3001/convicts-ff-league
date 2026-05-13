@@ -12,8 +12,9 @@ export default function AnnualBreakdown() {
   const displayYears = years.length > 0 ? years : [2019, 2020, 2021, 2022, 2023, 2024, 2025]
 
   return (
-    <div className="gl p-[18px] mb-4">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[14px]">
+    <div className="gl p-[18px] mb-4 relative overflow-hidden">
+      <div className="bento-fill" style={{ background: 'rgba(34,197,94,0.15)' }} />
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-[14px] relative z-10">
         Annual Breakdown
       </div>
 
@@ -27,7 +28,7 @@ export default function AnnualBreakdown() {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b-2 border-s-border2 odd:bg-[#0b1120]">
+            <tr className="border-b-2 border-s-border2">
               <td className="sticky-owner sticky left-0 z-[1] text-[10px] font-bold uppercase tracking-[1.5px] text-s-text3">
                 Buy-In
               </td>
@@ -41,7 +42,7 @@ export default function AnnualBreakdown() {
             {EARNINGS_DATA.map(e => {
               const tc = e.total >= 0 ? 'text-s-green' : 'text-s-red'
               return (
-                <tr key={e.owner} className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors">
+                <tr key={e.owner} className="hover:bg-indigo-500/10 transition-colors">
                   <td className="sticky-owner sticky left-0 z-[1] font-bold text-s-text">
                     <div className="flex items-center gap-2">
                       <OwnerAvatar name={e.owner} size="sm" />

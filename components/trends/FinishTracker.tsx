@@ -32,8 +32,9 @@ export default function FinishTracker() {
   ]
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px] mb-4">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">
+    <div className="gl relative overflow-hidden p-[18px] mb-4">
+      <div className="bento-fill" style={{ background: 'rgba(244,63,94,0.15)' }} />
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-3 relative z-10">
         Finish Position by Year — 1=Champion · Last=Toilet Bowl
       </div>
 

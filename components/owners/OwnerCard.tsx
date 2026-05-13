@@ -21,7 +21,8 @@ export default function OwnerCard({ name, seasons }: Props) {
 
   return (
     <Link href={`/owners/${encodeURIComponent(name)}`}>
-      <div className="gl ic p-[14px] text-center rounded-[12px]">
+      <div className="gl ic p-[14px] text-center rounded-[12px] relative overflow-hidden">
+        <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
         {/* Avatar */}
         <div
           className="w-11 h-11 rounded-full mx-auto mb-[10px] flex items-center justify-center text-[16px] font-extrabold avatar-glow"

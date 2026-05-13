@@ -5,8 +5,9 @@ export default function EarningsBars() {
   const maxAbs = Math.max(...EARNINGS_DATA.map(e => Math.abs(e.total)))
 
   return (
-    <div className="gl p-[18px] mb-4">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[14px]">
+    <div className="gl p-[18px] mb-4 relative overflow-hidden">
+      <div className="bento-fill" style={{ background: 'rgba(34,197,94,0.15)' }} />
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-[14px] relative z-10">
         Net Payout Ranking
       </div>
       <div className="space-y-[6px]">

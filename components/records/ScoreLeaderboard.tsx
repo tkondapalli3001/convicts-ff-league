@@ -20,8 +20,9 @@ interface Props {
 export default function ScoreLeaderboard({ title, scores, variant, countByOwner }: Props) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-4">
-      <div className="gl p-[14px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">
+      <div className="gl p-[14px] relative overflow-hidden">
+        <div className="bento-fill" style={{ background: 'rgba(245,158,11,0.15)' }} />
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-3 relative z-10">
           Top 10 {variant === 'high' ? 'Highest' : 'Lowest'} Scores
         </div>
         {scores.slice(0, 10).map((s, rank) => (
@@ -38,8 +39,9 @@ export default function ScoreLeaderboard({ title, scores, variant, countByOwner 
         ))}
       </div>
 
-      <div className="gl p-[14px]">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">
+      <div className="gl p-[14px] relative overflow-hidden">
+        <div className="bento-fill" style={{ background: 'rgba(245,158,11,0.15)' }} />
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-3 relative z-10">
           Most {variant === 'high' ? '140+' : 'Sub-80'} Games by Manager
         </div>
         {countByOwner.slice(0, 8).map(([owner, count], i) => (

@@ -36,8 +36,9 @@ function fmt(n: number, decimals = 2): string {
 
 export default function LuckTable({ entries, year }: Props) {
   return (
-    <div className="gl p-[18px]">
-      <p className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-3">
+    <div className="gl p-[18px] relative overflow-hidden">
+      <div className="bento-fill" style={{ background: 'rgba(20,184,166,0.15)' }} />
+      <p className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-3 relative z-10">
         All-Play Luck Rankings — {year} Season
       </p>
       <div className="overflow-x-auto">

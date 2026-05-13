@@ -189,7 +189,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       {/* Back button */}
       <Link
         href="/owners"
-        className="inline-flex items-center gap-[6px] px-4 py-2 bg-s-bg3 border border-s-border rounded-[8px] text-s-text2 text-[12px] font-semibold mb-5 hover:border-s-border2 hover:text-s-text transition-all duration-150"
+        className="inline-flex items-center gap-[6px] px-4 py-2 bg-white/5 border border-white/10 rounded-[8px] text-slate-400 text-[12px] font-semibold mb-5 hover:text-white bento-interactive transition-all duration-150"
       >
         ← All Owners
       </Link>
@@ -269,7 +269,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       {/* Top Scorers */}
       {funStats.topScorers.length > 0 && (
         <div className="gl p-[14px] mb-5">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[10px]">Top Scorers</div>
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-[10px]">Top Scorers</div>
           <div className="flex flex-wrap gap-2">
             {funStats.topScorers.map(p => (
               <span
@@ -297,7 +297,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
               'px-4 py-[9px] text-[11px] font-bold tracking-[1px] uppercase border-b-2 -mb-[1px] whitespace-nowrap transition-colors duration-150 bg-transparent border-0',
               tab === t.id
                 ? 'text-s-gold border-b-2 border-s-gold'
-                : 'text-s-text3 border-transparent hover:text-s-text2',
+                : 'text-slate-400 border-transparent hover:text-white',
             ].join(' ')}
             style={{ borderBottomWidth: 2, borderBottomColor: tab === t.id ? '#f59e0b' : 'transparent' }}
           >
@@ -362,7 +362,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
             return (
               <div
                 key={`${g.year}-${g.week}-${g.team1}`}
-                className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] hover:bg-s-bg3 transition-colors duration-100"
+                className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] hover:bg-white/5 transition-colors duration-100"
               >
                 <span className="w-[60px] text-s-text2 text-[10px] flex-shrink-0 num">{g.year} W{g.week}</span>
                 <span className="font-bold w-[72px] flex-shrink-0 overflow-hidden text-ellipsis text-s-text">

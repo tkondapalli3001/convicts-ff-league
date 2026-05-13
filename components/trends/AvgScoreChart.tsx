@@ -25,11 +25,12 @@ export default function AvgScoreChart() {
   }
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px] mb-4">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">
+    <div className="gl relative overflow-hidden p-[18px] mb-4">
+      <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-3 relative z-10">
         Average Score by Season (Points Per Team Per Game)
       </div>
-      <div className="h-[200px]">
+      <div className="h-[200px] relative z-10">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid stroke="#1e2d45" strokeDasharray="3 3" />

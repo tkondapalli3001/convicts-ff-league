@@ -9,7 +9,7 @@ interface Props {
 export default function TrashTalkCard({ emoji, owner, title, color, body }: Props) {
   return (
     <div
-      className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px] mb-3 animate-fade-in"
+      className="gl relative overflow-hidden p-[18px] mb-3 animate-fade-in"
       style={{ borderLeft: `3px solid ${color}` }}
     >
       <div className="flex gap-3 items-start">

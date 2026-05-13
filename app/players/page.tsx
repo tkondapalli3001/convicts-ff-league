@@ -116,8 +116,8 @@ export default function PlayersPage() {
             className={[
               'px-4 py-[7px] rounded-[8px] border text-[12px] font-bold transition-all duration-150 cursor-pointer',
               activeTab === tab.id
-                ? 'bg-s-gold text-[#000] border-s-gold'
-                : 'bg-s-bg2 border-s-border text-s-text2 hover:border-s-border2 hover:text-s-text',
+                ? 'bg-s-gold text-[#000] border-s-gold shadow-[0_0_16px_rgba(56,189,248,0.15)]'
+                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
             ].join(' ')}
           >
             {tab.label}
@@ -127,7 +127,7 @@ export default function PlayersPage() {
 
       {/* Loading state for draft/player data */}
       {activeTab !== 'transactions' && activeTab !== 'scoring' && loading && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-s-bg2 border border-s-border rounded-[10px] mb-4 text-[12px] text-s-text2">
+        <div className="flex items-center gap-3 px-4 py-3 gl rounded-[10px] mb-4 text-[12px] text-s-text2">
           <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
           {loadingText}
         </div>
@@ -154,7 +154,7 @@ export default function PlayersPage() {
       {activeTab === 'transactions' && (
         <div>
           {txLoading && (
-            <div className="flex items-center gap-3 px-4 py-3 bg-s-bg2 border border-s-border rounded-[10px] mb-4 text-[12px] text-s-text2">
+            <div className="flex items-center gap-3 px-4 py-3 gl rounded-[10px] mb-4 text-[12px] text-s-text2">
               <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
               {txLoadingText}
             </div>

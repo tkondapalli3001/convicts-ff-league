@@ -135,7 +135,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
       className={[hideOnMobile ? 'hidden md:table-cell' : '', stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : ''].filter(Boolean).join(' ')}
       style={{
         color: sortKey === k ? '#f59e0b' : undefined,
-        background: stickyFirst ? '#090f21' : undefined,
+        background: stickyFirst ? '#0B0E11' : undefined,
       }}
     >
       {label} {sortKey === k ? (sortDir === 1 ? '↑' : '↓') : ''}
@@ -144,7 +144,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
 
   return (
     <div className="gl p-[18px]">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[14px]">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-[14px]">
         Season Standings — Click year to isolate · Double-click row to view owner
       </div>
 
@@ -158,7 +158,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
               'px-3 py-[5px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150 whitespace-nowrap',
               activeYears.has(y)
                 ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
             ].join(' ')}
           >
             {y}
@@ -192,7 +192,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
                 <tr
                   key={`${r.manager}-${r.year}`}
                   onDoubleClick={() => router.push(`/owners/${encodeURIComponent(r.manager)}`)}
-                  className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors"
+                  className="hover:bg-indigo-500/10 transition-colors"
                 >
                   <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06] font-bold text-s-text">
                     <div className="flex items-center gap-2">
@@ -239,7 +239,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
           </table>
         </div>
         {/* Right-edge gradient fade — signals scrollable content */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(8,12,20,0.85)] z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] z-10" />
       </div>
 
       <p className="mt-3 px-1 text-[10px] text-s-text3 leading-relaxed">

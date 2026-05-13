@@ -13,7 +13,7 @@
   }
   body {
     font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #020617;
+    background-color: #0B0E11;
     color: #e2e8f0;
     min-height: 100vh;
     font-size: 14px;
@@ -105,23 +105,23 @@
   .sticky-col {
     position: sticky;
     left: 0;
-    background: #0d1117;
+    background: #0B0E11;
     z-index: 1;
   }
   tbody tr:hover .sticky-col {
     background: rgba(139, 92, 246, 0.13);
   }
-  tbody tr:nth-child(even) .sticky-col { background: #0d1117; }
+  tbody tr:nth-child(even) .sticky-col { background: #0B0E11; }
   .table-sticky-col {
     position: sticky;
     left: 0;
-    background: #0d1117;
+    background: #0B0E11;
     z-index: 1;
   }
   tbody tr:hover .table-sticky-col {
     background: rgba(139, 92, 246, 0.13);
   }
-  tbody tr:nth-child(even) .table-sticky-col { background: #0d1117; }
+  tbody tr:nth-child(even) .table-sticky-col { background: #0B0E11; }
 
   /* Annual Breakdown + Season Standings: row-level banding, sticky cell inherits row color */
   .ab-table tbody tr td { background: transparent; }
@@ -138,27 +138,27 @@
 
   /* Standard glass card — data panels */
   .gl {
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
   }
 
-  /* Bento card — interactive, hover lift + violet glow */
+  /* Bento card — interactive, hover lift + sky-blue glow */
   .bento-card {
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 16px;
     overflow: hidden;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
   .bento-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 16px 48px rgba(139, 92, 246, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.04);
-    border-color: rgba(139, 92, 246, 0.32);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), 0 16px 48px rgba(139, 92, 246, 0.10);
+    border-color: rgba(255, 255, 255, 0.18);
   }
 
   /* Nebula card — glass + radial violet flare in top-right corner */
@@ -188,6 +188,28 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 32px rgba(139, 92, 246, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.04);
     border-color: rgba(139, 92, 246, 0.42);
+  }
+
+  /* Bento section accent fill — absolute radial orb, color passed via inline style */
+  .bento-fill {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+    filter: blur(48px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Interactive element hover glow — tab buttons, filter pills, action buttons */
+  .bento-interactive {
+    transition: box-shadow 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  }
+  .bento-interactive:hover {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
   }
 
   /* Owner avatar glow */

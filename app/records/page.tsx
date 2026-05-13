@@ -53,8 +53,8 @@ export default function RecordsPage() {
             className={[
               'px-4 py-[7px] rounded-[8px] border text-[12px] font-bold transition-all duration-150 cursor-pointer',
               activeTab === tab.id
-                ? 'bg-s-gold text-[#000] border-s-gold'
-                : 'bg-s-bg2 border-s-border text-s-text2 hover:border-s-border2 hover:text-s-text',
+                ? 'bg-s-gold text-[#000] border-s-gold shadow-[0_0_16px_rgba(56,189,248,0.15)]'
+                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
             ].join(' ')}
           >
             {tab.label}
@@ -67,14 +67,14 @@ export default function RecordsPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-4">
             <div>
-              <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">Scoring Extremes</div>
+              <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">Scoring Extremes</div>
               <RecordItem icon="🔥" label="Highest Single Game"     value={highScore?.pts.toFixed(2) || '—'}   context={`${highScore?.owner} · ${highScore?.year} Wk${highScore?.week} vs ${highScore?.opp}`} />
               <RecordItem icon="🥶" label="Lowest Single Game"      value={lowScore?.pts.toFixed(2)  || '—'}   context={`${lowScore?.owner} · ${lowScore?.year} Wk${lowScore?.week} vs ${lowScore?.opp}`} />
               <RecordItem icon="📈" label="Highest Season PF"       value={highPF?.pf.toFixed(1)     || '—'}   context={`${highPF?.name} · ${highPF?.year} · ${highPF ? (highPF.pf/14).toFixed(1) : '—'} pts/wk avg`} />
               <RecordItem icon="📉" label="Lowest Season PF"        value={lowPF?.pf.toFixed(1)      || '—'}   context={`${lowPF?.name} · ${lowPF?.year}`} />
             </div>
             <div>
-              <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">Matchup Records</div>
+              <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">Matchup Records</div>
               <RecordItem icon="💥" label="Largest Margin of Victory" value={`${maxMargin?.margin.toFixed(2)} pts`} context={`${maxMargin?.winner} def. ${maxMargin?.loser} · ${maxMargin?.year} Wk${maxMargin?.week}`} />
               <RecordItem icon="⚖️" label="Narrowest Victory"         value={`${minMargin?.margin.toFixed(2)} pts`} context={`${minMargin?.winner} def. ${minMargin?.loser} · ${minMargin?.year} Wk${minMargin?.week}`} />
               {biggestPlayoffBlowout && (
@@ -84,12 +84,12 @@ export default function RecordsPage() {
             </div>
           </div>
 
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">
+          <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">
             🔥 140+ Point Explosions ({high140.length} total)
           </div>
           <ScoreLeaderboard title="140+" scores={high140} variant="high" countByOwner={countByOwner(high140)} />
 
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2 mt-4">
+          <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2 mt-4">
             🥶 Sub-80 Stinkers ({low80.length} total)
           </div>
           <ScoreLeaderboard title="Sub-80" scores={low80} variant="low" countByOwner={countByOwner(low80)} />
@@ -100,14 +100,14 @@ export default function RecordsPage() {
       {activeTab === 'records' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
           <div>
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">Season Records</div>
+            <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">Season Records</div>
             {bestWinPct  && <RecordItem icon="🏆" label="Best Single-Season Win%"   value={`${(bestWinPct.wins /(bestWinPct.wins +bestWinPct.losses )*100).toFixed(1)}%`} context={`${bestWinPct.name} · ${bestWinPct.year} (${bestWinPct.wins}-${bestWinPct.losses})`} />}
             {worstWinPct && <RecordItem icon="💀" label="Worst Single-Season Win%"  value={`${(worstWinPct.wins/(worstWinPct.wins+worstWinPct.losses)*100).toFixed(1)}%`} context={`${worstWinPct.name} · ${worstWinPct.year} (${worstWinPct.wins}-${worstWinPct.losses})`} />}
             <RecordItem icon="📊" label="Best Season PF Margin"    value={`+${(bestMarginSeason.pf -bestMarginSeason.pa).toFixed(1)}`}  context={`${bestMarginSeason.name} · ${bestMarginSeason.year}`} />
             <RecordItem icon="🩸" label="Worst Season PF Margin"   value={`${(worstMarginSeason.pf-worstMarginSeason.pa).toFixed(1)}`} context={`${worstMarginSeason.name} · ${worstMarginSeason.year}`} />
           </div>
           <div>
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-2">Career Milestones</div>
+            <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">Career Milestones</div>
             <RecordItem icon="💰" label="All-Time Most Money Won"   value="+$450"  context="Kerry — won 2025 for +$675 in biggest single-year payout" />
             <RecordItem icon="🩸" label="All-Time Most Money Lost"  value="-$410"  context="Teja — 7 seasons, 0 rings, 1x toilet bowl (2021) 💔" />
             <RecordItem icon="👑" label="Most Championships"        value="2x — Daniyaal" context="2020 & 2023 · Armaan & Dustin share 0.5x (2022 co-champs)" />

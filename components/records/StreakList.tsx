@@ -17,8 +17,9 @@ interface Props {
 
 export default function StreakList({ title, streaks, variant }: Props) {
   return (
-    <div className="gl p-[14px]">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">{title}</div>
+    <div className="gl p-[14px] relative overflow-hidden">
+      <div className="bento-fill" style={{ background: 'rgba(245,158,11,0.15)' }} />
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-3 relative z-10">{title}</div>
       {streaks.map(({ owner, streak, startYear, startWeek, endYear, endWeek }) => (
         <div key={owner} className="flex items-center gap-2 py-[6px] border-b border-s-bg3 text-[12px]">
           <OwnerAvatar name={owner} size="sm" />

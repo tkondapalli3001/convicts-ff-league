@@ -25,10 +25,11 @@ export default function TransactionFilters({
   const types: TxTypeFilter[] = ['trade', 'waivers']
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[14px] mb-4">
+    <div className="gl relative overflow-hidden rounded-[12px] p-[14px] mb-4">
+      <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
       {/* Type filter */}
-      <div className="mb-3">
-        <div className="text-[9px] font-bold tracking-[2px] uppercase text-s-text3 mb-2">Type</div>
+      <div className="mb-3 relative z-10">
+        <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-400 mb-2">Type</div>
         <div className="flex gap-[6px] flex-wrap">
           {types.map(t => (
             <button
@@ -38,7 +39,7 @@ export default function TransactionFilters({
                 'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                 activeTypes.has(t)
                   ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                  : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
               ].join(' ')}
             >
               {TYPE_LABELS[t]}
@@ -48,8 +49,8 @@ export default function TransactionFilters({
       </div>
 
       {/* Year filter */}
-      <div className="mb-3">
-        <div className="text-[9px] font-bold tracking-[2px] uppercase text-s-text3 mb-2">Year</div>
+      <div className="mb-3 relative z-10">
+        <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-400 mb-2">Year</div>
         <div className="flex gap-[6px] flex-wrap">
           {years.map(y => (
             <button
@@ -59,7 +60,7 @@ export default function TransactionFilters({
                 'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                 activeYears.has(y)
                   ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                  : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
               ].join(' ')}
             >
               {y}
@@ -69,8 +70,8 @@ export default function TransactionFilters({
       </div>
 
       {/* Owner filter */}
-      <div>
-        <div className="text-[9px] font-bold tracking-[2px] uppercase text-s-text3 mb-2">Owner</div>
+      <div className="relative z-10">
+        <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-400 mb-2">Owner</div>
         <div className="flex gap-[6px] flex-wrap">
           {owners.map(name => (
             <button
@@ -80,7 +81,7 @@ export default function TransactionFilters({
                 'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                 activeOwners.has(name)
                   ? 'bg-[#1a3020] border-s-green text-[#86efac]'
-                  : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
               ].join(' ')}
             >
               {name}

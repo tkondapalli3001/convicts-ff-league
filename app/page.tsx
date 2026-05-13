@@ -244,7 +244,7 @@ export default function HomePage() {
               <thead>
                 <tr>
                   <th className="w-10 text-center">#</th>
-                  <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#090f21' }}>Manager</th>
+                  <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#0B0E11' }}>Manager</th>
                   <th>W–L</th>
                   <th>Win%</th>
                   <th className="text-right">Avg PPG</th>
@@ -268,7 +268,7 @@ export default function HomePage() {
                     <tr
                       key={d.name}
                       onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}
-                      className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors"
+                      className="hover:bg-indigo-500/10 transition-colors"
                     >
                       <td className="text-center">
                         <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[10px] font-extrabold ${rankCls}`}>
@@ -361,7 +361,7 @@ export default function HomePage() {
               </tbody>
             </table>
             </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(8,12,20,0.85)] z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] z-10" />
           </div>
         </div>
 

@@ -138,8 +138,7 @@ function GameDetailModal({ detail, onClose }: { detail: GameDetail; onClose: () 
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[20px] border border-s-border"
-        style={{ background: '#0e1117' }}
+        className="gl w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[20px]"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-s-border/60">
@@ -233,7 +232,7 @@ function MatchupCard({
   return (
     <div
       className={`border rounded-[8px] p-[10px] cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-lg
-        ${isChampionship ? 'bg-[#1e1a00] border-[#5a3800] hover:border-[#9a6800]' : 'bg-[#1e1e2e] border-s-border hover:border-s-border2'}`}
+        ${isChampionship ? 'bg-amber-950/20 border-amber-500/20 hover:border-amber-500/40' : 'bg-white/5 border-white/[0.08] hover:border-white/[0.15]'}`}
       onClick={onClick}
       title="Click to view game details"
     >
@@ -339,7 +338,7 @@ export default function PlayoffBracket({ year }: Props) {
 
   if (!bracket) {
     return (
-      <div className="rounded-[12px] bg-[#252535] p-[18px] text-center text-s-text3 text-[12px]">
+      <div className="gl p-[18px] text-center text-s-text3 text-[12px]">
         No bracket data available for {year}
       </div>
     )
@@ -351,7 +350,7 @@ export default function PlayoffBracket({ year }: Props) {
 
   if (rounds.length === 0) {
     return (
-      <div className="rounded-[12px] bg-[#252535] p-[18px] text-center text-s-text3 text-[12px]">
+      <div className="gl p-[18px] text-center text-s-text3 text-[12px]">
         Bracket not yet available for {year}
       </div>
     )
@@ -367,8 +366,9 @@ export default function PlayoffBracket({ year }: Props) {
 
   return (
     <>
-      <div className="rounded-[12px] bg-[#252535] p-[18px] mt-4">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-1">
+      <div className="gl p-[18px] mt-4 relative overflow-hidden">
+        <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
+        <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-1">
           {year} Playoff Bracket
         </div>
         <div className="text-[9px] text-s-text3/50 mb-4">Click any matchup to view game details</div>

@@ -29,8 +29,7 @@ export default function HeroSection({
 }: HeroProps) {
   return (
     <div
-      className="relative overflow-hidden rounded-[20px] border border-white/[0.07] p-7 md:p-10 animate-fade-in"
-      style={{ background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(20px)' }}
+      className="gl relative overflow-hidden rounded-[20px] border-white/10 p-7 md:p-10 animate-fade-in"
     >
       {/* Champion color orb — top-right */}
       <div
@@ -113,8 +112,7 @@ export default function HeroSection({
         <div className="flex-shrink-0 flex flex-col gap-3 min-w-[200px]">
           {/* Runner-Up */}
           <div
-            className="rounded-[14px] border border-white/[0.07] p-4 transition-all duration-150 hover:border-white/[0.12]"
-            style={{ background: 'rgba(15, 23, 42, 0.6)' }}
+            className="gl rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-white/20"
           >
             <div className="flex items-center gap-3">
               <span className="text-[26px] leading-none flex-shrink-0">🥈</span>
@@ -134,8 +132,7 @@ export default function HeroSection({
 
           {/* Toilet Bowl */}
           <div
-            className="rounded-[14px] border border-white/[0.07] p-4 transition-all duration-150 hover:border-red-500/20"
-            style={{ background: 'rgba(15, 23, 42, 0.6)' }}
+            className="gl rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-red-500/20"
           >
             <div className="flex items-center gap-3">
               <span className="text-[26px] leading-none flex-shrink-0">🚽</span>

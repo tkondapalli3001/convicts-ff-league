@@ -116,7 +116,7 @@ export default function CareerLeaderboard() {
       ].filter(Boolean).join(' ')}
       style={{
         color: sortKey === k ? '#f59e0b' : undefined,
-        background: stickyFirst ? '#090f21' : undefined,
+        background: stickyFirst ? '#0B0E11' : undefined,
       }}
     >
       {label}
@@ -124,9 +124,10 @@ export default function CareerLeaderboard() {
   )
 
   return (
-    <div className="gl p-[18px]">
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
+    <div className="gl p-[18px] relative overflow-hidden">
+      <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2 relative z-10">
+        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400">
           Career Leaderboard{playoffOnly ? ' — Playoff Games Only' : ''}
         </div>
         <button
@@ -135,7 +136,7 @@ export default function CareerLeaderboard() {
             'px-3 py-[5px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
             playoffOnly
               ? 'bg-[#2d1a00] border-s-gold text-s-gold'
-              : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+              : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
           ].join(' ')}
         >
           {playoffOnly ? '← All Games' : 'Playoffs Only'}
@@ -167,7 +168,7 @@ export default function CareerLeaderboard() {
                 const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg4 text-s-text3'
                 const pct = (d.winpct * 100).toFixed(1)
                 return (
-                  <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)} className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors">
+                  <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)} className="hover:bg-indigo-500/10 transition-colors">
                     <td>
                       <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold num ${rankCls}`}>{i + 1}</span>
                     </td>

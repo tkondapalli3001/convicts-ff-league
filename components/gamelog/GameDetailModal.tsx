@@ -155,7 +155,7 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
       className="fixed inset-0 bg-black/80 z-[500] flex items-center justify-center p-4 backdrop-blur-sm"
       onClick={e => { if (e.target === e.currentTarget) handleClose() }}
     >
-      <div className="bg-s-bg2 border border-s-border2 rounded-[18px] p-5 max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+      <div className="gl rounded-[18px] p-5 max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl">
         <div className="flex justify-between items-center mb-4">
           <span className="text-[15px] font-extrabold text-s-text">{modal.title}</span>
           <button
