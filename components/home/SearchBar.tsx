@@ -45,7 +45,7 @@ const POS_COLORS: Record<string, string> = {
 
 // ─── Manager Card ─────────────────────────────────────────────────────────────
 
-function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => void }) {
+function ManagerCard({ data, playerWinRates = [], onClose }: { data: ManagerCardData; playerWinRates?: PlayerStat[]; onClose: () => void }) {
   const router = useRouter()
   const { state } = useLeague()
   const [imgError, setImgError] = useState(false)
@@ -54,6 +54,29 @@ function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => 
   const avatarUrl = state.ownerAvatarMap?.[data.name]
   const initials = fullNameInitials(data.name)
   const fullDisplayName = OWNER_FULL_NAMES[data.name] || data.name
+
+  const mvpName = useMemo(() => {
+    if (playerWinRates.length === 0) return null
+    const playerById = new Map(playerWinRates.map(s => [s.player_id, s.name]))
+    const totals: Record<string, number> = {}
+    for (const [yearStr, weekMap] of Object.entries(state.matchups)) {
+      const rMap = state.rosterUserMaps[Number(yearStr)] ?? {}
+      for (const [, { matchups }] of Object.entries(weekMap)) {
+        for (const entry of matchups) {
+          if (rMap[String(entry.roster_id)] !== data.name) continue
+          const starters = entry.starters ?? []
+          const pts = entry.starters_points ?? []
+          starters.forEach((pid, i) => {
+            if (!pid || pid === '0') return
+            totals[pid] = (totals[pid] ?? 0) + (pts[i] ?? 0)
+          })
+        }
+      }
+    }
+    const sorted = Object.entries(totals).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
+    const topId = sorted[0]?.[0]
+    return topId ? (playerById.get(topId) ?? null) : null
+  }, [state.matchups, state.rosterUserMaps, data.name, playerWinRates])
 
   return (
     <div className="bento-card animate-fade-in">
@@ -96,8 +119,12 @@ function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => 
               <span className="text-[22px] font-black text-s-text tracking-tight leading-none">
                 {fullDisplayName}
               </span>
-              {data.champs > 0 && <span className="text-base">🏆</span>}
-              {data.shame > 0 && <span className="text-base">🚽</span>}
+              {data.champs > 0 && Array.from({ length: Math.ceil(data.champs) }, (_, i) => (
+                <span key={i} className="text-base">🏆</span>
+              ))}
+              {data.shame > 0 && Array.from({ length: data.shame }, (_, i) => (
+                <span key={i} className="text-base">🚽</span>
+              ))}
             </div>
             <div className="text-[11px] text-s-text3 font-medium mt-1">
               {data.numSeasons} season{data.numSeasons !== 1 ? 's' : ''} &middot;{' '}
@@ -148,34 +175,40 @@ function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => 
         ))}
       </div>
 
-      {/* Best season */}
-      <div className="px-5 py-4 border-t border-s-border/60">
-        <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">Best Season</div>
-        {data.bestSeasonYear ? (
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-[16px] font-bold text-s-text">{data.bestSeasonYear}</span>
-            <span className="text-[12px] font-semibold text-s-green">
-              {data.bestSeasonWins}W–{data.bestSeasonLosses}L
-            </span>
-            {data.bestSeasonFinish != null && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-s-gold/10 text-s-gold border border-s-gold/20 font-bold">
-                #{data.bestSeasonFinish} Finish
+      {/* Best Season · Top Rival · MVP */}
+      <div className="grid grid-cols-3 border-t border-s-border/60">
+        <div className="px-4 py-3 border-r border-s-border/60">
+          <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">Best Season</div>
+          {data.bestSeasonYear ? (
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[15px] font-bold text-s-text">{data.bestSeasonYear}</span>
+              <span className="text-[11px] font-semibold text-s-green">
+                {data.bestSeasonWins}W–{data.bestSeasonLosses}L
               </span>
-            )}
-          </div>
-        ) : (
-          <span className="text-s-text3 text-[12px]">—</span>
-        )}
-      </div>
+              {data.bestSeasonFinish != null && (
+                <span className="text-[9px] self-start px-1.5 py-0.5 rounded-full bg-s-gold/10 text-s-gold border border-s-gold/20 font-bold">
+                  #{data.bestSeasonFinish} Finish
+                </span>
+              )}
+            </div>
+          ) : <span className="text-s-text3 text-[12px]">—</span>}
+        </div>
 
-      {/* Top Rival */}
-      <div className="px-5 py-4 border-t border-s-border/60">
-        <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1">Top Rival</div>
-        <div
-          className="text-[14px] font-bold"
-          style={{ color: data.topRival ? ownerColor(data.topRival) : '#6e7681' }}
-        >
-          {data.topRival ?? '—'}
+        <div className="px-4 py-3 border-r border-s-border/60">
+          <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1">Top Rival</div>
+          <div
+            className="text-[13px] font-bold"
+            style={{ color: data.topRival ? ownerColor(data.topRival) : '#6e7681' }}
+          >
+            {data.topRival ?? '—'}
+          </div>
+        </div>
+
+        <div className="px-4 py-3">
+          <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1">MVP</div>
+          <div className="text-[13px] font-bold text-s-text leading-snug">
+            {mvpName ?? '—'}
+          </div>
         </div>
       </div>
 
@@ -272,7 +305,7 @@ function PlayerCard({
           [
             { label: 'Games Started', value: stat.games },
             { label: 'Wins', value: stat.wins },
-            { label: 'Top Owner', value: stat.topOwner || '—' },
+            { label: 'Most Started By', value: stat.topOwner || '—' },
             {
               label: 'Avg Draft Pick',
               value: ownership ? `#${ownership.avgPickNo.toFixed(1)}` : '—',
@@ -293,23 +326,13 @@ function PlayerCard({
         ))}
       </div>
 
-      {/* Draft history + most started by */}
+      {/* Draft history */}
       {ownerList && (
         <div className="px-5 py-4 border-t border-s-border/60">
-          <div className="flex items-start justify-between gap-6 flex-wrap">
-            <div className="flex-1 min-w-0">
-              <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">
-                Draft History &mdash; {ownership!.picks.length}× drafted
-              </div>
-              <div className="text-[12px] text-s-text2 leading-relaxed">{ownerList}</div>
-            </div>
-            {stat.topOwner && (
-              <div className="flex-shrink-0">
-                <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">Most Started By</div>
-                <div className="text-[13px] font-bold text-s-text">{stat.topOwner}</div>
-              </div>
-            )}
+          <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">
+            Draft History &mdash; {ownership!.picks.length}× drafted
           </div>
+          <div className="text-[12px] text-s-text2 leading-relaxed">{ownerList}</div>
         </div>
       )}
 
@@ -583,7 +606,7 @@ export default function SearchBar({ managerData }: Props) {
       {selected && !dropdownOpen && (
         <div className="mt-3">
           {selectedManager && (
-            <ManagerCard data={selectedManager} onClose={() => { setSelected(null); setQuery('') }} />
+            <ManagerCard data={selectedManager} playerWinRates={playerWinRates} onClose={() => { setSelected(null); setQuery('') }} />
           )}
           {selectedPlayerEntry && (
             <PlayerCard stat={selectedPlayerEntry.stat} ownership={selectedPlayerEntry.ownership}
