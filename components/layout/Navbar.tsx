@@ -5,11 +5,12 @@ import { usePathname } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import {
   Home, DollarSign, Users, Trophy,
-  CalendarDays, Zap, ClipboardList, Activity,
+  CalendarDays, Zap, ClipboardList, Activity, LayoutDashboard,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',         label: 'Home',     icon: Home          },
+  { href: '/',           label: 'Home',      icon: Home             },
+  { href: '/dashboard',  label: 'Dashboard', icon: LayoutDashboard  },
   { href: '/owners',   label: 'Owners',   icon: Users         },
   { href: '/earnings', label: 'Earnings', icon: DollarSign    },
   { href: '/seasons',  label: 'Seasons',  icon: CalendarDays  },
