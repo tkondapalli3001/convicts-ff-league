@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 
 const POS_COLORS: Record<string, string> = {
@@ -27,9 +27,10 @@ interface PickResult {
 export default function StealsBusts() {
   const { state } = useLeague()
   const { draftData, matchups, rosterUserMaps, years } = state
+  const [selectedYear, setSelectedYear] = useState<number | null>(null)
 
-  const { steals, busts } = useMemo(() => {
-    const allResults: PickResult[] = []
+  const allResults = useMemo<PickResult[]>(() => {
+    const results: PickResult[] = []
 
     for (const year of years) {
       const draft = draftData[year]
@@ -38,7 +39,6 @@ export default function StealsBusts() {
       const weekData = matchups[year]
       if (!weekData) continue
 
-      // Aggregate total points per player_id for this season
       const playerPts: Record<string, number> = {}
       for (const { matchups: weekMatchups } of Object.values(weekData)) {
         for (const m of weekMatchups) {
@@ -49,7 +49,6 @@ export default function StealsBusts() {
         }
       }
 
-      // Only include players with actual production (starters produce points)
       const pickedPlayers = draft.picks.map(pick => {
         const pts = playerPts[pick.player_id] ?? 0
         const owner = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
@@ -65,18 +64,15 @@ export default function StealsBusts() {
         }
       }).filter(p => p.totalPts > 0 && p.position !== '?')
 
-      // Per-position: compute pick rank and points rank
       const positions = [...new Set(pickedPlayers.map(p => p.position))]
       for (const pos of positions) {
         const group = pickedPlayers
           .filter(p => p.position === pos)
           .sort((a, b) => a.pickNo - b.pickNo)
-
         const byPts = [...group].sort((a, b) => b.totalPts - a.totalPts)
-
         group.forEach((p, pickIdx) => {
           const ptsIdx = byPts.findIndex(x => x.playerName === p.playerName && x.pickNo === p.pickNo)
-          allResults.push({
+          results.push({
             ...p,
             pickRank: pickIdx + 1,
             ptsRank: ptsIdx + 1,
@@ -85,19 +81,15 @@ export default function StealsBusts() {
         })
       }
     }
-
-    // Steals: high value (picked late, produced well)
-    const steals = [...allResults]
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 10)
-
-    // Busts: low value (picked early, produced poorly)
-    const busts = [...allResults]
-      .sort((a, b) => a.value - b.value)
-      .slice(0, 10)
-
-    return { steals, busts }
+    return results
   }, [draftData, matchups, rosterUserMaps, years])
+
+  const filtered = selectedYear !== null
+    ? allResults.filter(r => r.year === selectedYear)
+    : allResults
+
+  const steals = [...filtered].sort((a, b) => b.value - a.value).slice(0, 10)
+  const busts  = [...filtered].sort((a, b) => a.value - b.value).slice(0, 10)
 
   if (!steals.length && !busts.length) {
     return (
@@ -107,8 +99,39 @@ export default function StealsBusts() {
     )
   }
 
+  const sortedYears = [...years].sort((a, b) => a - b)
+
   return (
     <div className="space-y-4">
+      {/* Year filter */}
+      <div className="flex gap-[6px] flex-wrap items-center">
+        <button
+          onClick={() => setSelectedYear(null)}
+          className={[
+            'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+            selectedYear === null
+              ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
+              : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+          ].join(' ')}
+        >
+          All Years
+        </button>
+        {sortedYears.map(y => (
+          <button
+            key={y}
+            onClick={() => setSelectedYear(y === selectedYear ? null : y)}
+            className={[
+              'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+              selectedYear === y
+                ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
+                : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
+            ].join(' ')}
+          >
+            {y}
+          </button>
+        ))}
+      </div>
+
       <p className="text-[11px] text-s-text3">
         Steals picked later than their positional peers but outscored them. Busts were drafted early but underperformed.
       </p>

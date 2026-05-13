@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList,
 } from 'recharts'
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 
@@ -82,13 +82,19 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
             labelFormatter={(label) => `${label} Season`}
           />
           <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-            {data.map((entry, i) => (
+            {data.map((entry) => (
               <Cell
                 key={entry.year}
                 fill={entry.count > 0 ? '#f59e0b' : '#1e2739'}
                 fillOpacity={entry.count > 0 ? 0.85 : 1}
               />
             ))}
+            <LabelList
+              dataKey="count"
+              position="top"
+              formatter={(val: number) => (val > 0 ? val : '')}
+              style={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }}
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

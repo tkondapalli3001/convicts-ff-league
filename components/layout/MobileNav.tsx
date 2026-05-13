@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { href: '/owners',   label: 'Owners',  icon: Users         },
   { href: '/earnings', label: 'Cash',    icon: DollarSign    },
   { href: '/draft',    label: 'Draft',   icon: ClipboardList },
-  { href: '/gamelog',  label: 'Seasons', icon: CalendarDays  },
+  { href: '/seasons',  label: 'Seasons', icon: CalendarDays  },
   { href: '/records',  label: 'Records', icon: Trophy        },
   { href: '/players',  label: 'Players', icon: Zap           },
 ]

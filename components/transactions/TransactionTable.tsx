@@ -5,7 +5,7 @@ import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 const TYPE_BADGE: Record<string, { label: string; className: string }> = {
   trade:      { label: 'TRADE',  className: 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]' },
   waiver:     { label: 'WAV',    className: 'bg-[#1a2010] border-s-green text-[#86efac]' },
-  free_agent: { label: 'FA',     className: 'bg-s-bg4 border-s-border text-s-text2' },
+  free_agent: { label: 'WAV',    className: 'bg-[#1a2010] border-s-green text-[#86efac]' },
 }
 
 interface Props {
@@ -27,7 +27,7 @@ function txSummary(tx: EnrichedTransaction): string {
     const bid = tx.settings?.waiver_bid
     return `${owner} claimed ${added || '—'}${bid ? ` ($${bid})` : ''}`
   }
-  return `${owner} signed ${added || '—'}`
+  return `${owner} claimed ${added || '—'}`
 }
 
 export default function TransactionTable({ transactions, onClick }: Props) {

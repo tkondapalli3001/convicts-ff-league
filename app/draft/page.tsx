@@ -77,6 +77,18 @@ function DraftSlotTable() {
     return acc
   }, [rows])
 
+  const managerAvgSlot = useMemo(() => {
+    const totals: Record<string, { sum: number; count: number }> = {}
+    for (const row of rows) {
+      if (!totals[row.owner]) totals[row.owner] = { sum: 0, count: 0 }
+      totals[row.owner].sum += row.slot
+      totals[row.owner].count += 1
+    }
+    return Object.entries(totals)
+      .map(([owner, { sum, count }]) => ({ owner, avgSlot: sum / count, count }))
+      .sort((a, b) => b.avgSlot - a.avgSlot)
+  }, [rows])
+
   if (!rows.length) {
     return (
       <div className="gl p-6 text-center text-s-text3 text-[12px]">
@@ -190,6 +202,39 @@ function DraftSlotTable() {
                 </>
               )
             })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Manager avg draft slot table */}
+      <div className="gl overflow-hidden">
+        <div className="px-4 py-3 border-b border-s-border">
+          <span className="text-[12px] font-extrabold tracking-[1.5px] uppercase text-s-text">Avg Draft Slot by Manager</span>
+          <span className="text-[11px] text-s-text3 ml-2">· higher = later slots on average</span>
+        </div>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Manager</th>
+              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Avg Slot</th>
+              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border"># Drafts</th>
+            </tr>
+          </thead>
+          <tbody>
+            {managerAvgSlot.map((row, i) => (
+              <tr key={row.owner} className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-s-text3 w-5 text-right">{i + 1}</span>
+                    <span className="text-[13px] font-semibold text-s-text">{row.owner}</span>
+                  </div>
+                </td>
+                <td className="px-3 py-3 text-center">
+                  <span className="text-[14px] font-bold text-s-text2 font-mono">{row.avgSlot.toFixed(1)}</span>
+                </td>
+                <td className="px-3 py-3 text-center text-[13px] text-s-text3">{row.count}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

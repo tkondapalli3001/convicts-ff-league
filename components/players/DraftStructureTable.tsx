@@ -1,12 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import type { DraftStructureEntry } from '@/lib/data-processing'
 
 const STRATEGY_DESCRIPTIONS: Record<string, string> = {
   'Zero-RB':  'No RBs in rounds 1–5. Loads up on WRs and TEs early, grabs RBs on the waiver wire.',
   'Hero-RB':  'First-round pick is a RB. Bet on one elite workhorse, fill the rest with receivers.',
   'RB-Heavy': '3+ RBs in rounds 1–5. Running back by committee — quantity over quality at the position.',
-  'WR-Heavy': '3+ WRs in rounds 1–5 with at most 1 RB. Volume pass-catcher approach, stream RBs.',
   'Balanced': '2 RBs and 2 WRs in rounds 1–5. Mix of skills, no strong positional commitment.',
 }
 
@@ -14,8 +14,14 @@ const STRATEGY_COLORS: Record<string, string> = {
   'Zero-RB':  'text-[#60a5fa]',
   'Hero-RB':  'text-[#22c55e]',
   'RB-Heavy': 'text-[#f97316]',
-  'WR-Heavy': 'text-[#a78bfa]',
   'Balanced': 'text-[#94a3b8]',
+}
+
+function ordinal(n: number) {
+  if (n === 1) return 'st'
+  if (n === 2) return 'nd'
+  if (n === 3) return 'rd'
+  return 'th'
 }
 
 interface Props {
@@ -23,6 +29,8 @@ interface Props {
 }
 
 export default function DraftStructureTable({ data }: Props) {
+  const [selectedStrategy, setSelectedStrategy] = useState<string | null>(null)
+
   if (!data.length) {
     return (
       <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
@@ -32,6 +40,7 @@ export default function DraftStructureTable({ data }: Props) {
   }
 
   const best = data.reduce((prev, cur) => cur.avgFinish < prev.avgFinish ? cur : prev, data[0])
+  const selectedEntry = data.find(e => e.strategy === selectedStrategy) ?? null
 
   return (
     <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
@@ -39,24 +48,37 @@ export default function DraftStructureTable({ data }: Props) {
         Draft Strategy vs Season Outcome
       </div>
       <div className="text-[11px] text-s-text3 mb-4">
-        Based on rounds 1–5 position selection across all seasons
+        Based on rounds 1–5 position selection across all seasons · Click a strategy to see instances
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {data.map(entry => {
           const color = STRATEGY_COLORS[entry.strategy] ?? 'text-s-text2'
           const isBest = entry.strategy === best.strategy
+          const isSelected = entry.strategy === selectedStrategy
           return (
             <div
               key={entry.strategy}
-              className={`rounded-[10px] p-4 border ${isBest ? 'border-s-gold bg-[#1a1200]' : 'border-s-border bg-s-bg3'}`}
+              onClick={() => setSelectedStrategy(isSelected ? null : entry.strategy)}
+              className={`rounded-[10px] p-4 border cursor-pointer transition-all duration-150 ${
+                isSelected
+                  ? 'border-s-blue bg-[#0a1628] ring-1 ring-s-blue/40'
+                  : isBest
+                  ? 'border-s-gold bg-[#1a1200] hover:border-s-gold/70'
+                  : 'border-s-border bg-s-bg3 hover:border-s-border2'
+              }`}
             >
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <span className={`text-[14px] font-extrabold ${color}`}>{entry.strategy}</span>
-                  {isBest && (
+                  {isBest && !isSelected && (
                     <span className="ml-2 text-[9px] font-bold uppercase tracking-[1px] text-s-gold bg-[#3d2000] px-[6px] py-[2px] rounded-full border border-[#5a3200]">
                       Best Avg Finish
+                    </span>
+                  )}
+                  {isSelected && (
+                    <span className="ml-2 text-[9px] font-bold uppercase tracking-[1px] text-[#93c5fd] bg-[#0a1e3d] px-[6px] py-[2px] rounded-full border border-s-blue/40">
+                      Selected
                     </span>
                   )}
                 </div>
@@ -79,6 +101,49 @@ export default function DraftStructureTable({ data }: Props) {
           )
         })}
       </div>
+
+      {/* Instance detail panel */}
+      {selectedEntry && (
+        <div className="mb-4 rounded-[10px] border border-s-blue/30 bg-[#080e1a] p-4">
+          <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#93c5fd] mb-3">
+            {selectedEntry.strategy} · {selectedEntry.examples.length} instance{selectedEntry.examples.length !== 1 ? 's' : ''}
+          </div>
+          <table className="w-full border-collapse text-[12px]">
+            <thead>
+              <tr>
+                <th className="text-left py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Year</th>
+                <th className="text-left py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Manager</th>
+                <th className="text-center py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Finish</th>
+                <th className="text-center py-1.5 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Playoffs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...selectedEntry.examples]
+                .sort((a, b) => b.year - a.year || (a.finish ?? 99) - (b.finish ?? 99))
+                .map((ex, i) => (
+                  <tr key={`${ex.year}-${ex.owner}-${i}`} className="border-t border-s-border/30">
+                    <td className="py-1.5 pr-4 text-s-text3 font-bold">{ex.year}</td>
+                    <td className="py-1.5 pr-4 font-semibold text-s-text">{ex.owner}</td>
+                    <td className="py-1.5 pr-4 text-center font-bold text-s-text2">
+                      {ex.finish === null ? '—'
+                        : ex.finish === 1 ? '🏆 1st'
+                        : `${ex.finish}${ordinal(ex.finish)}`}
+                    </td>
+                    <td className="py-1.5 text-center">
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                        ex.madePlayoffs
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-red-500/20 text-red-400'
+                      }`}>
+                        {ex.madePlayoffs ? 'Yes' : 'No'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <table className="w-full border-collapse text-[12px]">
         <thead>

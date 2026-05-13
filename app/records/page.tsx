@@ -9,18 +9,16 @@ import RecordItem from '@/components/shared/RecordItem'
 import ScoreLeaderboard from '@/components/records/ScoreLeaderboard'
 import StreakList from '@/components/records/StreakList'
 import FinishTracker from '@/components/trends/FinishTracker'
-import AvgScoreChart from '@/components/trends/AvgScoreChart'
 import TrashTalkCard from '@/components/trends/TrashTalkCard'
 import { TRASH_TALK } from '@/lib/constants'
 
-type Tab = 'extremes' | 'records' | 'streaks' | 'finish' | 'scoring' | 'trashtalk'
+type Tab = 'extremes' | 'records' | 'streaks' | 'finish' | 'trashtalk'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'extremes',  label: 'Extremes'       },
   { id: 'records',   label: 'Records'        },
   { id: 'streaks',   label: 'Streaks'        },
   { id: 'finish',    label: 'Finish Tracker' },
-  { id: 'scoring',   label: 'Scoring'        },
   { id: 'trashtalk', label: 'Trash Talk'     },
 ]
 
@@ -128,9 +126,6 @@ export default function RecordsPage() {
 
       {/* ── FINISH TRACKER TAB ───────────────────────────────────── */}
       {activeTab === 'finish' && <FinishTracker />}
-
-      {/* ── SCORING TAB ──────────────────────────────────────────── */}
-      {activeTab === 'scoring' && <AvgScoreChart />}
 
       {/* ── TRASH TALK TAB ───────────────────────────────────────── */}
       {activeTab === 'trashtalk' && (

@@ -1,29 +1,28 @@
 'use client'
 
-import type { Transaction } from '@/types'
+export type TxTypeFilter = 'trade' | 'waivers'
 
 interface Props {
   years: number[]
   owners: string[]
   activeYears: Set<number>
   activeOwners: Set<string>
-  activeTypes: Set<Transaction['type']>
+  activeTypes: Set<TxTypeFilter>
   onToggleYear: (y: number) => void
   onToggleOwner: (name: string) => void
-  onToggleType: (t: Transaction['type']) => void
+  onToggleType: (t: TxTypeFilter) => void
 }
 
-const TYPE_LABELS: Record<Transaction['type'], string> = {
-  trade:      'Trade',
-  waiver:     'Waiver',
-  free_agent: 'Free Agent',
+const TYPE_LABELS: Record<TxTypeFilter, string> = {
+  trade:   'Trade',
+  waivers: 'Waivers',
 }
 
 export default function TransactionFilters({
   years, owners, activeYears, activeOwners, activeTypes,
   onToggleYear, onToggleOwner, onToggleType,
 }: Props) {
-  const types: Transaction['type'][] = ['trade', 'waiver', 'free_agent']
+  const types: TxTypeFilter[] = ['trade', 'waivers']
 
   return (
     <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[14px] mb-4">

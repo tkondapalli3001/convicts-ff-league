@@ -9,7 +9,7 @@ import ErrorState from '@/components/shared/ErrorState'
 import TransactionFilters from '@/components/transactions/TransactionFilters'
 import TransactionTable from '@/components/transactions/TransactionTable'
 import TransactionDetailModal from '@/components/transactions/TransactionDetailModal'
-import type { Transaction } from '@/types'
+import type { TxTypeFilter } from '@/components/transactions/TransactionFilters'
 
 export default function TransactionsPage() {
   const { state } = useLeague()
@@ -18,7 +18,7 @@ export default function TransactionsPage() {
 
   const [activeYears, setActiveYears] = useState<Set<number>>(new Set())
   const [activeOwners, setActiveOwners] = useState<Set<string>>(new Set())
-  const [activeTypes, setActiveTypes] = useState<Set<Transaction['type']>>(new Set(['trade', 'waiver', 'free_agent']))
+  const [activeTypes, setActiveTypes] = useState<Set<TxTypeFilter>>(new Set(['trade', 'waivers']))
   const [selectedTx, setSelectedTx] = useState<EnrichedTransaction | null>(null)
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function TransactionsPage() {
     })
   }
 
-  function toggleType(t: Transaction['type']) {
+  function toggleType(t: TxTypeFilter) {
     setActiveTypes(prev => {
       const next = new Set(prev)
       if (next.has(t)) {
@@ -63,7 +63,8 @@ export default function TransactionsPage() {
   const filtered = useMemo(() => {
     return transactions.filter(tx => {
       if (!activeYears.has(tx.year)) return false
-      if (!activeTypes.has(tx.type)) return false
+      const txCategory: TxTypeFilter = tx.type === 'trade' ? 'trade' : 'waivers'
+      if (!activeTypes.has(txCategory)) return false
       if (activeOwners.size > 0) {
         const matches = tx.ownerNames.some(n => activeOwners.has(n))
         if (!matches) return false

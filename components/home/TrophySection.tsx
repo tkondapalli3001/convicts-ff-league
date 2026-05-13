@@ -18,10 +18,13 @@ function computeSeed(rosterId: number, year: number, state: ReturnType<typeof us
 }
 
 function computeSeedFromOwnerSeasons(ownerName: string, year: number, state: ReturnType<typeof useLeague>['state']): number | null {
-  const entries = Object.entries(state.ownerSeasons)
-    .map(([name, seasons]) => {
-      const s = seasons.find(x => x.year === year)
-      return s ? { name, wins: s.wins, pf: s.pf } : null
+  // Use rosterUserMaps as the authoritative participant list for this year
+  const rMap = state.rosterUserMaps[year] ?? {}
+  const participants = [...new Set(Object.values(rMap))].filter(Boolean)
+  const entries = participants
+    .map(name => {
+      const s = (state.ownerSeasons[name] ?? []).find(x => x.year === year)
+      return s ? { name, wins: s.wins ?? 0, pf: s.pf ?? 0 } : null
     })
     .filter((x): x is { name: string; wins: number; pf: number } => x !== null)
     .sort((a, b) => b.wins - a.wins || b.pf - a.pf)

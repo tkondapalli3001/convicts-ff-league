@@ -9,13 +9,15 @@ import ErrorState from '@/components/shared/ErrorState'
 import PlayerWinRateTable from '@/components/players/PlayerWinRateTable'
 import PlayerOwnershipTable from '@/components/players/PlayerOwnershipTable'
 import DraftStructureTable from '@/components/players/DraftStructureTable'
+import PlayerCardModal from '@/components/players/PlayerCardModal'
 import TransactionFilters from '@/components/transactions/TransactionFilters'
 import TransactionTable from '@/components/transactions/TransactionTable'
 import TransactionDetailModal from '@/components/transactions/TransactionDetailModal'
 import TradesByYearChart from '@/components/players/TradesByYearChart'
 import { USER_ID_TO_OWNER } from '@/lib/constants'
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
-import type { Transaction } from '@/types'
+import type { PlayerStat } from '@/types'
+import type { TxTypeFilter } from '@/components/transactions/TransactionFilters'
 
 type Tab = 'winrate' | 'ownership' | 'strategy' | 'transactions'
 
@@ -33,10 +35,13 @@ export default function PlayersPage() {
   const { transactions, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData()
   const [activeTab, setActiveTab] = useState<Tab>('winrate')
 
+  // Player card modal (lifted to page level so fixed positioning works)
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerStat | null>(null)
+
   // Transactions state
   const [activeYears, setActiveYears]   = useState<Set<number>>(new Set())
   const [activeOwners, setActiveOwners] = useState<Set<string>>(new Set())
-  const [activeTypes, setActiveTypes]   = useState<Set<Transaction['type']>>(new Set(['trade', 'waiver', 'free_agent']))
+  const [activeTypes, setActiveTypes]   = useState<Set<TxTypeFilter>>(new Set(['trade', 'waivers']))
   const [selectedTx, setSelectedTx]     = useState<EnrichedTransaction | null>(null)
 
   useEffect(() => {
@@ -65,7 +70,7 @@ export default function PlayersPage() {
       return next
     })
   }
-  function toggleType(t: Transaction['type']) {
+  function toggleType(t: TxTypeFilter) {
     setActiveTypes(prev => {
       const next = new Set(prev)
       if (next.has(t)) {
@@ -81,7 +86,8 @@ export default function PlayersPage() {
   const filteredTx = useMemo(() => {
     return transactions.filter(tx => {
       if (!activeYears.has(tx.year)) return false
-      if (!activeTypes.has(tx.type)) return false
+      const txCategory: TxTypeFilter = tx.type === 'trade' ? 'trade' : 'waivers'
+      if (!activeTypes.has(txCategory)) return false
       if (activeOwners.size > 0) {
         const matches = tx.ownerNames.some(n => activeOwners.has(n))
         if (!matches) return false
@@ -132,7 +138,7 @@ export default function PlayersPage() {
       )}
 
       {activeTab === 'winrate' && (
-        <PlayerWinRateTable players={playerWinRates} />
+        <PlayerWinRateTable players={playerWinRates} onPlayerClick={setSelectedPlayer} />
       )}
       {activeTab === 'ownership' && (
         loading && !ownership.length
@@ -177,11 +183,19 @@ export default function PlayersPage() {
             />
           )}
           <div className="text-[10px] text-s-text3 mb-2">
-            {filteredTx.length} transactions · {tradeCount} trades · {waiverCount} waiver/FA moves
+            {filteredTx.length} transactions · {tradeCount} trades · {waiverCount} waiver moves
           </div>
           <TransactionTable transactions={filteredTx} onClick={setSelectedTx} />
           <TransactionDetailModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
         </div>
+      )}
+
+      {/* Player card modal rendered at page root so fixed positioning works correctly */}
+      {selectedPlayer && (
+        <PlayerCardModal
+          player={selectedPlayer}
+          onClose={() => setSelectedPlayer(null)}
+        />
       )}
     </div>
   )

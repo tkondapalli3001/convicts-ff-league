@@ -143,24 +143,22 @@ export function computeDraftOwnership(
 
 // ─── Draft Structure Win Rate ─────────────────────────────────────────────────
 
-export type DraftStrategy = 'Zero-RB' | 'Hero-RB' | 'RB-Heavy' | 'WR-Heavy' | 'Balanced'
+export type DraftStrategy = 'Zero-RB' | 'Hero-RB' | 'RB-Heavy' | 'Balanced'
 
 export interface DraftStructureEntry {
   strategy: DraftStrategy
   count: number
   avgWins: number
   avgFinish: number
-  examples: { owner: string; year: number }[]
+  examples: { owner: string; year: number; finish: number | null; madePlayoffs: boolean }[]
 }
 
 function classifyStrategy(picks: DraftPick[], earlyCount: { rb: number; wr: number }): DraftStrategy {
-  const { rb, wr } = earlyCount
+  const { rb } = earlyCount
   if (rb === 0) return 'Zero-RB'
   if (rb >= 3) return 'RB-Heavy'
-  // Round 1 pick is RB = Hero-RB
   const r1Pick = picks.find(p => p.round === 1)
   if (r1Pick?.metadata?.position === 'RB') return 'Hero-RB'
-  if (wr >= 3 && rb <= 1) return 'WR-Heavy'
   return 'Balanced'
 }
 
@@ -169,11 +167,10 @@ export function computeDraftStructure(
   ownerSeasons: Record<string, OwnerSeason[]>,
   rosterUserMaps: LeagueState['rosterUserMaps']
 ): DraftStructureEntry[] {
-  const strategyMap: Record<DraftStrategy, { wins: number[]; finishes: number[]; examples: { owner: string; year: number }[] }> = {
+  const strategyMap: Record<DraftStrategy, { wins: number[]; finishes: number[]; examples: { owner: string; year: number; finish: number | null; madePlayoffs: boolean }[] }> = {
     'Zero-RB':  { wins: [], finishes: [], examples: [] },
     'Hero-RB':  { wins: [], finishes: [], examples: [] },
     'RB-Heavy': { wins: [], finishes: [], examples: [] },
-    'WR-Heavy': { wins: [], finishes: [], examples: [] },
     'Balanced': { wins: [], finishes: [], examples: [] },
   }
 
@@ -202,7 +199,12 @@ export function computeDraftStructure(
 
       strategyMap[strategy].wins.push(season.wins)
       if (season.finish != null) strategyMap[strategy].finishes.push(season.finish)
-      strategyMap[strategy].examples.push({ owner, year })
+      strategyMap[strategy].examples.push({
+        owner,
+        year,
+        finish: season.finish ?? null,
+        madePlayoffs: season.inPlayoffs ?? false,
+      })
     }
   }
 

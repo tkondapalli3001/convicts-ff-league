@@ -62,31 +62,34 @@ export default function StockStandings({ picks, currentPrices, loading, lastUpda
   return (
     <div className="gl p-0 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse min-w-[560px]">
+        <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border w-12">#</th>
+              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border w-10">#</th>
               <th className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Owner</th>
               <th className="text-left px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Stock Pick</th>
+              <th className="text-right px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">ROI</th>
               <th className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border whitespace-nowrap">
                 Price on {startLabel}
               </th>
               <th className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Today</th>
-              <th className="text-right px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">ROI</th>
             </tr>
           </thead>
           <tbody>
             {rankedRows.map((row, i) => (
               <tr key={row.owner} className="border-b border-s-border/40 hover:bg-s-bg3/40 transition-colors">
-                <td className="px-3 py-3 text-center text-[12px] font-extrabold text-s-text3">
+                <td className="px-3 py-3 text-center text-[12px] font-extrabold text-s-text3 whitespace-nowrap">
                   {row.roiPct !== null ? i + 1 : '—'}
                 </td>
-                <td className="px-4 py-3 text-[13px] font-semibold text-s-text">{row.owner}</td>
-                <td className="px-3 py-3">
+                <td className="px-4 py-3 text-[13px] font-semibold text-s-text whitespace-nowrap">{row.owner}</td>
+                <td className="px-3 py-3 whitespace-nowrap">
                   <span className="text-[13px] font-black text-s-text">{row.ticker}</span>
                 </td>
-                <td className="px-3 py-3 text-right text-[13px] text-s-text2 num">{fmtPrice(row.startPrice)}</td>
-                <td className="px-3 py-3 text-right text-[13px] num">
+                <td className={`px-4 py-3 text-right text-[13px] font-bold num whitespace-nowrap ${roiColor(row.roiPct)}`}>
+                  {row.roiPct !== null ? fmtRoi(row.roiPct) : '—'}
+                </td>
+                <td className="px-3 py-3 text-right text-[13px] text-s-text2 num whitespace-nowrap">{fmtPrice(row.startPrice)}</td>
+                <td className="px-3 py-3 text-right text-[13px] num whitespace-nowrap">
                   {loading && row.current === undefined ? (
                     <span className="inline-block w-3 h-3 border-2 border-s-border2 border-t-s-blue rounded-full animate-spin" />
                   ) : row.current !== undefined ? (
@@ -95,41 +98,38 @@ export default function StockStandings({ picks, currentPrices, loading, lastUpda
                     <span className="text-s-text3">—</span>
                   )}
                 </td>
-                <td className={`px-4 py-3 text-right text-[13px] font-bold num ${roiColor(row.roiPct)}`}>
-                  {row.roiPct !== null ? fmtRoi(row.roiPct) : '—'}
-                </td>
               </tr>
             ))}
 
             {/* Convicts Fund row */}
             <tr className="border-t-2 border-s-border bg-s-bg3/30">
               <td className="px-3 py-3 text-center text-[11px] text-s-text3">—</td>
-              <td className="px-4 py-3 text-[12px] font-extrabold text-s-text" colSpan={2}>Convicts Fund</td>
-              <td className="px-3 py-3 text-right text-[13px] text-s-text2 num font-bold">{fmtPrice(fundStart)}</td>
-              <td className="px-3 py-3 text-right text-[13px] num">
+              <td className="px-4 py-3 text-[12px] font-extrabold text-s-text whitespace-nowrap" colSpan={2}>Convicts Fund</td>
+              <td className={`px-4 py-3 text-right text-[13px] font-extrabold num whitespace-nowrap ${roiColor(fundRoi)}`}>
+                {fundRoi !== null ? fmtRoi(fundRoi) : '—'}
+              </td>
+              <td className="px-3 py-3 text-right text-[13px] text-s-text2 num font-bold whitespace-nowrap">{fmtPrice(fundStart)}</td>
+              <td className="px-3 py-3 text-right text-[13px] num whitespace-nowrap">
                 {fundCurrent !== null ? (
                   <span className="text-s-text font-bold">{fmtPrice(fundCurrent)}</span>
                 ) : <span className="text-s-text3">—</span>}
-              </td>
-              <td className={`px-4 py-3 text-right text-[13px] font-extrabold num ${roiColor(fundRoi)}`}>
-                {fundRoi !== null ? fmtRoi(fundRoi) : '—'}
               </td>
             </tr>
 
             {/* Market benchmark row */}
             <tr className="border-t border-s-border/40 bg-s-bg3/20">
               <td className="px-3 py-3 text-center text-[11px] text-s-text3">—</td>
-              <td className="px-4 py-3 text-[12px] font-extrabold text-s-text2" colSpan={2}>
+              <td className="px-4 py-3 text-[12px] font-extrabold text-s-text2 whitespace-nowrap" colSpan={2}>
                 {MARKET_BENCHMARK_2026.displayTicker}
               </td>
-              <td className="px-3 py-3 text-right text-[13px] text-s-text3 num">{fmtPrice(MARKET_BENCHMARK_2026.startPrice)}</td>
-              <td className="px-3 py-3 text-right text-[13px] num">
+              <td className={`px-4 py-3 text-right text-[13px] font-bold num whitespace-nowrap ${roiColor(marketRoi)}`}>
+                {marketRoi !== null ? fmtRoi(marketRoi) : '—'}
+              </td>
+              <td className="px-3 py-3 text-right text-[13px] text-s-text3 num whitespace-nowrap">{fmtPrice(MARKET_BENCHMARK_2026.startPrice)}</td>
+              <td className="px-3 py-3 text-right text-[13px] num whitespace-nowrap">
                 {marketCurrent !== undefined ? (
                   <span className="text-s-text2">{fmtPrice(marketCurrent)}</span>
                 ) : <span className="text-s-text3">—</span>}
-              </td>
-              <td className={`px-4 py-3 text-right text-[13px] font-bold num ${roiColor(marketRoi)}`}>
-                {marketRoi !== null ? fmtRoi(marketRoi) : '—'}
               </td>
             </tr>
           </tbody>
@@ -145,24 +145,25 @@ export default function StockStandings({ picks, currentPrices, loading, lastUpda
           : 'Prices unavailable — showing start prices only'}
       </div>
 
-      {/* Fund vs Market statement */}
+      {/* Fund vs Market banner */}
       {fundRoi !== null && marketRoi !== null && (
         <div
-          className={`px-4 py-3 text-[13px] font-bold border-t border-s-border/40 flex items-center gap-2 ${
-            beatingMarket ? 'text-s-green' : 'text-s-red'
+          className={`mx-4 mb-4 mt-2 rounded-[12px] border p-5 text-center ${
+            beatingMarket ? 'border-green-500/30' : 'border-red-500/30'
           }`}
           style={{
             background: beatingMarket
-              ? 'rgba(34, 197, 94, 0.06)'
-              : 'rgba(239, 68, 68, 0.06)',
+              ? 'linear-gradient(135deg, rgba(34,197,94,0.12) 0%, rgba(16,185,129,0.06) 100%)'
+              : 'linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(220,38,38,0.06) 100%)',
           }}
         >
-          <span className="text-[18px]">{beatingMarket ? '📈' : '📉'}</span>
-          <span>
-            {beatingMarket
-              ? `Convicts Fund is beating the market! (${fmtRoi(fundRoi)} vs ${fmtRoi(marketRoi)})`
-              : `Convicts Fund is trailing the market. (${fmtRoi(fundRoi)} vs ${fmtRoi(marketRoi)})`}
-          </span>
+          <div className="text-[32px] mb-1">{beatingMarket ? '📈' : '📉'}</div>
+          <div className={`text-[15px] font-extrabold ${beatingMarket ? 'text-s-green' : 'text-s-red'}`}>
+            {beatingMarket ? 'Convicts Fund is beating the market!' : 'Convicts Fund is trailing the market.'}
+          </div>
+          <div className="text-[12px] text-s-text3 mt-1">
+            Fund {fmtRoi(fundRoi)} · Market {fmtRoi(marketRoi)}
+          </div>
         </div>
       )}
     </div>
