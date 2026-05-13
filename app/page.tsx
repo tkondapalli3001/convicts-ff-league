@@ -7,7 +7,6 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import HeroSection from '@/components/home/HeroSection'
 import SearchBar from '@/components/home/SearchBar'
-import LeaguePulse from '@/components/home/LeaguePulse'
 import type { ManagerCardData } from '@/components/home/SearchBar'
 import { getChampion, getShameLoser, getRunnerUp, ownerColor, avatarLetters, fullNameInitials } from '@/lib/utils'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/constants'
@@ -447,8 +446,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── LEAGUE PULSE ─────────────────────────────────────────── */}
-      <LeaguePulse />
     </div>
   )
 }

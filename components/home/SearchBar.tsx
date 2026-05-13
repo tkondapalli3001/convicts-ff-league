@@ -168,37 +168,15 @@ function ManagerCard({ data, onClose }: { data: ManagerCardData; onClose: () => 
         )}
       </div>
 
-      {/* Extended stats — Top Rival / High / Low */}
-      <div className="grid grid-cols-3 border-t border-s-border/60">
-        {(
-          [
-            {
-              label: 'Top Rival',
-              value: data.topRival ?? '—',
-              color: data.topRival ? ownerColor(data.topRival) : undefined,
-            },
-            {
-              label: 'Single Game High',
-              value: data.singleGameHigh != null ? data.singleGameHigh.toFixed(2) : '—',
-              color: '#00ceb8',
-            },
-            {
-              label: 'Single Game Low',
-              value: data.singleGameLow != null ? data.singleGameLow.toFixed(2) : '—',
-              color: '#ff395c',
-            },
-          ] as { label: string; value: string; color?: string }[]
-        ).map((s, i) => (
-          <div
-            key={s.label}
-            className={['p-4', i > 0 ? 'border-l border-s-border/60' : ''].join(' ')}
-          >
-            <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1">{s.label}</div>
-            <div className="text-[14px] font-bold num" style={{ color: s.color ?? '#e6edf3' }}>
-              {s.value}
-            </div>
-          </div>
-        ))}
+      {/* Top Rival */}
+      <div className="px-5 py-4 border-t border-s-border/60">
+        <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1">Top Rival</div>
+        <div
+          className="text-[14px] font-bold"
+          style={{ color: data.topRival ? ownerColor(data.topRival) : '#6e7681' }}
+        >
+          {data.topRival ?? '—'}
+        </div>
       </div>
 
       {/* CTA */}
@@ -315,13 +293,23 @@ function PlayerCard({
         ))}
       </div>
 
-      {/* Draft history */}
+      {/* Draft history + most started by */}
       {ownerList && (
         <div className="px-5 py-4 border-t border-s-border/60">
-          <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">
-            Draft History &mdash; {ownership!.picks.length}× drafted
+          <div className="flex items-start justify-between gap-6 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">
+                Draft History &mdash; {ownership!.picks.length}× drafted
+              </div>
+              <div className="text-[12px] text-s-text2 leading-relaxed">{ownerList}</div>
+            </div>
+            {stat.topOwner && (
+              <div className="flex-shrink-0">
+                <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1.5">Most Started By</div>
+                <div className="text-[13px] font-bold text-s-text">{stat.topOwner}</div>
+              </div>
+            )}
           </div>
-          <div className="text-[12px] text-s-text2 leading-relaxed">{ownerList}</div>
         </div>
       )}
 
