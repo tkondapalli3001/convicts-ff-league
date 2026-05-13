@@ -244,7 +244,7 @@ export default function HomePage() {
               <thead>
                 <tr>
                   <th className="w-10 text-center">#</th>
-                  <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#0B0E11' }}>Manager</th>
+                  <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#0d121b' }}>Manager</th>
                   <th>W–L</th>
                   <th>Win%</th>
                   <th className="text-right">Avg PPG</th>

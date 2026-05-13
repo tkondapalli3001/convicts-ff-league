@@ -5,12 +5,14 @@ import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import CareerLeaderboard from '@/components/owners/CareerLeaderboard'
+import AnnualBreakdown from '@/components/earnings/AnnualBreakdown'
 import RivalryCalc from '@/components/records/RivalryCalc'
 
-type Tab = 'leaderboard' | 'h2h'
+type Tab = 'leaderboard' | 'earnings' | 'h2h'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'leaderboard', label: 'Career Leaderboard' },
+  { id: 'earnings',    label: 'Earnings Ledger'    },
   { id: 'h2h',         label: 'Head-to-Head'       },
 ]
 
@@ -46,6 +48,7 @@ export default function OwnersPage() {
       </div>
 
       {activeTab === 'leaderboard' && <CareerLeaderboard />}
+      {activeTab === 'earnings' && <AnnualBreakdown />}
       {activeTab === 'h2h' && <RivalryCalc />}
     </div>
   )

@@ -116,7 +116,7 @@ export default function CareerLeaderboard() {
       ].filter(Boolean).join(' ')}
       style={{
         color: sortKey === k ? '#f59e0b' : undefined,
-        background: stickyFirst ? '#0B0E11' : undefined,
+        background: stickyFirst ? '#0d121b' : undefined,
       }}
     >
       {label}

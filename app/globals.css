@@ -101,35 +101,35 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Sticky table columns */
+  /* Sticky table columns — #0d121b is rgba(15,23,42,0.4) composited over the page body */
   .sticky-col {
     position: sticky;
     left: 0;
-    background: #0B0E11;
+    background: #0d121b;
     z-index: 1;
   }
   tbody tr:hover .sticky-col {
-    background: rgba(139, 92, 246, 0.13);
+    background: #161a30;
   }
-  tbody tr:nth-child(even) .sticky-col { background: #0B0E11; }
+  tbody tr:nth-child(even) .sticky-col { background: #0d121b; }
   .table-sticky-col {
     position: sticky;
     left: 0;
-    background: #0B0E11;
+    background: #0d121b;
     z-index: 1;
   }
   tbody tr:hover .table-sticky-col {
-    background: rgba(139, 92, 246, 0.13);
+    background: #161a30;
   }
-  tbody tr:nth-child(even) .table-sticky-col { background: #0B0E11; }
+  tbody tr:nth-child(even) .table-sticky-col { background: #0d121b; }
 
   /* Annual Breakdown + Season Standings: transparent rows, solid sticky first col */
   .ab-table tbody tr td { background: transparent; }
-  .ab-table tbody tr .sticky-owner { background: #0B0E11; }
+  .ab-table tbody tr .sticky-owner { background: #0d121b; }
   .ss-table tbody tr td { background: transparent; }
-  .ss-table tbody tr .sticky-owner { background: #0B0E11; }
-  .ss-table tbody tr:hover .sticky-owner { background: rgba(99, 102, 241, 0.1); }
-  .ab-table tbody tr:hover .sticky-owner { background: rgba(99, 102, 241, 0.1); }
+  .ss-table tbody tr .sticky-owner { background: #0d121b; }
+  .ss-table tbody tr:hover .sticky-owner { background: #161a30; }
+  .ab-table tbody tr:hover .sticky-owner { background: #161a30; }
 
   /* Glassmorphism nav/overlay */
   .glass {

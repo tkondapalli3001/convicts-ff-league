@@ -3,18 +3,17 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Home, DollarSign, Users, Trophy,
+  Home, Users, Trophy,
   CalendarDays, Zap, ClipboardList,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',         label: 'Home',    icon: Home          },
-  { href: '/owners',   label: 'Owners',  icon: Users         },
-  { href: '/earnings', label: 'Cash',    icon: DollarSign    },
-  { href: '/seasons',  label: 'Seasons', icon: CalendarDays  },
-  { href: '/draft',    label: 'Draft',   icon: ClipboardList },
-  { href: '/records',  label: 'Records', icon: Trophy        },
-  { href: '/players',  label: 'Players', icon: Zap           },
+  { href: '/',        label: 'Home',    icon: Home          },
+  { href: '/owners',  label: 'Owners',  icon: Users         },
+  { href: '/seasons', label: 'Seasons', icon: CalendarDays  },
+  { href: '/draft',   label: 'Draft',   icon: ClipboardList },
+  { href: '/records', label: 'Records', icon: Trophy        },
+  { href: '/players', label: 'Players', icon: Zap           },
 ]
 
 export default function MobileNav() {

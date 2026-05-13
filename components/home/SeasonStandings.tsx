@@ -135,7 +135,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
       className={[hideOnMobile ? 'hidden md:table-cell' : '', stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : ''].filter(Boolean).join(' ')}
       style={{
         color: sortKey === k ? '#f59e0b' : undefined,
-        background: stickyFirst ? '#0B0E11' : undefined,
+        background: stickyFirst ? '#0d121b' : undefined,
       }}
     >
       {label} {sortKey === k ? (sortDir === 1 ? '↑' : '↓') : ''}
