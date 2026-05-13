@@ -164,7 +164,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
+      <div className="overflow-x-auto -webkit-overflow-scrolling-touch ss-table">
         <table className="w-full border-collapse min-w-[560px]">
           <thead>
             <tr>
@@ -188,8 +188,9 @@ export default function SeasonStandings({ onYearChange }: Props) {
                 <tr
                   key={`${r.manager}-${r.year}`}
                   onDoubleClick={() => router.push(`/owners/${encodeURIComponent(r.manager)}`)}
+                  className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors"
                 >
-                  <td className="sticky-col font-bold text-s-text">
+                  <td className="sticky-owner sticky left-0 z-[1] font-bold text-s-text">
                     <div className="flex items-center gap-2">
                       <OwnerAvatar name={r.manager} size="sm" />
                       {r.manager}

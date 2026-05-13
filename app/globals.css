@@ -110,6 +110,12 @@
   }
   tbody tr:nth-child(even) .table-sticky-col { background: #0d1117; }
 
+  /* Annual Breakdown + Season Standings: row-level banding, sticky cell inherits row color */
+  .ab-table tbody tr td { background: transparent; }
+  .ab-table tbody tr .sticky-owner { background: inherit; }
+  .ss-table tbody tr td { background: transparent; }
+  .ss-table tbody tr .sticky-owner { background: inherit; }
+
   /* Glassmorphism nav/overlay */
   .glass {
     backdrop-filter: blur(20px) saturate(180%);

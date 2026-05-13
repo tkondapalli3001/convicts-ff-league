@@ -17,7 +17,7 @@ export default function AnnualBreakdown() {
         Annual Breakdown
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto ab-table">
         <table className="w-full border-collapse" style={{ minWidth: `${displayYears.length * 60 + 160}px` }}>
           <thead>
             <tr>
@@ -27,8 +27,8 @@ export default function AnnualBreakdown() {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b-2 border-s-border2">
-              <td className="table-sticky-col text-[10px] font-bold uppercase tracking-[1.5px] text-s-text3">
+            <tr className="border-b-2 border-s-border2 odd:bg-[#0b1120]">
+              <td className="sticky-owner sticky left-0 z-[1] text-[10px] font-bold uppercase tracking-[1.5px] text-s-text3">
                 Buy-In
               </td>
               <td className="text-s-text3 text-[11px]">—</td>
@@ -41,8 +41,8 @@ export default function AnnualBreakdown() {
             {EARNINGS_DATA.map(e => {
               const tc = e.total >= 0 ? 'text-s-green' : 'text-s-red'
               return (
-                <tr key={e.owner}>
-                  <td className="table-sticky-col font-bold text-s-text">
+                <tr key={e.owner} className="odd:bg-[#0b1120] even:bg-[#0f1629] hover:bg-indigo-500/10 transition-colors">
+                  <td className="sticky-owner sticky left-0 z-[1] font-bold text-s-text">
                     <div className="flex items-center gap-2">
                       <OwnerAvatar name={e.owner} size="sm" />
                       {e.owner}
