@@ -4,14 +4,15 @@ import { useState, useEffect, useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { fetchDrafts, fetchDraftPicks } from '@/lib/sleeper-api'
 import { getPlayersCache, type PlayerMetadata } from '@/lib/players-cache'
-import { computePlayerWinRates, computeDraftOwnership, computeDraftStructure } from '@/lib/data-processing'
-import type { OwnershipEntry, DraftStructureEntry } from '@/lib/data-processing'
+import { computePlayerWinRates, computeDraftOwnership, computeDraftStructure, computePlayerScores } from '@/lib/data-processing'
+import type { OwnershipEntry, DraftStructureEntry, PlayerScoreStat } from '@/lib/data-processing'
 import type { PlayerStat, DraftPick } from '@/types'
 
 interface PlayersData {
   playerWinRates: PlayerStat[]
   ownership: OwnershipEntry[]
   draftStructure: DraftStructureEntry[]
+  playerScores: PlayerScoreStat[]
   loading: boolean
   loadingText: string
   error: string | null
@@ -81,5 +82,10 @@ export function usePlayersData(enabled: boolean = true): PlayersData {
     return computeDraftStructure(draftPicksByYear, state.ownerSeasons, state.rosterUserMaps)
   }, [draftPicksByYear, state.ownerSeasons, state.rosterUserMaps])
 
-  return { playerWinRates, ownership, draftStructure, loading, loadingText, error }
+  const playerScores = useMemo(() => {
+    if (!state.loaded || !playersCache) return []
+    return computePlayerScores(state, playersCache)
+  }, [state, playersCache])
+
+  return { playerWinRates, ownership, draftStructure, playerScores, loading, loadingText, error }
 }

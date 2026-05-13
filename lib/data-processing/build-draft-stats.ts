@@ -90,6 +90,61 @@ export function computePlayerWinRates(
     .sort((a, b) => b.games - a.games)
 }
 
+// ─── Player Scoring ───────────────────────────────────────────────────────────
+
+export interface PlayerScoreStat {
+  player_id: string
+  name: string
+  position: string
+  team: string
+  /** owner → year → { pts, games } */
+  byOwnerYear: Record<string, Record<number, { pts: number; games: number }>>
+}
+
+export function computePlayerScores(
+  state: LeagueState,
+  playersCache: Record<string, PlayerMetadata>
+): PlayerScoreStat[] {
+  const accum: Record<string, PlayerScoreStat> = {}
+
+  for (const [yearStr, weekMap] of Object.entries(state.matchups)) {
+    const year = Number(yearStr)
+    const rMap = state.rosterUserMaps[year] ?? {}
+
+    for (const [, { matchups }] of Object.entries(weekMap)) {
+      for (const entry of matchups) {
+        const owner = rMap[String(entry.roster_id)] ?? `Team${entry.roster_id}`
+        const starters = entry.starters ?? []
+        const pts = entry.starters_points ?? []
+
+        starters.forEach((pid, i) => {
+          if (!pid || pid === '0') return
+          const pointsThisGame = pts[i] ?? 0
+
+          if (!accum[pid]) {
+            const p = playersCache[pid]
+            accum[pid] = {
+              player_id: pid,
+              name: playerDisplayName(p, pid),
+              position: p?.position ?? '?',
+              team: p?.team ?? '',
+              byOwnerYear: {},
+            }
+          }
+
+          if (!accum[pid].byOwnerYear[owner]) accum[pid].byOwnerYear[owner] = {}
+          const slot = accum[pid].byOwnerYear[owner]
+          if (!slot[year]) slot[year] = { pts: 0, games: 0 }
+          slot[year].pts += pointsThisGame
+          slot[year].games++
+        })
+      }
+    }
+  }
+
+  return Object.values(accum)
+}
+
 // ─── Draft Ownership ──────────────────────────────────────────────────────────
 
 export interface OwnershipEntry {

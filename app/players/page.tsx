@@ -7,6 +7,7 @@ import { useTransactionsData } from '@/hooks/useTransactionsData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PlayerWinRateTable from '@/components/players/PlayerWinRateTable'
+import PlayerScoringTable from '@/components/players/PlayerScoringTable'
 import PlayerOwnershipTable from '@/components/players/PlayerOwnershipTable'
 import PlayerCardModal from '@/components/players/PlayerCardModal'
 import TransactionFilters from '@/components/transactions/TransactionFilters'
@@ -19,10 +20,11 @@ import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 import type { PlayerStat } from '@/types'
 import type { TxTypeFilter } from '@/components/transactions/TransactionFilters'
 
-type Tab = 'winrate' | 'ownership' | 'transactions'
+type Tab = 'winrate' | 'scoring' | 'ownership' | 'transactions'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'winrate',      label: 'Win Rate'        },
+  { id: 'scoring',      label: 'Scoring'         },
   { id: 'ownership',   label: 'Draft Ownership'  },
   { id: 'transactions', label: 'Transactions'    },
 ]
@@ -30,7 +32,7 @@ const TABS: { id: Tab; label: string }[] = [
 export default function PlayersPage() {
   const { state } = useLeague()
   const { loaded, error, years, ownerSeasons } = state
-  const { playerWinRates, ownership, loading, loadingText, error: dataError } = usePlayersData()
+  const { playerWinRates, ownership, playerScores, loading, loadingText, error: dataError } = usePlayersData()
   const { transactions, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData()
   const [activeTab, setActiveTab] = useState<Tab>('winrate')
 
@@ -124,13 +126,13 @@ export default function PlayersPage() {
       </div>
 
       {/* Loading state for draft/player data */}
-      {activeTab !== 'transactions' && loading && (
+      {activeTab !== 'transactions' && activeTab !== 'scoring' && loading && (
         <div className="flex items-center gap-3 px-4 py-3 bg-s-bg2 border border-s-border rounded-[10px] mb-4 text-[12px] text-s-text2">
           <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
           {loadingText}
         </div>
       )}
-      {activeTab !== 'transactions' && dataError && (
+      {activeTab !== 'transactions' && activeTab !== 'scoring' && dataError && (
         <div className="px-4 py-3 bg-[#220000] border border-[#5a0000] rounded-[10px] mb-4 text-[12px] text-s-red">
           Failed to load draft data: {dataError}
         </div>
@@ -138,6 +140,11 @@ export default function PlayersPage() {
 
       {activeTab === 'winrate' && (
         <PlayerWinRateTable players={playerWinRates} onPlayerClick={setSelectedPlayer} />
+      )}
+      {activeTab === 'scoring' && (
+        playerScores.length === 0
+          ? <div className="text-s-text3 text-[12px] text-center py-12">Loading scoring data…</div>
+          : <PlayerScoringTable playerScores={playerScores} years={years} ownerNames={ownerNames} />
       )}
       {activeTab === 'ownership' && (
         loading && !ownership.length
