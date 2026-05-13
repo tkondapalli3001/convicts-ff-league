@@ -17,7 +17,7 @@ type Tab = 'seasons' | 'h2h' | 'gamelog'
 
 export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const { state } = useLeague()
-  const { loaded, error, ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, draftData } = state
+  const { loaded, error, ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, draftData, matchups } = state
   const [tab, setTab] = useState<Tab>('seasons')
 
   // Must be before early returns (React hook rules)
@@ -64,13 +64,15 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     const bestGame  = scores.length ? scores.reduce((m, s) => s.pts > m.pts ? s : m, scores[0]) : null
     const worstGame = scores.length ? scores.reduce((m, s) => s.pts < m.pts ? s : m, scores[0]) : null
 
-    // Top rival (all games)
-    const rivalCount: Record<string, number> = {}
+    // Top rival = opponent who has defeated this owner the most
+    const rivalLossCount: Record<string, number> = {}
     ownerGames.forEach(g => {
-      const opp = g.team1 === ownerName ? g.team2 : g.team1
-      rivalCount[opp] = (rivalCount[opp] || 0) + 1
+      const opp    = g.team1 === ownerName ? g.team2 : g.team1
+      const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
+      const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
+      if (oppPts > myPts) rivalLossCount[opp] = (rivalLossCount[opp] || 0) + 1
     })
-    const topRivalName = Object.entries(rivalCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+    const topRivalName = Object.entries(rivalLossCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
     let rivalW = 0, rivalL = 0
     if (topRivalName) {
       ownerGames.forEach(g => {
@@ -100,24 +102,52 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       }
     })
 
-    // Most drafted players
-    const playerCount: Record<string, { name: string; count: number; pos: string }> = {}
-    Object.entries(draftData).forEach(([yearStr, { picks }]) => {
-      const year = Number(yearStr)
-      const rMap = rosterUserMaps[year] ?? {}
-      picks
-        .filter(p => rMap[String(p.roster_id)] === ownerName)
-        .forEach(p => {
-          const name = [p.metadata.first_name, p.metadata.last_name].filter(Boolean).join(' ')
-          if (!name) return
-          if (!playerCount[p.player_id]) playerCount[p.player_id] = { name, count: 0, pos: p.metadata.position ?? '' }
-          playerCount[p.player_id].count++
-        })
+    // Top scorers — players with most total points started for this owner, excluding DEF
+    // Build name + position lookup from all draft picks
+    const playerNameMap: Record<string, string> = {}
+    const playerPosMap: Record<string, string> = {}
+    Object.values(draftData).forEach(({ picks }) => {
+      picks.forEach(p => {
+        if (!playerNameMap[p.player_id])
+          playerNameMap[p.player_id] = [p.metadata.first_name, p.metadata.last_name].filter(Boolean).join(' ')
+        if (!playerPosMap[p.player_id])
+          playerPosMap[p.player_id] = p.metadata.position ?? ''
+      })
     })
-    const topPlayers = Object.values(playerCount).sort((a, b) => b.count - a.count).slice(0, 3)
 
-    return { bestGame, worstGame, topRivalName, rivalW, rivalL, maxStreak, streakStart, streakEnd, topPlayers }
-  }, [ownerGames, ownerName, consolationGameKeys, draftData, rosterUserMaps])
+    // Find this owner's roster_id for each year
+    const ownerRosterIds: Record<number, number> = {}
+    Object.entries(rosterUserMaps).forEach(([yearStr, rMap]) => {
+      const year = Number(yearStr)
+      const entry = Object.entries(rMap).find(([, name]) => name === ownerName)
+      if (entry) ownerRosterIds[year] = Number(entry[0])
+    })
+
+    // Accumulate starter points per player across all weeks/years
+    const playerPts: Record<string, { name: string; pos: string; pts: number }> = {}
+    Object.entries(matchups).forEach(([yearStr, weeks]) => {
+      const year = Number(yearStr)
+      const rId = ownerRosterIds[year]
+      if (rId == null) return
+      Object.values(weeks).forEach(({ matchups: weekMatchups }) => {
+        const myMatchup = weekMatchups.find(m => m.roster_id === rId)
+        if (!myMatchup?.starters?.length || !myMatchup.starters_points?.length) return
+        myMatchup.starters.forEach((playerId, i) => {
+          const pos = playerPosMap[playerId] ?? ''
+          // Exclude defenses by position or by team-abbreviation ID (Sleeper uses e.g. "NE", "KC")
+          if (pos === 'DEF' || /^[A-Z]{2,3}$/.test(playerId)) return
+          const pts = myMatchup.starters_points![i] ?? 0
+          if (pts <= 0) return
+          if (!playerPts[playerId])
+            playerPts[playerId] = { name: playerNameMap[playerId] || playerId, pos, pts: 0 }
+          playerPts[playerId].pts += pts
+        })
+      })
+    })
+    const topScorers = Object.values(playerPts).sort((a, b) => b.pts - a.pts).slice(0, 3)
+
+    return { bestGame, worstGame, topRivalName, rivalW, rivalL, maxStreak, streakStart, streakEnd, topScorers }
+  }, [ownerGames, ownerName, consolationGameKeys, draftData, rosterUserMaps, matchups])
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
@@ -212,7 +242,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         <StatBox
           label="Top Rival"
           value={funStats.topRivalName ?? '—'}
-          sub={funStats.topRivalName ? `${funStats.rivalW}-${funStats.rivalL} all-time` : undefined}
+          sub={funStats.topRivalName ? `beat me ${funStats.rivalL}x · ${funStats.rivalW}-${funStats.rivalL}` : undefined}
         />
         <StatBox
           label="Best Game"
@@ -236,12 +266,12 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         />
       </div>
 
-      {/* Draft Darlings */}
-      {funStats.topPlayers.length > 0 && (
+      {/* Top Scorers */}
+      {funStats.topScorers.length > 0 && (
         <div className="gl p-[14px] mb-5">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[10px]">Most Drafted</div>
+          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-[10px]">Top Scorers</div>
           <div className="flex flex-wrap gap-2">
-            {funStats.topPlayers.map(p => (
+            {funStats.topScorers.map(p => (
               <span
                 key={p.name}
                 className="inline-flex items-center gap-[6px] px-3 py-[5px] rounded-full text-[11px] font-semibold bg-s-bg3 border border-s-border text-s-text2"
@@ -250,7 +280,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 <span className="text-s-text3">·</span>
                 <span className="text-s-text3">{p.pos}</span>
                 <span className="text-s-text3">·</span>
-                <span className="text-s-gold font-bold">{p.count}x</span>
+                <span className="text-s-gold font-bold">{p.pts.toFixed(1)} pts</span>
               </span>
             ))}
           </div>

@@ -22,13 +22,43 @@ interface Props {
 export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: Props) {
   const isSnake = draft.type === 'snake'
 
-  // Build slot → owner map from round 1
+  // Build slot → canonical owner map (pre-trade assignment).
+  // Round-1 picks reflect whoever used the pick after trades, so we can't use
+  // them for column headers. Use slot_to_roster_id first, then infer from the
+  // mode of roster_id across rounds 2+ (almost never traded), then fall back
+  // to round 1 only for slots still unresolved.
+  const draftAny = draft as unknown as {
+    slot_to_roster_id?: Record<string, number> | null
+  }
   const slotOwner: Record<number, string> = {}
-  for (const pick of picks) {
-    if (pick.round === 1) {
-      const owner = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
-      slotOwner[pick.draft_slot] = owner
+
+  // Tier 1: slot_to_roster_id (set at draft creation, unaffected by trades)
+  const s2r = draftAny.slot_to_roster_id
+  if (s2r && typeof s2r === 'object') {
+    for (const [slotStr, rosterId] of Object.entries(s2r)) {
+      const owner = rMap[String(rosterId)]
+      if (owner) slotOwner[Number(slotStr)] = owner
     }
+  }
+
+  // Tier 2: mode of roster_id across rounds 2+ for any slots still missing
+  const votes: Record<number, Record<string, number>> = {}
+  for (const pick of picks) {
+    if (pick.round < 2) continue
+    const owner = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
+    if (!votes[pick.draft_slot]) votes[pick.draft_slot] = {}
+    votes[pick.draft_slot][owner] = (votes[pick.draft_slot][owner] || 0) + 1
+  }
+  for (const [slotStr, counts] of Object.entries(votes)) {
+    const slot = Number(slotStr)
+    if (slotOwner[slot]) continue
+    slotOwner[slot] = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
+  }
+
+  // Tier 3: round-1 fallback for any slots still unresolved
+  for (const pick of picks) {
+    if (pick.round !== 1 || slotOwner[pick.draft_slot] !== undefined) continue
+    slotOwner[pick.draft_slot] = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
   }
 
   const numSlots = Math.max(...picks.map(p => p.draft_slot), 0) || 10
