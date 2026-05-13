@@ -9,15 +9,17 @@ import RecordItem from '@/components/shared/RecordItem'
 import ScoreLeaderboard from '@/components/records/ScoreLeaderboard'
 import StreakList from '@/components/records/StreakList'
 import TrashTalkCard from '@/components/trends/TrashTalkCard'
+import FunFacts from '@/components/records/FunFacts'
 import { TRASH_TALK } from '@/lib/constants'
 
-type Tab = 'extremes' | 'records' | 'streaks' | 'trashtalk'
+type Tab = 'extremes' | 'records' | 'streaks' | 'trashtalk' | 'funfacts'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'extremes',  label: 'Extremes'   },
   { id: 'records',   label: 'Records'    },
   { id: 'streaks',   label: 'Streaks'    },
   { id: 'trashtalk', label: 'Trash Talk' },
+  { id: 'funfacts',  label: 'Fun Facts'  },
 ]
 
 export default function RecordsPage() {
@@ -130,6 +132,9 @@ export default function RecordsPage() {
           ))}
         </div>
       )}
+
+      {/* ── FUN FACTS TAB ────────────────────────────────────────────── */}
+      {activeTab === 'funfacts' && <FunFacts />}
     </div>
   )
 }
