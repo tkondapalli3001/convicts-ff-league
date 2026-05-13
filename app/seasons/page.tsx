@@ -7,49 +7,69 @@ import ErrorState from '@/components/shared/ErrorState'
 import SeasonStandings from '@/components/home/SeasonStandings'
 import PlayoffBracket from '@/components/home/PlayoffBracket'
 import AvgScoreChart from '@/components/trends/AvgScoreChart'
+import FinishTracker from '@/components/trends/FinishTracker'
+
+type Tab = 'standings' | 'finish' | 'avgscore'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'standings', label: 'Standings'      },
+  { id: 'finish',    label: 'Finish Tracker' },
+  { id: 'avgscore',  label: 'Avg Score'      },
+]
 
 export default function SeasonsPage() {
   const { state } = useLeague()
   const { loaded, error, years } = state
-  const [bracketYear, setBracketYear] = useState<number | null>(null)
+  const [activeTab, setActiveTab] = useState<Tab>('standings')
+  const [standingsYear, setStandingsYear] = useState<number | null>(null)
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
 
   const sortedYears = [...years].sort((a, b) => b - a)
-  const selectedYear = bracketYear ?? sortedYears[0]
+  const selectedYear = standingsYear ?? sortedYears[0]
 
   return (
     <div className="animate-fade-in">
       <h1 className="text-[26px] font-extrabold text-s-text mb-1">Seasons</h1>
-      <p className="text-[13px] text-s-text2 mb-6">Year-by-year standings and scoring trends</p>
+      <p className="text-[13px] text-s-text2 mb-5">Year-by-year standings and scoring trends</p>
 
-      <SeasonStandings />
-
-      <div className="mt-6">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">Playoff Bracket</div>
-        <div className="flex gap-[6px] flex-wrap mb-4">
-          {sortedYears.map(y => (
-            <button
-              key={y}
-              onClick={() => setBracketYear(y)}
-              className={[
-                'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
-                selectedYear === y
-                  ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                  : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
-              ].join(' ')}
-            >
-              {y}
-            </button>
-          ))}
-        </div>
-        <PlayoffBracket year={selectedYear} />
+      {/* Tab nav */}
+      <div className="flex gap-[6px] mb-5 flex-wrap">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={[
+              'px-4 py-[7px] rounded-[8px] border text-[12px] font-bold transition-all duration-150 cursor-pointer',
+              activeTab === tab.id
+                ? 'bg-s-gold text-[#000] border-s-gold'
+                : 'bg-s-bg2 border-s-border text-s-text2 hover:border-s-border2 hover:text-s-text',
+            ].join(' ')}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      <div className="mt-6">
-        <AvgScoreChart />
-      </div>
+      {/* ── STANDINGS TAB ─────────────────────────────────────────── */}
+      {activeTab === 'standings' && (
+        <>
+          <SeasonStandings onYearChange={setStandingsYear} />
+          <div className="mt-6">
+            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">
+              Playoff Bracket · {selectedYear}
+            </div>
+            <PlayoffBracket year={selectedYear} />
+          </div>
+        </>
+      )}
+
+      {/* ── FINISH TRACKER TAB ────────────────────────────────────── */}
+      {activeTab === 'finish' && <FinishTracker />}
+
+      {/* ── AVG SCORE TAB ─────────────────────────────────────────── */}
+      {activeTab === 'avgscore' && <AvgScoreChart />}
     </div>
   )
 }

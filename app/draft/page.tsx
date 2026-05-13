@@ -48,20 +48,36 @@ function DraftSlotTable() {
       if (!data?.picks?.length) continue
       const rMap = rosterUserMaps[year] ?? {}
 
-      const slotMap: Record<number, string> = {}
-      for (const pick of data.picks) {
-        if (pick.round !== 1) continue
-        const ownerName = rMap[String(pick.roster_id)]
-          ?? resolveOwnerName(pick.picked_by, '')
-        if (ownerName) slotMap[pick.draft_slot] = ownerName
+      // ownerSlot: one canonical slot per owner per year.
+      // Prefer slot_to_roster_id (Sleeper's pre-trade draft order) so traded picks
+      // don't create a second slot entry for the manager who acquired them.
+      const ownerSlot: Record<string, number> = {}
+      const draftAny = data.draft as unknown as { slot_to_roster_id?: Record<string, number> }
+      if (draftAny.slot_to_roster_id) {
+        for (const [slotStr, rosterId] of Object.entries(draftAny.slot_to_roster_id)) {
+          const ownerName = rMap[String(rosterId)]
+          if (ownerName) ownerSlot[ownerName] = Number(slotStr)
+        }
+      } else {
+        // Fallback: scan round-1 picks; if an owner appears twice, keep the lower slot
+        // (the earlier pick in round 1 is more likely to be their original assignment).
+        for (const pick of data.picks) {
+          if (pick.round !== 1) continue
+          const ownerName = rMap[String(pick.roster_id)]
+            ?? resolveOwnerName(pick.picked_by, '')
+          if (!ownerName) continue
+          if (!(ownerName in ownerSlot) || pick.draft_slot < ownerSlot[ownerName]) {
+            ownerSlot[ownerName] = pick.draft_slot
+          }
+        }
       }
 
-      for (const [slot, owner] of Object.entries(slotMap)) {
+      for (const [owner, slot] of Object.entries(ownerSlot)) {
         const season = ownerSeasons[owner]?.find(s => s.year === year)
         out.push({
           year,
           owner,
-          slot: Number(slot),
+          slot,
           finish: season?.finish ?? null,
           madePlayoffs: season?.inPlayoffs ?? false,
         })
