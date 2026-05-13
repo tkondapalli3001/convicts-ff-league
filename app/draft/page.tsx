@@ -12,6 +12,14 @@ import {
 } from '@/lib/stock-picks'
 import { resolveOwnerName } from '@/lib/data-processing'
 
+type Tab = 'pickorder' | 'history' | 'slots'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'pickorder', label: '2026 Pick Order' },
+  { id: 'history',   label: 'Past Drafts'     },
+  { id: 'slots',     label: 'Slot Analysis'   },
+]
+
 // ─── Draft Slot vs Final Standings ───────────────────────────────────────────
 
 function DraftSlotTable() {
@@ -254,6 +262,7 @@ export default function DraftPage() {
   const { state } = useLeague()
   const { loaded, error } = state
 
+  const [activeTab, setActiveTab] = useState<Tab>('pickorder')
   const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({})
   const [priceLoading, setPriceLoading]   = useState(true)
   const [lastUpdated, setLastUpdated]     = useState<Date | null>(null)
@@ -276,59 +285,65 @@ export default function DraftPage() {
   if (!loaded) return <LoadingSpinner />
 
   return (
-    <div className="animate-fade-in space-y-8">
-      <div>
-        <h1 className="text-[26px] font-extrabold text-s-text mb-1">Draft Hub</h1>
-        <p className="text-[13px] text-s-text3">
-          Draft history, 2026 pick order standings, and slot vs outcome analysis
-        </p>
-      </div>
+    <div className="animate-fade-in">
+      <h1 className="text-[26px] font-extrabold text-s-text mb-1">Draft Hub</h1>
+      <p className="text-[13px] text-s-text3 mb-5">
+        Draft history, 2026 pick order standings, and slot vs outcome analysis
+      </p>
 
-      {/* ── SECTION 1: 2026 Draft Pick Order ─────────────────────── */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-0.5">
-              2026 Draft Pick Order
-            </div>
-            <div className="text-[11px] text-s-text3">
-              Jan 12 → Jul 15 · Best ROI drafts first
-            </div>
-          </div>
+      {/* Tab nav */}
+      <div className="flex items-center gap-[6px] mb-5 flex-wrap">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={[
+              'px-4 py-[7px] rounded-[8px] border text-[12px] font-bold transition-all duration-150 cursor-pointer',
+              activeTab === tab.id
+                ? 'bg-s-gold text-[#000] border-s-gold'
+                : 'bg-s-bg2 border-s-border text-s-text2 hover:border-s-border2 hover:text-s-text',
+            ].join(' ')}
+          >
+            {tab.label}
+          </button>
+        ))}
+        {/* Refresh button inline when on pick order tab */}
+        {activeTab === 'pickorder' && (
           <button
             onClick={fetchPrices}
             disabled={priceLoading}
-            className="px-3 py-[5px] text-[11px] font-semibold rounded-[6px] border border-s-border text-s-text3 bg-s-bg3 hover:border-s-border2 hover:text-s-text2 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-auto px-3 py-[5px] text-[11px] font-semibold rounded-[6px] border border-s-border text-s-text3 bg-s-bg3 hover:border-s-border2 hover:text-s-text2 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {priceLoading ? 'Refreshing…' : '↻ Refresh'}
           </button>
-        </div>
-        <StockStandings
-          picks={STOCK_PICKS_2026}
-          currentPrices={currentPrices}
-          loading={priceLoading}
-          lastUpdated={lastUpdated}
-        />
-      </section>
+        )}
+      </div>
 
-      {/* ── SECTION 2: Past Draft History ────────────────────────── */}
-      <section>
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-3">
-          Past Draft History
-        </div>
-        <PastDrafts />
-      </section>
+      {/* ── 2026 PICK ORDER TAB ───────────────────────────────────── */}
+      {activeTab === 'pickorder' && (
+        <>
+          <div className="text-[11px] text-s-text3 mb-3">Jan 12 → Jul 15 · Best ROI drafts first</div>
+          <StockStandings
+            picks={STOCK_PICKS_2026}
+            currentPrices={currentPrices}
+            loading={priceLoading}
+            lastUpdated={lastUpdated}
+          />
+        </>
+      )}
 
-      {/* ── SECTION 3: Draft Slot vs Final Standings ─────────────── */}
-      <section>
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3 mb-1">
-          Draft Slot vs Final Standings
-        </div>
-        <p className="text-[11px] text-s-text3 mb-3">
-          Did early picks translate to better finishes?
-        </p>
-        <DraftSlotTable />
-      </section>
+      {/* ── PAST DRAFTS TAB ──────────────────────────────────────── */}
+      {activeTab === 'history' && <PastDrafts />}
+
+      {/* ── SLOT ANALYSIS TAB ────────────────────────────────────── */}
+      {activeTab === 'slots' && (
+        <>
+          <p className="text-[11px] text-s-text3 mb-3">
+            Did early picks translate to better finishes?
+          </p>
+          <DraftSlotTable />
+        </>
+      )}
     </div>
   )
 }

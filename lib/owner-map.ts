@@ -34,13 +34,16 @@ export const DISPLAY_NAME_TO_OWNER: Record<string, string> = {
 
 // ─── Full names (first → first + last) for avatar initials ────────────────────
 export const OWNER_FULL_NAMES: Record<string, string> = {
+  'Armaan':   'Armaan Ahmed',
   'Dustin':   'Dustin Cai',
   'Nathan':   'Nathan Biyani',
+  'Raghav':   'Raghav Kappagantula',
   'Teja':     'Teja Kondapalli',
   'Daniyaal': 'Daniyaal Malik',
   'Manu':     'Manu Budidi',
   'Eric':     'Eric Doan',
   'Kerry':    'Kerry Yan',
+  'Sonu':     'Anurag Khandavalli',
 }
 
 // ─── Avatar colors per canonical owner name ────────────────────────────────────

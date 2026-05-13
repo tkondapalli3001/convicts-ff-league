@@ -8,7 +8,7 @@ import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
-type SortKey = 'manager' | 'year' | 'finish' | 'wins' | 'losses' | 'winpct' | 'pf' | 'pa' | 'margin' | 'allPlayW'
+type SortKey = 'manager' | 'year' | 'finish' | 'wins' | 'losses' | 'winpct' | 'pf' | 'pa' | 'margin' | 'luck'
 
 interface Row {
   manager: string
@@ -23,6 +23,7 @@ interface Row {
   playoffs: boolean
   allPlayW: number
   allPlayL: number
+  luck: number
 }
 
 interface Props {
@@ -98,6 +99,9 @@ export default function SeasonStandings({ onYearChange }: Props) {
         const games = s.wins + s.losses
         const margin = games > 0 ? parseFloat(((s.pf - s.pa) / games).toFixed(2)) : 0
         const ap = allPlayMap[`${name}:${s.year}`] ?? { w: 0, l: 0 }
+        const apTotal = ap.w + ap.l
+        const expectedWins = apTotal > 0 ? (s.wins + s.losses) * (ap.w / apTotal) : 0
+        const luck = parseFloat((s.wins - expectedWins).toFixed(2))
         result.push({
           manager: name,
           year: s.year,
@@ -111,6 +115,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
           playoffs: s.inPlayoffs,
           allPlayW: ap.w,
           allPlayL: ap.l,
+          luck,
         })
       })
     }
@@ -172,7 +177,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
               <SortTh k="pf"      label="PF/Gm" hideOnMobile />
               <SortTh k="pa"      label="PA/Gm" hideOnMobile />
               <SortTh k="margin"  label="+/−/Gm" hideOnMobile />
-              <SortTh k="allPlayW" label="All-Play" hideOnMobile />
+              <SortTh k="luck" label="Luck" hideOnMobile />
               <th className="hidden md:table-cell">Playoffs</th>
             </tr>
           </thead>
@@ -207,9 +212,9 @@ export default function SeasonStandings({ onYearChange }: Props) {
                     </span>
                   </td>
                   <td className="hidden md:table-cell num">
-                    <span className="text-s-green font-bold">{r.allPlayW}</span>
-                    <span className="text-s-text3 mx-0.5">−</span>
-                    <span className="text-s-red">{r.allPlayL}</span>
+                    <span className={r.luck >= 0 ? 'text-s-green font-bold' : 'text-s-red font-bold'}>
+                      {r.luck >= 0 ? '+' : ''}{r.luck.toFixed(1)}
+                    </span>
                   </td>
                   <td className="hidden md:table-cell">
                     {r.playoffs ? (
@@ -228,6 +233,12 @@ export default function SeasonStandings({ onYearChange }: Props) {
           </tbody>
         </table>
       </div>
+
+      <p className="mt-3 px-1 text-[10px] text-s-text3 leading-relaxed">
+        <span className="font-bold text-s-text2">Luck Index</span> = Actual Wins − Expected Wins.
+        Expected Wins is your All-Play win rate (how often you beat the rest of the field each week) applied to your actual schedule length.
+        Positive = you won more than your scoring deserved; negative = you were unlucky.
+      </p>
     </div>
   )
 }
