@@ -1,9 +1,5 @@
 import { useLeague } from '@/context/LeagueContext'
-
-const EXCLUDED_SCORES = [
-  { owner: 'Teja', year: 2019, week: 14 },
-  { owner: 'Eric', year: 2021, week: 17 },
-]
+import { EXCLUDED_GAME_SCORES } from '@/lib/constants'
 
 export function useRecordsData() {
   const { state } = useLeague()
@@ -39,7 +35,7 @@ export function useRecordsData() {
   }
 
   const filteredMatchups = allMatchups.filter(g =>
-    !EXCLUDED_SCORES.some(e => e.year === g.year && e.week === g.week &&
+    !EXCLUDED_GAME_SCORES.some(e => e.year === g.year && e.week === g.week &&
       (e.owner === g.team1 || e.owner === g.team2))
   )
 

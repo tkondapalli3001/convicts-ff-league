@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
 import { fmtPts } from '@/lib/utils'
-import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA } from '@/lib/constants'
+import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, EXCLUDED_GAME_SCORES } from '@/lib/constants'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import StatBox from '@/components/shared/StatBox'
 import FinishBadge from '@/components/shared/FinishBadge'
@@ -59,16 +59,20 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   }, [brackets, rosterUserMaps, leagues])
 
   const nonConsolationGames = useMemo(
-    () => ownerGames.filter(g =>
-      g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
-    ),
+    () => ownerGames.filter(g => {
+      if (EXCLUDED_GAME_SCORES.some(e => e.year === g.year && e.week === g.week &&
+          (e.owner === g.team1 || e.owner === g.team2))) return false
+      return g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
+    }),
     [ownerGames, consolationGameKeys]
   )
 
   const allMatchupsFiltered = useMemo(
-    () => allMatchups.filter(g =>
-      g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
-    ),
+    () => allMatchups.filter(g => {
+      if (EXCLUDED_GAME_SCORES.some(e => e.year === g.year && e.week === g.week &&
+          (e.owner === g.team1 || e.owner === g.team2))) return false
+      return g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
+    }),
     [allMatchups, consolationGameKeys]
   )
 

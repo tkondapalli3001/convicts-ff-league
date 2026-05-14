@@ -39,3 +39,12 @@ export const MANUAL_SHAME: ShameLoser[] = [
 export const MANUAL_PLAYOFF_OVERRIDES: { year: number; owner: string; finish?: number }[] = [
   { year: 2024, owner: 'Teja', finish: 5 }, // Was in playoffs; bracket data may misplace him
 ]
+
+// ─── Manually excluded game scores ────────────────────────────────────────────
+// Games excluded from all stat computations — either consolation games that
+// Sleeper's bracket data fails to detect (incomplete roster IDs in old seasons),
+// or known data entry errors.
+export const EXCLUDED_GAME_SCORES: { owner: string; year: number; week: number }[] = [
+  { owner: 'Teja', year: 2019, week: 14 },
+  { owner: 'Eric', year: 2021, week: 17 },
+]
