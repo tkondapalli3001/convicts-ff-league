@@ -42,6 +42,36 @@ export default function FunFacts() {
         ))}
       </div>
 
+      {/* ── The Perfect Storm ──────────────────────────────────────────────── */}
+      <div className="bento-card p-[18px]">
+        <div className="flex items-center gap-2 mb-4">
+          <Zap className="w-4 h-4 text-indigo-400" />
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
+            The Perfect Storm
+          </span>
+          <span className="ml-auto text-[10px] text-s-text3">Highest Player Scores</span>
+        </div>
+        {perfectStorm.length === 0 ? (
+          <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
+        ) : perfectStorm.map((entry, i) => (
+          <div
+            key={`${entry.owner}-${entry.year}-${entry.week}-${i}`}
+            className="flex items-center gap-2 py-[6px] border-b border-s-bg3 text-[12px] last:border-b-0"
+          >
+            <span className="w-5 text-s-text3 text-[10px] num flex-shrink-0">{i + 1}</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-s-text font-bold truncate">{entry.playerName}</div>
+              <div className="text-[10px] text-s-text3">
+                {entry.owner} · {entry.year} Wk{entry.week}
+              </div>
+            </div>
+            <span className="text-indigo-400 font-bold num text-[14px] flex-shrink-0">
+              {entry.pts.toFixed(2)}
+            </span>
+          </div>
+        ))}
+      </div>
+
       {/* ── Dumpster Divers (col-span-2) ──────────────────────────────────── */}
       <div className="md:col-span-2 bento-card p-[18px]">
         <div className="flex items-center gap-2 mb-4">
@@ -69,36 +99,6 @@ export default function FunFacts() {
             </span>
             <span className="text-s-text3 text-[10px] ml-auto whitespace-nowrap">
               {entry.year} Wk{entry.week}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* ── The Perfect Storm ──────────────────────────────────────────────── */}
-      <div className="bento-card p-[18px]">
-        <div className="flex items-center gap-2 mb-4">
-          <Zap className="w-4 h-4 text-indigo-400" />
-          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
-            The Perfect Storm
-          </span>
-          <span className="ml-auto text-[10px] text-s-text3">Highest Player Scores</span>
-        </div>
-        {perfectStorm.length === 0 ? (
-          <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
-        ) : perfectStorm.map((entry, i) => (
-          <div
-            key={`${entry.owner}-${entry.year}-${entry.week}-${i}`}
-            className="flex items-center gap-2 py-[6px] border-b border-s-bg3 text-[12px] last:border-b-0"
-          >
-            <span className="w-5 text-s-text3 text-[10px] num flex-shrink-0">{i + 1}</span>
-            <div className="flex-1 min-w-0">
-              <div className="text-s-text font-bold truncate">{entry.playerName}</div>
-              <div className="text-[10px] text-s-text3">
-                {entry.owner} · {entry.year} Wk{entry.week}
-              </div>
-            </div>
-            <span className="text-indigo-400 font-bold num text-[14px] flex-shrink-0">
-              {entry.pts.toFixed(2)}
             </span>
           </div>
         ))}

@@ -113,10 +113,13 @@ export function useFunFacts(): FunFactsData {
 
     // ── Card 3: The Boom-Bust Specialist ─────────────────────────────────────
     const scoresByOwner: Record<string, number[]> = {}
-    for (const s of allScores) {
-      if (s.pts <= 0) continue
-      if (!scoresByOwner[s.owner]) scoresByOwner[s.owner] = []
-      scoresByOwner[s.owner].push(s.pts)
+    for (const m of filteredMatchups) {
+      if (m.type !== 'R') continue
+      for (const [owner, pts] of [[m.team1, m.pts1], [m.team2, m.pts2]] as [string, number][]) {
+        if (pts <= 0) continue
+        if (!scoresByOwner[owner]) scoresByOwner[owner] = []
+        scoresByOwner[owner].push(pts)
+      }
     }
     const boomBust: BoomBustEntry[] = Object.entries(scoresByOwner)
       .filter(([, scores]) => scores.length >= 4)

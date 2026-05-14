@@ -14,19 +14,28 @@ export function useRecordsData() {
     const year = Number(yearStr)
     const rMap = rosterUserMaps[year] ?? {}
     const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
+
+    const addConsolationGame = (r: number, idA: number, idB: number) => {
+      const week = playoffStart + (r - 1)
+      const nameA = rMap[String(idA)] ?? `Team${idA}`
+      const nameB = rMap[String(idB)] ?? `Team${idB}`
+      consolationGameKeys.add(`${year}|||${week}|||${nameA}|||${nameB}`)
+      consolationGameKeys.add(`${year}|||${week}|||${nameB}|||${nameA}`)
+    }
+
+    // Winners bracket non-championship games (3rd, 5th, 7th place, etc.)
     ;(bracket.winners ?? [])
       .filter(g => g.p && g.p !== 1)
       .forEach(g => {
-        const t1Id = g.t1 ?? null
-        const t2Id = g.t2 ?? null
-        if (t1Id != null && t2Id != null) {
-          const week = playoffStart + (g.r - 1)
-          const t1Name = rMap[String(t1Id)] ?? `Team${t1Id}`
-          const t2Name = rMap[String(t2Id)] ?? `Team${t2Id}`
-          consolationGameKeys.add(`${year}|||${week}|||${t1Name}|||${t2Name}`)
-          consolationGameKeys.add(`${year}|||${week}|||${t2Name}|||${t1Name}`)
-        }
+        if (g.t1 != null && g.t2 != null) addConsolationGame(g.r, g.t1, g.t2)
+        else if (g.w != null && g.l != null) addConsolationGame(g.r, g.w, g.l)
       })
+
+    // All losers bracket games (toilet bowl path)
+    ;(bracket.losers ?? []).forEach(g => {
+      if (g.t1 != null && g.t2 != null) addConsolationGame(g.r, g.t1, g.t2)
+      else if (g.w != null && g.l != null) addConsolationGame(g.r, g.w, g.l)
+    })
   }
 
   const filteredMatchups = allMatchups.filter(g =>

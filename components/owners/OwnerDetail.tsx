@@ -32,29 +32,48 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       const year = Number(yearStr)
       const rMap = rosterUserMaps[year] ?? {}
       const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
+
+      const addGame = (r: number, idA: number, idB: number) => {
+        const week = playoffStart + (r - 1)
+        const nameA = rMap[String(idA)] ?? `Team${idA}`
+        const nameB = rMap[String(idB)] ?? `Team${idB}`
+        set.add(`${year}|||${week}|||${nameA}|||${nameB}`)
+        set.add(`${year}|||${week}|||${nameB}|||${nameA}`)
+      }
+
+      // Winners bracket non-championship games (3rd, 5th, 7th place, etc.)
       ;(bracket.winners ?? [])
         .filter(g => g.p && g.p !== 1)
         .forEach(g => {
-          const t1Id = g.t1 ?? null
-          const t2Id = g.t2 ?? null
-          if (t1Id != null && t2Id != null) {
-            const week = playoffStart + (g.r - 1)
-            const t1Name = rMap[String(t1Id)] ?? `Team${t1Id}`
-            const t2Name = rMap[String(t2Id)] ?? `Team${t2Id}`
-            set.add(`${year}|||${week}|||${t1Name}|||${t2Name}`)
-            set.add(`${year}|||${week}|||${t2Name}|||${t1Name}`)
-          }
+          if (g.t1 != null && g.t2 != null) addGame(g.r, g.t1, g.t2)
+          else if (g.w != null && g.l != null) addGame(g.r, g.w, g.l)
         })
+
+      // All losers bracket games (toilet bowl path)
+      ;(bracket.losers ?? []).forEach(g => {
+        if (g.t1 != null && g.t2 != null) addGame(g.r, g.t1, g.t2)
+        else if (g.w != null && g.l != null) addGame(g.r, g.w, g.l)
+      })
     }
     return set
   }, [brackets, rosterUserMaps, leagues])
 
-  const funStats = useMemo(() => {
-    // Scores excluding consolation games
-    const validGames = ownerGames.filter(g =>
+  const nonConsolationGames = useMemo(
+    () => ownerGames.filter(g =>
       g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
-    )
-    const scores = validGames.map(g => ({
+    ),
+    [ownerGames, consolationGameKeys]
+  )
+
+  const allMatchupsFiltered = useMemo(
+    () => allMatchups.filter(g =>
+      g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
+    ),
+    [allMatchups, consolationGameKeys]
+  )
+
+  const funStats = useMemo(() => {
+    const scores = nonConsolationGames.map(g => ({
       pts: g.team1 === ownerName ? g.pts1 : g.pts2,
       opp: g.team1 === ownerName ? g.team2 : g.team1,
       year: g.year,
@@ -66,7 +85,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
     // Top rival = opponent who has defeated this owner the most
     const rivalLossCount: Record<string, number> = {}
-    ownerGames.forEach(g => {
+    nonConsolationGames.forEach(g => {
       const opp    = g.team1 === ownerName ? g.team2 : g.team1
       const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
       const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
@@ -75,7 +94,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     const topRivalName = Object.entries(rivalLossCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
     let rivalW = 0, rivalL = 0
     if (topRivalName) {
-      ownerGames.forEach(g => {
+      nonConsolationGames.forEach(g => {
         const opp = g.team1 === ownerName ? g.team2 : g.team1
         if (opp !== topRivalName) return
         const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
@@ -84,8 +103,8 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       })
     }
 
-    // Longest win streak (all games)
-    const sorted = [...ownerGames].sort((a, b) => a.year - b.year || a.week - b.week)
+    // Longest win streak (regular season + championship path only)
+    const sorted = [...nonConsolationGames].sort((a, b) => a.year - b.year || a.week - b.week)
     let maxStreak = 0, curStreak = 0
     let streakStart = sorted.length > 0 ? sorted[0] : null
     let streakEnd   = sorted.length > 0 ? sorted[0] : null
@@ -147,7 +166,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     const topScorers = Object.values(playerPts).sort((a, b) => b.pts - a.pts).slice(0, 3)
 
     return { bestGame, worstGame, topRivalName, rivalW, rivalL, maxStreak, streakStart, streakEnd, topScorers }
-  }, [ownerGames, ownerName, consolationGameKeys, draftData, rosterUserMaps, matchups])
+  }, [nonConsolationGames, ownerName, draftData, rosterUserMaps, matchups])
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
@@ -176,12 +195,12 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const shame  = MANUAL_SHAME.filter(s => s.loser === ownerName)
   const earn   = EARNINGS_DATA.find(e => e.owner === ownerName)
 
-  const allOwnerNames = [...new Set(allMatchups.flatMap(g => [g.team1, g.team2]))]
+  const allOwnerNames = [...new Set(allMatchupsFiltered.flatMap(g => [g.team1, g.team2]))]
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'seasons', label: 'Season Log' },
     { id: 'h2h',     label: 'H2H Records' },
-    { id: 'gamelog', label: `Game Log (${ownerGames.length})` },
+    { id: 'gamelog', label: `Game Log (${nonConsolationGames.length})` },
   ]
 
   return (
@@ -347,13 +366,13 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
       {/* H2H Records */}
       {tab === 'h2h' && (
-        <H2HGrid ownerName={ownerName} allMatchups={allMatchups} allOwnerNames={allOwnerNames} />
+        <H2HGrid ownerName={ownerName} allMatchups={allMatchupsFiltered} allOwnerNames={allOwnerNames} />
       )}
 
       {/* Game Log */}
       {tab === 'gamelog' && (
         <div className="max-h-[500px] overflow-y-auto gl rounded-[12px]">
-          {ownerGames.map(g => {
+          {nonConsolationGames.map(g => {
             const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
             const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
             const opp    = g.team1 === ownerName ? g.team2 : g.team1
