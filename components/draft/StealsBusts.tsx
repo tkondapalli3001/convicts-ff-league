@@ -149,6 +149,24 @@ function PickList({ title, emoji, picks, isSteal }: {
   picks: PickResult[]
   isSteal: boolean
 }) {
+  const [sortKey, setSortKey] = useState<'playerName' | 'owner' | 'pickNo' | 'totalPts' | 'value'>('value')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(isSteal ? 'desc' : 'asc')
+
+  function toggleSort(key: typeof sortKey) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('asc') }
+  }
+  const icon = (key: typeof sortKey) => sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
+
+  const sortedPicks = [...picks].sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1
+    if (sortKey === 'playerName') return dir * a.playerName.localeCompare(b.playerName)
+    if (sortKey === 'owner') return dir * a.owner.localeCompare(b.owner)
+    if (sortKey === 'pickNo') return dir * (a.pickNo - b.pickNo)
+    if (sortKey === 'totalPts') return dir * (a.totalPts - b.totalPts)
+    return dir * (a.value - b.value)
+  })
+
   return (
     <div className="gl">
       <div className="px-4 py-3 border-b border-s-border flex items-center gap-2">
@@ -162,15 +180,15 @@ function PickList({ title, emoji, picks, isSteal }: {
             <thead>
               <tr>
                 <th className="text-left px-4 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">#</th>
-                <th className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Player</th>
-                <th className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Manager</th>
-                <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Pick</th>
-                <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Pts</th>
-                <th className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Value</th>
+                <th onClick={() => toggleSort('playerName')} className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Player{icon('playerName')}</th>
+                <th onClick={() => toggleSort('owner')} className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{icon('owner')}</th>
+                <th onClick={() => toggleSort('pickNo')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Pick{icon('pickNo')}</th>
+                <th onClick={() => toggleSort('totalPts')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Pts{icon('totalPts')}</th>
+                <th onClick={() => toggleSort('value')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Value{icon('value')}</th>
               </tr>
             </thead>
             <tbody>
-              {picks.map((p, i) => {
+              {sortedPicks.map((p, i) => {
                 const posClass = POS_COLORS[p.position] ?? 'bg-slate-500/20 text-slate-400 border-slate-500/30'
                 return (
                   <tr key={`${p.year}-${p.playerName}-${p.pickNo}`} className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors">

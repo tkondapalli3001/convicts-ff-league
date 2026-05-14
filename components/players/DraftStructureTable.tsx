@@ -30,6 +30,21 @@ interface Props {
 
 export default function DraftStructureTable({ data }: Props) {
   const [selectedStrategy, setSelectedStrategy] = useState<string | null>(null)
+  const [stratSort, setStratSort] = useState<'strategy' | 'avgWins' | 'avgFinish'>('avgFinish')
+  const [stratDir, setStratDir] = useState<'asc' | 'desc'>('asc')
+
+  function toggleStratSort(key: typeof stratSort) {
+    if (stratSort === key) setStratDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setStratSort(key); setStratDir('asc') }
+  }
+  const stratIcon = (key: typeof stratSort) => stratSort === key ? (stratDir === 'asc' ? ' ↑' : ' ↓') : ''
+
+  const sortedData = [...data].sort((a, b) => {
+    const dir = stratDir === 'asc' ? 1 : -1
+    if (stratSort === 'strategy') return dir * a.strategy.localeCompare(b.strategy)
+    if (stratSort === 'avgWins') return dir * (a.avgWins - b.avgWins)
+    return dir * (a.avgFinish - b.avgFinish)
+  })
 
   if (!data.length) {
     return (
@@ -154,13 +169,13 @@ export default function DraftStructureTable({ data }: Props) {
       <table className="w-full border-collapse text-[12px]">
         <thead>
           <tr className="text-[10px] font-bold tracking-[1px] uppercase text-s-text3 border-b border-s-border">
-            <th className="text-left py-[5px] pr-3">Strategy</th>
-            <th className="text-right py-[5px] pr-3">Avg W</th>
-            <th className="text-right py-[5px]">Avg Finish</th>
+            <th onClick={() => toggleStratSort('strategy')} className="text-left py-[5px] pr-3 cursor-pointer select-none hover:text-s-text2">Strategy{stratIcon('strategy')}</th>
+            <th onClick={() => toggleStratSort('avgWins')} className="text-right py-[5px] pr-3 cursor-pointer select-none hover:text-s-text2">Avg W{stratIcon('avgWins')}</th>
+            <th onClick={() => toggleStratSort('avgFinish')} className="text-right py-[5px] cursor-pointer select-none hover:text-s-text2">Avg Finish{stratIcon('avgFinish')}</th>
           </tr>
         </thead>
         <tbody>
-          {data.map(entry => {
+          {sortedData.map(entry => {
             const color = STRATEGY_COLORS[entry.strategy] ?? 'text-s-text2'
             return (
               <tr key={entry.strategy} className="border-b border-s-bg3">

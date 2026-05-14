@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import type { StockPick } from '@/lib/stock-picks'
 import { MARKET_BENCHMARK_2026 } from '@/lib/stock-picks'
 
@@ -23,18 +24,36 @@ function fmtPrice(n: number) {
 }
 
 export default function StockStandings({ picks, currentPrices, loading, lastUpdated }: Props) {
+  const [sortKey, setSortKey] = useState<'owner' | 'ticker' | 'roi' | 'startPrice' | 'current'>('roi')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  function toggleSort(key: typeof sortKey) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir(key === 'roi' || key === 'current' ? 'desc' : 'asc') }
+  }
+  const icon = (key: typeof sortKey) => sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
+
   const rows = picks.map(p => {
     const current = currentPrices[p.ticker]
     const roiPct = current !== undefined ? roi(current, p.startPrice) : null
     return { ...p, current, roiPct }
   })
 
-  // Sort by ROI descending, nulls last
   const rankedRows = [...rows].sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1
+    if (sortKey === 'owner') return dir * a.owner.localeCompare(b.owner)
+    if (sortKey === 'ticker') return dir * a.ticker.localeCompare(b.ticker)
+    if (sortKey === 'startPrice') return dir * (a.startPrice - b.startPrice)
+    if (sortKey === 'current') {
+      if (a.current === undefined && b.current === undefined) return 0
+      if (a.current === undefined) return 1
+      if (b.current === undefined) return -1
+      return dir * (a.current - b.current)
+    }
     if (a.roiPct === null && b.roiPct === null) return 0
     if (a.roiPct === null) return 1
     if (b.roiPct === null) return -1
-    return b.roiPct - a.roiPct
+    return dir * (a.roiPct - b.roiPct)
   })
 
   // Convicts Fund aggregate
@@ -66,13 +85,13 @@ export default function StockStandings({ picks, currentPrices, loading, lastUpda
           <thead>
             <tr>
               <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border w-10">#</th>
-              <th className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Manager</th>
-              <th className="text-left px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Stock Pick</th>
-              <th className="text-right px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">ROI</th>
-              <th className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border whitespace-nowrap">
-                Price on {startLabel}
+              <th onClick={() => toggleSort('owner')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{icon('owner')}</th>
+              <th onClick={() => toggleSort('ticker')} className="text-left px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Stock Pick{icon('ticker')}</th>
+              <th onClick={() => toggleSort('roi')} className="text-right px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">ROI{icon('roi')}</th>
+              <th onClick={() => toggleSort('startPrice')} className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2 whitespace-nowrap">
+                Price on {startLabel}{icon('startPrice')}
               </th>
-              <th className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Today</th>
+              <th onClick={() => toggleSort('current')} className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Today{icon('current')}</th>
             </tr>
           </thead>
           <tbody>

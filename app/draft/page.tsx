@@ -40,6 +40,10 @@ function DraftSlotTable() {
   const { draftData, rosterUserMaps, ownerSeasons, years } = state
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
   const [selectedManager, setSelectedManager] = useState<string | null>(null)
+  const [slotSort, setSlotSort] = useState<'slot' | 'avgFinish' | 'playoffs'>('slot')
+  const [slotSortDir, setSlotSortDir] = useState<'asc' | 'desc'>('asc')
+  const [mgrSort, setMgrSort] = useState<'owner' | 'avgSlot' | 'count'>('avgSlot')
+  const [mgrSortDir, setMgrSortDir] = useState<'asc' | 'desc'>('asc')
 
   const rows = useMemo(() => {
     const out: { year: number; owner: string; slot: number; finish: number | null; madePlayoffs: boolean }[] = []
@@ -153,7 +157,38 @@ function DraftSlotTable() {
     )
   }
 
-  const slots = [...new Set(rows.map(r => r.slot))].sort((a, b) => a - b)
+  function toggleSlotSort(key: 'slot' | 'avgFinish' | 'playoffs') {
+    if (slotSort === key) setSlotSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSlotSort(key); setSlotSortDir('asc') }
+  }
+  function toggleMgrSort(key: 'owner' | 'avgSlot' | 'count') {
+    if (mgrSort === key) setMgrSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setMgrSort(key); setMgrSortDir('asc') }
+  }
+  const sIcon = (key: 'slot' | 'avgFinish' | 'playoffs') =>
+    slotSort === key ? (slotSortDir === 'asc' ? ' ↑' : ' ↓') : ''
+  const mIcon = (key: 'owner' | 'avgSlot' | 'count') =>
+    mgrSort === key ? (mgrSortDir === 'asc' ? ' ↑' : ' ↓') : ''
+
+  const sortedSlots = [...new Set(rows.map(r => r.slot))].sort((a, b) => {
+    if (slotSort === 'slot') return slotSortDir === 'asc' ? a - b : b - a
+    if (slotSort === 'avgFinish') {
+      const da = avgBySlot[a], db = avgBySlot[b]
+      const avgA = da?.finishes.length ? da.finishes.reduce((x, y) => x + y, 0) / da.finishes.length : (slotSortDir === 'asc' ? Infinity : -Infinity)
+      const avgB = db?.finishes.length ? db.finishes.reduce((x, y) => x + y, 0) / db.finishes.length : (slotSortDir === 'asc' ? Infinity : -Infinity)
+      return slotSortDir === 'asc' ? avgA - avgB : avgB - avgA
+    }
+    const da = avgBySlot[a], db = avgBySlot[b]
+    const pctA = da?.total ? da.playoffs / da.total : 0
+    const pctB = db?.total ? db.playoffs / db.total : 0
+    return slotSortDir === 'asc' ? pctA - pctB : pctB - pctA
+  })
+
+  const sortedManagers = [...managerAvgSlot].sort((a, b) => {
+    if (mgrSort === 'owner') return mgrSortDir === 'asc' ? a.owner.localeCompare(b.owner) : b.owner.localeCompare(a.owner)
+    if (mgrSort === 'count') return mgrSortDir === 'asc' ? a.count - b.count : b.count - a.count
+    return mgrSortDir === 'asc' ? a.avgSlot - b.avgSlot : b.avgSlot - a.avgSlot
+  })
 
   return (
     <div className="space-y-3">
@@ -161,14 +196,13 @@ function DraftSlotTable() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Slot</th>
-              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Avg Finish</th>
-              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border"># Seasons</th>
-              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Made Playoffs</th>
+              <th onClick={() => toggleSlotSort('slot')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Slot{sIcon('slot')}</th>
+              <th onClick={() => toggleSlotSort('avgFinish')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Avg Finish{sIcon('avgFinish')}</th>
+              <th onClick={() => toggleSlotSort('playoffs')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Made Playoffs{sIcon('playoffs')}</th>
             </tr>
           </thead>
           <tbody>
-            {slots.map(slot => {
+            {sortedSlots.map(slot => {
               const d = avgBySlot[slot]
               const avg = d?.finishes.length
                 ? (d.finishes.reduce((a, b) => a + b, 0) / d.finishes.length)
@@ -205,7 +239,6 @@ function DraftSlotTable() {
                         {avg !== null ? avg.toFixed(1) : '—'}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-center text-[13px] text-s-text3">{d?.total ?? 0}</td>
                     <td className="px-3 py-3 text-center text-[12px] text-s-text2">
                       {d ? `${d.playoffs} / ${d.total}` : '—'}
                     </td>
@@ -213,7 +246,7 @@ function DraftSlotTable() {
 
                   {isOpen && (
                     <tr key={`slot-${slot}-detail`}>
-                      <td colSpan={4} className="px-4 py-0 border-b border-s-border/40 bg-s-bg3/20">
+                      <td colSpan={3} className="px-4 py-0 border-b border-s-border/40 bg-s-bg3/20">
                         <div className="py-3">
                           <div className="text-[10px] font-bold tracking-[2px] uppercase text-s-text3 mb-2">
                             {slotRows.length} manager{slotRows.length !== 1 ? 's' : ''} from Slot {slot} —&nbsp;
@@ -271,13 +304,13 @@ function DraftSlotTable() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Manager</th>
-              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">Avg Slot</th>
-              <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border"># Drafts</th>
+              <th onClick={() => toggleMgrSort('owner')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{mIcon('owner')}</th>
+              <th onClick={() => toggleMgrSort('avgSlot')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Avg Slot{mIcon('avgSlot')}</th>
+              <th onClick={() => toggleMgrSort('count')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2"># Drafts{mIcon('count')}</th>
             </tr>
           </thead>
           <tbody>
-            {managerAvgSlot.map((row, i) => (
+            {sortedManagers.map((row, i) => (
               <tr
                 key={row.owner}
                 className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors cursor-pointer"

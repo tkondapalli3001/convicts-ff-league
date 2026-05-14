@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
@@ -46,6 +46,8 @@ export default function HomePage() {
   const { state } = useLeague()
   const { loaded, error, allMatchups, ownerSeasons, years, leagueChain } = state
   const router = useRouter()
+  const [sortKey, setSortKey] = useState<'wins' | 'winpct' | 'avgPPG' | 'champs' | 'earn'>('winpct')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
   // All-time career stats per owner (enriched for SearchBar)
   const careerData = useMemo<ManagerCardData[]>(() => {
@@ -134,6 +136,20 @@ export default function HomePage() {
       })
   }, [ownerSeasons, allMatchups])
 
+  const displayData = useMemo(() => {
+    return [...careerData].sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1
+      if (sortKey === 'wins') return dir * (a.allW - b.allW)
+      if (sortKey === 'winpct') return dir * (a.winpct - b.winpct)
+      if (sortKey === 'avgPPG') return dir * (a.avgPFperGame - b.avgPFperGame)
+      if (sortKey === 'champs') return dir * (a.champs - b.champs)
+      if (a.earn === null && b.earn === null) return 0
+      if (a.earn === null) return 1
+      if (b.earn === null) return -1
+      return dir * (a.earn - b.earn)
+    })
+  }, [careerData, sortKey, sortDir])
+
   // All-time high score
   const { highScore, highScoreOwner } = useMemo(() => {
     let high = 0
@@ -161,6 +177,12 @@ export default function HomePage() {
   const runnerUpColor = ownerColor(runnerUpName)
   const shameName    = shameRecord?.loser ?? '—'
   const shameColor   = ownerColor(shameName)
+
+  function toggleSort(key: typeof sortKey) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('desc') }
+  }
+  const icon = (key: typeof sortKey) => sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
 
   const sortedYears = [...years].sort((a, b) => b - a)
 
@@ -245,15 +267,15 @@ export default function HomePage() {
                 <tr>
                   <th className="w-10 text-center">#</th>
                   <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#0d121b' }}>Manager</th>
-                  <th>W–L</th>
-                  <th>Win%</th>
-                  <th className="text-right">Avg PPG</th>
-                  <th className="text-center">🏆</th>
-                  <th className="text-right">Net $</th>
+                  <th onClick={() => toggleSort('wins')} className="cursor-pointer select-none hover:text-s-text2">W–L{icon('wins')}</th>
+                  <th onClick={() => toggleSort('winpct')} className="cursor-pointer select-none hover:text-s-text2">Win%{icon('winpct')}</th>
+                  <th onClick={() => toggleSort('avgPPG')} className="text-right cursor-pointer select-none hover:text-s-text2">Avg PPG{icon('avgPPG')}</th>
+                  <th onClick={() => toggleSort('champs')} className="text-center cursor-pointer select-none hover:text-s-text2">🏆{icon('champs')}</th>
+                  <th onClick={() => toggleSort('earn')} className="text-right cursor-pointer select-none hover:text-s-text2">Net ${icon('earn')}</th>
                 </tr>
               </thead>
               <tbody>
-                {careerData.map((d, i) => {
+                {displayData.map((d, i) => {
                   const color = ownerColor(d.name)
                   const avatarUrl = state.ownerAvatarMap?.[d.name]
 
