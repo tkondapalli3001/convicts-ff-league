@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { useRecordsData } from '@/hooks/useRecordsData'
+import { computeLuckIndex } from '@/lib/luck'
 
 interface HeartbreakEntry {
   owner: string
@@ -42,12 +43,18 @@ interface LowestWinEntry {
   opp: string
 }
 
+interface LuckDuoEntry {
+  luckiest: { owner: string; luckIndex: number }
+  unluckiest: { owner: string; luckIndex: number }
+}
+
 export interface FunFactsData {
   heartbreak: HeartbreakEntry[]
   perfectStorm: PerfectStormEntry[]
   boomBust: BoomBustEntry[]
   theOwner: TheOwnerEntry[]
   lowestWins: LowestWinEntry[]
+  luckDuo: LuckDuoEntry | null
 }
 
 export function useFunFacts(): FunFactsData {
@@ -155,6 +162,18 @@ export function useFunFacts(): FunFactsData {
       .slice(0, 5)
       .map(s => ({ owner: s.owner, pts: s.pts, oppPts: s.oppPts, year: s.year, week: s.week, opp: s.opp }))
 
-    return { heartbreak, perfectStorm, boomBust, theOwner, lowestWins }
+    // ── Card 6: Lucky Charm / Cosmic Punching Bag ────────────────────────────
+    const luckEntries = computeLuckIndex(state.matchups, state.rosterUserMaps, state.ownerSeasons)
+    let luckDuo: LuckDuoEntry | null = null
+    if (luckEntries.length >= 2) {
+      const luckiest = luckEntries[0]
+      const unluckiest = luckEntries[luckEntries.length - 1]
+      luckDuo = {
+        luckiest: { owner: luckiest.owner, luckIndex: luckiest.luckIndex },
+        unluckiest: { owner: unluckiest.owner, luckIndex: unluckiest.luckIndex },
+      }
+    }
+
+    return { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo }
   }, [state, allScores, filteredMatchups])
 }

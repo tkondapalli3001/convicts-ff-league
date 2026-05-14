@@ -1,11 +1,11 @@
 'use client'
 
-import { HeartCrack, Zap, Activity, Crown, Trash2 } from 'lucide-react'
+import { HeartCrack, Zap, Activity, Crown, Trash2, Clover } from 'lucide-react'
 import { useFunFacts } from '@/hooks/useFunFacts'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
 export default function FunFacts() {
-  const { heartbreak, perfectStorm, boomBust, theOwner, lowestWins } = useFunFacts()
+  const { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo } = useFunFacts()
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -81,6 +81,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             The Perfect Storm
           </span>
+          <span className="ml-auto text-[10px] text-s-text3">Highest Player Scores</span>
         </div>
         {perfectStorm.length === 0 ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
@@ -169,6 +170,49 @@ export default function FunFacts() {
             </span>
           </div>
         ))}
+      </div>
+
+      {/* ── Lucky Charm / Cosmic Punching Bag ─────────────────────────────── */}
+      <div className="bento-card p-[18px]">
+        <div className="flex items-center gap-2 mb-4">
+          <Clover className="w-4 h-4 text-emerald-400" />
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
+            Luck of the Draw
+          </span>
+          <span className="ml-auto text-[10px] text-s-text3">Career luck index</span>
+        </div>
+        {!luckDuo ? (
+          <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 py-[8px] border-b border-s-bg3">
+              <OwnerAvatar name={luckDuo.luckiest.owner} size="sm" />
+              <div className="flex-1">
+                <div className="text-s-text font-bold text-[12px]">{luckDuo.luckiest.owner}</div>
+                <div className="text-[10px] text-s-text3">Lucky Charm 🍀</div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <div className="text-emerald-400 font-bold num text-[14px]">
+                  +{luckDuo.luckiest.luckIndex.toFixed(2)}
+                </div>
+                <div className="text-[9px] text-s-text3">wins</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 py-[8px]">
+              <OwnerAvatar name={luckDuo.unluckiest.owner} size="sm" />
+              <div className="flex-1">
+                <div className="text-s-text font-bold text-[12px]">{luckDuo.unluckiest.owner}</div>
+                <div className="text-[10px] text-s-text3">Cosmic Punching Bag 💀</div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <div className="text-rose-400 font-bold num text-[14px]">
+                  {luckDuo.unluckiest.luckIndex.toFixed(2)}
+                </div>
+                <div className="text-[9px] text-s-text3">wins</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
     </div>
