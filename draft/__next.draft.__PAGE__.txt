@@ -1,9 +1,9 @@
 1:"$Sreact.fragment"
 2:I[47257,["/convicts-ff-league/_next/static/chunks/0h-snaj6og6ia.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js"],"ClientPageRoot"]
-3:I[56396,["/convicts-ff-league/_next/static/chunks/0h-snaj6og6ia.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js","/convicts-ff-league/_next/static/chunks/0y0~p1r99v5ya.js","/convicts-ff-league/_next/static/chunks/0pi74aphbgdnz.js"],"default"]
+3:I[56396,["/convicts-ff-league/_next/static/chunks/0h-snaj6og6ia.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js","/convicts-ff-league/_next/static/chunks/0y0~p1r99v5ya.js","/convicts-ff-league/_next/static/chunks/019j.4xb_j2e2.js"],"default"]
 6:I[97367,["/convicts-ff-league/_next/static/chunks/0h-snaj6og6ia.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js"],"OutletBoundary"]
 7:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/convicts-ff-league/_next/static/chunks/0y0~p1r99v5ya.js","async":true}],["$","script","script-1",{"src":"/convicts-ff-league/_next/static/chunks/0pi74aphbgdnz.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"CgSztKAfOtJf5FoM0yGa5"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/convicts-ff-league/_next/static/chunks/0y0~p1r99v5ya.js","async":true}],["$","script","script-1",{"src":"/convicts-ff-league/_next/static/chunks/019j.4xb_j2e2.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"uJQBucT15HxDgrzFBNYD5"}
 4:{}
 5:"$0:rsc:props:children:0:props:serverProvidedParams:params"
 8:null
