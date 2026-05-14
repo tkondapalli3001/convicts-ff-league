@@ -1,11 +1,11 @@
 'use client'
 
-import { HeartCrack, Zap, Activity, Crown } from 'lucide-react'
+import { HeartCrack, Zap, Activity, Crown, Trash2 } from 'lucide-react'
 import { useFunFacts } from '@/hooks/useFunFacts'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
 export default function FunFacts() {
-  const { heartbreak, perfectStorm, boomBust, theOwner } = useFunFacts()
+  const { heartbreak, perfectStorm, boomBust, theOwner, lowestWins } = useFunFacts()
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -32,6 +32,38 @@ export default function FunFacts() {
             <span className="whitespace-nowrap text-[12px]">
               <span className="text-rose-400 font-bold num">{entry.pts.toFixed(2)}</span>
               <span className="text-s-text3 mx-1">lost to</span>
+              <span className="text-s-text2 font-semibold">{entry.opp}</span>
+              <span className="text-s-text3 num ml-1">{entry.oppPts.toFixed(2)}</span>
+            </span>
+            <span className="text-s-text3 text-[10px] ml-auto whitespace-nowrap">
+              {entry.year} Wk{entry.week}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Dumpster Divers (col-span-2) ──────────────────────────────────── */}
+      <div className="md:col-span-2 bento-card p-[18px]">
+        <div className="flex items-center gap-2 mb-4">
+          <Trash2 className="w-4 h-4 text-lime-400" />
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
+            Dumpster Divers
+          </span>
+          <span className="ml-auto text-[10px] text-s-text3">Lowest score in a win</span>
+        </div>
+        {lowestWins.length === 0 ? (
+          <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
+        ) : lowestWins.map((entry, i) => (
+          <div
+            key={`${entry.owner}-${entry.year}-${entry.week}`}
+            className="flex items-center gap-2 py-[6px] border-b border-s-bg3 text-[12px] last:border-b-0"
+          >
+            <span className="w-5 text-s-text3 text-[10px] num flex-shrink-0">{i + 1}</span>
+            <OwnerAvatar name={entry.owner} size="sm" />
+            <span className="font-bold text-s-text w-[62px] flex-shrink-0">{entry.owner}</span>
+            <span className="whitespace-nowrap text-[12px]">
+              <span className="text-lime-400 font-bold num">{entry.pts.toFixed(2)}</span>
+              <span className="text-s-text3 mx-1">beat</span>
               <span className="text-s-text2 font-semibold">{entry.opp}</span>
               <span className="text-s-text3 num ml-1">{entry.oppPts.toFixed(2)}</span>
             </span>

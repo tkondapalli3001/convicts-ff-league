@@ -38,7 +38,7 @@ export default function Navbar() {
       <div className="max-w-[1200px] mx-auto flex items-center overflow-x-auto scrollbar-none">
 
         {/* Brand */}
-        <div className="px-5 py-[15px] flex-shrink-0 flex items-center gap-2 border-r border-white/[0.07]">
+        <Link href="/" className="px-5 py-[15px] flex-shrink-0 flex items-center gap-2 border-r border-white/[0.07]">
           <Activity size={14} className="text-violet-500 flex-shrink-0" />
           <span
             className="text-[11px] font-black tracking-[3px] uppercase whitespace-nowrap"
@@ -51,7 +51,7 @@ export default function Navbar() {
           >
             CONVICTS FF
           </span>
-        </div>
+        </Link>
 
         {/* Nav links — hidden on mobile */}
         <div className="hidden sm:flex">

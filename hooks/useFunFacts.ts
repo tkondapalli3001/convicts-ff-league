@@ -33,11 +33,21 @@ interface TheOwnerEntry {
   winPct: number
 }
 
+interface LowestWinEntry {
+  owner: string
+  pts: number
+  oppPts: number
+  year: number
+  week: number
+  opp: string
+}
+
 export interface FunFactsData {
   heartbreak: HeartbreakEntry[]
   perfectStorm: PerfectStormEntry[]
   boomBust: BoomBustEntry[]
   theOwner: TheOwnerEntry[]
+  lowestWins: LowestWinEntry[]
 }
 
 export function useFunFacts(): FunFactsData {
@@ -138,6 +148,13 @@ export function useFunFacts(): FunFactsData {
     }
     theOwner.sort((a, b) => b.winPct - a.winPct || b.wins - a.wins)
 
-    return { heartbreak, perfectStorm, boomBust, theOwner }
+    // ── Card 5: Dumpster Divers ───────────────────────────────────────────────
+    const lowestWins: LowestWinEntry[] = allScores
+      .filter(s => s.result === 'W' && s.pts > 0)
+      .sort((a, b) => a.pts - b.pts)
+      .slice(0, 5)
+      .map(s => ({ owner: s.owner, pts: s.pts, oppPts: s.oppPts, year: s.year, week: s.week, opp: s.opp }))
+
+    return { heartbreak, perfectStorm, boomBust, theOwner, lowestWins }
   }, [state, allScores, filteredMatchups])
 }
