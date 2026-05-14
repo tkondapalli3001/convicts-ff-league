@@ -49,7 +49,7 @@ export default function StealsBusts() {
         }
       }
 
-      const pickedPlayers = draft.picks.map(pick => {
+      const pickedPlayers = draft.picks.filter(pick => !pick.is_keeper).map(pick => {
         const pts = playerPts[pick.player_id] ?? 0
         const owner = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
         const playerName = [pick.metadata.first_name, pick.metadata.last_name].filter(Boolean).join(' ')
