@@ -20,8 +20,6 @@ interface Props {
 }
 
 export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: Props) {
-  const isSnake = draft.type === 'snake'
-
   // Build slot → canonical owner map (pre-trade assignment).
   // Round-1 picks reflect whoever used the pick after trades, so we can't use
   // them for column headers. Use slot_to_roster_id first, then infer from the
@@ -118,15 +116,12 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
             <tbody>
               {Array.from({ length: numRounds }, (_, i) => {
                 const round = i + 1
-                const displaySlots = isSnake && round % 2 === 0
-                  ? [...slots].reverse()
-                  : slots
                 return (
                   <tr key={round} className="border-b border-s-border/30">
                     <td className="px-2 py-1 text-center text-[11px] font-extrabold text-s-text3 bg-s-bg3/20">
                       {round}
                     </td>
-                    {displaySlots.map(slot => {
+                    {slots.map(slot => {
                       const pick = pickMap[`${round}-${slot}`]
                       if (!pick) {
                         return (
