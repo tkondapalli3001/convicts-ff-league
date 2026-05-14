@@ -2,4 +2,4 @@
 2:I[39756,["/convicts-ff-league/_next/static/chunks/0h-snaj6og6ia.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js"],"default"]
 3:I[37457,["/convicts-ff-league/_next/static/chunks/0h-snaj6og6ia.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js"],"default"]
 4:[]
-0:{"rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"isPartial":false,"staleTime":300,"varyParams":"$W4","buildId":"JqF6-Zd-st9im7HaOSmuW"}
+0:{"rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"isPartial":false,"staleTime":300,"varyParams":"$W4","buildId":"CgSztKAfOtJf5FoM0yGa5"}
