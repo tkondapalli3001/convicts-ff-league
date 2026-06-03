@@ -27,7 +27,18 @@ function StatChip({
   animClass?: string
 }) {
   return (
-    <div className={`bento-card p-5 flex flex-col gap-1 ${animClass ?? ''}`}>
+    <div className={`bento-card relative p-5 flex flex-col gap-1 ${animClass ?? ''}`}>
+      {accent && (
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: -32, right: -32,
+            width: 110, height: 110,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${accent}28 0%, transparent 70%)`,
+          }}
+        />
+      )}
       <div className="text-[9px] font-bold tracking-[3px] uppercase text-s-text3 mb-1">{label}</div>
       <div
         className="text-[28px] md:text-[32px] font-black leading-none tracking-tight"
@@ -391,7 +402,12 @@ export default function HomePage() {
         <div className="flex flex-col gap-4">
 
           {/* Hall of Fame */}
-          <div className="bento-card flex-1">
+          <div className="bento-card relative flex-1">
+            <div className="absolute pointer-events-none inset-0"
+              style={{ background: 'linear-gradient(135deg, rgba(120,53,15,0.18) 0%, transparent 55%)' }} />
+            <div className="absolute pointer-events-none"
+              style={{ top: -36, right: -36, width: 130, height: 130, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%)' }} />
             <div className="px-5 pt-5 pb-3 border-b border-[#5a3800]/40">
               <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#a37a1a]">
                 🏆 Hall of Fame
@@ -434,7 +450,12 @@ export default function HomePage() {
           </div>
 
           {/* Wall of Shame */}
-          <div className="bento-card flex-1">
+          <div className="bento-card relative flex-1">
+            <div className="absolute pointer-events-none inset-0"
+              style={{ background: 'linear-gradient(135deg, rgba(127,29,29,0.20) 0%, transparent 55%)' }} />
+            <div className="absolute pointer-events-none"
+              style={{ top: -36, right: -36, width: 130, height: 130, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(239,68,68,0.16) 0%, transparent 70%)' }} />
             <div className="px-5 pt-5 pb-3 border-b border-[#5a0000]/40">
               <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#7a1010]">
                 🚽 Wall of Shame

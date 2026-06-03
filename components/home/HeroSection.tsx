@@ -118,9 +118,11 @@ export default function HeroSection({
         <div className="flex-shrink-0 flex flex-row lg:flex-col gap-3 lg:min-w-[200px]">
           {/* Runner-Up */}
           <div
-            className="gl flex-1 lg:flex-none rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-white/20"
+            className="gl relative flex-1 lg:flex-none rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-white/20 overflow-hidden"
           >
-            <div className="flex items-center gap-3">
+            <div className="absolute inset-0 pointer-events-none rounded-[14px]"
+              style={{ background: 'linear-gradient(135deg, rgba(226,232,240,0.07) 0%, transparent 60%)' }} />
+            <div className="relative flex items-center gap-3">
               <span className="text-[26px] leading-none flex-shrink-0">🥈</span>
               <div className="min-w-0">
                 <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-600 mb-0.5">
@@ -138,9 +140,11 @@ export default function HeroSection({
 
           {/* Toilet Bowl */}
           <div
-            className="gl flex-1 lg:flex-none rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-red-500/20"
+            className="gl relative flex-1 lg:flex-none rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-red-500/20 overflow-hidden"
           >
-            <div className="flex items-center gap-3">
+            <div className="absolute inset-0 pointer-events-none rounded-[14px]"
+              style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.09) 0%, transparent 60%)' }} />
+            <div className="relative flex items-center gap-3">
               <span className="text-[26px] leading-none flex-shrink-0">🚽</span>
               <div className="min-w-0">
                 <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-600 mb-0.5">
