@@ -83,11 +83,17 @@ export default function HeroSection({
             The Convicts League · {totalSeasons} Seasons · {yearRange}
           </div>
 
-          <h1 className="text-[28px] md:text-[38px] lg:text-[44px] font-black text-s-text leading-[1.1] mb-4 tracking-tight">
+          <h1 className="text-[32px] md:text-[38px] lg:text-[44px] font-black text-s-text leading-[1.1] mb-4 tracking-tight">
             <span className="block text-slate-500 font-semibold text-[13px] md:text-[15px] tracking-[3px] uppercase mb-2">
               Reigning Champion
             </span>
-            <span className="relative inline-block" style={{ color: champColor }}>
+            <span
+              className="relative inline-block"
+              style={{
+                color: champColor,
+                filter: `drop-shadow(0 0 18px ${champColor}55)`,
+              }}
+            >
               {fullName(champName)}
             </span>
           </h1>
@@ -109,10 +115,10 @@ export default function HeroSection({
         </div>
 
         {/* Right — Runner-Up + Toilet Bowl */}
-        <div className="flex-shrink-0 flex flex-col gap-3 min-w-[200px]">
+        <div className="flex-shrink-0 flex flex-row lg:flex-col gap-3 lg:min-w-[200px]">
           {/* Runner-Up */}
           <div
-            className="gl rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-white/20"
+            className="gl flex-1 lg:flex-none rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-white/20"
           >
             <div className="flex items-center gap-3">
               <span className="text-[26px] leading-none flex-shrink-0">🥈</span>
@@ -132,7 +138,7 @@ export default function HeroSection({
 
           {/* Toilet Bowl */}
           <div
-            className="gl rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-red-500/20"
+            className="gl flex-1 lg:flex-none rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-red-500/20"
           >
             <div className="flex items-center gap-3">
               <span className="text-[26px] leading-none flex-shrink-0">🚽</span>

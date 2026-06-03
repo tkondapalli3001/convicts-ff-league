@@ -125,16 +125,18 @@ export function getShameLoser(year: number, state: LeagueState) {
   const toiletGame = losers.find(g => g.r === maxRound && g.p === 1)
     ?? (losers.length ? losers.reduce((best, g) => (g.r > best.r ? g : best)) : undefined)
 
+  // Sleeper losers bracket semantics: `w` tracks the team advancing toward last place
+  // (i.e., the team that LOST the game), so `w` on the final game = the actual last-place team.
   if (manual?.loser) {
     let seed: number | null = manual.seed ?? null
-    if (seed == null && toiletGame?.l != null) {
-      seed = seedMap[toiletGame.l] ?? computeRegularSeasonSeed(toiletGame.l, year, state)
+    if (seed == null && toiletGame?.w != null) {
+      seed = seedMap[toiletGame.w] ?? computeRegularSeasonSeed(toiletGame.w, year, state)
     }
     return { ...manual, seed }
   }
 
-  if (toiletGame?.l) {
-    return { year, loser: rMap[String(toiletGame.l)] || `Team${toiletGame.l}`, seed: seedMap[toiletGame.l] ?? null }
+  if (toiletGame?.w) {
+    return { year, loser: rMap[String(toiletGame.w)] || `Team${toiletGame.w}`, seed: seedMap[toiletGame.w] ?? null }
   }
   return { year, loser: '—', seed: null }
 }

@@ -24,11 +24,11 @@ export const MANUAL_CHAMPS: Champion[] = [
 
 // ─── Shame (Toilet Bowl Losers) ────────────────────────────────────────────────
 export const MANUAL_SHAME: ShameLoser[] = [
-  { year: 2025, loser: 'Sonu',    seed: null, note: 'Sonu319, roster 2 lost toilet bowl'          },
+  { year: 2025, loser: 'Eric',    seed: null, note: 'edoan96, roster 7 lost toilet bowl final'    },
   { year: 2024, loser: 'Dustin',  seed: null, note: 'Dustin13Cai, roster 1 lost toilet bowl'      },
   { year: 2023, loser: 'Kerry',   seed: 7                                                           },
   { year: 2022, loser: 'Nathan',  seed: 10                                                          },
-  { year: 2021, loser: 'Teja',    seed: 9                                                           },
+  { year: 2021, loser: 'Teja',    seed: 9,   note: 'Round-robin loser format; Sleeper bracket does not reflect this' },
   { year: 2020, loser: 'Nathan',  seed: 9                                                           },
   { year: 2019, loser: 'Sangram', seed: 7                                                           },
 ]
