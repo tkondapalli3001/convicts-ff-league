@@ -167,10 +167,44 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         })
       })
     })
-    const topScorers = Object.values(playerPts).sort((a, b) => b.pts - a.pts).slice(0, 3)
+    const topScorers = Object.values(playerPts).sort((a, b) => b.pts - a.pts).slice(0, 5)
 
     return { bestGame, worstGame, topRivalName, rivalW, rivalL, maxStreak, streakStart, streakEnd, topScorers }
   }, [nonConsolationGames, ownerName, draftData, rosterUserMaps, matchups])
+
+  const playoffStats = useMemo(() => {
+    let finalsW = 0
+    let finalsL = 0
+    let byes = 0
+
+    for (const [yearStr, bracket] of Object.entries(brackets)) {
+      const year = Number(yearStr)
+      const rMap = rosterUserMaps[year] ?? {}
+      const ownerEntry = Object.entries(rMap).find(([, name]) => name === ownerName)
+      if (!ownerEntry) continue
+      const rId = Number(ownerEntry[0])
+
+      const champGame = bracket.winners?.find(g => g.p === 1)
+      if (champGame) {
+        if (champGame.w === rId) finalsW++
+        else if (champGame.l === rId) finalsL++
+      }
+
+      const inRound1 = new Set<number>()
+      ;(bracket.winners ?? []).filter(g => g.r === 1).forEach(g => {
+        if (g.t1 != null) inRound1.add(g.t1)
+        if (g.t2 != null) inRound1.add(g.t2)
+      })
+      const directInRound2 = new Set<number>()
+      ;(bracket.winners ?? []).filter(g => g.r === 2).forEach(g => {
+        if (g.t1 != null) directInRound2.add(g.t1)
+        if (g.t2 != null) directInRound2.add(g.t2)
+      })
+      if (directInRound2.has(rId) && !inRound1.has(rId)) byes++
+    }
+
+    return { finalsW, finalsL, byes }
+  }, [brackets, rosterUserMaps, ownerName])
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
@@ -246,13 +280,11 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         </div>
       </div>
 
-      {/* Core stat boxes */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-[10px] mb-[10px]">
+      {/* Row 1 — Core Performance */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-[10px] mb-[10px]">
         <StatBox label="Career Record" value={`${totalW}-${totalL}`} sub={`${pct}% win rate`} />
         <StatBox label="Avg PF/Game" value={(seasons.reduce((a,s)=>a+s.pf,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPF.toFixed(0)} pts/season`} />
         <StatBox label="Avg PA/Game" value={(seasons.reduce((a,s)=>a+s.pa,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPA.toFixed(0)} pts allowed/season`} valueColor="#f87171" />
-        <StatBox label="Best Season"   value={String(best.year)}  sub={`${best.wins}-${best.losses} record`}  valueColor="#22c55e" />
-        <StatBox label="Worst Season"  value={String(worst.year)} sub={`${worst.wins}-${worst.losses} record`} valueColor="#ef4444" />
         <StatBox
           label="Net Earnings"
           value={earn ? `${earn.total >= 0 ? '+' : ''}$${earn.total}` : 'N/A'}
@@ -260,7 +292,25 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         />
       </div>
 
-      {/* Fun stat boxes */}
+      {/* Row 2 — Season & Playoffs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-[10px] mb-[10px]">
+        <StatBox
+          label="Finals Record"
+          value={playoffStats.finalsW + playoffStats.finalsL > 0 ? `${playoffStats.finalsW}-${playoffStats.finalsL}` : '—'}
+          sub={playoffStats.finalsW + playoffStats.finalsL > 0 ? `${playoffStats.finalsW + playoffStats.finalsL} Finals appearance${playoffStats.finalsW + playoffStats.finalsL !== 1 ? 's' : ''}` : 'Never reached Finals'}
+          valueColor={playoffStats.finalsW > 0 ? '#f59e0b' : undefined}
+        />
+        <StatBox
+          label="Playoff Byes"
+          value={playoffStats.byes > 0 ? String(playoffStats.byes) : '—'}
+          sub={playoffStats.byes > 0 ? `career first-round bye${playoffStats.byes !== 1 ? 's' : ''}` : 'No byes earned'}
+          valueColor={playoffStats.byes > 0 ? '#a78bfa' : undefined}
+        />
+        <StatBox label="Best Season"   value={String(best.year)}  sub={`${best.wins}-${best.losses} record`}  valueColor="#22c55e" />
+        <StatBox label="Worst Season"  value={String(worst.year)} sub={`${worst.wins}-${worst.losses} record`} valueColor="#ef4444" />
+      </div>
+
+      {/* Row 3 — Fun Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-[10px] mb-5">
         <StatBox
           label="Top Rival"
