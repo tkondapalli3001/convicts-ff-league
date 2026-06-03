@@ -1,3 +1,3 @@
-:HL["/convicts-ff-league/_next/static/chunks/0te8c2s-4n83d.css","style"]
+:HL["/convicts-ff-league/_next/static/chunks/0djeezt42dz78.css","style"]
 :HL["/convicts-ff-league/_next/static/media/83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"owners","param":null,"prefetchHints":0,"slots":{"children":{"name":"name","param":{"type":"d","key":"Armaan","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"sjgrcIzEA0Zq6DtOcZDvr"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"owners","param":null,"prefetchHints":0,"slots":{"children":{"name":"name","param":{"type":"d","key":"Armaan","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"UGFOFj9eUapoo-8WJVnHT"}
