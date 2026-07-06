@@ -52,6 +52,10 @@ const config: Config = {
           from: { backgroundPosition: '-200% 0' },
           to:   { backgroundPosition: '200% 0' },
         },
+        slideInLeft: {
+          from: { opacity: '0', transform: 'translateX(-24px)' },
+          to:   { opacity: '1', transform: 'translateX(0)' },
+        },
       },
       animation: {
         'fade-in':    'fadeInUp 0.5s ease both',
@@ -63,6 +67,7 @@ const config: Config = {
         'fade-in-6':  'fadeInUp 0.5s 0.36s ease both',
         'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
         'shimmer':    'shimmer 2s linear infinite',
+        'slide-in-left': 'slideInLeft 0.22s ease-out both',
       },
       backgroundSize: {
         '200': '200% 100%',

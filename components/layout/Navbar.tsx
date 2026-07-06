@@ -2,22 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Activity } from 'lucide-react'
 import { useLeague } from '@/context/LeagueContext'
 import GlobalSearch from '@/components/search/GlobalSearch'
-import {
-  Home, Users, Trophy, Swords,
-  CalendarDays, Zap, ClipboardList, Activity,
-} from 'lucide-react'
-
-const NAV_ITEMS = [
-  { href: '/',          label: 'Home',      icon: Home          },
-  { href: '/this-week', label: 'This Week', icon: Swords        },
-  { href: '/owners',    label: 'Owners',    icon: Users         },
-  { href: '/seasons',   label: 'Seasons',   icon: CalendarDays  },
-  { href: '/draft',     label: 'Draft',     icon: ClipboardList },
-  { href: '/records',   label: 'Records',   icon: Trophy        },
-  { href: '/players',   label: 'Players',   icon: Zap           },
-]
+import MobileMenu from './MobileMenu'
+import { NAV_ITEMS } from './nav-items'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -37,10 +26,16 @@ export default function Navbar() {
         background: 'rgba(2, 6, 23, 0.88)',
       }}
     >
-      <div className="max-w-[1200px] mx-auto flex items-center overflow-x-auto scrollbar-none">
+      <div className="max-w-[1200px] mx-auto flex items-center px-3 sm:px-0 sm:overflow-x-auto scrollbar-none">
+
+        {/* Mobile menu trigger */}
+        <MobileMenu />
 
         {/* Brand */}
-        <Link href="/" className="px-5 py-[15px] flex-shrink-0 flex items-center gap-2 border-r border-white/[0.07]">
+        <Link
+          href="/"
+          className="px-2 sm:px-5 py-[15px] flex-shrink-0 flex items-center gap-2 sm:border-r border-white/[0.07]"
+        >
           <Activity size={14} className="text-violet-500 flex-shrink-0" />
           <span
             className="text-[11px] font-black tracking-[3px] uppercase whitespace-nowrap"
@@ -55,7 +50,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Nav links — hidden on mobile */}
+        {/* Nav links — desktop only; mobile uses the drawer */}
         <div className="hidden sm:flex">
           {NAV_ITEMS.map(item => {
             const Icon = item.icon
@@ -83,7 +78,7 @@ export default function Navbar() {
         </div>
 
         {/* Search + status pill */}
-        <div className="ml-auto px-4 flex-shrink-0 flex items-center gap-2">
+        <div className="ml-auto pl-2 sm:px-4 flex-shrink-0 flex items-center gap-2">
           <GlobalSearch />
           <div className="hidden lg:block text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-600 bg-white/[0.04] px-3 py-1 rounded-full border border-white/[0.07] whitespace-nowrap">
             {statusText}

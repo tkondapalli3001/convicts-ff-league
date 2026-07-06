@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { LeagueProvider } from '@/context/LeagueContext'
 import Navbar from '@/components/layout/Navbar'
-import MobileNav from '@/components/layout/MobileNav'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -52,10 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-[#0B0E11] text-s-text min-h-screen font-sans antialiased">
         <LeagueProvider>
           <Navbar />
-          <main className="max-w-[1200px] mx-auto px-4 pb-24 pt-6">
+          <main className="max-w-[1200px] mx-auto px-4 pb-16 pt-6">
             {children}
           </main>
-          <MobileNav />
         </LeagueProvider>
       </body>
     </html>
