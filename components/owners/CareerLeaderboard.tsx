@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
-import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/constants'
+import { EARNINGS_DATA } from '@/lib/constants'
+import { activeOwnerNames, championshipCount, shameCount, buildChampPathGameKeys, gameKey } from '@/lib/stats'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
@@ -17,34 +18,13 @@ export default function CareerLeaderboard() {
   const [playoffOnly, setPlayoffOnly] = useState(false)
   const router = useRouter()
 
-  // Build a set of exact game keys (year|||week|||team1|||team2) for championship-path games only.
-  // Excludes 3rd/5th place consolation games (g.p === 3 or g.p === 5) and the losers bracket.
-  const winnersBracketGameKeys = useMemo(() => {
-    const set = new Set<string>()
-    for (const [yearStr, bracket] of Object.entries(brackets)) {
-      const year = Number(yearStr)
-      const rMap = rosterUserMaps[year] ?? {}
-      const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
-      ;(bracket.winners ?? [])
-        .filter(g => !g.p || g.p === 1)  // keep unplaced rounds + championship; exclude 3rd/5th
-        .forEach(g => {
-          const t1Id = g.t1 ?? null
-          const t2Id = g.t2 ?? null
-          if (t1Id != null && t2Id != null) {
-            const week = playoffStart + (g.r - 1)
-            const t1Name = rMap[String(t1Id)] ?? `Team${t1Id}`
-            const t2Name = rMap[String(t2Id)] ?? `Team${t2Id}`
-            set.add(`${year}|||${week}|||${t1Name}|||${t2Name}`)
-            set.add(`${year}|||${week}|||${t2Name}|||${t1Name}`)
-          }
-        })
-    }
-    return set
-  }, [brackets, rosterUserMaps, leagues])
+  // Championship-path game keys only (excludes 3rd/5th place games + losers bracket)
+  const winnersBracketGameKeys = useMemo(
+    () => buildChampPathGameKeys({ brackets, rosterUserMaps, leagues }),
+    [brackets, rosterUserMaps, leagues]
+  )
 
-  const INACTIVE_OWNERS = new Set(['Hamza', 'Sangram'])
-  const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
-  const names = canonicalNames.filter(n => ownerSeasons[n] && !INACTIVE_OWNERS.has(n)).sort()
+  const names = activeOwnerNames(ownerSeasons).sort()
 
   function handleSort(k: SortKey) {
     if (sortKey === k) setSortDir(d => (d === 1 ? -1 : 1))
@@ -55,9 +35,8 @@ export default function CareerLeaderboard() {
     return names.map(name => {
       const allSeasons = ownerSeasons[name] || []
       const playoffApps = allSeasons.filter(s => s.inPlayoffs).length
-      const champs = MANUAL_CHAMPS.filter(c => c.winner?.includes(name))
-        .reduce((sum, c) => sum + (c.half ? 0.5 : 1), 0)
-      const shame = MANUAL_SHAME.filter(s => s.loser === name).length
+      const champs = championshipCount(name)
+      const shame = shameCount(name)
       const earn = EARNINGS_DATA.find(e => e.owner === name)
 
       let allW: number, allL: number, avgPF: number, numSeasons: number, avgFinish: number | null
@@ -67,7 +46,7 @@ export default function CareerLeaderboard() {
         const playoffGames = allMatchups.filter(
           g => g.type === 'P' &&
                (g.team1 === name || g.team2 === name) &&
-               winnersBracketGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
+               winnersBracketGameKeys.has(gameKey(g.year, g.week, g.team1, g.team2))
         )
         allW = playoffGames.filter(g => g.winner === name).length
         allL = playoffGames.filter(g => g.loser === name).length

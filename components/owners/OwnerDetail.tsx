@@ -4,7 +4,8 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
 import { fmtPts } from '@/lib/utils'
-import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, EXCLUDED_GAME_SCORES } from '@/lib/constants'
+import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA } from '@/lib/constants'
+import { buildConsolationGameKeys, excludeManualGames, gameKey } from '@/lib/stats'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import StatBox from '@/components/shared/StatBox'
 import FinishBadge from '@/components/shared/FinishBadge'
@@ -26,53 +27,22 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     [allMatchups, ownerName]
   )
 
-  const consolationGameKeys = useMemo(() => {
-    const set = new Set<string>()
-    for (const [yearStr, bracket] of Object.entries(brackets)) {
-      const year = Number(yearStr)
-      const rMap = rosterUserMaps[year] ?? {}
-      const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
-
-      const addGame = (r: number, idA: number, idB: number) => {
-        const week = playoffStart + (r - 1)
-        const nameA = rMap[String(idA)] ?? `Team${idA}`
-        const nameB = rMap[String(idB)] ?? `Team${idB}`
-        set.add(`${year}|||${week}|||${nameA}|||${nameB}`)
-        set.add(`${year}|||${week}|||${nameB}|||${nameA}`)
-      }
-
-      // Winners bracket non-championship games (3rd, 5th, 7th place, etc.)
-      ;(bracket.winners ?? [])
-        .filter(g => g.p && g.p !== 1)
-        .forEach(g => {
-          if (g.t1 != null && g.t2 != null) addGame(g.r, g.t1, g.t2)
-          else if (g.w != null && g.l != null) addGame(g.r, g.w, g.l)
-        })
-
-      // All losers bracket games (toilet bowl path)
-      ;(bracket.losers ?? []).forEach(g => {
-        if (g.t1 != null && g.t2 != null) addGame(g.r, g.t1, g.t2)
-        else if (g.w != null && g.l != null) addGame(g.r, g.w, g.l)
-      })
-    }
-    return set
-  }, [brackets, rosterUserMaps, leagues])
+  const consolationGameKeys = useMemo(
+    () => buildConsolationGameKeys({ brackets, rosterUserMaps, leagues }),
+    [brackets, rosterUserMaps, leagues]
+  )
 
   const nonConsolationGames = useMemo(
-    () => ownerGames.filter(g => {
-      if (EXCLUDED_GAME_SCORES.some(e => e.year === g.year && e.week === g.week &&
-          (e.owner === g.team1 || e.owner === g.team2))) return false
-      return g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
-    }),
+    () => excludeManualGames(ownerGames).filter(g =>
+      g.type === 'R' || !consolationGameKeys.has(gameKey(g.year, g.week, g.team1, g.team2))
+    ),
     [ownerGames, consolationGameKeys]
   )
 
   const allMatchupsFiltered = useMemo(
-    () => allMatchups.filter(g => {
-      if (EXCLUDED_GAME_SCORES.some(e => e.year === g.year && e.week === g.week &&
-          (e.owner === g.team1 || e.owner === g.team2))) return false
-      return g.type === 'R' || !consolationGameKeys.has(`${g.year}|||${g.week}|||${g.team1}|||${g.team2}`)
-    }),
+    () => excludeManualGames(allMatchups).filter(g =>
+      g.type === 'R' || !consolationGameKeys.has(gameKey(g.year, g.week, g.team1, g.team2))
+    ),
     [allMatchups, consolationGameKeys]
   )
 

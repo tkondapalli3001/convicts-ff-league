@@ -8,31 +8,11 @@ import { OWNER_FULL_NAMES } from '@/lib/constants'
 import { useLeague } from '@/context/LeagueContext'
 import type { OwnershipEntry } from '@/lib/data-processing'
 import type { PlayerStat } from '@/types'
+import type { CareerStats } from '@/lib/stats'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface ManagerCardData {
-  name: string
-  allW: number
-  allL: number
-  winpct: number
-  avgPF: number
-  avgPFperGame: number
-  totalPF: number
-  playoffApps: number
-  champs: number
-  shame: number
-  numSeasons: number
-  earn: number | null
-  sparkData: number[]
-  bestSeasonYear: number | null
-  bestSeasonWins: number | null
-  bestSeasonLosses: number | null
-  bestSeasonFinish: number | null
-  topRival: string | null
-  singleGameHigh: number | null
-  singleGameLow: number | null
-}
+export type ManagerCardData = CareerStats
 
 const POS_COLORS: Record<string, string> = {
   QB: '#f59e0b',

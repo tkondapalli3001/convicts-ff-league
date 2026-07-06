@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import { USER_ID_TO_OWNER } from '@/lib/constants'
+import { h2hRecord } from '@/lib/stats'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
 export default function RivalryCalc() {
@@ -22,30 +23,7 @@ export default function RivalryCalc() {
 
   const h2h = useMemo(() => {
     if (!ownerA || !ownerB) return null
-
-    const games = [...allMatchups]
-      .filter(g =>
-        (g.team1 === ownerA && g.team2 === ownerB) ||
-        (g.team1 === ownerB && g.team2 === ownerA)
-      )
-      .sort((a, b) => b.year - a.year || b.week - a.week)
-
-    if (!games.length) return { games, winsA: 0, winsB: 0, avgA: 0, avgB: 0, highA: 0, highB: 0, lastGame: null }
-
-    const winsA = games.filter(g =>
-      (g.team1 === ownerA && g.pts1 >= g.pts2) ||
-      (g.team2 === ownerA && g.pts2 >= g.pts1)
-    ).length
-    const winsB = games.length - winsA
-
-    const ptsA = games.map(g => g.team1 === ownerA ? g.pts1 : g.pts2)
-    const ptsB = games.map(g => g.team1 === ownerB ? g.pts1 : g.pts2)
-    const avgA = ptsA.reduce((a, b) => a + b, 0) / games.length
-    const avgB = ptsB.reduce((a, b) => a + b, 0) / games.length
-    const highA = Math.max(...ptsA)
-    const highB = Math.max(...ptsB)
-
-    return { games, winsA, winsB, avgA, avgB, highA, highB, lastGame: games[0] }
+    return h2hRecord(allMatchups, ownerA, ownerB)
   }, [allMatchups, ownerA, ownerB])
 
   const selectCls = 'flex-1 min-w-[140px] bg-s-bg3 border border-s-border text-s-text text-[13px] rounded-[8px] px-3 py-2 outline-none focus:border-s-border2 transition-colors'

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Matchup } from '@/types'
+import { h2hVsAll } from '@/lib/stats'
 import H2HModal from './H2HModal'
 
 interface Props {
@@ -13,26 +14,7 @@ interface Props {
 export default function H2HGrid({ ownerName, allMatchups, allOwnerNames }: Props) {
   const [modal, setModal] = useState<{ opp: string; games: Matchup[] } | null>(null)
 
-  const h2hData = allOwnerNames
-    .filter(n => n !== ownerName)
-    .map(opp => {
-      const games = allMatchups.filter(
-        g => (g.team1 === ownerName && g.team2 === opp) || (g.team1 === opp && g.team2 === ownerName)
-      )
-      if (!games.length) return null
-
-      let w = 0, pfTotal = 0, paTotal = 0
-      games.forEach(g => {
-        const myPts = g.team1 === ownerName ? g.pts1 : g.pts2
-        const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
-        pfTotal += myPts
-        paTotal += oppPts
-        if (myPts >= oppPts) w++
-      })
-      const l = games.length - w
-      return { opp, games, w, l, pfAvg: pfTotal / games.length, paAvg: paTotal / games.length }
-    })
-    .filter(Boolean) as { opp: string; games: Matchup[]; w: number; l: number; pfAvg: number; paAvg: number }[]
+  const h2hData = h2hVsAll(allMatchups, ownerName, allOwnerNames)
 
   return (
     <>

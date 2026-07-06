@@ -3,13 +3,12 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
+import { useCareerStats } from '@/hooks/useCareerStats'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import HeroSection from '@/components/home/HeroSection'
 import SearchBar from '@/components/home/SearchBar'
-import type { ManagerCardData } from '@/components/home/SearchBar'
 import { getChampion, getShameLoser, getRunnerUp, ownerColor, avatarLetters, fullNameInitials } from '@/lib/utils'
-import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/constants'
 
 // ─── Quick Stat Card ──────────────────────────────────────────────────────────
 
@@ -60,92 +59,8 @@ export default function HomePage() {
   const [sortKey, setSortKey] = useState<'wins' | 'winpct' | 'avgPPG' | 'champs' | 'earn'>('winpct')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
-  // All-time career stats per owner (enriched for SearchBar)
-  const careerData = useMemo<ManagerCardData[]>(() => {
-    const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
-    return canonicalNames
-      .filter(n => ownerSeasons[n] && n !== 'Sangram' && n !== 'Hamza')
-      .map(name => {
-        const seasons = ownerSeasons[name] || []
-        const allW = seasons.reduce((a, s) => a + s.wins, 0)
-        const allL = seasons.reduce((a, s) => a + s.losses, 0)
-        const winpct = allW / (allW + allL || 1)
-        const totalPF = seasons.reduce((a, s) => a + s.pf, 0)
-        const avgPF = seasons.length ? totalPF / seasons.length : 0
-        const avgPFperGame = (allW + allL) > 0 ? totalPF / (allW + allL) : 0
-        const playoffApps = seasons.filter(s => s.inPlayoffs).length
-        const champs = MANUAL_CHAMPS.filter(c => c.winner?.includes(name))
-          .reduce((sum, c) => sum + (c.half ? 0.5 : 1), 0)
-        const shame = MANUAL_SHAME.filter(s => s.loser === name).length
-        const earn = EARNINGS_DATA.find(e => e.owner === name)
-
-        const sparkData = [...seasons]
-          .sort((a, b) => a.year - b.year)
-          .map(s => (s.wins / (s.wins + s.losses || 1)) * 100)
-
-        const eligibleSeasons = seasons.filter(s => s.wins + s.losses > 0)
-        const bestSeason = eligibleSeasons.length
-          ? eligibleSeasons.reduce((best, s) => {
-              const pct = s.wins / (s.wins + s.losses)
-              const bestPct = best.wins / (best.wins + best.losses)
-              if (pct !== bestPct) return pct > bestPct ? s : best
-              const sFinish = s.finish ?? Infinity
-              const bestFinish = best.finish ?? Infinity
-              return sFinish < bestFinish ? s : best
-            })
-          : null
-
-        // Per-owner matchup stats
-        const ownerMatchups = allMatchups.filter(m => m.team1 === name || m.team2 === name)
-        let singleGameHigh: number | null = null
-        let singleGameLow: number | null = null
-        for (const m of ownerMatchups) {
-          const pts = m.team1 === name ? m.pts1 : m.pts2
-          if (pts > 0) {
-            if (singleGameHigh === null || pts > singleGameHigh) singleGameHigh = pts
-            if (singleGameLow === null || pts < singleGameLow) singleGameLow = pts
-          }
-        }
-
-        const lossesTo: Record<string, number> = {}
-        for (const m of ownerMatchups) {
-          if (m.loser === name && m.winner !== name) {
-            lossesTo[m.winner] = (lossesTo[m.winner] ?? 0) + 1
-          }
-        }
-        const topRivalEntry = Object.entries(lossesTo).sort((a, b) => b[1] - a[1])[0]
-        const topRival = topRivalEntry ? topRivalEntry[0] : null
-
-        return {
-          name,
-          allW,
-          allL,
-          winpct,
-          avgPF,
-          avgPFperGame,
-          totalPF,
-          playoffApps,
-          champs,
-          shame,
-          numSeasons: seasons.length,
-          earn: earn?.total ?? null,
-          sparkData,
-          bestSeasonYear: bestSeason?.year ?? null,
-          bestSeasonWins: bestSeason?.wins ?? null,
-          bestSeasonLosses: bestSeason?.losses ?? null,
-          bestSeasonFinish: bestSeason?.finish ?? null,
-          topRival,
-          singleGameHigh,
-          singleGameLow,
-        }
-      })
-      // Primary: win%, Secondary: total PF
-      .sort((a, b) => {
-        const diff = b.winpct - a.winpct
-        if (Math.abs(diff) > 0.0001) return diff
-        return b.totalPF - a.totalPF
-      })
-  }, [ownerSeasons, allMatchups])
+  // All-time career stats per owner (shared engine — also feeds SearchBar)
+  const careerData = useCareerStats()
 
   const displayData = useMemo(() => {
     return [...careerData].sort((a, b) => {
