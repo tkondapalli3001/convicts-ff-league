@@ -7,7 +7,7 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import StatChip from '@/components/shared/StatChip'
 import HeroSection from '@/components/home/HeroSection'
-import SearchBar from '@/components/home/SearchBar'
+import { openLeagueSearch } from '@/components/search/GlobalSearch'
 import CareerStandingsTable from '@/components/home/CareerStandingsTable'
 import HallOfFameCard from '@/components/home/HallOfFameCard'
 import WallOfShameCard from '@/components/home/WallOfShameCard'
@@ -17,7 +17,7 @@ export default function HomePage() {
   const { state } = useLeague()
   const { loaded, error, allMatchups, years, leagueChain } = state
 
-  // All-time career stats per owner (shared engine — also feeds SearchBar)
+  // All-time career stats per owner (shared engine)
   const careerData = useCareerStats()
 
   // All-time high score
@@ -51,10 +51,23 @@ export default function HomePage() {
   return (
     <div className="space-y-4">
 
-      {/* ── SEARCH BAR ───────────────────────────────────────────── */}
-      <div className="animate-fade-in relative z-10">
-        <SearchBar managerData={careerData} />
-      </div>
+      {/* ── SEARCH TRIGGER ───────────────────────────────────────── */}
+      <button
+        onClick={openLeagueSearch}
+        className="animate-fade-in w-full flex items-center gap-3 bento-card px-4 py-3.5 text-left hover:border-s-teal/50 transition-colors"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="flex-shrink-0" style={{ color: '#6e7681' }}>
+          <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.2" />
+          <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+        </svg>
+        <span className="flex-1 text-[14px] text-s-text3">
+          Ask anything — &ldquo;Teja vs Nathan&rdquo;, &ldquo;Who won in 2022?&rdquo;, &ldquo;Longest streak&rdquo;…
+        </span>
+        <span className="hidden md:flex items-center gap-0.5 flex-shrink-0">
+          <kbd className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-s-bg3 border border-s-border text-s-text3">⌘</kbd>
+          <kbd className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-s-bg3 border border-s-border text-s-text3">K</kbd>
+        </span>
+      </button>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <HeroSection

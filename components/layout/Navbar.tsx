@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
+import GlobalSearch from '@/components/search/GlobalSearch'
 import {
   Home, Users, Trophy,
   CalendarDays, Zap, ClipboardList, Activity,
@@ -80,9 +81,10 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Status pill */}
-        <div className="ml-auto px-4 flex-shrink-0">
-          <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-600 bg-white/[0.04] px-3 py-1 rounded-full border border-white/[0.07] whitespace-nowrap">
+        {/* Search + status pill */}
+        <div className="ml-auto px-4 flex-shrink-0 flex items-center gap-2">
+          <GlobalSearch />
+          <div className="hidden lg:block text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-600 bg-white/[0.04] px-3 py-1 rounded-full border border-white/[0.07] whitespace-nowrap">
             {statusText}
           </div>
         </div>

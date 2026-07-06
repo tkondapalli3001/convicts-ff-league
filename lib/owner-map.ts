@@ -46,6 +46,16 @@ export const OWNER_FULL_NAMES: Record<string, string> = {
   'Sonu':     'Anurag Khandavalli',
 }
 
+// ─── Position badge colors (QB/RB/WR/TE…) ──────────────────────────────────────
+export const POS_COLORS: Record<string, string> = {
+  QB: '#f59e0b',
+  RB: '#2ea043',
+  WR: '#58a6ff',
+  TE: '#a371f7',
+  K: '#6e7681',
+  DEF: '#6e7681',
+}
+
 // ─── Avatar colors per canonical owner name ────────────────────────────────────
 export const OWNER_COLORS: Record<string, string> = {
   'Teja':    '#3b82f6',
