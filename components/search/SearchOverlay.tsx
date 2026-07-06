@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
+import { X } from 'lucide-react'
 import { useLeague } from '@/context/LeagueContext'
 import { useCareerStats } from '@/hooks/useCareerStats'
 import { useRecordsData } from '@/hooks/useRecordsData'
@@ -146,9 +148,11 @@ export default function SearchOverlay({ onClose }: Props) {
     else if (e.key === 'Enter' && focusIdx >= 0) { e.preventDefault(); selectEntry(flatResults[focusIdx]) }
   }
 
-  return (
+  // Rendered through a portal: the navbar's backdrop-filter would otherwise
+  // become the containing block for this fixed overlay and clip it to the nav.
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-[10vh] pb-8 overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-3 pb-[calc(32px+env(safe-area-inset-bottom))] sm:px-4 sm:pt-[10vh] sm:pb-8 overflow-y-auto animate-fade-in"
       style={{ background: 'rgba(2, 6, 23, 0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
       onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}
     >
@@ -177,9 +181,17 @@ export default function SearchOverlay({ onClose }: Props) {
           )}
           <button
             onClick={onClose}
-            className="flex-shrink-0 px-2 py-0.5 rounded text-[10px] font-mono bg-s-bg3 border border-s-border text-s-text3 hover:text-s-text transition-colors"
+            className="hidden sm:block flex-shrink-0 px-2 py-0.5 rounded text-[10px] font-mono bg-s-bg3 border border-s-border text-s-text3 hover:text-s-text transition-colors"
+            aria-label="Close search"
           >
             ESC
+          </button>
+          <button
+            onClick={onClose}
+            className="sm:hidden flex-shrink-0 p-1.5 -mr-1 rounded-full text-s-text3 hover:text-s-text active:bg-s-bg3 transition-colors"
+            aria-label="Close search"
+          >
+            <X size={18} />
           </button>
         </div>
 
@@ -307,6 +319,7 @@ export default function SearchOverlay({ onClose }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
