@@ -6,6 +6,7 @@ import { usePlayersData } from '@/hooks/usePlayersData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PillTabs from '@/components/shared/PillTabs'
+import PageHeader from '@/components/shared/PageHeader'
 import StockStandings from '@/components/draft/StockStandings'
 import StealsBusts from '@/components/draft/StealsBusts'
 import DraftSlotAnalysis from '@/components/draft/DraftSlotAnalysis'
@@ -56,10 +57,10 @@ export default function DraftPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-[26px] font-extrabold text-s-text mb-1">Draft Hub</h1>
-      <p className="text-[13px] text-s-text3 mb-5">
-        Draft history, 2026 pick order standings, slot vs outcome analysis, and historical steals & busts
-      </p>
+      <PageHeader
+        title="Draft Hub"
+        subtitle="Draft history, 2026 pick order standings, slot vs outcome analysis, and historical steals & busts"
+      />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab}>
         {activeTab === 'pickorder' && (

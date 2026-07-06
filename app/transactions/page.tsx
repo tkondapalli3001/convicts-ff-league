@@ -6,6 +6,7 @@ import { useTransactionsData, type EnrichedTransaction } from '@/hooks/useTransa
 import { USER_ID_TO_OWNER } from '@/lib/constants'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
+import PageHeader from '@/components/shared/PageHeader'
 import TransactionFilters from '@/components/transactions/TransactionFilters'
 import TransactionTable from '@/components/transactions/TransactionTable'
 import TransactionDetailModal from '@/components/transactions/TransactionDetailModal'
@@ -78,10 +79,10 @@ export default function TransactionsPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-[26px] font-extrabold text-s-text mb-1">Transactions</h1>
-      <p className="text-[13px] text-s-text2 mb-6">
-        All trades, waiver claims, and free agent signings across all seasons
-      </p>
+      <PageHeader
+        title="Transactions"
+        subtitle="All trades, waiver claims, and free agent signings across all seasons"
+      />
 
       {/* Loading progress */}
       {loading && (

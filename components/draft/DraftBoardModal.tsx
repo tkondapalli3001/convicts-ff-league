@@ -2,14 +2,7 @@
 
 import type { DraftPick, SleeperDraft } from '@/types'
 
-const POS_COLORS: Record<string, string> = {
-  QB:  'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  RB:  'bg-green-500/20 text-green-400 border-green-500/30',
-  WR:  'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  TE:  'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  K:   'bg-slate-500/20 text-slate-400 border-slate-500/30',
-  DEF: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-}
+import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/constants'
 
 interface Props {
   year: number

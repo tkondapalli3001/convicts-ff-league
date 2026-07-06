@@ -88,11 +88,11 @@ export default function HeroSection({
               Reigning Champion
             </span>
             <span
-              className="relative inline-block"
+              className="relative inline-block champ-glow"
               style={{
                 color: champColor,
-                filter: `drop-shadow(0 0 18px ${champColor}55)`,
-              }}
+                '--champ-color': `${champColor}55`,
+              } as React.CSSProperties}
             >
               {fullName(champName)}
             </span>

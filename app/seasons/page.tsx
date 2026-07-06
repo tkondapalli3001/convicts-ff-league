@@ -5,6 +5,7 @@ import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PillTabs from '@/components/shared/PillTabs'
+import PageHeader from '@/components/shared/PageHeader'
 import SeasonStandings from '@/components/home/SeasonStandings'
 import PlayoffBracket from '@/components/home/PlayoffBracket'
 import AvgScoreChart from '@/components/trends/AvgScoreChart'
@@ -32,8 +33,7 @@ export default function SeasonsPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-[26px] font-extrabold text-s-text mb-1">Seasons</h1>
-      <p className="text-[13px] text-s-text2 mb-5">Year-by-year standings and scoring trends</p>
+      <PageHeader title="Seasons" subtitle="Year-by-year standings and scoring trends" />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 

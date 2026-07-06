@@ -135,8 +135,10 @@ All data is **client-side only** — no SSR, no API routes, no server components
 ## UI & Design System (Statmuse × Sleeper)
 
 - **Theme:** Dark mode only. Custom Tailwind `s-` color palette defined in `tailwind.config.ts`.
-- **Key colors:** `s-bg` (#080c14) backgrounds, `s-gold` accents, `s-green`/`s-red` for win/loss, `s-text` / `s-text3` for hierarchy.
-- **Layout:** High-contrast tables, borderless rounded cards, hero typography for key numbers.
+- **Key colors:** `s-bg` (#080c14) backgrounds, `s-gold` accents, `s-green`/`s-red` for win/loss, `s-text` / `s-text3` for hierarchy. Position colors come from `POS_COLORS` / `POS_TEXT_CLASSES` / `POS_BADGE_CLASSES` in `lib/constants` — never redefine them locally.
+- **Card/rounding tokens:** cards use `.bento-card` / `.gl` (16px radius, defined in globals.css), inner panels `rounded-[10px]`, pills `rounded-full`, tab buttons `rounded-[8px]`.
+- **Shared primitives:** `PageHeader` (page title + subtitle), `PillTabs` (gold tab row), `StatChip` (hero number card), `StatBox`, `OwnerAvatar`, `FinishBadge`, `WinPctBadge`. Use these instead of re-rolling the markup.
+- **Layout:** High-contrast tables, borderless rounded cards, hero typography for key numbers. Keyboard focus rings come from a global `:focus-visible` rule.
 - **No CSS modules or styled-components** — pure Tailwind utility classes in JSX. Inline styles only for dynamic values (e.g., percentage widths, owner hex colors).
 
 ---

@@ -5,6 +5,7 @@ import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PillTabs from '@/components/shared/PillTabs'
+import PageHeader from '@/components/shared/PageHeader'
 import CareerLeaderboard from '@/components/owners/CareerLeaderboard'
 import AnnualBreakdown from '@/components/earnings/AnnualBreakdown'
 import RivalryCalc from '@/components/records/RivalryCalc'
@@ -27,8 +28,10 @@ export default function OwnersPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-[26px] font-extrabold text-s-text mb-1">Owner Profiles</h1>
-      <p className="text-[13px] text-s-text3 mb-5">Click any row to drill into career stats, H2H records & game log</p>
+      <PageHeader
+        title="Owner Profiles"
+        subtitle="Click any row to drill into career stats, H2H records & game log"
+      />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 

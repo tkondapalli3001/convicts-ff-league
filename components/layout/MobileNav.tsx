@@ -26,6 +26,7 @@ export default function MobileNav() {
         background: 'rgba(2, 6, 23, 0.96)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
       <div className="flex">

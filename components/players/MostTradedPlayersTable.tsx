@@ -4,14 +4,7 @@ import { useState, useMemo } from 'react'
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 import type { PlayerStat } from '@/types'
 
-const POS_COLORS: Record<string, string> = {
-  QB:  'text-[#f59e0b]',
-  RB:  'text-[#22c55e]',
-  WR:  'text-[#60a5fa]',
-  TE:  'text-[#a78bfa]',
-  K:   'text-[#94a3b8]',
-  DEF: 'text-[#94a3b8]',
-}
+import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
 
 interface Props {
   transactions: EnrichedTransaction[]

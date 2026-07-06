@@ -7,6 +7,7 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import RecordItem from '@/components/shared/RecordItem'
 import PillTabs from '@/components/shared/PillTabs'
+import PageHeader from '@/components/shared/PageHeader'
 import ScoreLeaderboard from '@/components/records/ScoreLeaderboard'
 import StreakList from '@/components/records/StreakList'
 import TrashTalkCard from '@/components/trends/TrashTalkCard'
@@ -42,8 +43,10 @@ export default function RecordsPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-[26px] font-extrabold text-s-text mb-1">League Records</h1>
-      <p className="text-[13px] text-s-text3 mb-5">All-time milestones, extremes & fun stats across {years.length} seasons</p>
+      <PageHeader
+        title="League Records"
+        subtitle={`All-time milestones, extremes & fun stats across ${years.length} seasons`}
+      />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 

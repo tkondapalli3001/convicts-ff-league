@@ -5,6 +5,7 @@ import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PillTabs from '@/components/shared/PillTabs'
+import PageHeader from '@/components/shared/PageHeader'
 import GameLogFilters from '@/components/gamelog/GameLogFilters'
 import GameLogTable from '@/components/gamelog/GameLogTable'
 import GameDetailModal from '@/components/gamelog/GameDetailModal'
@@ -72,10 +73,10 @@ export default function GameLogPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-[26px] font-extrabold text-s-text mb-1">Seasons</h1>
-      <p className="text-[13px] text-s-text3 mb-5">
-        {allMatchups.length} total matchups across {years.length} seasons
-      </p>
+      <PageHeader
+        title="Seasons"
+        subtitle={`${allMatchups.length} total matchups across ${years.length} seasons`}
+      />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 

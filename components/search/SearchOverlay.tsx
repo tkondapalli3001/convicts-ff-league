@@ -148,7 +148,7 @@ export default function SearchOverlay({ onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-[10vh] pb-8 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-[10vh] pb-8 overflow-y-auto animate-fade-in"
       style={{ background: 'rgba(2, 6, 23, 0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
       onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}
     >

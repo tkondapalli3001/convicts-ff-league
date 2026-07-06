@@ -7,6 +7,7 @@ import { useTransactionsData } from '@/hooks/useTransactionsData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PillTabs from '@/components/shared/PillTabs'
+import PageHeader from '@/components/shared/PageHeader'
 import PlayerWinRateTable from '@/components/players/PlayerWinRateTable'
 import PlayerScoringTable from '@/components/players/PlayerScoringTable'
 import PlayerOwnershipTable from '@/components/players/PlayerOwnershipTable'
@@ -103,10 +104,10 @@ export default function PlayersPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-[26px] font-extrabold text-s-text mb-1">Players</h1>
-      <p className="text-[13px] text-s-text2 mb-6">
-        Player performance, draft tendencies, and transactions across all seasons
-      </p>
+      <PageHeader
+        title="Players"
+        subtitle="Player performance, draft tendencies, and transactions across all seasons"
+      />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
