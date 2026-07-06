@@ -1,20 +1,21 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { usePlayersData } from '@/hooks/usePlayersData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
+import PillTabs from '@/components/shared/PillTabs'
 import StockStandings from '@/components/draft/StockStandings'
-import DraftBoardModal from '@/components/draft/DraftBoardModal'
 import StealsBusts from '@/components/draft/StealsBusts'
+import DraftSlotAnalysis from '@/components/draft/DraftSlotAnalysis'
+import PastDrafts from '@/components/draft/PastDrafts'
 import DraftStructureTable from '@/components/players/DraftStructureTable'
 import {
   STOCK_PICKS_2026,
   MARKET_BENCHMARK_2026,
   fetchCurrentPrices,
 } from '@/lib/stock-picks'
-import { resolveOwnerName } from '@/lib/data-processing'
 
 type Tab = 'pickorder' | 'history' | 'slots' | 'steals' | 'strategy'
 
@@ -25,441 +26,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'steals',    label: 'Steals & Busts'   },
   { id: 'strategy',  label: 'Draft Strategy'   },
 ]
-
-function ordinal(n: number) {
-  if (n === 1) return 'st'
-  if (n === 2) return 'nd'
-  if (n === 3) return 'rd'
-  return 'th'
-}
-
-// ─── Draft Slot Analysis ──────────────────────────────────────────────────────
-
-function DraftSlotTable() {
-  const { state } = useLeague()
-  const { draftData, rosterUserMaps, ownerSeasons, years } = state
-  const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
-  const [selectedManager, setSelectedManager] = useState<string | null>(null)
-  const [slotSort, setSlotSort] = useState<'slot' | 'avgFinish' | 'playoffs'>('slot')
-  const [slotSortDir, setSlotSortDir] = useState<'asc' | 'desc'>('asc')
-  const [mgrSort, setMgrSort] = useState<'owner' | 'avgSlot' | 'count'>('avgSlot')
-  const [mgrSortDir, setMgrSortDir] = useState<'asc' | 'desc'>('asc')
-
-  const rows = useMemo(() => {
-    const out: { year: number; owner: string; slot: number; finish: number | null; madePlayoffs: boolean }[] = []
-    for (const year of [...years].sort((a, b) => b - a)) {
-      const data = draftData[year]
-      if (!data?.picks?.length) continue
-      const rMap = rosterUserMaps[year] ?? {}
-
-      // ownerSlot: one canonical slot per owner per year.
-      // Three tiers to handle pick trades correctly:
-      //   Tier 1 — slot_to_roster_id: Sleeper's pre-trade assignment, most reliable
-      //   Tier 2 — draft_order: user_id→slot map, catches gaps when rMap lookup fails
-      //   Tier 3 — snake math on rounds 2+: finds managers whose round-1 pick was
-      //            traded away (they have no round-1 entry at all)
-      const ownerSlot: Record<string, number> = {}
-      const draftAny = data.draft as unknown as {
-        slot_to_roster_id?: Record<string, number> | null
-        draft_order?: Record<string, number> | null
-      }
-      const isSnake = data.draft.type === 'snake'
-      const N = Math.max(...data.picks.map(p => p.draft_slot), 0) || 10
-
-      // Tier 1: slot_to_roster_id → look up roster_id in rMap
-      const s2r = draftAny.slot_to_roster_id
-      if (s2r && typeof s2r === 'object') {
-        for (const [slotStr, rosterId] of Object.entries(s2r)) {
-          const ownerName = rMap[String(rosterId)]
-          if (ownerName && !ownerName.startsWith('Team ')) {
-            ownerSlot[ownerName] = Number(slotStr)
-          }
-        }
-      }
-
-      // Tier 2: draft_order → resolve user_id directly (bypasses rMap issues)
-      const dOrder = draftAny.draft_order
-      if (dOrder && typeof dOrder === 'object') {
-        for (const [userId, slot] of Object.entries(dOrder)) {
-          const ownerName = resolveOwnerName(userId, '')
-          if (ownerName && ownerName !== 'Unknown' && !(ownerName in ownerSlot)) {
-            ownerSlot[ownerName] = Number(slot)
-          }
-        }
-      }
-
-      // Tier 3: infer slot from rounds 2+ via snake/linear math.
-      // A manager who traded away their round-1 pick has no round-1 entry but still
-      // picks in rounds 2–N at their original slot position. Vote across all rounds
-      // and take the mode so a single traded later-round pick can't corrupt the result.
-      const slotVotes: Record<string, Record<number, number>> = {}
-      for (const pick of data.picks) {
-        if (pick.round < 2) continue
-        const ownerName = rMap[String(pick.roster_id)]
-          ?? resolveOwnerName(pick.picked_by, '')
-        if (!ownerName || ownerName in ownerSlot) continue
-        const s = (isSnake && pick.round % 2 === 0)
-          ? pick.round * N - pick.pick_no + 1
-          : pick.pick_no - (pick.round - 1) * N
-        if (s >= 1 && s <= N) {
-          if (!slotVotes[ownerName]) slotVotes[ownerName] = {}
-          slotVotes[ownerName][s] = (slotVotes[ownerName][s] ?? 0) + 1
-        }
-      }
-      for (const [owner, freq] of Object.entries(slotVotes)) {
-        if (owner in ownerSlot) continue
-        const best = Object.entries(freq).sort((a, b) => b[1] - a[1])[0]
-        if (best) ownerSlot[owner] = Number(best[0])
-      }
-
-      for (const [owner, slot] of Object.entries(ownerSlot)) {
-        const season = ownerSeasons[owner]?.find(s => s.year === year)
-        out.push({
-          year,
-          owner,
-          slot,
-          finish: season?.finish ?? null,
-          madePlayoffs: season?.inPlayoffs ?? false,
-        })
-      }
-    }
-    return out
-  }, [draftData, rosterUserMaps, ownerSeasons, years])
-
-  const avgBySlot = useMemo(() => {
-    const acc: Record<number, { finishes: number[]; playoffs: number; total: number }> = {}
-    for (const row of rows) {
-      if (!acc[row.slot]) acc[row.slot] = { finishes: [], playoffs: 0, total: 0 }
-      if (row.finish !== null) acc[row.slot].finishes.push(row.finish)
-      acc[row.slot].total++
-      if (row.madePlayoffs) acc[row.slot].playoffs++
-    }
-    return acc
-  }, [rows])
-
-  const managerAvgSlot = useMemo(() => {
-    const totals: Record<string, { sum: number; count: number }> = {}
-    for (const row of rows) {
-      if (!totals[row.owner]) totals[row.owner] = { sum: 0, count: 0 }
-      totals[row.owner].sum += row.slot
-      totals[row.owner].count += 1
-    }
-    return Object.entries(totals)
-      .map(([owner, { sum, count }]) => ({ owner, avgSlot: sum / count, count }))
-      .sort((a, b) => a.avgSlot - b.avgSlot)
-  }, [rows])
-
-  if (!rows.length) {
-    return (
-      <div className="gl p-6 text-center text-s-text3 text-[12px]">
-        No draft slot data available yet
-      </div>
-    )
-  }
-
-  function toggleSlotSort(key: 'slot' | 'avgFinish' | 'playoffs') {
-    if (slotSort === key) setSlotSortDir(d => d === 'asc' ? 'desc' : 'asc')
-    else { setSlotSort(key); setSlotSortDir('asc') }
-  }
-  function toggleMgrSort(key: 'owner' | 'avgSlot' | 'count') {
-    if (mgrSort === key) setMgrSortDir(d => d === 'asc' ? 'desc' : 'asc')
-    else { setMgrSort(key); setMgrSortDir('asc') }
-  }
-  const sIcon = (key: 'slot' | 'avgFinish' | 'playoffs') =>
-    slotSort === key ? (slotSortDir === 'asc' ? ' ↑' : ' ↓') : ''
-  const mIcon = (key: 'owner' | 'avgSlot' | 'count') =>
-    mgrSort === key ? (mgrSortDir === 'asc' ? ' ↑' : ' ↓') : ''
-
-  const sortedSlots = [...new Set(rows.map(r => r.slot))].sort((a, b) => {
-    if (slotSort === 'slot') return slotSortDir === 'asc' ? a - b : b - a
-    if (slotSort === 'avgFinish') {
-      const da = avgBySlot[a], db = avgBySlot[b]
-      const avgA = da?.finishes.length ? da.finishes.reduce((x, y) => x + y, 0) / da.finishes.length : (slotSortDir === 'asc' ? Infinity : -Infinity)
-      const avgB = db?.finishes.length ? db.finishes.reduce((x, y) => x + y, 0) / db.finishes.length : (slotSortDir === 'asc' ? Infinity : -Infinity)
-      return slotSortDir === 'asc' ? avgA - avgB : avgB - avgA
-    }
-    const da = avgBySlot[a], db = avgBySlot[b]
-    const pctA = da?.total ? da.playoffs / da.total : 0
-    const pctB = db?.total ? db.playoffs / db.total : 0
-    return slotSortDir === 'asc' ? pctA - pctB : pctB - pctA
-  })
-
-  const sortedManagers = [...managerAvgSlot].sort((a, b) => {
-    if (mgrSort === 'owner') return mgrSortDir === 'asc' ? a.owner.localeCompare(b.owner) : b.owner.localeCompare(a.owner)
-    if (mgrSort === 'count') return mgrSortDir === 'asc' ? a.count - b.count : b.count - a.count
-    return mgrSortDir === 'asc' ? a.avgSlot - b.avgSlot : b.avgSlot - a.avgSlot
-  })
-
-  return (
-    <div className="space-y-3">
-      <div className="gl overflow-hidden">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th onClick={() => toggleSlotSort('slot')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Slot{sIcon('slot')}</th>
-              <th onClick={() => toggleSlotSort('avgFinish')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Avg Finish{sIcon('avgFinish')}</th>
-              <th onClick={() => toggleSlotSort('playoffs')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Made Playoffs{sIcon('playoffs')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedSlots.map(slot => {
-              const d = avgBySlot[slot]
-              const avg = d?.finishes.length
-                ? (d.finishes.reduce((a, b) => a + b, 0) / d.finishes.length)
-                : null
-              const isOpen = selectedSlot === slot
-              const slotRows = rows.filter(r => r.slot === slot)
-
-              return (
-                <>
-                  <tr
-                    key={`slot-${slot}`}
-                    className={`border-b border-s-border/40 cursor-pointer transition-colors ${
-                      isOpen ? 'bg-s-bg3/60' : 'hover:bg-s-bg3/30'
-                    }`}
-                    onClick={() => setSelectedSlot(isOpen ? null : slot)}
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-extrabold text-s-text">Slot {slot}</span>
-                        <span
-                          className="text-s-text3 text-[11px] leading-none transition-transform duration-200"
-                          style={{ display: 'inline-block', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                        >
-                          ▾
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 text-center">
-                      <span className={`text-[14px] font-bold ${
-                        avg !== null && avg <= 3 ? 'text-s-gold'
-                        : avg !== null && avg >= 9 ? 'text-s-red'
-                        : 'text-s-text2'
-                      }`}>
-                        {avg !== null ? avg.toFixed(1) : '—'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-center text-[12px] text-s-text2">
-                      {d ? `${d.playoffs} / ${d.total}` : '—'}
-                    </td>
-                  </tr>
-
-                  {isOpen && (
-                    <tr key={`slot-${slot}-detail`}>
-                      <td colSpan={3} className="px-4 py-0 border-b border-s-border/40 bg-s-bg3/20">
-                        <div className="py-3">
-                          <div className="text-[10px] font-bold tracking-[2px] uppercase text-s-text3 mb-2">
-                            {slotRows.length} manager{slotRows.length !== 1 ? 's' : ''} from Slot {slot} —&nbsp;
-                            {d?.playoffs ?? 0} of {d?.total ?? 0} made playoffs
-                          </div>
-                          <table className="w-full border-collapse text-[12px]">
-                            <thead>
-                              <tr>
-                                <th className="text-left py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Year</th>
-                                <th className="text-left py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Manager</th>
-                                <th className="text-center py-1.5 pr-4 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Finish</th>
-                                <th className="text-center py-1.5 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Playoffs</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {slotRows.sort((a, b) => b.year - a.year).map(r => (
-                                <tr key={`${r.year}-${r.owner}`}>
-                                  <td className="py-1 pr-4 text-s-text3 font-bold">{r.year}</td>
-                                  <td className="py-1 pr-4 font-semibold text-s-text">{r.owner}</td>
-                                  <td className="py-1 pr-4 text-center font-bold text-s-text2">
-                                    {r.finish === null ? '—'
-                                      : r.finish === 1 ? '🏆 1st'
-                                      : `${r.finish}${ordinal(r.finish)}`}
-                                  </td>
-                                  <td className="py-1 text-center">
-                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                                      r.madePlayoffs
-                                        ? 'bg-green-500/20 text-green-400'
-                                        : 'bg-red-500/20 text-red-400'
-                                    }`}>
-                                      {r.madePlayoffs ? 'Yes' : 'No'}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Manager avg draft slot table */}
-      <div className="gl overflow-hidden">
-        <div className="px-4 py-3 border-b border-s-border">
-          <span className="text-[12px] font-extrabold tracking-[1.5px] uppercase text-s-text">Avg Draft Slot by Manager</span>
-          <span className="text-[11px] text-s-text3 ml-2">· lower = earlier draft slot on average</span>
-        </div>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th onClick={() => toggleMgrSort('owner')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{mIcon('owner')}</th>
-              <th onClick={() => toggleMgrSort('avgSlot')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Avg Slot{mIcon('avgSlot')}</th>
-              <th onClick={() => toggleMgrSort('count')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2"># Drafts{mIcon('count')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedManagers.map((row, i) => (
-              <tr
-                key={row.owner}
-                className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors cursor-pointer"
-                onClick={() => setSelectedManager(row.owner)}
-              >
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-s-text3 w-5 text-right">{i + 1}</span>
-                    <span className="text-[13px] font-semibold text-s-text">{row.owner}</span>
-                  </div>
-                </td>
-                <td className="px-3 py-3 text-center">
-                  <span className="text-[14px] font-bold text-s-text2 font-mono">{row.avgSlot.toFixed(1)}</span>
-                </td>
-                <td className="px-3 py-3 text-center text-[13px] text-s-text3">{row.count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {selectedManager && (() => {
-        const history = rows.filter(r => r.owner === selectedManager).sort((a, b) => b.year - a.year)
-        return (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-            onClick={() => setSelectedManager(null)}
-          >
-            <div
-              className="bg-s-bg2 border border-s-border rounded-[14px] p-6 max-w-sm w-full mx-4"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[15px] font-extrabold text-s-text">{selectedManager}</span>
-                <button
-                  onClick={() => setSelectedManager(null)}
-                  className="text-s-text3 hover:text-s-text text-[20px] leading-none"
-                >×</button>
-              </div>
-              <div className="text-[10px] text-s-text3 uppercase tracking-[1.5px] font-bold mb-4">
-                {history.length} season{history.length !== 1 ? 's' : ''} · Draft slot history
-              </div>
-              <table className="w-full border-collapse text-[12px]">
-                <thead>
-                  <tr>
-                    <th className="text-left pb-2 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Year</th>
-                    <th className="text-center pb-2 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Slot</th>
-                    <th className="text-center pb-2 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Finish</th>
-                    <th className="text-center pb-2 text-[9px] text-s-text3 font-semibold uppercase tracking-wider">Playoffs</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map(r => (
-                    <tr key={r.year} className="border-t border-s-border/30">
-                      <td className="py-2 font-bold text-s-text3">{r.year}</td>
-                      <td className="py-2 text-center font-mono font-bold text-s-text2">{r.slot}</td>
-                      <td className="py-2 text-center font-bold text-s-text2">
-                        {r.finish === null ? '—'
-                          : r.finish === 1 ? '🏆 1st'
-                          : `${r.finish}${ordinal(r.finish)}`}
-                      </td>
-                      <td className="py-2 text-center">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                          r.madePlayoffs
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-red-500/20 text-red-400'
-                        }`}>
-                          {r.madePlayoffs ? 'Yes' : 'No'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )
-      })()}
-    </div>
-  )
-}
-
-// ─── Past Draft History ───────────────────────────────────────────────────────
-
-function PastDrafts() {
-  const { state } = useLeague()
-  const { draftData, rosterUserMaps, years } = state
-  const [modalYear, setModalYear] = useState<number | null>(null)
-
-  const sortedYears = [...years].sort((a, b) => b - a)
-
-  if (!Object.keys(draftData).length) {
-    return (
-      <div className="gl p-6 text-center text-s-text3 text-[12px]">
-        No draft history available
-      </div>
-    )
-  }
-
-  const modalData = modalYear !== null ? draftData[modalYear] : null
-
-  return (
-    <>
-      <div className="space-y-2">
-        {sortedYears.map(year => {
-          const data = draftData[year]
-          if (!data) return null
-          const { draft, picks } = data
-          const roundCount = Math.max(...picks.map(p => p.round), 0)
-
-          return (
-            <div key={year} className="bento-card overflow-hidden">
-              <button
-                onClick={() => setModalYear(year)}
-                className="w-full flex items-center justify-between px-5 py-4 hover:bg-s-bg3/30 transition-colors text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-[14px] font-extrabold text-s-text">{year}</span>
-                  <span className="text-[10px] font-bold tracking-[1.5px] uppercase text-s-text3 bg-s-bg3 px-2 py-0.5 rounded-full border border-s-border">
-                    {draft.type.toUpperCase()}
-                  </span>
-                  <span className="text-[11px] text-s-text3">
-                    {picks.length} picks · {roundCount} rounds
-                  </span>
-                </div>
-                <span className="text-[12px] text-s-text3 flex items-center gap-1.5 font-semibold">
-                  View Board
-                  <span className="text-[14px]">→</span>
-                </span>
-              </button>
-            </div>
-          )
-        })}
-      </div>
-
-      {modalYear !== null && modalData && (
-        <DraftBoardModal
-          year={modalYear}
-          draft={modalData.draft}
-          picks={modalData.picks}
-          rMap={rosterUserMaps[modalYear] ?? {}}
-          onClose={() => setModalYear(null)}
-        />
-      )}
-    </>
-  )
-}
-
-// ─── Draft Page ───────────────────────────────────────────────────────────────
 
 export default function DraftPage() {
   const { state } = useLeague()
@@ -495,22 +61,7 @@ export default function DraftPage() {
         Draft history, 2026 pick order standings, slot vs outcome analysis, and historical steals & busts
       </p>
 
-      {/* Tab nav */}
-      <div className="flex items-center gap-[6px] mb-5 flex-wrap">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={[
-              'px-4 py-[7px] rounded-[8px] border text-[12px] font-bold transition-all duration-150 cursor-pointer',
-              activeTab === tab.id
-                ? 'bg-s-gold text-[#000] border-s-gold shadow-[0_0_16px_rgba(56,189,248,0.15)]'
-                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
-            ].join(' ')}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab}>
         {activeTab === 'pickorder' && (
           <button
             onClick={fetchPrices}
@@ -520,7 +71,7 @@ export default function DraftPage() {
             {priceLoading ? 'Refreshing…' : '↻ Refresh'}
           </button>
         )}
-      </div>
+      </PillTabs>
 
       {/* ── 2026 PICK ORDER TAB ───────────────────────────────────── */}
       {activeTab === 'pickorder' && (
@@ -544,7 +95,7 @@ export default function DraftPage() {
           <p className="text-[11px] text-s-text3 mb-3">
             Click any slot to see historical managers, finishes, and playoff rates.
           </p>
-          <DraftSlotTable />
+          <DraftSlotAnalysis />
         </>
       )}
 
