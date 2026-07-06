@@ -1,3 +1,5 @@
+> **Global instructions apply first.** Before working on this project, read the global CLAUDE.md (About Me system: about-me.md, writingrules.md, memory.md). Then read this file for project-specific context, and `memory.md` in this folder for current status.
+
 # CLAUDE.md — Convicts FF League
 
 ## Project Essence
@@ -25,52 +27,71 @@ A data-heavy historical archive for a 7-season Sleeper Fantasy Football league. 
 
 ```
 app/                        Next.js App Router pages (thin render shells only)
-  page.tsx                  Home — standings, playoff bracket, trophies
-  gamelog/page.tsx          Full match history with lineup detail modal
-  records/page.tsx          All-time records and streaks
-  luck/page.tsx             Luck index (expected vs actual wins)
-  earnings/page.tsx         All-time earnings leaderboard
-  trends/page.tsx           Season trends and charts
-  owners/page.tsx           Career leaderboard
-  owners/[name]/page.tsx    Individual owner profile
+  page.tsx                  Home — hero, quick stats, career standings, HOF/Shame
+  gamelog/page.tsx          Seasons view — match history, standings, playoff bracket
+  records/page.tsx          All-time records, streaks, fun facts, trash talk
+  owners/page.tsx           Career leaderboard, earnings ledger, rivalry calculator
+  owners/[name]/page.tsx    Individual owner profile (season log, H2H, game log)
+  players/page.tsx          NFL player stats — win rate, scoring, ownership, transactions
+  seasons/page.tsx          Season trends and charts
+  draft/page.tsx            Draft boards, slot analysis, pick order
+  transactions/page.tsx     Trades, waivers, free agency history
   layout.tsx                Root layout — wraps app in <LeagueProvider>
   globals.css               Tailwind directives + custom utility classes
 
 components/                 Feature-organized UI components
   gamelog/                  GameLogFilters, GameLogTable, GameDetailModal
-  home/                     PlayoffBracket, SeasonStandings, TrophySection, QuickStats
+  home/                     HeroSection, SearchBar, SeasonStandings, PlayoffBracket
   layout/                   Navbar, MobileNav
-  luck/                     LuckTable
-  owners/                   OwnerDetail, CareerLeaderboard, H2HGrid, H2HModal, OwnerCard
-  records/                  ScoreLeaderboard, StreakList
+  owners/                   OwnerDetail, CareerLeaderboard, H2HGrid, H2HModal
+  records/                  ScoreLeaderboard, StreakList, FunFacts, RivalryCalc
+  players/                  PlayerWinRateTable, PlayerScoringTable, PlayerCardModal, etc.
+  draft/                    Draft boards and tables
+  transactions/             TransactionTable, TransactionFilters, TransactionDetailModal
+  seasons/                  Season cards and charts
   shared/                   Reusable primitives: StatBox, OwnerAvatar, FinishBadge, etc.
   trends/                   AvgScoreChart, FinishTracker, TrashTalkCard
-  earnings/                 AnnualBreakdown, EarningsBars
+  earnings/                 AnnualBreakdown
 
 context/
   LeagueContext.tsx         Global state — orchestrates all Sleeper API fetching and
                             post-processing; exposes useLeague() hook
 
 hooks/
-  useRecordsData.ts         Derived record computations (streaks, extremes, rivalries)
+  useCareerStats.ts         Memoized wrapper for lib/stats buildCareerStats()
+  useRecordsData.ts         Memoized wrapper for lib/stats computeRecords()
+  usePlayersData.ts         NFL player stats (lazy players-cache fetch)
+  useTransactionsData.ts    Transaction history (lazy fetch, module cache)
+  useFunFacts.ts            Narrative stats for the records page
 
 lib/                        Business logic and static data
   config.ts                 LEAGUE_ID, SLEEPER_API base URL
   owner-map.ts              USER_ID_TO_OWNER, DISPLAY_NAME_TO_OWNER, OWNER_COLORS
-  league-history.ts         MANUAL_CHAMPS, MANUAL_SHAME, MANUAL_PLAYOFF_OVERRIDES, BUY_INS
+  league-history.ts         MANUAL_CHAMPS, MANUAL_SHAME, MANUAL_PLAYOFF_OVERRIDES,
+                            BUY_INS, EXCLUDED_GAME_SCORES
   earnings-data.ts          EARNINGS_DATA (all-time payouts per owner per year)
   narratives.ts             TRASH_TALK (flavor text per owner)
   constants.ts              Barrel — re-exports all of the above (use this for imports)
   sleeper-api.ts            Sleeper API fetch wrappers (sleepFetch, buildLeagueChain, etc.)
+  players-cache.ts          Lazy-loaded Sleeper player metadata cache
+  stock-picks.ts            Stock-picks side-game data
+  stats/                    Shared stat engine — pure functions, single source of truth
+    game-filters.ts         gameKey(), consolation/champ-path key sets, manual exclusions
+    career.ts               buildCareerStats(), championshipCount(), activeOwnerNames()
+    h2h.ts                  h2hRecord(), h2hVsAll()
+    records.ts              computeRecords() — record-book extremes and streaks
+    index.ts                Barrel re-export (import from '@/lib/stats')
   data-processing/          Data transformation layer
     resolve-owner.ts        resolveOwnerName() — user_id/display_name → canonical name
     bracket-finish.ts       getFinishFromBracket() — bracket game → placement (1st, 2nd…)
     build-matchups.ts       buildFlatMatchups() — raw API data → flat Matchup[]
     build-seasons.ts        buildOwnerSeasons() — matchups → per-owner OwnerSeason[]
+    player-stats.ts         computePlayerWinRates(), computePlayerScores()
+    build-draft-stats.ts    computeDraftOwnership() and draft aggregations
     index.ts                Barrel re-export
   data-processing.ts        Barrel — re-exports from data-processing/ (use this for imports)
   luck.ts                   computeLuckIndex() — expected wins vs actual wins
-  utils.ts                  ownerColor(), fmtPts(), fmtPct(), fmtMoney(), sortBy(), etc.
+  utils.ts                  ownerColor(), fmtPts(), getChampion(), getShameLoser(), etc.
 
 types/
   index.ts                  All TypeScript interfaces — Sleeper API types + processed types
@@ -105,7 +126,8 @@ All data is **client-side only** — no SSR, no API routes, no server components
 
 - **Name resolution is the linchpin.** Sleeper usernames change; canonical owner first names don't. Always use `resolveOwnerName()` or the `rosterUserMaps[year]` lookup. The mappings live in `lib/owner-map.ts`.
 - **Manual overrides exist for a reason.** `MANUAL_CHAMPS`, `MANUAL_SHAME`, and `MANUAL_PLAYOFF_OVERRIDES` in `lib/league-history.ts` correct Sleeper bracket data that is incomplete or wrong for specific seasons. Do not remove them.
-- **Import from barrels, not sub-files.** Always `import from '@/lib/constants'` and `import from '@/lib/data-processing'` — not from the individual files underneath. This keeps import paths stable across future reorganizations.
+- **Import from barrels, not sub-files.** Always `import from '@/lib/constants'`, `import from '@/lib/data-processing'`, and `import from '@/lib/stats'` — not from the individual files underneath. This keeps import paths stable across future reorganizations.
+- **Stat math lives in `lib/stats/`.** Career records, championship counts, H2H records, and record-book extremes have one implementation each. Never recompute them inline in a component — half-titles (0.5), shared-winner substring matching, and tie-as-win rules are easy to get subtly wrong.
 - **Pages are thin shells.** Computation belongs in `hooks/` or `lib/`. Pages should only call hooks, destructure results, and render JSX.
 
 ---
