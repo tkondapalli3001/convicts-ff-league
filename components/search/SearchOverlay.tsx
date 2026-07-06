@@ -8,7 +8,7 @@ import { useCareerStats } from '@/hooks/useCareerStats'
 import { useRecordsData } from '@/hooks/useRecordsData'
 import { usePlayersData } from '@/hooks/usePlayersData'
 import { ownerColor, fullNameInitials } from '@/lib/utils'
-import { OWNER_FULL_NAMES, POS_COLORS, USER_ID_TO_OWNER } from '@/lib/constants'
+import { OWNER_FULL_NAMES, USER_ID_TO_OWNER } from '@/lib/constants'
 import { buildEntityIndex, answerQuery } from '@/lib/search'
 import type { Answer } from '@/lib/search'
 import type { PlayerStat } from '@/types'
@@ -16,6 +16,7 @@ import type { OwnershipEntry } from '@/lib/data-processing'
 import AnswerCard from './AnswerCard'
 import ManagerCard from './ManagerCard'
 import PlayerCard from './PlayerCard'
+import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 
 const EXAMPLE_CHIPS = [
   'Teja vs Nathan all time',
@@ -273,7 +274,6 @@ export default function SearchOverlay({ onClose }: Props) {
                 <div className={managerResults.length > 0 ? 'border-t border-s-border/60' : ''}>
                   <div className="px-4 pt-3 pb-1 text-[9px] font-bold tracking-[3px] uppercase text-s-text3">Players</div>
                   {playerResults.map(({ stat }, i) => {
-                    const posColor = POS_COLORS[stat.position] ?? '#6e7681'
                     const globalIdx = managerResults.length + i
                     const isFocused = focusIdx === globalIdx
                     return (
@@ -281,10 +281,7 @@ export default function SearchOverlay({ onClose }: Props) {
                         onMouseDown={e => { e.preventDefault(); selectEntry({ kind: 'player', id: stat.player_id }) }}
                         className={['w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
                           isFocused ? 'bg-s-bg3' : 'hover:bg-s-bg3/60'].join(' ')}>
-                        <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-[10px] font-black"
-                          style={{ background: `${posColor}20`, color: posColor, border: `1px solid ${posColor}40` }}>
-                          {stat.position}
-                        </div>
+                        <PlayerHeadshot playerId={stat.player_id} position={stat.position} size={32} />
                         <div className="flex-1 min-w-0">
                           <div className="text-[13px] font-semibold text-s-text truncate">{stat.name}</div>
                           <div className="text-[10px] text-s-text3">

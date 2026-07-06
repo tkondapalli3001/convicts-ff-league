@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import type { PlayerScoreStat } from '@/lib/data-processing'
 
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
+import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 
 const FLEX_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
 
@@ -206,7 +207,12 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
                   className="border-b border-s-bg3 hover:bg-s-bg3 transition-colors"
                 >
                   <td className="py-[7px] pr-2 text-s-text3 text-[11px]">{i + 1}</td>
-                  <td className="py-[7px] pr-3 font-semibold text-s-text">{r.name}</td>
+                  <td className="py-[7px] pr-3 font-semibold text-s-text">
+                    <div className="flex items-center gap-2">
+                      <PlayerHeadshot playerId={r.player_id} position={r.position} size={22} />
+                      <span>{r.name}</span>
+                    </div>
+                  </td>
                   <td className={`py-[7px] pr-3 font-bold text-[11px] ${posColor}`}>{r.position}</td>
                   <td className="py-[7px] pr-3 text-right font-bold text-s-gold tabular-nums">
                     {r.totalPoints.toFixed(2)}

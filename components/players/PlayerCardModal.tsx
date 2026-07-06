@@ -3,6 +3,7 @@
 import type { PlayerStat } from '@/types'
 
 import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/constants'
+import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 
 interface Props {
   player: PlayerStat
@@ -34,16 +35,19 @@ export default function PlayerCardModal({ player, onClose }: Props) {
       >
         {/* Header */}
         <div className="px-6 py-5 border-b border-s-border flex items-start justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${posClass}`}>
-                {player.position}
-              </span>
-              {player.team && (
-                <span className="text-[11px] text-s-text3">{player.team}</span>
-              )}
+          <div className="flex items-start gap-3">
+            <PlayerHeadshot playerId={player.player_id} position={player.position} size={48} />
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${posClass}`}>
+                  {player.position}
+                </span>
+                {player.team && (
+                  <span className="text-[11px] text-s-text3">{player.team}</span>
+                )}
+              </div>
+              <div className="text-[22px] font-extrabold text-s-text leading-tight">{player.name}</div>
             </div>
-            <div className="text-[22px] font-extrabold text-s-text leading-tight">{player.name}</div>
           </div>
           <button
             onClick={onClose}

@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import type { PlayerStat } from '@/types'
 
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
+import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 
 const FLEX_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
 
@@ -104,7 +105,12 @@ export default function PlayerWinRateTable({ players, minGames = 10, onPlayerCli
                   className="border-b border-s-bg3 hover:bg-s-bg3 transition-colors cursor-pointer"
                   onClick={() => onPlayerClick(p)}
                 >
-                  <td className="py-[7px] pr-3 font-semibold text-s-text">{p.name}</td>
+                  <td className="py-[7px] pr-3 font-semibold text-s-text">
+                    <div className="flex items-center gap-2">
+                      <PlayerHeadshot playerId={p.player_id} position={p.position} size={22} />
+                      <span>{p.name}</span>
+                    </div>
+                  </td>
                   <td className={`py-[7px] pr-3 font-bold text-[11px] ${posColor}`}>{p.position}</td>
                   <td className="py-[7px] pr-3 text-right text-s-text2">{p.games}</td>
                   <td className="py-[7px] pr-3 text-right text-s-green font-bold">{p.wins}</td>

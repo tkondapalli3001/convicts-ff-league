@@ -5,6 +5,7 @@ import type { OwnershipEntry } from '@/lib/data-processing'
 import { USER_ID_TO_OWNER } from '@/lib/constants'
 
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
+import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 
 const FLEX_POSITIONS = new Set(['RB', 'WR', 'TE'])
 
@@ -147,7 +148,12 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
                 .join(', ')
               return (
                 <tr key={e.player_id} className="border-b border-s-bg3 hover:bg-s-bg3 transition-colors">
-                  <td className="py-[7px] pr-3 font-semibold text-s-text">{e.name}</td>
+                  <td className="py-[7px] pr-3 font-semibold text-s-text">
+                    <div className="flex items-center gap-2">
+                      <PlayerHeadshot playerId={e.player_id} position={e.position} size={22} />
+                      <span>{e.name}</span>
+                    </div>
+                  </td>
                   <td className={`py-[7px] pr-3 font-bold text-[11px] ${posColor}`}>{e.position}</td>
                   <td className="py-[7px] pr-3 text-right font-bold text-s-text">{e.timesOwned}</td>
                   <td className="py-[7px] pr-3 text-right text-s-text2 font-mono">#{e.avgPickNo.toFixed(1)}</td>

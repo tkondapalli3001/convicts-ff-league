@@ -5,6 +5,7 @@ import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 import type { PlayerStat } from '@/types'
 
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
+import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 
 interface Props {
   transactions: EnrichedTransaction[]
@@ -89,7 +90,12 @@ export default function MostTradedPlayersTable({ transactions, playerWinRates }:
               return (
                 <tr key={row.playerId} className="border-b border-s-bg3 hover:bg-s-bg3 transition-colors">
                   <td className="py-[7px] text-center text-s-text3 font-bold">{i + 1}</td>
-                  <td className="py-[7px] pr-3 font-semibold text-s-text">{row.name}</td>
+                  <td className="py-[7px] pr-3 font-semibold text-s-text">
+                    <div className="flex items-center gap-2">
+                      <PlayerHeadshot playerId={row.playerId} position={row.position} size={22} />
+                      <span>{row.name}</span>
+                    </div>
+                  </td>
                   <td className={`py-[7px] pr-3 font-bold text-[11px] ${posColor}`}>{row.position}</td>
                   <td className="py-[7px] pr-3 text-right font-bold text-s-text">{row.count}</td>
                   <td className="py-[7px] text-right font-bold" style={{ color: winRateColor }}>

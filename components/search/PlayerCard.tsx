@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { POS_COLORS } from '@/lib/constants'
+import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 import type { OwnershipEntry } from '@/lib/data-processing'
 import type { PlayerStat } from '@/types'
 
@@ -47,17 +48,7 @@ export default function PlayerCard({
         </button>
 
         <div className="flex items-start gap-3">
-          {/* Position badge */}
-          <div
-            className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-[13px] font-black"
-            style={{
-              background: `${posColor}22`,
-              color: posColor,
-              border: `1px solid ${posColor}50`,
-            }}
-          >
-            {stat.position}
-          </div>
+          <PlayerHeadshot playerId={stat.player_id} position={stat.position} size={48} />
 
           <div className="flex-1 min-w-0">
             <div className="text-[20px] font-black text-s-text tracking-tight leading-tight">
