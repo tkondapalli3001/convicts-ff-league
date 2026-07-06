@@ -5,17 +5,18 @@ import { usePathname } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import GlobalSearch from '@/components/search/GlobalSearch'
 import {
-  Home, Users, Trophy,
+  Home, Users, Trophy, Swords,
   CalendarDays, Zap, ClipboardList, Activity,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/',          label: 'Home',    icon: Home          },
-  { href: '/owners',    label: 'Owners',  icon: Users         },
-  { href: '/seasons',   label: 'Seasons', icon: CalendarDays  },
-  { href: '/draft',     label: 'Draft',   icon: ClipboardList },
-  { href: '/records',   label: 'Records', icon: Trophy        },
-  { href: '/players',   label: 'Players', icon: Zap           },
+  { href: '/',          label: 'Home',      icon: Home          },
+  { href: '/this-week', label: 'This Week', icon: Swords        },
+  { href: '/owners',    label: 'Owners',    icon: Users         },
+  { href: '/seasons',   label: 'Seasons',   icon: CalendarDays  },
+  { href: '/draft',     label: 'Draft',     icon: ClipboardList },
+  { href: '/records',   label: 'Records',   icon: Trophy        },
+  { href: '/players',   label: 'Players',   icon: Zap           },
 ]
 
 export default function Navbar() {
