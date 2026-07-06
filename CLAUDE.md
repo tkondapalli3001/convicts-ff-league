@@ -44,7 +44,7 @@ app/                        Next.js App Router pages (thin render shells only)
 components/                 Feature-organized UI components
   gamelog/                  GameLogFilters, GameLogTable, GameDetailModal
   home/                     HeroSection, SeasonStandings, PlayoffBracket, career cards
-  layout/                   Navbar, MobileNav
+  layout/                   Navbar, MobileMenu (hamburger drawer), nav-items.ts (shared links)
   search/                   GlobalSearch (⌘K trigger), SearchOverlay, AnswerCard,
                             ManagerCard, PlayerCard
   preview/                  MatchupPreviewCard (This Week tab)
