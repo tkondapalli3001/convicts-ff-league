@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { fetchTransactions } from '@/lib/sleeper-api'
+import { loadSnapshotSeason, loadSnapshotManifest } from '@/lib/history-snapshot'
 import { getPlayersCache, playerDisplayName } from '@/lib/players-cache'
 import type { Transaction } from '@/types'
 
@@ -56,39 +57,49 @@ export function useTransactionsData(): TransactionsData {
         if (cancelled) return
 
         const allTxs: EnrichedTransaction[] = []
+        const manifest = await loadSnapshotManifest()
+        const snapshotYears = new Set(manifest?.years ?? [])
 
         for (const entry of state.leagueChain) {
           if (cancelled) return
           setLoadingText(`Loading ${entry.year} transactions…`)
           const rMap = state.rosterUserMaps[entry.year] ?? {}
 
-          // Fetch all weeks in batches of 5
+          const enrich = (weekTxs: Transaction[]) => {
+            for (const tx of weekTxs) {
+              if (tx.status !== 'complete') continue
+
+              const ownerNames = tx.roster_ids.map(rid => rMap[String(rid)] ?? `Team${rid}`)
+
+              const addedPlayers = Object.entries(tx.adds ?? {}).map(([pid, rid]) => ({
+                playerId: pid,
+                name: playerDisplayName(playersCache[pid], pid),
+                owner: rMap[String(rid)] ?? `Team${rid}`,
+              }))
+
+              const droppedPlayers = Object.entries(tx.drops ?? {}).map(([pid, rid]) => ({
+                playerId: pid,
+                name: playerDisplayName(playersCache[pid], pid),
+                owner: rMap[String(rid)] ?? `Team${rid}`,
+              }))
+
+              allTxs.push({ ...tx, year: entry.year, ownerNames, addedPlayers, droppedPlayers })
+            }
+          }
+
+          // Completed seasons come from the static snapshot — no Sleeper calls
+          const snap = snapshotYears.has(entry.year) ? await loadSnapshotSeason(entry.year) : null
+          if (snap) {
+            Object.values(snap.transactionsByWeek).forEach(enrich)
+            continue
+          }
+
+          // Live season: fetch all weeks in batches of 5
           for (let batch = 1; batch <= WEEKS_PER_SEASON; batch += 5) {
             if (cancelled) return
             const weekNums = Array.from({ length: 5 }, (_, i) => batch + i).filter(w => w <= WEEKS_PER_SEASON)
             const results = await Promise.all(weekNums.map(w => fetchBatch(entry.id, w)))
-
-            for (const weekTxs of results) {
-              for (const tx of weekTxs) {
-                if (tx.status !== 'complete') continue
-
-                const ownerNames = tx.roster_ids.map(rid => rMap[String(rid)] ?? `Team${rid}`)
-
-                const addedPlayers = Object.entries(tx.adds ?? {}).map(([pid, rid]) => ({
-                  playerId: pid,
-                  name: playerDisplayName(playersCache[pid], pid),
-                  owner: rMap[String(rid)] ?? `Team${rid}`,
-                }))
-
-                const droppedPlayers = Object.entries(tx.drops ?? {}).map(([pid, rid]) => ({
-                  playerId: pid,
-                  name: playerDisplayName(playersCache[pid], pid),
-                  owner: rMap[String(rid)] ?? `Team${rid}`,
-                }))
-
-                allTxs.push({ ...tx, year: entry.year, ownerNames, addedPlayers, droppedPlayers })
-              }
-            }
+            results.forEach(enrich)
           }
         }
 

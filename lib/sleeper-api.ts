@@ -1,5 +1,5 @@
-import { LEAGUE_ID, SLEEPER_API } from '@/lib/constants'
-import type { SleeperLeague, SleeperUser, SleeperRoster, SleeperMatchup, BracketGame, LeagueChainEntry, SleeperDraft, DraftPick, Transaction } from '@/types'
+import { SLEEPER_API } from '@/lib/constants'
+import type { SleeperUser, SleeperRoster, SleeperMatchup, BracketGame, SleeperDraft, DraftPick, Transaction } from '@/types'
 
 // ─── Core fetch wrapper ────────────────────────────────────────────────────────
 
@@ -25,34 +25,9 @@ export async function sleepFetch<T>(url: string): Promise<T> {
   }
 }
 
-// ─── League chain (walks backward via previous_league_id) ─────────────────────
-
-export async function buildLeagueChain(
-  onProgress?: (msg: string) => void
-): Promise<LeagueChainEntry[]> {
-  const chain: LeagueChainEntry[] = []
-  let lid: string | null = LEAGUE_ID
-
-  while (lid && lid !== '0') {
-    try {
-      const lg: SleeperLeague = await sleepFetch<SleeperLeague>(`${SLEEPER_API}/league/${lid}`)
-      const yr = parseInt(lg.season)
-      if (!chain.find(c => c.id === lid || c.year === yr)) {
-        chain.unshift({ id: lid, year: yr, data: lg })
-        onProgress?.(`Found ${yr} season...`)
-      }
-      lid = lg.previous_league_id
-      if (!lid || lid === '0') break
-    } catch {
-      break
-    }
-  }
-
-  chain.sort((a, b) => a.year - b.year)
-  return chain
-}
-
 // ─── Per-season fetchers ──────────────────────────────────────────────────────
+// (The league-chain walk lives in LeagueContext — it is snapshot-aware and
+// only fetches seasons missing from public/data/.)
 
 export function fetchUsers(leagueId: string): Promise<SleeperUser[]> {
   return sleepFetch(`${SLEEPER_API}/league/${leagueId}/users`)
