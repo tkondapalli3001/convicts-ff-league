@@ -25,6 +25,19 @@ export default function TransactionsPage() {
     if (years.length) setActiveYears(new Set(years))
   }, [years.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const filtered = useMemo(() => {
+    return transactions.filter(tx => {
+      if (!activeYears.has(tx.year)) return false
+      const txCategory: TxTypeFilter = tx.type === 'trade' ? 'trade' : 'waivers'
+      if (!activeTypes.has(txCategory)) return false
+      if (activeOwners.size > 0) {
+        const matches = tx.ownerNames.some(n => activeOwners.has(n))
+        if (!matches) return false
+      }
+      return true
+    })
+  }, [transactions, activeYears, activeOwners, activeTypes])
+
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
 
@@ -59,19 +72,6 @@ export default function TransactionsPage() {
       return next
     })
   }
-
-  const filtered = useMemo(() => {
-    return transactions.filter(tx => {
-      if (!activeYears.has(tx.year)) return false
-      const txCategory: TxTypeFilter = tx.type === 'trade' ? 'trade' : 'waivers'
-      if (!activeTypes.has(txCategory)) return false
-      if (activeOwners.size > 0) {
-        const matches = tx.ownerNames.some(n => activeOwners.has(n))
-        if (!matches) return false
-      }
-      return true
-    })
-  }, [transactions, activeYears, activeOwners, activeTypes])
 
   const tradeCount = filtered.filter(t => t.type === 'trade').length
   const waiverCount = filtered.filter(t => t.type === 'waiver' || t.type === 'free_agent').length

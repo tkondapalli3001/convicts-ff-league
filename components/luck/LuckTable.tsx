@@ -86,7 +86,7 @@ export default function LuckTable({ entries, year }: Props) {
 
       <p className="mt-4 text-[10px] text-s-text3 leading-relaxed">
         <strong className="text-s-text2">Luck Index</strong> = Actual Wins − All-Play Expected Wins.
-        Each week, a team's score is compared against every other team. Expected wins for that week = wins / (teams − 1).
+        Each week, a team&apos;s score is compared against every other team. Expected wins for that week = wins / (teams − 1).
         Summed across all regular-season weeks. Positive = lucky, negative = unlucky.
       </p>
     </div>

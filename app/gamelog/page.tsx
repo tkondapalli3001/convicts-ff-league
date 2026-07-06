@@ -38,6 +38,18 @@ export default function GameLogPage() {
     if (years.length) setActiveYears(new Set([years[years.length - 1]]))
   }, [years.length])  // eslint-disable-line react-hooks/exhaustive-deps
 
+  const filtered = useMemo(() => {
+    return allMatchups
+      .filter(g => {
+        if (!activeYears.has(g.year)) return false
+        if (activeOwners.size > 0) {
+          if (!activeOwners.has(g.team1) && !activeOwners.has(g.team2)) return false
+        }
+        return true
+      })
+      .sort((a, b) => b.year - a.year || b.week - a.week)
+  }, [allMatchups, activeYears, activeOwners])
+
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
 
@@ -56,18 +68,6 @@ export default function GameLogPage() {
       return new Set([name])
     })
   }
-
-  const filtered = useMemo(() => {
-    return allMatchups
-      .filter(g => {
-        if (!activeYears.has(g.year)) return false
-        if (activeOwners.size > 0) {
-          if (!activeOwners.has(g.team1) && !activeOwners.has(g.team2)) return false
-        }
-        return true
-      })
-      .sort((a, b) => b.year - a.year || b.week - a.week)
-  }, [allMatchups, activeYears, activeOwners])
 
   return (
     <div className="animate-fade-in">
