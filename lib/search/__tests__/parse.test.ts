@@ -133,6 +133,38 @@ describe('parseQuery intents', () => {
     expect(p.owners).toEqual(['Daniyaal'])
   })
 
+  it('blowouts, scoped and unscoped', () => {
+    expect(parse('biggest blowout ever').intent).toBe('blowout')
+    expect(parse('largest margin of victory').intent).toBe('blowout')
+    const scoped = parse('biggest blowout between Teja and Nathan')
+    expect(scoped.intent).toBe('blowout')
+    expect(scoped.owners).toEqual(['Teja', 'Nathan'])
+  })
+
+  it('"biggest win streak" stays a streak, not a blowout', () => {
+    expect(parse('biggest win streak').intent).toBe('win-streak')
+  })
+
+  it('closest games', () => {
+    expect(parse('closest game ever').intent).toBe('closest-game')
+    expect(parse('closest game in 2023').year).toBe(2023)
+    const p = parse('nail biter between kerry and eric')
+    expect(p.intent).toBe('closest-game')
+    expect(p.owners).toEqual(['Kerry', 'Eric'])
+  })
+
+  it('who drafted a player, optionally by year', () => {
+    const p = parse('who drafted justin jefferson in 2023')
+    expect(p.intent).toBe('drafted')
+    expect(p.player?.name).toBe('Justin Jefferson')
+    expect(p.year).toBe(2023)
+  })
+
+  it('draft mention without a player degrades to career / nothing', () => {
+    expect(parse('teja draft').intent).toBe('career')
+    expect(parse('the 2023 draft').intent).toBeNull()
+  })
+
   it('bare owner name falls through to career card', () => {
     expect(parse('teja').intent).toBe('career')
   })

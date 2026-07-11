@@ -8,6 +8,35 @@ const fmtMoney = (n: number) => `${n >= 0 ? '+' : '−'}$${Math.abs(n)}`
 
 type Resolver = (p: ParsedQuery, ctx: QueryContext) => Answer | null
 
+/** Played games scoped by the query's owners (pairing or single) and year. */
+function marginPool(p: ParsedQuery, ctx: QueryContext) {
+  let games = ctx.records.filteredMatchups.filter(g => g.pts1 > 0 || g.pts2 > 0)
+  if (p.owners.length === 2) {
+    const [a, b] = p.owners
+    games = games.filter(g =>
+      (g.team1 === a && g.team2 === b) || (g.team1 === b && g.team2 === a)
+    )
+  } else if (p.owners.length === 1) {
+    const a = p.owners[0]
+    games = games.filter(g => g.team1 === a || g.team2 === a)
+  }
+  if (p.year != null) games = games.filter(g => g.year === p.year)
+  return games
+}
+
+function marginScope(p: ParsedQuery): string {
+  return [
+    p.owners.length === 2 ? `${p.owners[0]} vs ${p.owners[1]}` : p.owners[0],
+    p.year != null ? String(p.year) : 'All-Time',
+  ].filter(Boolean).join(' · ')
+}
+
+const scoreline = (g: { winner: string; loser: string; team1: string; pts1: number; pts2: number; year: number; week: number }) => {
+  const winPts = g.winner === g.team1 ? g.pts1 : g.pts2
+  const losPts = g.winner === g.team1 ? g.pts2 : g.pts1
+  return `${g.winner} ${winPts.toFixed(2)} – ${losPts.toFixed(2)} ${g.loser} · ${g.year} Wk${g.week}`
+}
+
 const resolvers: Record<NonNullable<ParsedQuery['intent']>, Resolver> = {
 
   champion(p, ctx) {
@@ -51,6 +80,89 @@ const resolvers: Record<NonNullable<ParsedQuery['intent']>, Resolver> = {
         label: c.name,
         value: `${c.champs % 1 === 0 ? c.champs : c.champs.toFixed(1)}× 🏆`,
         owner: c.name,
+      })),
+    }
+  },
+
+  blowout(p, ctx) {
+    const games = marginPool(p, ctx)
+    if (!games.length) return null
+    if (p.owners.length || p.year != null) {
+      const top = games.reduce((m, g) => (g.margin > m.margin ? g : m), games[0])
+      return {
+        kind: 'stat',
+        headline: `Biggest Blowout — ${marginScope(p)}`,
+        value: top.margin.toFixed(2),
+        detail: scoreline(top),
+        owner: top.winner,
+      }
+    }
+    const ranked = [...games].sort((a, b) => b.margin - a.margin).slice(0, 5)
+    return {
+      kind: 'list',
+      title: 'Biggest Blowouts',
+      rows: ranked.map(g => ({
+        label: `${g.winner} over ${g.loser}`,
+        value: `+${g.margin.toFixed(2)}`,
+        sub: scoreline(g),
+        owner: g.winner,
+      })),
+    }
+  },
+
+  'closest-game'(p, ctx) {
+    const games = marginPool(p, ctx)
+    if (!games.length) return null
+    if (p.owners.length || p.year != null) {
+      const top = games.reduce((m, g) => (g.margin < m.margin ? g : m), games[0])
+      return {
+        kind: 'stat',
+        headline: `Closest Game — ${marginScope(p)}`,
+        value: top.margin.toFixed(2),
+        detail: scoreline(top),
+        owner: top.winner,
+      }
+    }
+    const ranked = [...games].sort((a, b) => a.margin - b.margin).slice(0, 5)
+    return {
+      kind: 'list',
+      title: 'Closest Games',
+      rows: ranked.map(g => ({
+        label: `${g.winner} over ${g.loser}`,
+        value: `±${g.margin.toFixed(2)}`,
+        sub: scoreline(g),
+        owner: g.winner,
+      })),
+    }
+  },
+
+  drafted(p, ctx) {
+    // ownership is empty until the players cache lazy-loads — null falls back
+    // to the overlay's plain name-match cards, same as player-stats
+    if (!p.player) return null
+    const entry = ctx.ownership.find(o => o.player_id === p.player!.id)
+    if (!entry?.picks.length) return null
+    let picks = [...entry.picks].sort((a, b) => b.year - a.year || a.pickNo - b.pickNo)
+    if (p.year != null) picks = picks.filter(x => x.year === p.year)
+    if (!picks.length) return null
+    if (picks.length === 1) {
+      const pick = picks[0]
+      return {
+        kind: 'stat',
+        headline: `Who Drafted ${entry.name}${p.year != null ? ` — ${p.year}` : ''}`,
+        value: pick.owner,
+        detail: `${pick.year} · Round ${pick.round}, Pick ${pick.pickNo}`,
+        owner: pick.owner,
+      }
+    }
+    return {
+      kind: 'list',
+      title: `Draft History — ${entry.name}`,
+      rows: picks.map(x => ({
+        label: String(x.year),
+        value: x.owner,
+        sub: `Rd ${x.round} · Pick ${x.pickNo}`,
+        owner: x.owner,
       })),
     }
   },

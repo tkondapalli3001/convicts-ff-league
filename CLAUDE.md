@@ -95,7 +95,7 @@ lib/                        Business logic and static data
   search/                   "Ask anything" query engine — no LLM, no API keys
     tokenize.ts             normalize(), tokens(), extractYear(), levenshtein()
     entities.ts             buildEntityIndex(), matchOwners(), matchPlayer()
-    parse.ts                parseQuery() — regex intent table (13 intents)
+    parse.ts                parseQuery() — regex intent table (16 intents)
     resolvers.ts            resolveAnswer() — maps intents onto lib/stats computations
     index.ts                Barrel + answerQuery() (import from '@/lib/search')
   preview/                  This Week engine — pure functions

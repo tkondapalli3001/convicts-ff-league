@@ -14,6 +14,9 @@ export type Intent =
   | 'earnings'
   | 'playoffs'
   | 'most-champs'
+  | 'blowout'
+  | 'closest-game'
+  | 'drafted'
   | 'career'
   | 'player-stats'
 

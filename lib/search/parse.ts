@@ -7,6 +7,10 @@ import type { EntityIndex, Intent, ParsedQuery } from './types'
  * plain regexes over the normalized query, no scoring model.
  */
 const INTENT_RULES: { intent: Intent; test: (n: string) => boolean }[] = [
+  { intent: 'drafted',      test: n => /\bdraft(ed)?\b/.test(n) },
+  // "biggest win streak" belongs to win-streak, so blowout bows out on "streak"
+  { intent: 'blowout',      test: n => !/\bstreak\b/.test(n) && /\b(blow ?outs?|beat ?downs?|biggest (win|victory|margin)|largest margin|margin of victory|(most )?lopsided)\b/.test(n) },
+  { intent: 'closest-game', test: n => /\b(closest|narrowest|slimmest|nail ?biters?|photo finish|smallest margin)\b/.test(n) },
   { intent: 'h2h',         test: n => /\b(vs|versus|against|head to head|h2h|rivalry)\b/.test(n) },
   { intent: 'most-champs', test: n => /\bmost\b.*\b(champ|champion|championships|rings?|titles?)\b/.test(n) || /\b(champ|champion|championships|rings?|titles?)\b.*\bmost\b/.test(n) },
   { intent: 'champion',    test: n => /\b(champion|champ|title|ring|who won|won (the )?(league|it|championship)|winner)\b/.test(n) },
@@ -35,6 +39,9 @@ export function parseQuery(raw: string, index: EntityIndex, years: number[]): Pa
 
   // h2h needs two owners; with fewer it degrades to career/player lookup
   if (intent === 'h2h' && owners.length < 2) intent = owners.length === 1 ? 'career' : null
+
+  // drafted needs a player; without one it degrades the same way
+  if (intent === 'drafted' && !player) intent = owners.length === 1 ? 'career' : null
 
   // No keyword hit but we recognized an entity → show its card
   if (!intent) {
