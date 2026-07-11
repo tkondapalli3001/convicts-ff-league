@@ -1,5 +1,5 @@
-:HL["/convicts-ff-league/_next/static/chunks/0xdu3xw4_w4.4.css","style"]
+:HL["/convicts-ff-league/_next/static/chunks/08y7bylv6vggd.css","style"]
 :HL["/convicts-ff-league/_next/static/media/75affa71d1e2f6a7-s.p.0e5c5_wyqqx75.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/convicts-ff-league/_next/static/media/89232e6535d3b87e-s.p.0uy8evdve.ea3.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/convicts-ff-league/_next/static/media/d9b5d46d9a89ffe6-s.p.0agk34fg-1.z0.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"transactions","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"dPi0v_lTw2DUc_tdDWqvk"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"transactions","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"L8ckFFiRgiwXc2UxuKowX"}
