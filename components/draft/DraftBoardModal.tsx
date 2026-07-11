@@ -2,6 +2,7 @@
 
 import type { DraftPick, SleeperDraft } from '@/types'
 
+import { useModalClose } from '@/hooks/useModalClose'
 import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/constants'
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: Props) {
+  useModalClose(onClose)
   // Build slot → canonical owner map (pre-trade assignment).
   // Round-1 picks reflect whoever used the pick after trades, so we can't use
   // them for column headers. Use slot_to_roster_id first, then infer from the
@@ -64,6 +66,9 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${year} draft board`}
       className="fixed inset-0 z-50 flex items-start justify-center overflow-auto bg-black/80 backdrop-blur-sm py-8 px-2"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
@@ -78,6 +83,7 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-s-text3 hover:text-s-text text-[22px] leading-none px-3 py-1 rounded-lg hover:bg-s-bg3 transition-colors"
           >
             ✕

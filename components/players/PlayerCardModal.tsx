@@ -2,6 +2,7 @@
 
 import type { PlayerStat } from '@/types'
 
+import { useModalClose } from '@/hooks/useModalClose'
 import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/constants'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function PlayerCardModal({ player, onClose }: Props) {
+  useModalClose(onClose)
   const pct = (player.winRate * 100).toFixed(1)
   const posClass = POS_COLORS[player.position] ?? 'bg-white/[0.06] text-s-text3 border-white/10'
 
@@ -26,6 +28,9 @@ export default function PlayerCardModal({ player, onClose }: Props) {
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${player.name} player card`}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
@@ -51,6 +56,7 @@ export default function PlayerCardModal({ player, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-s-text3 hover:text-s-text text-[20px] leading-none px-2 py-1 rounded-lg hover:bg-s-bg3 transition-colors flex-shrink-0"
           >
             ✕

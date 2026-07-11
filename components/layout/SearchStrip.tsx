@@ -13,7 +13,6 @@ export default function SearchStrip() {
       onClick={openLeagueSearch}
       className="flex w-full items-center gap-3.5 px-5 py-3.5 border-b bg-panel-2 text-left transition-colors hover:bg-[rgba(201,150,46,0.05)]"
       style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}
-      aria-label="Search the league"
     >
       {/* Gold dash */}
       <span className="hidden sm:block w-4 h-px flex-shrink-0 bg-gold" />

@@ -1,5 +1,6 @@
 'use client'
 
+import { useModalClose } from '@/hooks/useModalClose'
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 
 interface Props {
@@ -18,12 +19,16 @@ const TYPE_LABEL: Record<string, string> = {
 }
 
 export default function TransactionDetailModal({ tx, onClose }: Props) {
+  useModalClose(onClose)
   if (!tx) return null
 
   const isTrade = tx.type === 'trade'
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${TYPE_LABEL[tx.type] ?? tx.type} details`}
       className="fixed inset-0 bg-black/80 z-[500] flex items-center justify-center p-4 backdrop-blur-sm"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
@@ -38,6 +43,7 @@ export default function TransactionDetailModal({ tx, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-[20px] text-s-text3 bg-transparent border-0 cursor-pointer hover:text-s-text transition-colors leading-none"
           >
             ✕

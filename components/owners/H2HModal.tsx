@@ -2,6 +2,7 @@
 
 import { Matchup } from '@/types'
 import { fmtPts } from '@/lib/utils'
+import { useModalClose } from '@/hooks/useModalClose'
 
 interface Props {
   p1: string
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function H2HModal({ p1, p2, games, onClose }: Props) {
+  useModalClose(onClose)
   let w1 = 0, l1 = 0
 
   const rows = games.map(g => {
@@ -27,6 +29,9 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
       className="fixed inset-0 bg-black/80 z-[500] flex items-center justify-center p-4"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
@@ -36,6 +41,7 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
           <span className="text-[16px] font-extrabold text-s-text">{title}</span>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-[20px] text-s-text3 bg-none border-none cursor-pointer hover:text-s-text transition-colors"
           >
             ✕

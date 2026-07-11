@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, type ReactNode } from 'react'
+import { useModalClose } from '@/hooks/useModalClose'
 import { getPlayersCache, type PlayerMetadata } from '@/lib/players-cache'
 import type { Matchup, SleeperMatchup, LeagueState } from '@/types'
 
@@ -148,10 +149,15 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
     onClose()
   }
 
+  useModalClose(handleClose)
+
   if (!modal) return null
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={modal.title}
       className="fixed inset-0 bg-black/80 z-[500] flex items-center justify-center p-4 backdrop-blur-sm"
       onClick={e => { if (e.target === e.currentTarget) handleClose() }}
     >
@@ -160,6 +166,7 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
           <span className="text-[15px] font-extrabold text-s-text">{modal.title}</span>
           <button
             onClick={handleClose}
+            aria-label="Close"
             className="text-[20px] text-s-text3 bg-transparent border-0 cursor-pointer hover:text-s-text transition-colors leading-none"
           >
             ✕
