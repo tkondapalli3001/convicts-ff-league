@@ -45,8 +45,10 @@ no LLM/API keys anywhere.
 - `npm run build` succeeds; `npm run lint` has 0 errors (~45 pre-existing
   `react-hooks` warnings are known noise).
 - Snapshots present for **2019–2025** (7 seasons) + `manifest.json`.
-- `lib/config.ts` `LEAGUE_ID = '1253186296067657729'` → **still the 2025 league**.
-  The 2026 league ID does not exist yet (draft 2026-08-15; league grows to 10 teams).
+- `lib/config.ts` `LEAGUE_ID = '1367670546694705152'` → the **2026 league**
+  ("Misc Convicts", `pre_draft`, 10 teams, same 10 owners as 2025 — all user_ids
+  already mapped in `lib/owner-map.ts`). Draft 2026-08-15; `playoff_teams: 6`,
+  `playoff_week_start: 15`.
 
 ### 2.2 Implemented features
 
@@ -114,6 +116,17 @@ gold-pulse/fade-in motion with `prefers-reduced-motion` support, gold `:focus-vi
   **Update the constant each offseason.**
 - **Hygiene:** unused `framer-motion` removed; `tsconfig.tsbuildinfo` untracked and
   gitignored.
+- **Season rollover (T1, done early):** `LEAGUE_ID` points at the 2026 pre-draft league;
+  the context already skips matchup fetches for `pre_draft`/`drafting` status. The home
+  hero now shows the **reigning** champion (latest year with a decided title) instead of
+  the empty newest year — `champYear` logic in `app/page.tsx`. T2 (owner onboarding) was
+  unnecessary: same 10 owners, all mapped.
+- **Accessibility pass (T10):** shared `hooks/useModalClose.ts` (Escape + body scroll
+  lock, same semantics as MatchupModal) wired into the five modals that lacked it
+  (GameDetail, H2H, PlayerCard, TransactionDetail, DraftBoard) + `role="dialog"`,
+  `aria-modal`, labelled close buttons; SearchStrip accessible-name mismatch fixed.
+  Lighthouse (mobile, deployed): **Perf 73 · A11y 96 · Best Practices 100**, CLS 0.
+- **T11:** `design_handoff_midnight_prime/` deleted per owner decision.
 
 ---
 
@@ -121,10 +134,9 @@ gold-pulse/fade-in motion with `prefers-reduced-motion` support, gold `:focus-vi
 
 | # | Area | Risk | Detection | Mitigation |
 |---|---|---|---|---|
-| B1 | `lib/config.ts` | LEAGUE_ID still 2025 — after the 2026 draft the live season won't appear | Site shows no 2026 data in September | Task T1 |
-| B2 | `lib/owner-map.ts` | New 2026 owner's user_id/display_name unmapped → games attributed to "Unknown" or dropped | Owner missing from standings/leaderboards | Task T2 |
 | B4 | `lib/preview/projections.ts` | Undocumented Sleeper endpoint can change/vanish any time | Projection row silently disappears (designed behavior — verify it stays silent) | Task T4b |
 | B6 | Snapshot drift | Regenerating old snapshot years could shift historical name resolution | Career totals change unexpectedly | Snapshots freeze history — never regenerate old years without diffing (T9) |
+| B7 | Sleeper display-name churn | An owner renaming their Sleeper account mid-season falls back to `USER_ID_TO_OWNER` (fine) — but keep `DISPLAY_NAME_TO_OWNER` updated for search/aliases | New alias not searchable | Add the new name to `lib/owner-map.ts` when noticed |
 
 **Reproduction protocol for any data bug:** `npm run dev`, open the affected page,
 compare against Sleeper's own UI for the same league/week. Historical numbers must match
@@ -149,46 +161,10 @@ also require a visual check in `npm run dev`.
 
 ---
 
-### T1 — Season rollover to 2026 league *(HIGH — blocked until draft day 2026-08-15)*
+### T2b — 2026 buy-in *(LOW — when the league sets it)*
 
-**Description:** Point the app at the new 2026 Sleeper league so live data flows.
-**Inputs:** The new 2026 league ID (get from the owner or from Sleeper: the *new*
-league's `previous_league_id` must equal `1253186296067657729`).
-**Outputs:** Updated `lib/config.ts`.
-**Steps:**
-1. Open `lib/config.ts`. Replace the `LEAGUE_ID` value with the 2026 league ID string.
-2. Update the comment above it from "2025 league" to "2026 league".
-3. Run `npm run dev`, open `/` and `/this-week`. Confirm the 2026 season appears and all
-   historical seasons (2019–2025) still load from snapshots (Network tab: only the 2026
-   season should hit `api.sleeper.app`).
-4. Verification gate, then commit.
-**Constraints:** Touch only `lib/config.ts`. Do not regenerate snapshots.
-
----
-
-### T2 — Onboard new 2026 owners *(HIGH — after T1)*
-
-**Description:** Map any owner joining in 2026 into every manual data table.
-**Inputs:** For each new owner: Sleeper `user_id`, Sleeper display name(s), canonical
-first name, a hex color, 2026 buy-in amount.
-**Outputs:** Edits to `lib/owner-map.ts`, `lib/league-history.ts`,
-`lib/earnings-data.ts`, `lib/narratives.ts`.
-**Steps:**
-1. Fetch `https://api.sleeper.app/v1/league/<2026_LEAGUE_ID>/users` and list every
-   `user_id` + `display_name`.
-2. For each user_id **not** already in `USER_ID_TO_OWNER` (`lib/owner-map.ts`): add
-   `'<user_id>': '<CanonicalFirstName>'` to `USER_ID_TO_OWNER`, the display name to
-   `DISPLAY_NAME_TO_OWNER`, and a distinct hex color to `OWNER_COLORS` (must be visually
-   distinct from the existing colors on an onyx background).
-3. Add the owner to `BUY_INS` for 2026 in `lib/league-history.ts` (copy the shape of an
-   existing entry exactly).
-4. Add a zeroed/absent-years entry to `EARNINGS_DATA` in `lib/earnings-data.ts`
-   matching the existing structure.
-5. Add at least one `TRASH_TALK` line in `lib/narratives.ts` (match existing tone).
-6. `npm run dev` → `/owners`: the new owner appears with 0-0 record and correct color.
-7. Verification gate, then commit.
-**Constraints:** Never rename existing canonical owner names. Copy existing entry shapes
-exactly — these files are consumed by `lib/stats` with strict typing.
+`BUY_INS` in `lib/league-history.ts` ends at 2025 (`2025: 125`). Add the `2026: <amount>`
+entry once the buy-in is decided so earnings math stays correct at season's end.
 
 ---
 
@@ -221,25 +197,20 @@ exactly — these files are consumed by `lib/stats` with strict typing.
 
 ---
 
-### T10 — Accessibility & performance pass *(LOW — anytime)*
+### T12 — Deferred report-only findings from the T10 audit *(owner decisions — no action without sign-off)*
 
-**Description:** Audit table semantics, modal focus traps, and Lighthouse scores on the
-GitHub Pages deploy.
-**Steps:**
-1. Run Lighthouse (mobile + desktop) against the deployed site; record scores.
-2. Check every modal (game detail, H2H, matchup, player card, transaction detail) traps
-   focus and closes on Escape.
-3. Check data tables use `<th scope>` headers and that row-hover contrast meets WCAG AA
-   on the onyx palette.
-4. Report findings before fixing; visual changes need owner sign-off (design system is
-   locked).
+Lighthouse flagged these; both are **deliberate design choices**, so fixing them means
+changing the locked Midnight Prime palette or architecture:
 
----
-
-### T11 — Decide fate of `design_handoff_midnight_prime/` *(LOW — owner decision)*
-
-Committed design-handoff assets at the repo root. Options: keep as historical reference,
-move under `docs/`, or delete. **Ask the owner; do not act unilaterally.**
+1. **Color contrast (a11y 96, not 100):** the tiny uppercase labels in `#5C6270`
+   (`s-text3`), `#8A7439` (gold-dim), and `#8A4A46` (brick label) sit below WCAG AA
+   against onyx. Brightening them is a theme change — owner call.
+2. **LCP 5.6s (perf 73):** the hero champion name renders only after the client-side
+   data load — inherent to the client-only architecture (decision §2.3 #1). Options if
+   ever desired: prerender hero text from the snapshot at build time, or accept it.
+3. **Focus traps:** modals now close on Escape and are announced as dialogs, but focus
+   is not actively trapped inside them (Tab can reach the page behind). A full trap is
+   a larger change; add only if the owner wants it.
 
 ---
 
@@ -278,8 +249,8 @@ If the build fails on a page you didn't touch, you broke a shared module — rev
 re-approach; do not patch the symptom.
 
 ### Execution order
-- **Draft day 2026-08-15:** T1 → T2
+- **When the league sets the 2026 buy-in:** T2b
 - **Season start (Sept 2026):** T4b
 - **Season end (~Jan 2027):** T9
-- **Anytime:** T10 (report-first), T11 (owner decision)
+- **Owner decisions, no deadline:** T12 items (contrast, LCP, focus traps)
 - Anything not listed here that changes features or visuals: **ask the owner first.**
