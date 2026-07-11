@@ -5,8 +5,8 @@
   "start_url": "/convicts-ff-league/",
   "scope": "/convicts-ff-league/",
   "display": "standalone",
-  "background_color": "#080c14",
-  "theme_color": "#080c14",
+  "background_color": "#050506",
+  "theme_color": "#050506",
   "icons": [
     {
       "src": "/convicts-ff-league/icons/icon-192.png",
