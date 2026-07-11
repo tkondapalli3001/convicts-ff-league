@@ -16,7 +16,7 @@ interface Props<T extends string> {
 export default function PillTabs<T extends string>({ tabs, active, onChange, children }: Props<T>) {
   return (
     <div
-      className="mb-5 flex items-center gap-1 overflow-x-auto border-b scrollbar-none"
+      className="-mt-6 mb-5 flex items-center gap-1 overflow-x-auto border-b scrollbar-none"
       style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}
     >
       {tabs.map(tab => (

@@ -113,9 +113,10 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
         </div>
       </div>
 
-      {/* ── DESKTOP TABLE ─────────────────────────────────────────── */}
-      <div className="hidden sm:block">
-        <table className="w-full border-collapse">
+      {/* ── TABLE (horizontally scrollable on mobile) ─────────────── */}
+      <div className="relative">
+      <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <table className="w-full min-w-[560px] border-collapse">
           <thead>
             <tr>
               <th className="!text-center" style={{ width: 48 }}>No.</th>
@@ -186,37 +187,8 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
           </tbody>
         </table>
       </div>
-
-      {/* ── MOBILE CONDENSED LIST ─────────────────────────────────── */}
-      <div className="sm:hidden">
-        {displayData.map((d, i) => (
-          <button
-            key={d.name}
-            onClick={() => goToOwner(d.name)}
-            className="flex min-h-[44px] w-full items-center gap-3 px-[18px] py-2.5 text-left transition-colors hover:bg-[rgba(201,150,46,0.05)]"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
-          >
-            <span className="w-[22px] flex-shrink-0 font-display text-[15px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#3A4150' }}>
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <Avatar d={d} size={30} />
-            <div className="min-w-0 flex-1">
-              <div className="text-[12px] font-bold leading-none text-s-text">{d.name}</div>
-              <div className="mt-[3px] text-[8px] uppercase tracking-[1px] text-s-text3">
-                {d.numSeasons} season{d.numSeasons !== 1 ? 's' : ''}
-                {d.champs > 0 ? ` · ${fmtChamps(d.champs)}× titles` : ''}
-              </div>
-            </div>
-            <div className="flex-shrink-0 text-right">
-              <div className="font-display text-[15px] font-bold leading-none text-s-text">
-                {d.allW}–{d.allL}
-              </div>
-              <div className="mt-[3px] font-display text-[12px] font-bold" style={{ color: pctColor(d.winpct) }}>
-                {(d.winpct * 100).toFixed(1)}%
-              </div>
-            </div>
-          </button>
-        ))}
+        {/* Right-edge gradient fade — signals scrollable content */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,11,13,0.85)] z-10 sm:hidden" />
       </div>
     </div>
   )
