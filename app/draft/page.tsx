@@ -7,6 +7,7 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PillTabs from '@/components/shared/PillTabs'
 import PageHeader from '@/components/shared/PageHeader'
+import DraftCountdown from '@/components/draft/DraftCountdown'
 import StockStandings from '@/components/draft/StockStandings'
 import StealsBusts from '@/components/draft/StealsBusts'
 import DraftSlotAnalysis from '@/components/draft/DraftSlotAnalysis'
@@ -62,6 +63,8 @@ export default function DraftPage() {
         title="Draft Hub"
         subtitle="Draft history, 2026 pick order standings, slot vs outcome analysis, and historical steals & busts"
       />
+
+      <DraftCountdown />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab}>
         {activeTab === 'pickorder' && (

@@ -11,6 +11,11 @@ export const BUY_INS: Record<number, number> = {
   2025: 125,
 }
 
+// ─── Next draft date ───────────────────────────────────────────────────────────
+// Local date of the upcoming draft — drives the Draft Hub countdown, which hides
+// itself once the date passes. Update each offseason when the league sets a date.
+export const NEXT_DRAFT_DATE = '2026-08-15'
+
 // ─── Champions — fully verified from Sleeper bracket data ─────────────────────
 export const MANUAL_CHAMPS: Champion[] = [
   { year: 2025, winner: 'Kerry',           seed: null,  note: 'yanabana, roster 8'   },
