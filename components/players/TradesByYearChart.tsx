@@ -59,26 +59,26 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
         <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -20 }} barSize={28}>
           <XAxis
             dataKey="year"
-            tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }}
+            tick={{ fill: '#5C6270', fontSize: 11, fontWeight: 600 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fill: '#64748b', fontSize: 10 }}
+            tick={{ fill: '#5C6270', fontSize: 10 }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
             cursor={{ fill: 'rgba(201, 150, 46, 0.08)' }}
             contentStyle={{
-              background: '#0d1117',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 8,
+              background: '#0B0B0D',
+              border: '1px solid rgba(230,190,90,0.16)',
+              borderRadius: 6,
               fontSize: 12,
-              color: '#e2e8f0',
+              color: '#EDE9E0',
             }}
-            itemStyle={{ color: '#e2e8f0' }}
+            itemStyle={{ color: '#EDE9E0' }}
             labelStyle={{ color: '#9AA0AC' }}
             formatter={(val: number) => [val, 'Trades']}
             labelFormatter={(label) => `${label} Season`}
@@ -95,7 +95,7 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
               dataKey="count"
               position="top"
               formatter={(val: number) => (val > 0 ? val : '')}
-              style={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }}
+              style={{ fill: '#5C6270', fontSize: 10, fontWeight: 700 }}
             />
           </Bar>
         </BarChart>

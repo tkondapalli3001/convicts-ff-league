@@ -1,6 +1,8 @@
 # Convicts FF League
 
-Historical analytics archive for a 7-season Sleeper fantasy football league (2019–2025).
+Historical analytics archive for a 7-season Sleeper fantasy football league (2019–2025),
+styled in **Midnight Prime** — a "trophy-room luxury" look: cinematic onyx backgrounds,
+metallic-gold hairlines, and condensed uppercase display numerals.
 
 **Live site:** https://tkondapalli3001.github.io/convicts-ff-league
 
@@ -24,7 +26,7 @@ Pulls all historical data directly from the Sleeper API and presents it as a spo
 
 - **Next.js 16** (App Router, static export)
 - **TypeScript** (strict)
-- **Tailwind CSS** (custom dark theme)
+- **Tailwind CSS** (Midnight Prime onyx/gold palette — see `DESIGN.md`)
 - **Recharts** (trend visualizations)
 - **Sleeper API** (client-side fetch, no backend)
 - **GitHub Pages** (deployment)

@@ -12,7 +12,7 @@ interface Props {
 
 export default function PlayerCardModal({ player, onClose }: Props) {
   const pct = (player.winRate * 100).toFixed(1)
-  const posClass = POS_COLORS[player.position] ?? 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+  const posClass = POS_COLORS[player.position] ?? 'bg-white/[0.06] text-s-text3 border-white/10'
 
   // Sort owner counts descending
   const ownerList = Object.entries(player.ownerCounts)
@@ -30,8 +30,8 @@ export default function PlayerCardModal({ player, onClose }: Props) {
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="relative w-full max-w-[480px] rounded-[18px] border border-white/[0.1] overflow-hidden"
-        style={{ background: 'rgba(13, 17, 23, 0.97)' }}
+        className="relative w-full max-w-[480px] rounded-[6px] border border-white/[0.1] overflow-hidden"
+        style={{ background: '#0B0B0D' }}
       >
         {/* Header */}
         <div className="px-6 py-5 border-b border-s-border flex items-start justify-between gap-3">

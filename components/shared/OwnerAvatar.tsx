@@ -29,7 +29,7 @@ export default function OwnerAvatar({ name, size = 'md', className = '' }: Props
       <div
         className={`rounded-full flex-shrink-0 overflow-hidden ${box} ${className}`}
         style={{
-          boxShadow: `0 0 0 2px #0e1117, 0 0 14px ${color}40`,
+          boxShadow: `0 0 0 2px #050506, 0 0 14px ${color}40`,
         }}
       >
         <img
@@ -48,7 +48,7 @@ export default function OwnerAvatar({ name, size = 'md', className = '' }: Props
       style={{
         background: `linear-gradient(135deg, ${color} 0%, ${color}88 100%)`,
         color: '#ffffff',
-        boxShadow: `0 0 0 2px #0e1117, 0 0 14px ${color}40`,
+        boxShadow: `0 0 0 2px #050506, 0 0 14px ${color}40`,
         letterSpacing: '-0.02em',
       }}
     >

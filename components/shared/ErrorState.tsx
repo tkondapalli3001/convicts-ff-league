@@ -7,7 +7,7 @@ export default function ErrorState({ error }: Props) {
   const isTimeout = error.includes('timed out')
 
   return (
-    <div className="max-w-[560px] mx-auto mt-10 p-7 bg-s-bg2 border border-[#2a1a1a] rounded-[14px]">
+    <div className="max-w-[560px] mx-auto mt-10 p-7 bg-s-bg2 border border-[#2a1a1a] rounded-[6px]">
       <div className="text-[36px] mb-4">⚠️</div>
       <div className="text-[18px] font-extrabold text-s-text mb-[10px]">
         {isCors ? 'Sleeper API blocked by browser (CORS)' : isTimeout ? 'Sleeper API timed out' : 'Failed to load league data'}

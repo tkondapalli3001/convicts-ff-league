@@ -45,7 +45,7 @@ export default function TransactionTable({ transactions, onClick }: Props) {
           return (
             <div
               key={tx.transaction_id}
-              className="flex items-center gap-3 px-3 py-[10px] border-b border-s-bg3 cursor-pointer hover:bg-[#0f172a] transition-colors"
+              className="flex items-center gap-3 px-3 py-[10px] border-b border-s-bg3 cursor-pointer hover:bg-[rgba(201,150,46,0.05)] transition-colors"
               onClick={() => onClick(tx)}
             >
               {/* Type badge */}

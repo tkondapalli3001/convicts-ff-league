@@ -126,7 +126,7 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
                       const playerName = [pick.metadata.first_name, pick.metadata.last_name]
                         .filter(Boolean).join(' ') || pick.player_id
                       const pos = pick.metadata.position ?? '?'
-                      const posClass = POS_COLORS[pos] ?? 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                      const posClass = POS_COLORS[pos] ?? 'bg-white/[0.06] text-s-text3 border-white/10'
 
                       return (
                         <td key={slot} className="px-2 py-1.5 border-l border-s-border/40">

@@ -68,7 +68,7 @@ export default function DraftPage() {
           <button
             onClick={fetchPrices}
             disabled={priceLoading}
-            className="ml-auto px-3 py-[5px] text-[11px] font-semibold rounded-[6px] border border-white/10 text-slate-400 bg-white/5 bento-interactive disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-auto px-3 py-[5px] text-[11px] font-semibold rounded-[6px] border border-white/10 text-s-text3 bg-white/5 bento-interactive disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {priceLoading ? 'Refreshing…' : '↻ Refresh'}
           </button>

@@ -27,7 +27,7 @@ export default function TransactionDetailModal({ tx, onClose }: Props) {
       className="fixed inset-0 bg-black/80 z-[500] flex items-center justify-center p-4 backdrop-blur-sm"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-s-bg2 border border-s-border2 rounded-[18px] p-5 max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+      <div className="bg-s-bg2 border border-s-border2 rounded-[6px] p-5 max-w-lg w-full max-h-[85vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div>

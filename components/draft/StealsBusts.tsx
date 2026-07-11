@@ -182,7 +182,7 @@ function PickList({ title, emoji, picks, isSteal }: {
             </thead>
             <tbody>
               {sortedPicks.map((p, i) => {
-                const posClass = POS_COLORS[p.position] ?? 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                const posClass = POS_COLORS[p.position] ?? 'bg-white/[0.06] text-s-text3 border-white/10'
                 return (
                   <tr key={`${p.year}-${p.playerName}-${p.pickNo}`} className="border-b border-s-border/40 hover:bg-s-bg3/30 transition-colors">
                     <td className="px-4 py-2 text-[11px] font-bold text-s-text3">{i + 1}</td>

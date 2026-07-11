@@ -47,7 +47,7 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
           {rows.map(({ g, p1Pts, p2Pts, p1Won, margin }) => (
             <div
               key={`${g.year}-${g.week}`}
-              className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] hover:bg-[#0f172a]"
+              className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] hover:bg-[rgba(201,150,46,0.05)]"
             >
               <span className="w-[60px] text-s-text3 text-[10px] flex-shrink-0">{g.year} W{g.week}</span>
               <span className="font-bold w-[72px] flex-shrink-0 overflow-hidden text-ellipsis text-s-text">{p1}</span>

@@ -1,4 +1,4 @@
-> **Global instructions apply first.** Before working on this project, read the global CLAUDE.md (About Me system: about-me.md, writingrules.md, memory.md). Then read this file for project-specific context, and `memory.md` in this folder for current status.
+> **Global instructions apply first.** Before working on this project, read the global CLAUDE.md (About Me system: about-me.md, writingrules.md, memory.md). Then read this file for project-specific context.
 
 # CLAUDE.md — Convicts FF League
 
