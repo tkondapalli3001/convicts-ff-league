@@ -121,7 +121,7 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
                 <StarterRows entry={m1} rosterPositions={rosterPositions} players={players!} />
                 <div className="pt-2 text-[11px] font-bold text-s-text2 text-right">Total: <span className="text-s-text">{pts1.toFixed(2)}</span></div>
                 {agony1 != null && agony1 > 0 && (
-                  <div className="text-right text-[10px] font-medium text-[#f87171] mt-0.5">
+                  <div className="text-right text-[10px] font-medium text-[#B4636B] mt-0.5">
                     🩸 {agony1.toFixed(2)} left on bench
                   </div>
                 )}
@@ -131,7 +131,7 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
                 <StarterRows entry={m2} rosterPositions={rosterPositions} players={players!} />
                 <div className="pt-2 text-[11px] font-bold text-s-text2 text-right">Total: <span className="text-s-text">{pts2.toFixed(2)}</span></div>
                 {agony2 != null && agony2 > 0 && (
-                  <div className="text-right text-[10px] font-medium text-[#f87171] mt-0.5">
+                  <div className="text-right text-[10px] font-medium text-[#B4636B] mt-0.5">
                     🩸 {agony2.toFixed(2)} left on bench
                   </div>
                 )}

@@ -3,11 +3,9 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
-import { fmtPts } from '@/lib/utils'
+import { fmtPts, ownerColor, fullNameInitials } from '@/lib/utils'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA } from '@/lib/constants'
 import { buildConsolationGameKeys, excludeManualGames, gameKey } from '@/lib/stats'
-import OwnerAvatar from '@/components/shared/OwnerAvatar'
-import StatBox from '@/components/shared/StatBox'
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import H2HGrid from './H2HGrid'
@@ -185,7 +183,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       <div className="text-center py-16 text-s-text3">
         <div className="text-[48px] mb-4">🤷</div>
         <p>No data found for {ownerName}</p>
-        <Link href="/owners" className="mt-4 inline-block text-s-blue hover:underline">← Back to Owners</Link>
+        <Link href="/owners" className="mt-4 inline-block text-gold-soft hover:underline">← Back to Owners</Link>
       </div>
     )
   }
@@ -211,138 +209,143 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     { id: 'gamelog', label: `Game Log (${nonConsolationGames.length})` },
   ]
 
+  // ── Owner stat grid (design 4a) — 12 cells, semantically coloured Barlow values ──────
+  const games  = seasons.reduce((a, s) => a + s.wins + s.losses, 0)
+  const avgPFg = (seasons.reduce((a, s) => a + s.pf, 0) / Math.max(1, games)).toFixed(1)
+  const avgPAg = (seasons.reduce((a, s) => a + s.pa, 0) / Math.max(1, games)).toFixed(1)
+  const SAGE = '#7FA886', BRICK = '#B4636B', GOLD = '#C9A24B'
+  const finalsGames = playoffStats.finalsW + playoffStats.finalsL
+
+  const statCells: { label: string; value: string; sub?: string; color?: string }[] = [
+    { label: 'Career Record', value: `${totalW}–${totalL}`, sub: `${pct}% win rate` },
+    { label: 'Avg PF / Game', value: avgPFg, sub: `${avgPF.toFixed(0)} pts/season` },
+    { label: 'Avg PA / Game', value: avgPAg, sub: `${avgPA.toFixed(0)} allowed/season`, color: BRICK },
+    { label: 'Net Earnings', value: earn ? `${earn.total >= 0 ? '+' : '−'}$${Math.abs(earn.total)}` : 'N/A', color: earn ? (earn.total >= 0 ? SAGE : BRICK) : undefined },
+    { label: 'Finals Record', value: finalsGames > 0 ? `${playoffStats.finalsW}–${playoffStats.finalsL}` : '—', sub: finalsGames > 0 ? `${finalsGames} Finals appearance${finalsGames !== 1 ? 's' : ''}` : 'Never reached Finals', color: playoffStats.finalsW > 0 ? GOLD : undefined },
+    { label: 'Playoff Byes', value: playoffStats.byes > 0 ? String(playoffStats.byes) : '—', sub: playoffStats.byes > 0 ? `first-round bye${playoffStats.byes !== 1 ? 's' : ''}` : 'No byes earned', color: playoffStats.byes > 0 ? GOLD : undefined },
+    { label: 'Best Season', value: String(best.year), sub: `${best.wins}–${best.losses} record`, color: SAGE },
+    { label: 'Worst Season', value: String(worst.year), sub: `${worst.wins}–${worst.losses} record`, color: BRICK },
+    { label: 'Top Rival', value: funStats.topRivalName ?? '—', sub: funStats.topRivalName ? `${funStats.rivalW}–${funStats.rivalL} vs them` : undefined },
+    { label: 'Best Game', value: funStats.bestGame ? fmtPts(funStats.bestGame.pts) : '—', sub: funStats.bestGame ? `${funStats.bestGame.year} W${funStats.bestGame.week} vs ${funStats.bestGame.opp}` : undefined, color: SAGE },
+    { label: 'Worst Game', value: funStats.worstGame ? fmtPts(funStats.worstGame.pts) : '—', sub: funStats.worstGame ? `${funStats.worstGame.year} W${funStats.worstGame.week} vs ${funStats.worstGame.opp}` : undefined, color: BRICK },
+    { label: 'Longest Win Streak', value: funStats.maxStreak > 0 ? `${funStats.maxStreak}W` : '—', sub: funStats.maxStreak > 0 && funStats.streakStart && funStats.streakEnd ? `${funStats.streakStart.year} W${funStats.streakStart.week}–W${funStats.streakEnd.week}` : undefined, color: GOLD },
+  ]
+
   return (
     <div className="animate-fade-in">
-      {/* Back button */}
-      <Link
-        href="/owners"
-        className="inline-flex items-center gap-[6px] px-4 py-2 bg-white/5 border border-white/10 rounded-[8px] text-slate-400 text-[12px] font-semibold mb-5 hover:text-white bento-interactive transition-all duration-150"
+      {/* ── Profile header band (design 4a) ─────────────────────────── */}
+      <div
+        className="-mx-4 -mt-6 overflow-hidden border-b px-4 pb-8 pt-8 sm:px-8"
+        style={{
+          borderColor: 'rgba(var(--gold-rgb), 0.12)',
+          background:
+            'radial-gradient(ellipse 70% 90% at 50% -20%, rgba(var(--gold2-rgb), 0.10) 0%, transparent 60%), #050506',
+        }}
       >
-        ← All Owners
-      </Link>
+        <Link
+          href="/owners"
+          className="mb-6 inline-flex items-center gap-2 border px-3.5 py-[7px] text-[9px] font-bold uppercase tracking-[2px] text-s-text2 transition-colors hover:text-gold-soft"
+          style={{ borderColor: 'rgba(var(--gold-rgb), 0.20)' }}
+        >
+          ← All Owners
+        </Link>
 
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-5 flex-wrap">
-        <OwnerAvatar name={ownerName} size="lg" />
-        <div>
-          <div className="text-[24px] font-extrabold text-s-text">{ownerName}</div>
-          <div className="text-[12px] text-s-text3">
-            {seasons.length} seasons · {totalW}W-{totalL}L · {pct}% win rate
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-center gap-5 sm:gap-6">
+            <div
+              className="flex h-[76px] w-[76px] flex-shrink-0 items-center justify-center rounded-full font-display text-[28px] font-extrabold text-white"
+              style={{
+                background: ownerColor(ownerName),
+                boxShadow: '0 0 0 2px #050506, 0 0 0 3.5px #C9962E, 0 0 24px rgba(201,150,46,0.35)',
+              }}
+            >
+              {fullNameInitials(ownerName)}
+            </div>
+            <div>
+              <div className="mb-2 flex items-center gap-3.5">
+                <span className="h-px w-8" style={{ background: 'linear-gradient(to right, transparent, #C9962E)' }} />
+                <span className="text-[9px] font-bold uppercase tracking-[5px] text-gold-soft">Manager Profile</span>
+              </div>
+              <h1 className="text-hero-gold font-display text-[44px] font-extrabold uppercase leading-[0.95] tracking-[1px] sm:text-[64px] sm:tracking-[2px]">
+                {ownerName}
+              </h1>
+              <div className="mt-2.5 text-[11px] font-medium uppercase tracking-[1.5px] text-s-text2">
+                {seasons.length} Seasons · {totalW}W–{totalL}L · {pct}% Win Rate
+              </div>
+            </div>
+          </div>
+
+          {/* Badge chips */}
+          <div className="flex flex-wrap gap-2.5 sm:justify-end">
+            {champs.map(c => (
+              <span key={c.year} className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px] text-gold-soft" style={{ borderColor: 'rgba(var(--gold-rgb), 0.35)' }}>
+                {c.year}{c.half ? ' ½' : ''} Champ
+              </span>
+            ))}
+            {shame.map(s => (
+              <span key={s.year} className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px] text-loss" style={{ borderColor: 'rgba(180,90,90,0.35)' }}>
+                {s.year} Shame
+              </span>
+            ))}
+            {earn && (
+              <span className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px]" style={{ color: earn.total >= 0 ? '#7FA886' : '#B4636B', borderColor: earn.total >= 0 ? 'rgba(127,168,134,0.35)' : 'rgba(180,90,90,0.35)' }}>
+                {earn.total >= 0 ? '+' : '−'}${Math.abs(earn.total)} Net
+              </span>
+            )}
           </div>
         </div>
-        {/* Badges */}
-        <div className="flex gap-2 flex-wrap ml-auto">
-          {champs.map(c => (
-            <span key={c.year} className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d2000] text-s-gold border border-[#5a3200]">
-              🏆 {c.year}{c.half ? ' (½)' : ''} Champ
-            </span>
-          ))}
-          {shame.map(s => (
-            <span key={s.year} className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d0000] text-s-red border border-[#5a0000]">
-              🚽 {s.year} Shame
-            </span>
-          ))}
-          {earn && (
-            <span className={`inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold border ${earn.total >= 0 ? 'bg-[#002d10] text-s-green border-[#004d1a]' : 'bg-[#3d0000] text-s-red border-[#5a0000]'}`}>
-              {earn.total >= 0 ? '+' : ''}${earn.total} net
-            </span>
-          )}
-        </div>
       </div>
 
-      {/* Row 1 — Core Performance */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-[10px] mb-[10px]">
-        <StatBox label="Career Record" value={`${totalW}-${totalL}`} sub={`${pct}% win rate`} />
-        <StatBox label="Avg PF/Game" value={(seasons.reduce((a,s)=>a+s.pf,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPF.toFixed(0)} pts/season`} />
-        <StatBox label="Avg PA/Game" value={(seasons.reduce((a,s)=>a+s.pa,0)/Math.max(1,seasons.reduce((a,s)=>a+s.wins+s.losses,0))).toFixed(1)} sub={`${avgPA.toFixed(0)} pts allowed/season`} valueColor="#f87171" />
-        <StatBox
-          label="Net Earnings"
-          value={earn ? `${earn.total >= 0 ? '+' : ''}$${earn.total}` : 'N/A'}
-          valueColor={earn ? (earn.total >= 0 ? '#22c55e' : '#ef4444') : undefined}
-        />
+      {/* ── Stat grid — 12 hairline cells (4-col desktop / 2-col mobile) ─── */}
+      <div className="-mx-4 grid grid-cols-2 sm:grid-cols-4">
+        {statCells.map((c, i) => (
+          <div
+            key={i}
+            className="flex flex-col gap-1.5 border-b border-r px-5 py-[22px] transition-colors hover:bg-[rgba(201,150,46,0.04)] sm:px-8"
+            style={{ borderColor: 'rgba(var(--gold-rgb), 0.08)' }}
+          >
+            <div className="text-[9px] font-bold uppercase tracking-[3px] text-s-text3">{c.label}</div>
+            <div className="font-display text-[28px] font-bold leading-none sm:text-[34px]" style={{ color: c.color ?? '#EDE9E0' }}>
+              {c.value}
+            </div>
+            {c.sub && <div className="truncate text-[10px] font-semibold uppercase tracking-[1px] text-gold-soft">{c.sub}</div>}
+          </div>
+        ))}
       </div>
 
-      {/* Row 2 — Season & Playoffs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-[10px] mb-[10px]">
-        <StatBox
-          label="Finals Record"
-          value={playoffStats.finalsW + playoffStats.finalsL > 0 ? `${playoffStats.finalsW}-${playoffStats.finalsL}` : '—'}
-          sub={playoffStats.finalsW + playoffStats.finalsL > 0 ? `${playoffStats.finalsW + playoffStats.finalsL} Finals appearance${playoffStats.finalsW + playoffStats.finalsL !== 1 ? 's' : ''}` : 'Never reached Finals'}
-          valueColor={playoffStats.finalsW > 0 ? '#f59e0b' : undefined}
-        />
-        <StatBox
-          label="Playoff Byes"
-          value={playoffStats.byes > 0 ? String(playoffStats.byes) : '—'}
-          sub={playoffStats.byes > 0 ? `career first-round bye${playoffStats.byes !== 1 ? 's' : ''}` : 'No byes earned'}
-          valueColor={playoffStats.byes > 0 ? '#a78bfa' : undefined}
-        />
-        <StatBox label="Best Season"   value={String(best.year)}  sub={`${best.wins}-${best.losses} record`}  valueColor="#22c55e" />
-        <StatBox label="Worst Season"  value={String(worst.year)} sub={`${worst.wins}-${worst.losses} record`} valueColor="#ef4444" />
-      </div>
-
-      {/* Row 3 — Fun Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-[10px] mb-5">
-        <StatBox
-          label="Top Rival"
-          value={funStats.topRivalName ?? '—'}
-          sub={funStats.topRivalName ? `beat me ${funStats.rivalL}x · ${funStats.rivalW}-${funStats.rivalL}` : undefined}
-        />
-        <StatBox
-          label="Best Game"
-          value={funStats.bestGame ? fmtPts(funStats.bestGame.pts) : '—'}
-          sub={funStats.bestGame ? `${funStats.bestGame.year} W${funStats.bestGame.week} vs ${funStats.bestGame.opp}` : undefined}
-          valueColor="#22c55e"
-        />
-        <StatBox
-          label="Worst Game"
-          value={funStats.worstGame ? fmtPts(funStats.worstGame.pts) : '—'}
-          sub={funStats.worstGame ? `${funStats.worstGame.year} W${funStats.worstGame.week} vs ${funStats.worstGame.opp}` : undefined}
-          valueColor="#ef4444"
-        />
-        <StatBox
-          label="Longest Win Streak"
-          value={funStats.maxStreak > 0 ? `${funStats.maxStreak}W` : '—'}
-          sub={funStats.maxStreak > 0 && funStats.streakStart && funStats.streakEnd
-            ? `${funStats.streakStart.year} W${funStats.streakStart.week}–W${funStats.streakEnd.week}`
-            : undefined}
-          valueColor="#f59e0b"
-        />
-      </div>
-
-      {/* Top Scorers */}
+      {/* ── Top scorers band ─────────────────────────────────────────── */}
       {funStats.topScorers.length > 0 && (
-        <div className="gl p-[14px] mb-5">
-          <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-[10px]">Top Scorers</div>
+        <div className="-mx-4 flex flex-wrap items-center gap-4 border-b bg-panel-2 px-4 py-[18px] sm:px-8" style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}>
+          <div className="flex flex-shrink-0 items-center gap-2.5">
+            <span className="h-px w-4 bg-gold" />
+            <span className="text-[10px] font-bold uppercase tracking-[3px] text-gold-soft">Top Scorers</span>
+          </div>
           <div className="flex flex-wrap gap-2">
             {funStats.topScorers.map(p => (
               <span
                 key={p.name}
-                className="inline-flex items-center gap-[6px] px-3 py-[5px] rounded-full text-[11px] font-semibold bg-s-bg3 border border-s-border text-s-text2"
+                className="inline-flex items-center gap-2 border px-3.5 py-1.5 text-[11px]"
+                style={{ borderColor: 'rgba(var(--gold-rgb), 0.16)', background: '#0B0B0D' }}
               >
-                <span className="text-s-text">{p.name}</span>
-                <span className="text-s-text3">·</span>
+                <span className="font-bold text-s-text">{p.name}</span>
                 <span className="text-s-text3">{p.pos}</span>
-                <span className="text-s-text3">·</span>
-                <span className="text-s-gold font-bold">{p.pts.toFixed(1)} pts</span>
+                <span className="font-display text-[14px] font-bold text-gold-soft">{p.pts.toFixed(1)}</span>
               </span>
             ))}
           </div>
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex border-b border-s-border mb-4 overflow-x-auto scrollbar-none">
+      {/* ── Tabs (underline) ─────────────────────────────────────────── */}
+      <div className="-mx-4 mb-6 flex overflow-x-auto border-b bg-panel-2 px-4 scrollbar-none sm:px-8" style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}>
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={[
-              'px-4 py-[9px] text-[11px] font-bold tracking-[1px] uppercase border-b-2 -mb-[1px] whitespace-nowrap transition-colors duration-150 bg-transparent border-0',
-              tab === t.id
-                ? 'text-s-gold border-b-2 border-s-gold'
-                : 'text-slate-400 border-transparent hover:text-white',
+              '-mb-px whitespace-nowrap border-b-2 px-3.5 py-3.5 text-[10px] font-bold uppercase tracking-[2px] transition-colors duration-150',
+              tab === t.id ? 'border-gold text-s-text' : 'border-transparent text-s-text3 hover:text-gold-soft',
             ].join(' ')}
-            style={{ borderBottomWidth: 2, borderBottomColor: tab === t.id ? '#f59e0b' : 'transparent' }}
           >
             {t.label}
           </button>
@@ -365,20 +368,20 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 const spct = (s.wins / (s.wins + s.losses || 1) * 100).toFixed(1)
                 return (
                   <tr key={s.year}>
-                    <td><span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text2 border border-s-border num">{s.year}</span></td>
+                    <td className="font-display text-[17px] font-bold text-s-text2">{s.year}</td>
                     <td><FinishBadge finish={s.finish} /></td>
-                    <td className="text-s-green font-bold num">{s.wins}</td>
-                    <td className="text-s-red num">{s.losses}</td>
+                    <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{s.wins}</td>
+                    <td className="font-display text-[17px] font-bold" style={{ color: '#B4636B' }}>{s.losses}</td>
                     <td><WinPctBadge pct={spct} /></td>
-                    <td className="text-s-text2 num">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
-                    <td className="text-[#f87171] num">{s.wins + s.losses > 0 ? (s.pa / (s.wins + s.losses)).toFixed(1) : '—'}</td>
-                    <td className={`num ${margin >= 0 ? 'text-s-green' : 'text-s-red'}`}>
+                    <td className="text-right font-display text-[17px] font-semibold text-s-text2 num">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
+                    <td className="text-right font-display text-[17px] font-semibold num" style={{ color: '#B4636B' }}>{s.wins + s.losses > 0 ? (s.pa / (s.wins + s.losses)).toFixed(1) : '—'}</td>
+                    <td className="text-right font-display text-[17px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#B4636B' }}>
                       {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
                     </td>
-                    <td>
+                    <td className="text-right">
                       {s.inPlayoffs
-                        ? <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#052e16] text-s-green border border-[#166534]" style={{ boxShadow: '0 0 8px #22c55e30' }}>● Clinched</span>
-                        : <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#450a0a] text-s-red border border-[#7f1d1d]">✕ Elim.</span>}
+                        ? <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#7FA886', background: 'rgba(127,168,134,0.12)' }}>● Clinched</span>
+                        : <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}>✕ Elim.</span>}
                     </td>
                   </tr>
                 )
@@ -395,7 +398,10 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
       {/* Game Log */}
       {tab === 'gamelog' && (
-        <div className="max-h-[500px] overflow-y-auto gl rounded-[12px]">
+        <div
+          className="max-h-[500px] overflow-y-auto rounded-[6px]"
+          style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
+        >
           {nonConsolationGames.map(g => {
             const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
             const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
@@ -405,25 +411,28 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
             return (
               <div
                 key={`${g.year}-${g.week}-${g.team1}`}
-                className="flex items-center gap-[6px] px-3 py-[9px] border-b border-s-bg3 text-[12px] hover:bg-white/5 transition-colors duration-100"
+                className="flex items-center gap-2 border-b px-4 py-2.5 text-[12px] transition-colors last:border-b-0 hover:bg-[rgba(201,150,46,0.05)]"
+                style={{ borderColor: 'rgba(255,255,255,0.04)' }}
               >
-                <span className="w-[60px] text-s-text2 text-[10px] flex-shrink-0 num">{g.year} W{g.week}</span>
-                <span className="font-bold w-[72px] flex-shrink-0 overflow-hidden text-ellipsis text-s-text">
-                  {ownerName}
-                </span>
-                <span className="w-[50px] flex-shrink-0 num">{fmtPts(myPts)}</span>
-                <span className="text-s-text3 text-[10px] flex-shrink-0">vs</span>
-                <span className="font-bold w-[72px] flex-shrink-0 overflow-hidden text-ellipsis text-s-text2">
-                  {opp}
-                </span>
-                <span className="w-[50px] flex-shrink-0 num">{fmtPts(oppPts)}</span>
-                <span className={`px-[6px] py-[1px] rounded-[4px] text-[10px] font-extrabold flex-shrink-0 ${won ? 'bg-[#052e16] text-s-green' : 'bg-[#450a0a] text-s-red'}`}>
+                <span className="w-[54px] flex-shrink-0 text-[10px] uppercase tracking-[0.5px] text-s-text3">{g.year} W{g.week}</span>
+                <span className="w-[70px] flex-shrink-0 truncate font-bold text-s-text">{ownerName}</span>
+                <span className="w-[52px] flex-shrink-0 font-display text-[16px] font-bold text-gold-bright">{fmtPts(myPts)}</span>
+                <span className="flex-shrink-0 text-[10px] text-s-text3">vs</span>
+                <span className="w-[70px] flex-shrink-0 truncate font-bold text-s-text2">{opp}</span>
+                <span className="w-[52px] flex-shrink-0 font-display text-[16px] font-semibold text-s-text3">{fmtPts(oppPts)}</span>
+                <span
+                  className="flex-shrink-0 rounded-[2px] px-[6px] py-[1px] text-[10px] font-extrabold"
+                  style={won ? { color: '#7FA886', background: 'rgba(127,168,134,0.12)' } : { color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}
+                >
                   {won ? 'W' : 'L'}
                 </span>
-                <span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text3 border border-s-border flex-shrink-0">
+                <span
+                  className="flex-shrink-0 rounded-[2px] border px-2 py-[1px] text-[9px] font-bold uppercase tracking-[1px] text-s-text3"
+                  style={{ borderColor: 'rgba(var(--gold-rgb), 0.14)' }}
+                >
                   {g.type === 'R' ? 'REG' : 'PLY'}
                 </span>
-                <span className={`text-[11px] ml-auto flex-shrink-0 num ${margin >= 0 ? 'text-s-green' : 'text-s-red'}`}>
+                <span className="ml-auto flex-shrink-0 font-display text-[16px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#B4636B' }}>
                   {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
                 </span>
               </div>

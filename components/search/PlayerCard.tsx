@@ -16,7 +16,7 @@ export default function PlayerCard({
   onClose: () => void
 }) {
   const posColor = POS_COLORS[stat.position] ?? '#6e7681'
-  const winRateColor = stat.winRate >= 0.60 ? '#00ceb8' : stat.winRate >= 0.45 ? '#8b949e' : '#ff395c'
+  const winRateColor = stat.winRate >= 0.60 ? '#E8CE8A' : stat.winRate >= 0.45 ? '#9AA0AC' : '#B4636B'
 
   const byOwner = useMemo(() => {
     if (!ownership) return null

@@ -2,13 +2,14 @@ import { OWNER_FULL_NAMES } from '@/lib/constants'
 
 interface HeroProps {
   champName: string
-  champColor: string
   runnerUpName: string
-  runnerUpColor: string
   shameName: string
-  shameColor: string
-  totalSeasons: number
+  /** Season number, e.g. 7 → "Season 7 Champion". */
+  seasonCount: number
+  /** Latest completed season year, e.g. 2025 → kicker date + ghost "25" numeral. */
+  latestYear: number | null
   totalGames: number
+  managerCount: number
   yearRange: string
 }
 
@@ -16,151 +17,133 @@ function fullName(name: string): string {
   return OWNER_FULL_NAMES[name] || name
 }
 
+/**
+ * Midnight Prime home hero (design artboards 2a / 2b): gold radial wash, ghost-year
+ * numeral, kicker + hero-gradient champion name, rule-diamond divider, meta row, and a
+ * bordered Runner-Up / Toilet-Bowl panel (desktop) that collapses to a 2-col band on mobile.
+ */
 export default function HeroSection({
   champName,
-  champColor,
   runnerUpName,
-  runnerUpColor,
   shameName,
-  shameColor,
-  totalSeasons,
+  seasonCount,
+  latestYear,
   totalGames,
+  managerCount,
   yearRange,
 }: HeroProps) {
-  return (
-    <div
-      className="gl relative overflow-hidden rounded-[20px] border-white/10 p-7 md:p-10 animate-fade-in"
-    >
-      {/* Champion color orb — top-right */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: '-50%',
-          right: '-8%',
-          width: '55%',
-          paddingBottom: '55%',
-          borderRadius: '50%',
-          background: `radial-gradient(ellipse, ${champColor}22 0%, transparent 70%)`,
-        }}
-      />
-      {/* Violet nebula orb — bottom-left */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          bottom: '-40%',
-          left: '-4%',
-          width: '40%',
-          paddingBottom: '40%',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(139,92,246,0.14) 0%, transparent 70%)',
-        }}
-      />
-      {/* Blue orb — top-left subtle */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: '-20%',
-          left: '20%',
-          width: '30%',
-          paddingBottom: '30%',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%)',
-        }}
-      />
+  const ghost = latestYear ? String(latestYear).slice(-2) : ''
 
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-        {/* Left — headline */}
-        <div className="max-w-xl">
-          <div className="text-[10px] font-bold tracking-[4px] uppercase mb-4 flex items-center gap-2"
+  return (
+    <>
+      {/* ── HERO ─────────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden border-b px-5 py-9 sm:px-14 sm:pt-16 sm:pb-14"
+        style={{
+          borderColor: 'rgba(var(--gold-rgb), 0.12)',
+          background:
+            'radial-gradient(ellipse 90% 90% at 50% -20%, rgba(var(--gold2-rgb), 0.10) 0%, transparent 60%), #050506',
+        }}
+      >
+        {/* Ghost year numeral */}
+        {ghost && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute select-none font-display font-extrabold leading-none"
             style={{
-              background: 'linear-gradient(135deg, #8B5CF6, #3B82F6)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              top: -28,
+              right: 'clamp(-12px, 12vw, 260px)',
+              fontSize: 'clamp(150px, 26vw, 300px)',
+              letterSpacing: 4,
+              color: 'rgba(var(--gold2-rgb), 0.045)',
             }}
           >
-            <span className="w-4 h-px bg-gradient-to-r from-violet-500 to-blue-500 inline-block" />
-            The Convicts League · {totalSeasons} Seasons · {yearRange}
+            {ghost}
           </div>
+        )}
 
-          <h1 className="text-[32px] md:text-[38px] lg:text-[44px] font-black text-s-text leading-[1.1] mb-4 tracking-tight">
-            <span className="block text-slate-500 font-semibold text-[13px] md:text-[15px] tracking-[3px] uppercase mb-2">
-              Reigning Champion
-            </span>
-            <span
-              className="relative inline-block champ-glow"
-              style={{
-                color: champColor,
-                '--champ-color': `${champColor}55`,
-              } as React.CSSProperties}
+        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+          {/* Left — champion headline */}
+          <div className="animate-fade-in">
+            {/* Kicker */}
+            <div className="mb-4 flex items-center gap-3 sm:mb-[22px] sm:gap-4">
+              <span
+                className="h-px w-8 sm:w-12"
+                style={{ background: 'linear-gradient(to right, transparent, #C9962E)' }}
+              />
+              <span className="text-[9px] font-bold uppercase tracking-[4px] text-gold-soft sm:text-[10px] sm:tracking-[6px]">
+                Season {seasonCount} Champion{latestYear ? ` · ${latestYear}` : ''}
+              </span>
+            </div>
+
+            {/* Champion name */}
+            <h1
+              className="text-hero-gold animate-gold-pulse font-display font-extrabold uppercase leading-[0.92] tracking-[1px] text-[56px] sm:text-[80px] lg:text-[100px] sm:tracking-[2px]"
             >
               {fullName(champName)}
-            </span>
-          </h1>
+            </h1>
 
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-500 font-medium">
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-              {totalGames} matchups
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              12 managers
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-s-gold" />
-              Live from Sleeper API
-            </span>
-          </div>
-        </div>
+            {/* Rule-diamond divider */}
+            <div className="mt-4 flex items-center gap-2.5 sm:mt-[22px] sm:gap-3.5">
+              <span className="h-px w-9 bg-gold sm:w-16" />
+              <span className="h-[5px] w-[5px] rotate-45 bg-gold" />
+              <span className="h-px w-9 bg-gold sm:w-16" />
+            </div>
 
-        {/* Right — Runner-Up + Toilet Bowl */}
-        <div className="flex-shrink-0 flex flex-row lg:flex-col gap-3 lg:min-w-[200px]">
-          {/* Runner-Up */}
-          <div
-            className="gl relative flex-1 lg:flex-none rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-white/20 overflow-hidden"
-          >
-            <div className="absolute inset-0 pointer-events-none rounded-[14px]"
-              style={{ background: 'linear-gradient(135deg, rgba(226,232,240,0.07) 0%, transparent 60%)' }} />
-            <div className="relative flex items-center gap-3">
-              <span className="text-[26px] leading-none flex-shrink-0">🥈</span>
-              <div className="min-w-0">
-                <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-600 mb-0.5">
-                  Runner-Up
-                </div>
-                <div
-                  className="text-[17px] font-black leading-tight truncate"
-                  style={{ color: runnerUpColor !== '#64748b' ? runnerUpColor : '#e2e8f0' }}
-                >
-                  {runnerUpName}
-                </div>
-              </div>
+            {/* Meta row */}
+            <div className="mt-3.5 flex flex-wrap items-center gap-x-3.5 gap-y-2 text-[9px] font-semibold uppercase tracking-[1.5px] text-s-text2 sm:mt-5 sm:gap-x-5 sm:text-[11px]">
+              <span>{totalGames} Matchups</span>
+              <span className="h-[3px] w-[3px] rounded-full bg-gold" />
+              <span>{managerCount} Managers</span>
+              <span className="h-[3px] w-[3px] rounded-full bg-gold" />
+              <span>{yearRange}</span>
             </div>
           </div>
 
-          {/* Toilet Bowl */}
+          {/* Right — Runner-Up / Toilet Bowl panel (desktop) */}
           <div
-            className="gl relative flex-1 lg:flex-none rounded-[14px] border-white/10 p-4 transition-all duration-150 hover:border-red-500/20 overflow-hidden"
+            className="hidden flex-shrink-0 flex-col animate-fade-in-1 lg:flex lg:min-w-[264px]"
+            style={{ border: '1px solid rgba(var(--gold-rgb), 0.14)', background: 'rgba(10,10,12,0.7)' }}
           >
-            <div className="absolute inset-0 pointer-events-none rounded-[14px]"
-              style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.09) 0%, transparent 60%)' }} />
-            <div className="relative flex items-center gap-3">
-              <span className="text-[26px] leading-none flex-shrink-0">🚽</span>
-              <div className="min-w-0">
-                <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-600 mb-0.5">
-                  Toilet Bowl Loser
-                </div>
-                <div
-                  className="text-[17px] font-black leading-tight truncate"
-                  style={{ color: shameColor !== '#64748b' ? shameColor : '#e2e8f0' }}
-                >
-                  {shameName}
-                </div>
+            <div
+              className="border-b px-[22px] py-4 transition-colors hover:bg-[rgba(201,150,46,0.05)]"
+              style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}
+            >
+              <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[3px] text-gold-dim">
+                Runner-Up
+              </div>
+              <div className="font-display text-[27px] font-bold uppercase leading-none tracking-[1px] text-[#D8D3C8]">
+                {runnerUpName}
+              </div>
+            </div>
+            <div className="px-[22px] py-4 transition-colors hover:bg-[rgba(180,90,90,0.05)]">
+              <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[3px] text-[#8A4A46]">
+                Toilet Bowl Loser
+              </div>
+              <div className="font-display text-[27px] font-bold uppercase leading-none tracking-[1px] text-loss">
+                {shameName}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Runner-Up / Toilet Bowl — mobile 2-col band */}
+      <div
+        className="grid grid-cols-2 border-b lg:hidden"
+        style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}
+      >
+        <div className="border-r px-[18px] py-3.5" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[2.5px] text-gold-dim">Runner-Up</div>
+          <div className="font-display text-[22px] font-bold uppercase leading-none text-[#D8D3C8]">
+            {runnerUpName}
+          </div>
+        </div>
+        <div className="px-[18px] py-3.5">
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[2.5px] text-[#8A4A46]">Toilet Bowl</div>
+          <div className="font-display text-[22px] font-bold uppercase leading-none text-loss">{shameName}</div>
+        </div>
+      </div>
+    </>
   )
 }

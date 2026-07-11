@@ -13,7 +13,7 @@ export default function ManagerCard({ data, playerWinRates = [], onClose }: { da
   const { state } = useLeague()
   const [imgError, setImgError] = useState(false)
   const color = ownerColor(data.name)
-  const winpctColor = data.winpct >= 0.55 ? '#00ceb8' : data.winpct >= 0.45 ? '#8b949e' : '#ff395c'
+  const winpctColor = data.winpct >= 0.55 ? '#E8CE8A' : data.winpct >= 0.45 ? '#9AA0AC' : '#B4636B'
   const avatarUrl = state.ownerAvatarMap?.[data.name]
   const initials = fullNameInitials(data.name)
   const fullDisplayName = OWNER_FULL_NAMES[data.name] || data.name
@@ -131,7 +131,7 @@ export default function ManagerCard({ data, playerWinRates = [], onClose }: { da
             ].join(' ')}
           >
             <div className="text-[9px] tracking-[2px] uppercase text-s-text3 mb-1">{s.label}</div>
-            <div className="text-[17px] font-bold" style={{ color: s.color ?? '#e6edf3' }}>
+            <div className="text-[17px] font-bold" style={{ color: s.color ?? '#EDE9E0' }}>
               {s.value}
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function ManagerCard({ data, playerWinRates = [], onClose }: { da
       <div className="px-5 pb-5 pt-3">
         <button
           onClick={() => router.push(`/owners/${encodeURIComponent(data.name)}`)}
-          className="text-[11px] font-bold text-s-teal hover:opacity-70 transition-opacity flex items-center gap-1"
+          className="text-[11px] font-bold text-gold hover:opacity-70 transition-opacity flex items-center gap-1"
         >
           View Full Profile →
         </button>

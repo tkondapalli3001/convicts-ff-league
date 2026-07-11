@@ -10,45 +10,48 @@ export default function WallOfShameCard({ years }: { years: number[] }) {
   const sortedYears = [...years].sort((a, b) => b - a)
 
   return (
-    <div className="bento-card relative flex-1">
-      <div className="absolute pointer-events-none inset-0"
-        style={{ background: 'linear-gradient(135deg, rgba(127,29,29,0.20) 0%, transparent 55%)' }} />
-      <div className="absolute pointer-events-none"
-        style={{ top: -36, right: -36, width: 130, height: 130, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(239,68,68,0.16) 0%, transparent 70%)' }} />
-      <div className="px-5 pt-5 pb-3 border-b border-[#5a0000]/40">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-[#7a1010]">
-          🚽 Wall of Shame
-        </div>
+    <div
+      className="flex-1 overflow-hidden rounded-[6px]"
+      style={{ background: '#0B0B0D', border: '1px solid rgba(180,90,90,0.16)' }}
+    >
+      {/* Section header — brick dash + brick heading (slightly larger than HOF) */}
+      <div
+        className="flex items-center gap-2.5 border-b px-6 pb-3 pt-[18px]"
+        style={{ borderColor: 'rgba(180,90,90,0.20)' }}
+      >
+        <span className="h-px w-5" style={{ background: '#8A4A46' }} />
+        <div className="text-[13px] font-bold uppercase tracking-[4px] text-loss">Wall of Shame</div>
       </div>
-      <div className="p-2">
+
+      <div className="py-1.5">
         {sortedYears.map(year => {
           const s = getShameLoser(year, state)
           const shameClr = ownerColor(s.loser)
+          const seed = (s as { seed?: number | null }).seed
           return (
-            <div
+            <button
               key={year}
-              className="flex items-center justify-between px-3 py-2.5 rounded-[10px] hover:bg-[#220000]/60 transition-colors cursor-default"
+              onClick={() => router.push(`/owners/${encodeURIComponent(s.loser)}`)}
+              className="flex w-full items-center gap-3.5 px-6 py-2.5 text-left transition-colors hover:bg-[rgba(180,90,90,0.05)]"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-[11px] font-bold text-[#5a1010] w-9">{year}</span>
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black text-white"
-                  style={{ background: shameClr, boxShadow: `0 0 8px ${shameClr}44` }}
-                >
-                  {avatarLetters(s.loser)}
-                </div>
-                <span
-                  className="text-[13px] font-extrabold text-s-red hover:underline cursor-pointer"
-                  onClick={() => router.push(`/owners/${encodeURIComponent(s.loser)}`)}
-                >{s.loser}</span>
+              <span className="w-9 flex-shrink-0 text-[10px] font-bold tracking-[1px]" style={{ color: '#8A4A46' }}>
+                {year}
+              </span>
+              <div
+                className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold text-white"
+                style={{ background: shameClr, opacity: 0.75 }}
+              >
+                {avatarLetters(s.loser)}
               </div>
-              {(s as { seed?: number | null }).seed != null && (
-                <span className="text-[10px] text-[#5a1010] font-bold">
-                  Seed #{(s as { seed?: number | null }).seed}
+              <span className="min-w-0 flex-1 truncate font-display text-[19px] font-bold uppercase leading-none tracking-[0.5px] text-loss">
+                {s.loser}
+              </span>
+              {seed != null && (
+                <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#8A4A46' }}>
+                  Seed #{seed}
                 </span>
               )}
-            </div>
+            </button>
           )
         })}
       </div>

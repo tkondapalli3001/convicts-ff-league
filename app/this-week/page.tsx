@@ -7,11 +7,13 @@ import { usePreviewData } from '@/hooks/usePreviewData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PageHeader from '@/components/shared/PageHeader'
-import MatchupPreviewCard from '@/components/preview/MatchupPreviewCard'
+import MatchupRow from '@/components/preview/MatchupRow'
+import MatchupModal from '@/components/preview/MatchupModal'
 
 export default function ThisWeekPage() {
   const { state } = useLeague()
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
+  const [openIdx, setOpenIdx] = useState<number | null>(null)
   const { season, weeks, week, previews, projectionsLoading } = usePreviewData(selectedWeek)
 
   if (state.error) return <ErrorState error={state.error} />
@@ -24,6 +26,7 @@ export default function ThisWeekPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
+        kicker="The Week Ahead"
         title="This Week"
         subtitle={`Matchup previews, head-to-head history, and group-chat ammo · ${season} season`}
       />
@@ -61,15 +64,30 @@ export default function ThisWeekPage() {
       )}
 
       {previews.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {previews.map(p => (
-            <MatchupPreviewCard key={`${p.teamA.name}-${p.teamB.name}`} p={p} />
-          ))}
-        </div>
+        <>
+          <div
+            className="overflow-hidden rounded-[6px]"
+            style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
+          >
+            {previews.map((p, i) => (
+              <MatchupRow key={`${p.teamA.name}-${p.teamB.name}`} p={p} onClick={() => setOpenIdx(i)} />
+            ))}
+          </div>
+          <p className="mt-3 text-center text-[10px] uppercase tracking-[1px] text-s-text3">
+            Tap a matchup for head-to-head history &amp; group-chat ammo
+          </p>
+        </>
       ) : (
-        <div className="bento-card px-4 py-8 text-center text-[13px] text-s-text3">
+        <div
+          className="rounded-[6px] px-4 py-8 text-center text-[13px] text-s-text3"
+          style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
+        >
           No matchups for week {week}
         </div>
+      )}
+
+      {openIdx != null && previews[openIdx] && (
+        <MatchupModal p={previews[openIdx]} onClose={() => setOpenIdx(null)} />
       )}
     </div>
   )

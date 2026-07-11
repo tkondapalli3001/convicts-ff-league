@@ -58,6 +58,7 @@ export default function DraftPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
+        kicker="The Draft Room"
         title="Draft Hub"
         subtitle="Draft history, 2026 pick order standings, slot vs outcome analysis, and historical steals & busts"
       />

@@ -159,7 +159,7 @@ export default function SearchOverlay({ onClose }: Props) {
     >
       <div className="w-full max-w-[640px]">
         {/* ── Input ─────────────────────────────────────────────── */}
-        <div className="flex items-center gap-3 bento-card px-4 py-3.5 border-s-teal/40">
+        <div className="flex items-center gap-3 bento-card px-4 py-3.5 border-gold/40">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="flex-shrink-0" style={{ color: '#6e7681' }}>
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.2" />
             <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
@@ -176,7 +176,7 @@ export default function SearchOverlay({ onClose }: Props) {
           />
           {playersLoading && (
             <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] text-s-text3">
-              <div className="w-3 h-3 border border-s-border2 border-t-s-teal rounded-full animate-spin" />
+              <div className="w-3 h-3 border border-s-border2 border-t-gold rounded-full animate-spin" />
               <span className="hidden sm:block">Players…</span>
             </div>
           )}
@@ -210,7 +210,7 @@ export default function SearchOverlay({ onClose }: Props) {
                   <button
                     key={chip}
                     onClick={() => runChip(chip)}
-                    className="px-3 py-[6px] rounded-full border border-white/10 bg-white/5 text-[12px] font-semibold text-slate-300 hover:text-white hover:border-s-teal/50 transition-all"
+                    className="px-3 py-[6px] rounded-full border border-white/10 bg-white/5 text-[12px] font-semibold text-s-text2 hover:text-white hover:border-gold/50 transition-all"
                   >
                     {chip}
                   </button>
@@ -289,7 +289,7 @@ export default function SearchOverlay({ onClose }: Props) {
                           </div>
                         </div>
                         <div className="text-[12px] font-bold flex-shrink-0"
-                          style={{ color: stat.winRate >= 0.6 ? '#00ceb8' : stat.winRate >= 0.45 ? '#8b949e' : '#ff395c' }}>
+                          style={{ color: stat.winRate >= 0.6 ? '#E8CE8A' : stat.winRate >= 0.45 ? '#9AA0AC' : '#B4636B' }}>
                           {(stat.winRate * 100).toFixed(0)}%
                         </div>
                       </button>
@@ -303,7 +303,7 @@ export default function SearchOverlay({ onClose }: Props) {
           {/* Loading players notice while typing a player name */}
           {showFallback && flatResults.length === 0 && playersLoading && (
             <div className="bento-card flex items-center gap-3 px-4 py-5 text-[12px] text-s-text3">
-              <div className="w-4 h-4 border border-s-border2 border-t-s-teal rounded-full animate-spin flex-shrink-0" />
+              <div className="w-4 h-4 border border-s-border2 border-t-gold rounded-full animate-spin flex-shrink-0" />
               Loading player database…
             </div>
           )}

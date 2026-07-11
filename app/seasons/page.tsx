@@ -33,7 +33,7 @@ export default function SeasonsPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Seasons" subtitle="Year-by-year standings and scoring trends" />
+      <PageHeader kicker="The Season Archive" title="Seasons" subtitle="Year-by-year standings and scoring trends" />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 

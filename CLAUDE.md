@@ -3,9 +3,9 @@
 # CLAUDE.md — Convicts FF League
 
 ## Project Essence
-A data-heavy archive and live-season companion for a 7-season Sleeper Fantasy Football league. Goal: a professional sports analytics platform in the style of Statmuse × Sleeper — dark mode, high-density tables, hero typography. Source of truth for league history, plus weekly matchup previews during the season.
+A data-heavy archive and live-season companion for a 7-season Sleeper Fantasy Football league. Goal: a professional sports-analytics archive with a **Midnight Prime** "trophy-room luxury" look — cinematic onyx backgrounds, metallic-gold hairlines, condensed uppercase display numerals, high-density tables, editorial restraint. Source of truth for league history, plus weekly matchup previews during the season.
 
-**Never remove features or change the visual theme unless explicitly directed.** See `DESIGN.md` for the design system and architecture reference.
+**Never remove features or change the visual theme unless explicitly directed.** See `DESIGN.md` for the full Midnight Prime design system and architecture reference.
 
 ---
 
@@ -15,7 +15,7 @@ A data-heavy archive and live-season companion for a 7-season Sleeper Fantasy Fo
 |---|---|
 | Framework | Next.js 16 — App Router, static export (`output: 'export'`) |
 | Language | TypeScript (strict) |
-| Styling | Tailwind CSS — custom `s-` dark palette (see `tailwind.config.ts`) |
+| Styling | Tailwind CSS — Midnight Prime onyx/gold palette: `gold*` + legacy `s-` tokens (see `tailwind.config.ts`) |
 | State | React Context (`LeagueContext`) — all data loaded once on mount |
 | Data | Static season snapshots (`public/data/`) + Sleeper API for the live season — client-side, no backend |
 | Charts | Recharts |
@@ -44,18 +44,21 @@ app/                        Next.js App Router pages (thin render shells only)
 components/                 Feature-organized UI components
   gamelog/                  GameLogFilters, GameLogTable, GameDetailModal
   home/                     HeroSection, SeasonStandings, PlayoffBracket, career cards
-  layout/                   Navbar, MobileMenu (hamburger drawer), nav-items.ts (shared links)
+  layout/                   Navbar, MobileMenu (hamburger drawer), Brand (monogram +
+                            wordmark), SearchStrip (home search bar), Footer, nav-items.ts
   search/                   GlobalSearch (⌘K trigger), SearchOverlay, AnswerCard,
                             ManagerCard, PlayerCard
-  preview/                  MatchupPreviewCard (This Week tab)
+  preview/                  MatchupRow + MatchupModal (This Week tab — clickable rows → H2H popup)
   owners/                   OwnerDetail, CareerLeaderboard, H2HGrid, H2HModal
   records/                  ScoreLeaderboard, StreakList, FunFacts, RivalryCalc
   players/                  PlayerWinRateTable, PlayerScoringTable, PlayerCardModal, etc.
   draft/                    Draft boards and tables
   transactions/             TransactionTable, TransactionFilters, TransactionDetailModal
   seasons/                  Season cards and charts
-  shared/                   Reusable primitives: PageHeader, PillTabs, StatChip, StatBox,
-                            OwnerAvatar, PlayerHeadshot, FinishBadge, WinPctBadge, etc.
+  shared/                   Reusable primitives: PageHeader (kicker + gradient title),
+                            PillTabs (underline tabs), SectionCard (onyx + gold-dash header),
+                            StatChip (stat-band cell), RecordItem, OwnerAvatar,
+                            PlayerHeadshot, FinishBadge, WinPctBadge, etc.
   trends/                   AvgScoreChart, FinishTracker, TrashTalkCard
   earnings/                 AnnualBreakdown
 
@@ -165,14 +168,19 @@ season; after a season completes, run `npm run snapshot` and commit `public/data
 
 ---
 
-## UI & Design System (Statmuse × Sleeper)
+## UI & Design System (Midnight Prime)
 
-- **Theme:** Dark mode only. Custom Tailwind `s-` color palette defined in `tailwind.config.ts`.
-- **Key colors:** `s-bg` (#080c14) backgrounds, `s-gold` accents, `s-green`/`s-red` for win/loss, `s-text` / `s-text3` for hierarchy. Position colors come from `POS_COLORS` / `POS_TEXT_CLASSES` / `POS_BADGE_CLASSES` in `lib/constants` — never redefine them locally.
-- **Card/rounding tokens:** cards use `.bento-card` / `.gl` (16px radius, defined in globals.css), inner panels `rounded-[10px]`, pills `rounded-full`, tab buttons `rounded-[8px]`.
-- **Shared primitives:** `PageHeader` (page title + subtitle), `PillTabs` (gold tab row), `StatChip` (hero number card), `StatBox`, `OwnerAvatar`, `PlayerHeadshot` (CDN photo + position-badge fallback), `FinishBadge`, `WinPctBadge`. Use these instead of re-rolling the markup.
-- **Layout:** High-contrast tables, borderless rounded cards, hero typography for key numbers. Keyboard focus rings come from a global `:focus-visible` rule.
-- **No CSS modules or styled-components** — pure Tailwind utility classes in JSX. Inline styles only for dynamic values (e.g., percentage widths, owner hex colors).
+"Trophy-room luxury": cinematic onyx surfaces, metallic-gold hairlines, condensed uppercase
+display numerals, editorial restraint. **No glassmorphism, blur-on-cards, orb glows, or large
+rounded corners.** Full spec + canonical patterns live in `DESIGN.md`.
+
+- **Theme:** Dark mode only. Tokens in `tailwind.config.ts`: precise `gold` / `gold-soft` / `gold-dim` / `gold-bright`, `panel` / `panel-2`, `win` / `loss`, plus the legacy `s-` palette **remapped onto Midnight Prime** (e.g. `s-bg` = onyx `#050506`, `s-text` = warm off-white `#EDE9E0`, `s-green`/`s-red` = sage/brick) so un-migrated markup shifts with the theme.
+- **Key colors:** page `#050506`, nav `#070708`, cards `#0B0B0D`; gold `#C9962E` (hairlines/active underline), `#E8CE8A` (emphasized values), text `#EDE9E0`→`#9AA0AC`→`#5C6270`; sage `#7FA886` win / brick `#B4636B` loss. Gold hairlines = `rgba(var(--gold-rgb),0.08–0.20)`; hover wash = `rgba(var(--gold2-rgb),0.04–0.05)` (RGB tuples in `globals.css`). Position colors (`POS_COLORS` / `POS_TEXT_CLASSES` / `POS_BADGE_CLASSES`) and `OWNER_COLORS` are **functional palettes in `lib/owner-map.ts` — never theme-swap or redefine them locally.**
+- **Typography:** `Barlow Condensed` (display/numerals — all big numbers, names, titles, table numerals; uppercase, tight leading) + `Archivo` (UI/body; tiny uppercase tracked labels). Loaded via `next/font` in `layout.tsx` as `--font-barlow` / `--font-archivo`; use `font-display` for Barlow. **Inter is gone.**
+- **Shape tokens:** cards `6px` radius via `.gl` / `.bento-card` (onyx + 1px gold hairline, no blur), chips/badges square or `2px`, pills `rounded-full`, avatars `50%`. Depth comes from borders + background steps, not shadows.
+- **Shared primitives:** `PageHeader` (gold-dash kicker + hero-gradient title), `PillTabs` (gold-underline tabs), `SectionCard` (onyx card + gold/brick dash header), `StatChip` (hairline stat-band cell), `RecordItem`, `OwnerAvatar` (gold-ring for champions), `PlayerHeadshot`, `FinishBadge` (square chip), `WinPctBadge`. Use these instead of re-rolling the markup.
+- **Motion (respect `prefers-reduced-motion`):** `animate-gold-pulse` on hero names, `animate-fade-in*` staggered entrances. Global `:focus-visible` gold ring.
+- **No CSS modules or styled-components** — pure Tailwind utility classes in JSX. Inline styles only for dynamic values (percentage widths, owner hex colors, variable-alpha gold via the RGB tuples).
 
 ---
 

@@ -29,6 +29,7 @@ export default function OwnersPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
+        kicker="The Managers"
         title="Owner Profiles"
         subtitle="Click any row to drill into career stats, H2H records & game log"
       />

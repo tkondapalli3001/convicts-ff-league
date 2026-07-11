@@ -8,6 +8,24 @@ import type { CareerStats } from '@/lib/stats'
 
 type SortKey = 'wins' | 'winpct' | 'avgPPG' | 'champs' | 'earn'
 
+/** Win% → Midnight Prime semantic colour: ≥55% gold-bright, 45–55% neutral, <45% brick. */
+function pctColor(winpct: number): string {
+  if (winpct >= 0.55) return '#E8CE8A'
+  if (winpct >= 0.45) return '#9AA0AC'
+  return '#B4636B'
+}
+
+/** Champion avatars get a gold ring + glow; everyone else a hairline inset. */
+function ringShadow(isChamp: boolean): string {
+  return isChamp
+    ? '0 0 0 1.5px #C9962E, 0 0 10px rgba(201,150,46,0.35)'
+    : 'inset 0 0 0 1px rgba(255,255,255,0.14)'
+}
+
+function fmtChamps(n: number): string {
+  return n % 1 === 0 ? String(n) : n.toFixed(1)
+}
+
 export default function CareerStandingsTable({ data }: { data: CareerStats[] }) {
   const { state } = useLeague()
   const router = useRouter()
@@ -29,146 +47,176 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
   }, [data, sortKey, sortDir])
 
   function toggleSort(key: SortKey) {
-    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
-    else { setSortKey(key); setSortDir('desc') }
+    if (sortKey === key) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
+    else {
+      setSortKey(key)
+      setSortDir('desc')
+    }
   }
-  const icon = (key: SortKey) => sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
+  const arrow = (key: SortKey) => (sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '')
+
+  /** Active-sort headers glow gold-soft with a gold underline (design). */
+  function sortHeadStyle(key: SortKey): React.CSSProperties {
+    return sortKey === key
+      ? { color: '#C9A24B', borderBottom: '1px solid rgba(var(--gold2-rgb), 0.5)' }
+      : {}
+  }
+
+  function goToOwner(name: string) {
+    router.push(`/owners/${encodeURIComponent(name)}`)
+  }
+
+  function Avatar({ d, size }: { d: CareerStats; size: number }) {
+    const color = ownerColor(d.name)
+    const avatarUrl = state.ownerAvatarMap?.[d.name]
+    const shadow = ringShadow(d.champs > 0)
+    return avatarUrl ? (
+      <div
+        className="flex-shrink-0 overflow-hidden rounded-full"
+        style={{ width: size, height: size, boxShadow: shadow }}
+      >
+        <img
+          src={avatarUrl}
+          alt={d.name}
+          className="h-full w-full object-cover"
+          onError={e => {
+            const el = e.currentTarget.parentElement!
+            el.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${Math.round(size * 0.32)}px;font-weight:800;color:#fff;background:${color}">${fullNameInitials(d.name)}</div>`
+          }}
+        />
+      </div>
+    ) : (
+      <div
+        className="flex flex-shrink-0 items-center justify-center rounded-full font-extrabold leading-none text-white"
+        style={{ width: size, height: size, fontSize: Math.round(size * 0.32), background: color, boxShadow: shadow }}
+      >
+        {fullNameInitials(d.name)}
+      </div>
+    )
+  }
 
   return (
-    <div className="lg:col-span-2 bento-card" style={{ overflow: 'visible' }}>
-      <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-s-border/60">
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-s-text3">
+    <div
+      className="overflow-hidden rounded-[6px] lg:col-span-2"
+      style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
+    >
+      {/* Header */}
+      <div
+        className="flex items-baseline justify-between border-b px-5 pb-3.5 pt-5 sm:px-6"
+        style={{ borderColor: 'rgba(var(--gold-rgb), 0.14)' }}
+      >
+        <div className="text-[11px] font-bold uppercase tracking-[3px] text-gold-soft sm:text-[13px] sm:tracking-[4px]">
           All-Time Career Standings
         </div>
-        <div className="text-[9px] text-s-text3 font-medium hidden sm:block">
-          Click a row to view profile
+        <div className="hidden text-[11px] uppercase tracking-[1.5px] text-s-text3 sm:block">
+          Select a manager for profile
         </div>
       </div>
 
-      <div className="relative">
-        <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <table className="w-full border-collapse min-w-[560px] ss-table">
+      {/* ── DESKTOP TABLE ─────────────────────────────────────────── */}
+      <div className="hidden sm:block">
+        <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="w-10 text-center">#</th>
-              <th className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#0d121b' }}>Manager</th>
-              <th onClick={() => toggleSort('wins')} className="cursor-pointer select-none hover:text-s-text2">W–L{icon('wins')}</th>
-              <th onClick={() => toggleSort('winpct')} className="cursor-pointer select-none hover:text-s-text2">Win%{icon('winpct')}</th>
-              <th onClick={() => toggleSort('avgPPG')} className="text-right cursor-pointer select-none hover:text-s-text2">Avg PPG{icon('avgPPG')}</th>
-              <th onClick={() => toggleSort('champs')} className="text-center cursor-pointer select-none hover:text-s-text2">🏆{icon('champs')}</th>
-              <th onClick={() => toggleSort('earn')} className="text-right cursor-pointer select-none hover:text-s-text2">Net ${icon('earn')}</th>
+              <th className="!text-center" style={{ width: 48 }}>No.</th>
+              <th>Manager</th>
+              <th onClick={() => toggleSort('wins')} style={sortHeadStyle('wins')}>
+                W–L{arrow('wins')}
+              </th>
+              <th onClick={() => toggleSort('winpct')} style={sortHeadStyle('winpct')}>
+                Win%{arrow('winpct')}
+              </th>
+              <th onClick={() => toggleSort('avgPPG')} className="!text-right" style={sortHeadStyle('avgPPG')}>
+                Avg PPG{arrow('avgPPG')}
+              </th>
+              <th onClick={() => toggleSort('champs')} className="!text-center" style={sortHeadStyle('champs')}>
+                Titles{arrow('champs')}
+              </th>
+              <th onClick={() => toggleSort('earn')} className="!text-right" style={sortHeadStyle('earn')}>
+                Net{arrow('earn')}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {displayData.map((d, i) => {
-              const color = ownerColor(d.name)
-              const avatarUrl = state.ownerAvatarMap?.[d.name]
-
-              const rankColors = [
-                'bg-[#3d2000]/80 text-s-gold border border-[#5a3000]/60',
-                'bg-[#1c2430]/80 text-[#8b949e] border border-[#3d444d]/60',
-                'bg-[#1a1200]/80 text-[#cd7f32] border border-[#3d2d00]/60',
-              ]
-              const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg3/60 text-s-text3 border border-s-border/40'
-
-              return (
-                <tr
-                  key={d.name}
-                  onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}
-                  className="hover:bg-indigo-500/10 transition-colors"
-                >
-                  <td className="text-center">
-                    <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[10px] font-extrabold ${rankCls}`}>
-                      {i + 1}
-                    </span>
-                  </td>
-
-                  <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06]">
-                    <div className="flex items-center gap-3">
-                      {/* Avatar: Sleeper image or gradient initials */}
-                      {avatarUrl ? (
-                        <div
-                          className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden"
-                          style={{ boxShadow: `0 0 0 2px #0e1117, 0 0 14px ${color}55` }}
-                        >
-                          <img src={avatarUrl} alt={d.name} className="w-full h-full object-cover"
-                            onError={e => {
-                              const el = e.currentTarget.parentElement!
-                              el.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;background:linear-gradient(135deg,${color} 0%,${color}88 100%)">${fullNameInitials(d.name)}</div>`
-                            }} />
-                        </div>
-                      ) : (
-                        <div
-                          className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[12px] font-black text-white leading-none"
-                          style={{
-                            background: `linear-gradient(135deg, ${color} 0%, ${color}88 100%)`,
-                            boxShadow: `0 0 0 2px #0e1117, 0 0 14px ${color}55`,
-                          }}
-                        >
-                          {fullNameInitials(d.name)}
-                        </div>
-                      )}
-                      <div>
-                        <div className="text-[13px] font-bold text-s-text leading-none">{d.name}</div>
-                        <div className="text-[10px] text-s-text3 mt-0.5">
-                          {d.numSeasons} season{d.numSeasons !== 1 ? 's' : ''}
-                        </div>
+            {displayData.map((d, i) => (
+              <tr key={d.name} onClick={() => goToOwner(d.name)}>
+                <td className="text-center font-display text-[17px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#3A4150' }}>
+                  {String(i + 1).padStart(2, '0')}
+                </td>
+                <td>
+                  <div className="flex items-center gap-3">
+                    <Avatar d={d} size={34} />
+                    <div>
+                      <div className="text-[13px] font-bold leading-none text-s-text">{d.name}</div>
+                      <div className="mt-[3px] text-[9px] uppercase tracking-[1px] text-s-text3">
+                        {d.numSeasons} season{d.numSeasons !== 1 ? 's' : ''}
                       </div>
                     </div>
-                  </td>
-
-                  <td>
-                    <span className="text-s-green font-bold text-[13px]">{d.allW}</span>
-                    <span className="text-s-text3 mx-1 text-[11px]">–</span>
-                    <span className="text-s-red text-[13px]">{d.allL}</span>
-                  </td>
-
-                  <td>
-                    <span
-                      className="text-[13px] font-bold"
-                      style={{
-                        color: d.winpct >= 0.55 ? '#00ceb8' : d.winpct >= 0.45 ? '#8b949e' : '#ff395c',
-                      }}
-                    >
-                      {(d.winpct * 100).toFixed(1)}%
+                  </div>
+                </td>
+                <td className="font-display text-[17px] font-bold">
+                  <span className="text-s-text">{d.allW}</span>
+                  <span className="mx-[3px] text-[#3A4150]">–</span>
+                  <span className="text-[#7A828F]">{d.allL}</span>
+                </td>
+                <td className="font-display text-[17px] font-bold" style={{ color: pctColor(d.winpct) }}>
+                  {(d.winpct * 100).toFixed(1)}%
+                </td>
+                <td className="text-right font-display text-[17px] font-semibold text-s-text2 num">
+                  {d.avgPFperGame.toFixed(1)}
+                </td>
+                <td className="text-center font-display text-[16px] font-bold">
+                  {d.champs > 0 ? (
+                    <span className="text-gold-soft">{fmtChamps(d.champs)}×</span>
+                  ) : (
+                    <span className="text-[#3A4150]">—</span>
+                  )}
+                </td>
+                <td className="text-right text-[11px] font-bold num">
+                  {d.earn != null ? (
+                    <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>
+                      {d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}
                     </span>
-                  </td>
-
-                  <td className="text-right">
-                    <span className="text-[13px] font-bold text-s-text2 num">
-                      {d.avgPFperGame.toFixed(1)}
-                    </span>
-                  </td>
-
-                  <td className="text-center">
-                    {d.champs > 0 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#3d2000]/50 text-s-gold border border-[#5a3200]/50">
-                        🏆 {d.champs % 1 === 0 ? d.champs : d.champs.toFixed(1)}×
-                      </span>
-                    ) : (
-                      <span className="text-s-text3 text-[11px]">—</span>
-                    )}
-                  </td>
-
-                  <td className="text-right">
-                    {d.earn != null ? (
-                      <span
-                        className="text-[12px] font-bold"
-                        style={{ color: d.earn >= 0 ? '#2ea043' : '#f85149' }}
-                      >
-                        {d.earn >= 0 ? '+' : ''}${d.earn}
-                      </span>
-                    ) : (
-                      <span className="text-s-text3 text-[11px]">—</span>
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
+                  ) : (
+                    <span className="text-[#3A4150]">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-        </div>
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] z-10" />
+      </div>
+
+      {/* ── MOBILE CONDENSED LIST ─────────────────────────────────── */}
+      <div className="sm:hidden">
+        {displayData.map((d, i) => (
+          <button
+            key={d.name}
+            onClick={() => goToOwner(d.name)}
+            className="flex min-h-[44px] w-full items-center gap-3 px-[18px] py-2.5 text-left transition-colors hover:bg-[rgba(201,150,46,0.05)]"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
+          >
+            <span className="w-[22px] flex-shrink-0 font-display text-[15px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#3A4150' }}>
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <Avatar d={d} size={30} />
+            <div className="min-w-0 flex-1">
+              <div className="text-[12px] font-bold leading-none text-s-text">{d.name}</div>
+              <div className="mt-[3px] text-[8px] uppercase tracking-[1px] text-s-text3">
+                {d.numSeasons} season{d.numSeasons !== 1 ? 's' : ''}
+                {d.champs > 0 ? ` · ${fmtChamps(d.champs)}× titles` : ''}
+              </div>
+            </div>
+            <div className="flex-shrink-0 text-right">
+              <div className="font-display text-[15px] font-bold leading-none text-s-text">
+                {d.allW}–{d.allL}
+              </div>
+              <div className="mt-[3px] font-display text-[12px] font-bold" style={{ color: pctColor(d.winpct) }}>
+                {(d.winpct * 100).toFixed(1)}%
+              </div>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   )

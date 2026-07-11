@@ -8,19 +8,27 @@ interface Props<T extends string> {
   children?: React.ReactNode
 }
 
-/** Gold pill tab row used across pages (draft, players, owners, records, seasons). */
+/**
+ * Midnight Prime tab bar (design artboards 3a / 4a): underline tabs on a hairline rule —
+ * active = white + 2px gold underline, inactive = muted → gold-soft on hover. Horizontally
+ * scrollable on mobile. Shared across records, owners, seasons, draft, players, game log.
+ */
 export default function PillTabs<T extends string>({ tabs, active, onChange, children }: Props<T>) {
   return (
-    <div className="flex items-center gap-[6px] mb-5 flex-wrap">
+    <div
+      className="mb-5 flex items-center gap-1 overflow-x-auto border-b scrollbar-none"
+      style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}
+    >
       {tabs.map(tab => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
           className={[
-            'px-4 py-[7px] rounded-[8px] border text-[12px] font-bold transition-all duration-150 cursor-pointer active:scale-[0.98]',
+            '-mb-px whitespace-nowrap border-b-2 px-3.5 py-3 text-[10px] font-bold uppercase tracking-[2px]',
+            'transition-colors duration-150 active:scale-[0.98]',
             active === tab.id
-              ? 'bg-s-gold text-[#000] border-s-gold shadow-[0_0_16px_rgba(56,189,248,0.15)]'
-              : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
+              ? 'border-gold text-s-text'
+              : 'border-transparent text-s-text3 hover:text-gold-soft',
           ].join(' ')}
         >
           {tab.label}

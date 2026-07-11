@@ -2,34 +2,29 @@ interface Props {
   finish: number | null | undefined
 }
 
+/** Midnight Prime finish chip (design 4a): square bordered chip — 1st gold, 2nd silver, 3rd gold-dim, rest faint. */
 export default function FinishBadge({ finish }: Props) {
+  const base = 'inline-flex items-center gap-[3px] rounded-[2px] border px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1.5px]'
+
   if (finish === 1)
     return (
-      <span className="inline-flex items-center gap-[3px] px-2 py-[2px] rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/25">
+      <span className={base} style={{ color: '#C9A24B', background: 'rgba(201,150,46,0.08)', borderColor: 'rgba(var(--gold-rgb), 0.25)' }}>
         🏆 1st
       </span>
     )
   if (finish === 2)
     return (
-      <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/25">
-        2nd
-      </span>
+      <span className={base} style={{ color: '#D8D3C8', borderColor: 'rgba(255,255,255,0.14)' }}>2nd</span>
     )
   if (finish === 3)
     return (
-      <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-violet-500/10 text-violet-400 border border-violet-500/25">
-        3rd
-      </span>
+      <span className={base} style={{ color: '#8A7439', borderColor: 'rgba(var(--gold-rgb), 0.16)' }}>3rd</span>
     )
   if (finish)
     return (
-      <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-white/5 text-slate-400 border border-white/10">
-        {finish}th
-      </span>
+      <span className={base} style={{ color: '#9AA0AC', borderColor: 'rgba(255,255,255,0.10)' }}>{finish}th</span>
     )
   return (
-    <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-white/5 text-slate-600 border border-white/10">
-      —
-    </span>
+    <span className={base} style={{ color: '#3A4150', borderColor: 'rgba(255,255,255,0.08)' }}>—</span>
   )
 }

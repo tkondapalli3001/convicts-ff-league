@@ -105,6 +105,7 @@ export default function PlayersPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
+        kicker="The Player Database"
         title="Players"
         subtitle="Player performance, draft tendencies, and transactions across all seasons"
       />
@@ -119,7 +120,7 @@ export default function PlayersPage() {
         </div>
       )}
       {activeTab !== 'transactions' && activeTab !== 'scoring' && dataError && (
-        <div className="px-4 py-3 bg-[#220000] border border-[#5a0000] rounded-[10px] mb-4 text-[12px] text-s-red">
+        <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[10px] mb-4 text-[12px] text-s-red">
           Failed to load draft data: {dataError}
         </div>
       )}
@@ -146,7 +147,7 @@ export default function PlayersPage() {
             </div>
           )}
           {txError && (
-            <div className="px-4 py-3 bg-[#220000] border border-[#5a0000] rounded-[10px] mb-4 text-[12px] text-s-red">
+            <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[10px] mb-4 text-[12px] text-s-red">
               Failed to load transactions: {txError}
             </div>
           )}

@@ -84,8 +84,8 @@ export default function MostTradedPlayersTable({ transactions, playerWinRates }:
               const posColor = POS_COLORS[row.position] ?? 'text-s-text3'
               const winRateColor =
                 row.winRate === null ? '#6e7681'
-                : row.winRate >= 0.60 ? '#22c55e'
-                : row.winRate >= 0.40 ? '#8b949e'
+                : row.winRate >= 0.60 ? '#7FA886'
+                : row.winRate >= 0.40 ? '#9AA0AC'
                 : '#f85149'
               return (
                 <tr key={row.playerId} className="border-b border-s-bg3 hover:bg-s-bg3 transition-colors">

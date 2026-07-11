@@ -6,13 +6,13 @@ function FinishDot({ finish, year, totalTeams }: { finish: number | null | undef
   if (finish == null)
     return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[9px] font-bold bg-s-bg3 text-s-text3 flex-shrink-0">–</span>
   if (finish === 1)
-    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#3d2000] text-s-gold flex-shrink-0" title={`${year}: 🏆 Champ`}>1</span>
+    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[rgba(201,150,46,0.10)] text-s-gold flex-shrink-0" title={`${year}: 🏆 Champ`}>1</span>
   if (finish === 2)
-    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#001a40] text-[#93c5fd] flex-shrink-0" title={`${year}: 2nd`}>2</span>
+    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[rgba(216,211,200,0.12)] text-[#D8D3C8] flex-shrink-0" title={`${year}: 2nd`}>2</span>
   if (finish === 3)
-    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#001a40] text-[#7dd3fc] flex-shrink-0" title={`${year}: 3rd`}>3</span>
+    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[rgba(201,150,46,0.10)] text-[#8A7439] flex-shrink-0" title={`${year}: 3rd`}>3</span>
   if (finish >= totalTeams)
-    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#3d0000] text-[#f87171] flex-shrink-0" title={`${year}: 🚽 Last`}>{finish}</span>
+    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[rgba(180,99,107,0.12)] text-[#B4636B] flex-shrink-0" title={`${year}: 🚽 Last`}>{finish}</span>
   if (finish <= Math.floor(totalTeams / 2))
     return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-s-bg4 text-s-text2 flex-shrink-0" title={`${year}: ${finish}th`}>{finish}</span>
   return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#15202b] text-s-text2 flex-shrink-0" title={`${year}: ${finish}th`}>{finish}</span>
@@ -23,18 +23,18 @@ export default function FinishTracker() {
   const { ownerSeasons, years, leagues } = state
 
   const LEGEND = [
-    { label: 'Champ', className: 'bg-[#3d2000] text-s-gold' },
-    { label: '2nd',   className: 'bg-[#001a40] text-[#93c5fd]' },
-    { label: '3rd',   className: 'bg-[#001a40] text-[#7dd3fc]' },
+    { label: 'Champ', className: 'bg-[rgba(201,150,46,0.10)] text-s-gold' },
+    { label: '2nd',   className: 'bg-[rgba(216,211,200,0.12)] text-[#D8D3C8]' },
+    { label: '3rd',   className: 'bg-[rgba(201,150,46,0.10)] text-[#8A7439]' },
     { label: 'Mid',   className: 'bg-s-bg4 text-s-text2' },
     { label: 'Low',   className: 'bg-[#15202b] text-s-text3' },
-    { label: 'Last',  className: 'bg-[#3d0000] text-[#f87171]' },
+    { label: 'Last',  className: 'bg-[rgba(180,99,107,0.12)] text-[#B4636B]' },
   ]
 
   return (
     <div className="gl relative overflow-hidden p-[18px] mb-4">
       <div className="bento-fill" style={{ background: 'rgba(244,63,94,0.15)' }} />
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-3 relative z-10">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-3 relative z-10">
         Finish Position by Year — 1=Champion · Last=Toilet Bowl
       </div>
 

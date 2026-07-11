@@ -120,7 +120,7 @@ function GameDetailModal({ detail, onClose }: { detail: GameDetail; onClose: () 
               <span className="text-[12px] text-s-text2 truncate max-w-[60%]">{name}</span>
               <span
                 className="text-[13px] font-bold num flex-shrink-0"
-                style={{ color: (score ?? 0) >= 20 ? '#00ceb8' : '#e6edf3' }}
+                style={{ color: (score ?? 0) >= 20 ? '#E8CE8A' : '#EDE9E0' }}
               >
                 {score != null ? score.toFixed(2) : '—'}
               </span>
@@ -172,7 +172,7 @@ function GameDetailModal({ detail, onClose }: { detail: GameDetail; onClose: () 
               <div className="text-[11px] font-bold text-s-text3 mb-1 truncate">{name}</div>
               <div
                 className="text-[40px] font-black leading-none num"
-                style={{ color: won ? color : '#8b949e' }}
+                style={{ color: won ? color : '#9AA0AC' }}
               >
                 {score != null ? score.toFixed(2) : '—'}
               </div>
@@ -231,8 +231,9 @@ function MatchupCard({
 
   return (
     <div
-      className={`border rounded-[8px] p-[10px] cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:shadow-lg
-        ${isChampionship ? 'bg-amber-950/20 border-amber-500/20 hover:border-amber-500/40' : 'bg-white/5 border-white/[0.08] hover:border-white/[0.15]'}`}
+      className={`border rounded-[6px] p-[10px] cursor-pointer transition-colors duration-150
+        ${isChampionship ? 'bg-[rgba(201,150,46,0.08)] border-[rgba(230,190,90,0.25)] hover:border-[rgba(230,190,90,0.4)]' : 'hover:bg-[rgba(201,150,46,0.05)]'}`}
+      style={!isChampionship ? { background: '#0B0B0D', borderColor: 'rgba(var(--gold-rgb), 0.10)' } : undefined}
       onClick={onClick}
       title="Click to view game details"
     >
@@ -246,10 +247,11 @@ function MatchupCard({
         ].map(({ name, score, won }) => (
           <div
             key={name}
-            className={`flex items-center justify-between gap-2 px-[8px] py-[5px] rounded-[5px] ${won ? 'bg-[#1a2e1a]' : ''}`}
+            className="flex items-center justify-between gap-2 rounded-[4px] px-[8px] py-[5px]"
+            style={won ? { background: 'rgba(127,168,134,0.12)' } : undefined}
           >
             <span className={`text-[12px] font-semibold truncate ${won ? 'text-s-text' : 'text-s-text3'}`}>{name}</span>
-            <span className={`font-mono text-[12px] flex-shrink-0 ${won ? 'text-s-green font-bold' : 'text-s-text3'}`}>
+            <span className="flex-shrink-0 font-display text-[15px] font-bold" style={{ color: won ? '#7FA886' : '#5C6270' }}>
               {score != null ? score.toFixed(2) : winnerName != null ? '—' : 'TBD'}
             </span>
           </div>
@@ -263,7 +265,7 @@ function MatchupCard({
 // ─── Connector Lines ──────────────────────────────────────────────────────────
 
 function RoundConnector({ fromCount, toCount }: { fromCount: number; toCount: number }) {
-  const color = '#3a4060'
+  const color = 'rgba(201,150,46,0.25)'
   const W = 32
   const mid = W / 2
   const lines: React.ReactNode[] = []
@@ -368,7 +370,7 @@ export default function PlayoffBracket({ year }: Props) {
     <>
       <div className="gl p-[18px] mt-4 relative overflow-hidden">
         <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
-        <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-1">
+        <div className="text-[10px] font-bold tracking-[3px] uppercase text-gold-soft mb-1">
           {year} Playoff Bracket
         </div>
         <div className="text-[9px] text-s-text3/50 mb-4">Click any matchup to view game details</div>

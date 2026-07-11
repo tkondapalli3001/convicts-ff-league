@@ -93,7 +93,7 @@ export default function TransactionsPage() {
       )}
 
       {dataError && (
-        <div className="px-4 py-3 bg-[#220000] border border-[#5a0000] rounded-[10px] mb-4 text-[12px] text-s-red">
+        <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[10px] mb-4 text-[12px] text-s-red">
           Failed to load transactions: {dataError}
         </div>
       )}

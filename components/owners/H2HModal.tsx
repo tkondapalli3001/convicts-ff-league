@@ -55,7 +55,7 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
               <span className="text-s-text3 text-[10px] flex-shrink-0">vs</span>
               <span className="font-bold w-[72px] flex-shrink-0 overflow-hidden text-ellipsis text-s-text">{p2}</span>
               <span className="w-[50px] flex-shrink-0 font-mono text-[12px]">{fmtPts(p2Pts)}</span>
-              <span className={`px-[6px] py-[1px] rounded-[4px] text-[10px] font-extrabold flex-shrink-0 ${p1Won ? 'bg-[#052e16] text-s-green' : 'bg-[#450a0a] text-s-red'}`}>
+              <span className={`px-[6px] py-[1px] rounded-[4px] text-[10px] font-extrabold flex-shrink-0 ${p1Won ? 'bg-[rgba(127,168,134,0.12)] text-s-green' : 'bg-[rgba(180,99,107,0.12)] text-s-red'}`}>
                 {p1Won ? `${p1} W` : `${p2} W`}
               </span>
               <span className={`font-mono text-[11px] ml-auto flex-shrink-0 ${margin >= 0 ? 'text-s-green' : 'text-s-red'}`}>

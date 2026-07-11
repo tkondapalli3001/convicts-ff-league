@@ -9,34 +9,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Legacy dark palette (s- prefix = sleeper) — kept for backward compat
-        's-bg':      '#020617',   // upgraded to deep space
-        's-bg2':     '#0d1117',
-        's-bg3':     '#161b22',
-        's-bg4':     '#1e2739',
-        's-surface':  '#1a1d23',
-        's-border':   '#2d333b',
-        's-border2':  '#3d444d',
-        's-text':     '#e2e8f0',
-        's-text2':    '#94a3b8',
-        's-text3':    '#64748b',
-        's-muted':    '#475569',
-        's-gold':     '#f59e0b',
-        's-gold2':    '#fbbf24',
-        's-green':    '#22c55e',
-        's-red':      '#ef4444',
-        's-blue':     '#3b82f6',
-        's-purple':   '#8b5cf6',
-        's-teal':     '#14b8a6',
-        's-rose':     '#f43f5e',
-        // Nebula accent palette
-        'n-bg':      '#020617',   // Deep Space
-        'n-violet':  '#8B5CF6',   // Electric Violet
-        'n-blue':    '#3B82F6',   // Sleeper Blue
-        'n-surface': 'rgba(15,23,42,0.4)',
+        // Legacy s- palette — remapped to Midnight Prime so un-migrated pages shift with the theme.
+        's-bg':      '#050506',   // onyx base
+        's-bg2':     '#070708',   // nav
+        's-bg3':     '#0B0B0D',   // card
+        's-bg4':     '#121216',   // raised panel
+        's-surface':  '#0B0B0D',
+        's-border':   '#1e1a12',
+        's-border2':  '#2a2418',
+        's-text':     '#EDE9E0',  // warm off-white
+        's-text2':    '#9AA0AC',
+        's-text3':    '#5C6270',
+        's-muted':    '#3A4150',
+        's-gold':     '#C9962E',
+        's-green':    '#7FA886',  // sage win
+        's-red':      '#B4636B',  // brick loss
+        // Midnight Prime — precise tokens for new chrome + future pages
+        'gold':        '#C9962E',
+        'gold-soft':   '#C9A24B',
+        'gold-dim':    '#8A7439',
+        'gold-bright': '#E8CE8A',
+        'panel':       'rgba(10,10,12,0.7)',
+        'panel-2':     'rgba(10,10,12,0.5)',
+        'win':         '#7FA886',
+        'loss':        '#B4636B',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['var(--font-archivo)', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['var(--font-barlow)', 'Barlow Condensed', 'system-ui', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Courier New"', 'monospace'],
       },
       keyframes: {
@@ -44,17 +44,13 @@ const config: Config = {
           from: { opacity: '0', transform: 'translateY(14px)' },
           to:   { opacity: '1', transform: 'translateY(0)' },
         },
-        pulseGlow: {
-          '0%, 100%': { opacity: '0.6' },
-          '50%':      { opacity: '1' },
-        },
-        shimmer: {
-          from: { backgroundPosition: '-200% 0' },
-          to:   { backgroundPosition: '200% 0' },
-        },
         slideInLeft: {
           from: { opacity: '0', transform: 'translateX(-24px)' },
           to:   { opacity: '1', transform: 'translateX(0)' },
+        },
+        goldPulse: {
+          '0%, 100%': { opacity: '0.55' },
+          '50%':      { opacity: '1' },
         },
       },
       animation: {
@@ -65,12 +61,8 @@ const config: Config = {
         'fade-in-4':  'fadeInUp 0.5s 0.24s ease both',
         'fade-in-5':  'fadeInUp 0.5s 0.30s ease both',
         'fade-in-6':  'fadeInUp 0.5s 0.36s ease both',
-        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
-        'shimmer':    'shimmer 2s linear infinite',
         'slide-in-left': 'slideInLeft 0.22s ease-out both',
-      },
-      backgroundSize: {
-        '200': '200% 100%',
+        'gold-pulse': 'goldPulse 5s ease-in-out infinite',
       },
     },
   },

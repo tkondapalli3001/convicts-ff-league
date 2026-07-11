@@ -180,7 +180,7 @@ export default function RivalryCalc() {
                   <span className={`font-bold num w-[46px] ${aWon ? 'text-s-green' : 'text-s-text3'}`}>{ptsA.toFixed(1)}</span>
                   <span className="text-s-text3">–</span>
                   <span className={`font-bold num w-[46px] ${!aWon ? 'text-s-green' : 'text-s-text3'}`}>{ptsB.toFixed(1)}</span>
-                  <span className={`ml-auto px-[6px] py-[1px] rounded text-[9px] font-extrabold flex-shrink-0 ${aWon ? 'bg-[#052e16] text-s-green' : 'bg-[#450a0a] text-s-red'}`}>
+                  <span className={`ml-auto px-[6px] py-[1px] rounded text-[9px] font-extrabold flex-shrink-0 ${aWon ? 'bg-[rgba(127,168,134,0.12)] text-s-green' : 'bg-[rgba(180,99,107,0.12)] text-s-red'}`}>
                     {aWon ? ownerA : ownerB} W
                   </span>
                   <span className="text-s-text3 text-[9px] num">+{margin.toFixed(1)}</span>

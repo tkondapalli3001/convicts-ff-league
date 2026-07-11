@@ -49,12 +49,12 @@ export default function GlobalSearch() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3 py-[6px] rounded-full border border-white/[0.07] bg-white/[0.04] text-slate-500 hover:text-slate-300 hover:border-white/20 transition-all whitespace-nowrap"
+        className="flex items-center justify-center gap-2 w-11 h-11 md:w-auto md:h-auto md:justify-start md:px-3 md:py-[7px] md:border md:border-[rgba(230,190,90,0.18)] md:rounded-[2px] text-gold-soft md:text-s-text3 md:hover:text-gold-soft md:hover:border-[rgba(230,190,90,0.35)] transition-colors whitespace-nowrap"
         aria-label="Search the league"
       >
-        <Search size={11} className="flex-shrink-0" />
-        <span className="hidden md:block text-[10px] font-semibold tracking-[1px] uppercase">Ask anything</span>
-        <kbd className="hidden md:block px-1.5 py-0.5 rounded text-[9px] font-mono bg-white/[0.05] border border-white/[0.07]">⌘K</kbd>
+        <Search size={13} className="flex-shrink-0" />
+        <span className="hidden md:block text-[10px] font-semibold tracking-[1.5px] uppercase">Ask anything</span>
+        <kbd className="hidden md:block px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono text-s-text3 border border-[rgba(230,190,90,0.18)]">⌘K</kbd>
       </button>
 
       {open && <SearchOverlay onClose={() => setOpen(false)} />}

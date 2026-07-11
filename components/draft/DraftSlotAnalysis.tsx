@@ -173,8 +173,8 @@ export default function DraftSlotAnalysis() {
                                   <td className="py-1 text-center">
                                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                                       r.madePlayoffs
-                                        ? 'bg-green-500/20 text-green-400'
-                                        : 'bg-red-500/20 text-red-400'
+                                        ? 'bg-[rgba(127,168,134,0.14)] text-win'
+                                        : 'bg-[rgba(180,99,107,0.14)] text-loss'
                                     }`}>
                                       {r.madePlayoffs ? 'Yes' : 'No'}
                                     </span>
@@ -274,8 +274,8 @@ export default function DraftSlotAnalysis() {
                       <td className="py-2 text-center">
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                           r.madePlayoffs
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-red-500/20 text-red-400'
+                            ? 'bg-[rgba(127,168,134,0.14)] text-win'
+                            : 'bg-[rgba(180,99,107,0.14)] text-loss'
                         }`}>
                           {r.madePlayoffs ? 'Yes' : 'No'}
                         </span>

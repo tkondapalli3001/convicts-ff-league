@@ -3,7 +3,7 @@
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 
 const TYPE_BADGE: Record<string, { label: string; className: string }> = {
-  trade:      { label: 'TRADE',  className: 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]' },
+  trade:      { label: 'TRADE',  className: 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]' },
   waiver:     { label: 'WAV',    className: 'bg-[#1a2010] border-s-green text-[#86efac]' },
   free_agent: { label: 'WAV',    className: 'bg-[#1a2010] border-s-green text-[#86efac]' },
 }

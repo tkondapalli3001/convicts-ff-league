@@ -80,7 +80,7 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
     <th
       onClick={() => handleSort(k)}
       className={`cursor-pointer select-none ${right ? 'text-right' : 'text-left'}`}
-      style={{ color: sortKey === k ? '#f59e0b' : undefined }}
+      style={{ color: sortKey === k ? '#C9A24B' : undefined }}
     >
       {label} {sortKey === k ? (sortDir === 1 ? '↑' : '↓') : ''}
     </th>
@@ -101,7 +101,7 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
             className={[
               'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
               posFilter === pos
-                ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
+                ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
                 : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
             ].join(' ')}
           >

@@ -12,9 +12,9 @@ const STRATEGY_DESCRIPTIONS: Record<string, string> = {
 
 const STRATEGY_COLORS: Record<string, string> = {
   'Zero-RB':  'text-[#60a5fa]',
-  'Hero-RB':  'text-[#22c55e]',
+  'Hero-RB':  'text-[#7FA886]',
   'RB-Heavy': 'text-[#f97316]',
-  'Balanced': 'text-[#94a3b8]',
+  'Balanced': 'text-[#9AA0AC]',
 }
 
 function ordinal(n: number) {
@@ -77,7 +77,7 @@ export default function DraftStructureTable({ data }: Props) {
               onClick={() => setSelectedStrategy(isSelected ? null : entry.strategy)}
               className={`rounded-[10px] p-4 border cursor-pointer transition-all duration-150 ${
                 isSelected
-                  ? 'border-s-blue bg-[#0a1628] ring-1 ring-s-blue/40'
+                  ? 'border-gold bg-[rgba(201,150,46,0.10)] ring-1 ring-[rgba(201,150,46,0.4)]'
                   : isBest
                   ? 'border-s-gold bg-[#1a1200] hover:border-s-gold/70'
                   : 'border-s-border bg-s-bg3 hover:border-s-border2'
@@ -87,12 +87,12 @@ export default function DraftStructureTable({ data }: Props) {
                 <div>
                   <span className={`text-[14px] font-extrabold ${color}`}>{entry.strategy}</span>
                   {isBest && !isSelected && (
-                    <span className="ml-2 text-[9px] font-bold uppercase tracking-[1px] text-s-gold bg-[#3d2000] px-[6px] py-[2px] rounded-full border border-[#5a3200]">
+                    <span className="ml-2 text-[9px] font-bold uppercase tracking-[1px] text-s-gold bg-[rgba(201,150,46,0.10)] px-[6px] py-[2px] rounded-full border border-[rgba(230,190,90,0.25)]">
                       Best Avg Finish
                     </span>
                   )}
                   {isSelected && (
-                    <span className="ml-2 text-[9px] font-bold uppercase tracking-[1px] text-[#93c5fd] bg-[#0a1e3d] px-[6px] py-[2px] rounded-full border border-s-blue/40">
+                    <span className="ml-2 text-[9px] font-bold uppercase tracking-[1px] text-gold-soft bg-[rgba(201,150,46,0.12)] px-[6px] py-[2px] rounded-full border border-[rgba(230,190,90,0.4)]">
                       Selected
                     </span>
                   )}
@@ -119,8 +119,8 @@ export default function DraftStructureTable({ data }: Props) {
 
       {/* Instance detail panel */}
       {selectedEntry && (
-        <div className="mb-4 rounded-[10px] border border-s-blue/30 bg-[#080e1a] p-4">
-          <div className="text-[10px] font-bold tracking-[2px] uppercase text-[#93c5fd] mb-3">
+        <div className="mb-4 rounded-[10px] border border-[rgba(230,190,90,0.3)] bg-[#0B0B0D] p-4">
+          <div className="text-[10px] font-bold tracking-[2px] uppercase text-gold-soft mb-3">
             {selectedEntry.strategy} · {selectedEntry.examples.length} instance{selectedEntry.examples.length !== 1 ? 's' : ''}
           </div>
           {/* Scroll wrapper ensures the "Made Playoffs" column is reachable on narrow screens */}
@@ -150,8 +150,8 @@ export default function DraftStructureTable({ data }: Props) {
                     <td className="py-1.5 text-center">
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                         ex.madePlayoffs
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-red-500/20 text-red-400'
+                          ? 'bg-[rgba(127,168,134,0.14)] text-win'
+                          : 'bg-[rgba(180,99,107,0.14)] text-loss'
                       }`}>
                         {ex.madePlayoffs ? 'Yes' : 'No'}
                       </span>

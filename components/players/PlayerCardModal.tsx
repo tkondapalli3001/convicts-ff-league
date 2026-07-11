@@ -19,10 +19,10 @@ export default function PlayerCardModal({ player, onClose }: Props) {
     .sort((a, b) => b[1] - a[1])
 
   const winRateColor = player.winRate >= 0.6
-    ? '#22c55e'
+    ? '#7FA886'
     : player.winRate >= 0.4
-    ? '#94a3b8'
-    : '#ef4444'
+    ? '#9AA0AC'
+    : '#B4636B'
 
   return (
     <div
@@ -104,7 +104,7 @@ export default function PlayerCardModal({ player, onClose }: Props) {
               <tbody>
                 {[...player.yearStats].reverse().map(ys => {
                   const yr = ys.wins / ys.games
-                  const yColor = yr >= 0.6 ? '#22c55e' : yr >= 0.4 ? '#94a3b8' : '#ef4444'
+                  const yColor = yr >= 0.6 ? '#7FA886' : yr >= 0.4 ? '#9AA0AC' : '#B4636B'
                   return (
                     <tr key={ys.year} className="border-t border-s-border/40">
                       <td className="py-1.5 font-bold text-s-text3">{ys.year}</td>

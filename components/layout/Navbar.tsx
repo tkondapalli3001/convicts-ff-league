@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Activity } from 'lucide-react'
 import { useLeague } from '@/context/LeagueContext'
 import GlobalSearch from '@/components/search/GlobalSearch'
 import MobileMenu from './MobileMenu'
+import Brand from './Brand'
 import { NAV_ITEMS } from './nav-items'
 
 export default function Navbar() {
@@ -19,12 +19,8 @@ export default function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b border-white/[0.07]"
-      style={{
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        background: 'rgba(2, 6, 23, 0.88)',
-      }}
+      className="sticky top-0 z-50 bg-s-bg2 border-b"
+      style={{ borderColor: 'rgba(var(--gold-rgb), 0.14)' }}
     >
       <div className="max-w-[1200px] mx-auto flex items-center px-3 sm:px-0 sm:overflow-x-auto scrollbar-none">
 
@@ -34,26 +30,15 @@ export default function Navbar() {
         {/* Brand */}
         <Link
           href="/"
-          className="px-2 sm:px-5 py-[15px] flex-shrink-0 flex items-center gap-2 sm:border-r border-white/[0.07]"
+          className="px-2 sm:px-6 py-3 flex-shrink-0 sm:border-r"
+          style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}
         >
-          <Activity size={14} className="text-violet-500 flex-shrink-0" />
-          <span
-            className="text-[11px] font-black tracking-[3px] uppercase whitespace-nowrap"
-            style={{
-              background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            CONVICTS FF
-          </span>
+          <Brand />
         </Link>
 
         {/* Nav links — desktop only; mobile uses the drawer */}
         <div className="hidden sm:flex">
           {NAV_ITEMS.map(item => {
-            const Icon = item.icon
             const isActive =
               item.href === '/'
                 ? pathname === '/'
@@ -63,24 +48,23 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={[
-                  'flex items-center gap-[5px] px-[12px] py-[15px] text-[10px] font-bold whitespace-nowrap',
-                  'tracking-[1.2px] uppercase border-b-2 transition-all duration-150',
+                  'px-4 pt-[19px] pb-[17px] text-[10px] whitespace-nowrap uppercase',
+                  'tracking-[2.5px] border-b-2 transition-colors duration-150',
                   isActive
-                    ? 'text-violet-400 border-violet-500'
-                    : 'text-slate-600 border-transparent hover:text-slate-300 hover:border-white/20',
+                    ? 'text-s-text font-bold border-gold'
+                    : 'text-s-text3 font-semibold border-transparent hover:text-gold-soft',
                 ].join(' ')}
               >
-                <Icon size={11} className="flex-shrink-0" />
                 {item.label}
               </Link>
             )
           })}
         </div>
 
-        {/* Search + status pill */}
-        <div className="ml-auto pl-2 sm:px-4 flex-shrink-0 flex items-center gap-2">
+        {/* Search + status */}
+        <div className="ml-auto pl-2 sm:px-5 flex-shrink-0 flex items-center gap-4">
           <GlobalSearch />
-          <div className="hidden lg:block text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-600 bg-white/[0.04] px-3 py-1 rounded-full border border-white/[0.07] whitespace-nowrap">
+          <div className="hidden lg:block text-[9px] font-semibold tracking-[2px] uppercase text-s-text3 whitespace-nowrap">
             {statusText}
           </div>
         </div>

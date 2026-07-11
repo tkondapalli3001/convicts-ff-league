@@ -134,7 +134,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
       onClick={() => handleSort(k)}
       className={[hideOnMobile ? 'hidden md:table-cell' : '', stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : ''].filter(Boolean).join(' ')}
       style={{
-        color: sortKey === k ? '#f59e0b' : undefined,
+        color: sortKey === k ? '#C9A24B' : undefined,
         background: stickyFirst ? '#0d121b' : undefined,
       }}
     >
@@ -144,7 +144,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
 
   return (
     <div className="gl p-[18px]">
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-[14px]">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-[14px]">
         Season Standings — Click year to isolate · Double-click row to view owner
       </div>
 
@@ -157,8 +157,8 @@ export default function SeasonStandings({ onYearChange }: Props) {
             className={[
               'px-3 py-[5px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150 whitespace-nowrap',
               activeYears.has(y)
-                ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
+                ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
+                : 'border-[rgba(230,190,90,0.14)] text-s-text3 hover:text-gold-soft',
             ].join(' ')}
           >
             {y}
@@ -192,7 +192,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
                 <tr
                   key={`${r.manager}-${r.year}`}
                   onDoubleClick={() => router.push(`/owners/${encodeURIComponent(r.manager)}`)}
-                  className="hover:bg-indigo-500/10 transition-colors"
+                  className="hover:bg-[rgba(201,150,46,0.05)] transition-colors"
                 >
                   <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06] font-bold text-s-text">
                     <div className="flex items-center gap-2">
@@ -200,34 +200,26 @@ export default function SeasonStandings({ onYearChange }: Props) {
                       {r.manager}
                     </div>
                   </td>
-                  <td>
-                    <span className="inline-block px-2 py-[2px] rounded-full text-[10px] font-bold bg-s-bg4 text-s-text2 border border-s-border num">
-                      {r.year}
-                    </span>
-                  </td>
+                  <td className="font-display text-[17px] font-bold text-s-text2">{r.year}</td>
                   <td><FinishBadge finish={r.finish} /></td>
-                  <td className="text-s-green font-bold num">{r.wins}</td>
-                  <td className="text-s-red num">{r.losses}</td>
+                  <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{r.wins}</td>
+                  <td className="font-display text-[17px] font-bold" style={{ color: '#B4636B' }}>{r.losses}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="text-s-text2 num">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="text-s-text2 num">{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="num">
-                    <span className={r.margin >= 0 ? 'text-s-green' : 'text-s-red'}>
-                      {r.margin >= 0 ? '+' : ''}{r.margin.toFixed(1)}
-                    </span>
+                  <td className="font-display text-[17px] font-semibold text-s-text2 num">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="font-display text-[17px] font-semibold num" style={{ color: '#B4636B' }}>{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="font-display text-[17px] font-bold num" style={{ color: r.margin >= 0 ? '#7FA886' : '#B4636B' }}>
+                    {r.margin >= 0 ? '+' : ''}{r.margin.toFixed(1)}
                   </td>
-                  <td className="num">
-                    <span className={r.luck >= 0 ? 'text-s-green font-bold' : 'text-s-red font-bold'}>
-                      {r.luck >= 0 ? '+' : ''}{r.luck.toFixed(1)}
-                    </span>
+                  <td className="font-display text-[17px] font-bold num" style={{ color: r.luck >= 0 ? '#7FA886' : '#B4636B' }}>
+                    {r.luck >= 0 ? '+' : ''}{r.luck.toFixed(1)}
                   </td>
                   <td>
                     {r.playoffs ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#052e16] text-s-green border border-[#166534]" style={{ boxShadow: '0 0 8px #22c55e30' }}>
+                      <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[rgba(127,168,134,0.12)] text-s-green border border-[rgba(127,168,134,0.3)]" style={{ boxShadow: '0 0 8px #7FA88630' }}>
                         ● Clinched
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#450a0a] text-s-red border border-[#7f1d1d]">
+                      <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[rgba(180,99,107,0.12)] text-s-red border border-[rgba(180,99,107,0.3)]">
                         ✕ Eliminated
                       </span>
                     )}

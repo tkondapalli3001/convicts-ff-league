@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Activity } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useLeague } from '@/context/LeagueContext'
+import Brand from './Brand'
 import { NAV_ITEMS } from './nav-items'
 
 /**
@@ -45,10 +46,10 @@ export default function MobileMenu() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="sm:hidden flex-shrink-0 p-2 -mr-1 rounded-[8px] text-slate-400 hover:text-slate-200 active:scale-[0.98] transition-all"
+        className="sm:hidden flex-shrink-0 w-11 h-11 -ml-2 flex items-center justify-center text-gold-soft active:scale-[0.98] transition-transform"
         aria-label="Open menu"
       >
-        <Menu size={17} />
+        <Menu size={18} />
       </button>
 
       {open && createPortal(
@@ -56,36 +57,29 @@ export default function MobileMenu() {
           {/* Backdrop */}
           <div
             className="absolute inset-0"
-            style={{ background: 'rgba(2, 6, 23, 0.6)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+            style={{ background: 'rgba(3, 3, 4, 0.7)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
             onClick={() => setOpen(false)}
           />
 
           {/* Drawer */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-[280px] max-w-[84vw] flex flex-col border-r border-white/[0.07] animate-slide-in-left"
+            className="absolute left-0 top-0 bottom-0 w-[280px] max-w-[84vw] flex flex-col border-r animate-slide-in-left"
             style={{
-              background: 'rgba(8, 12, 20, 0.98)',
+              background: '#070708',
+              borderColor: 'rgba(var(--gold-rgb), 0.14)',
               paddingTop: 'env(safe-area-inset-top)',
               paddingBottom: 'env(safe-area-inset-bottom)',
             }}
           >
             {/* Brand row */}
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.07]">
-              <Activity size={14} className="text-violet-500 flex-shrink-0" />
-              <span
-                className="text-[11px] font-black tracking-[3px] uppercase"
-                style={{
-                  background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                CONVICTS FF
-              </span>
+            <div
+              className="flex items-center gap-2 px-5 py-4 border-b"
+              style={{ borderColor: 'rgba(var(--gold-rgb), 0.14)' }}
+            >
+              <Brand size="sm" />
               <button
                 onClick={() => setOpen(false)}
-                className="ml-auto p-1.5 -mr-1.5 rounded-full text-slate-500 hover:text-slate-200 active:bg-white/[0.06] transition-colors"
+                className="ml-auto p-1.5 -mr-1.5 text-s-text3 hover:text-gold-soft transition-colors"
                 aria-label="Close menu"
               >
                 <X size={16} />
@@ -105,24 +99,28 @@ export default function MobileMenu() {
                     key={item.href}
                     href={item.href}
                     className={[
-                      'flex items-center gap-3 px-3 py-[11px] rounded-[10px]',
-                      'text-[11px] font-bold tracking-[1.5px] uppercase transition-colors duration-150',
+                      'flex items-center gap-3 px-3 min-h-[44px] rounded-[2px]',
+                      'text-[11px] font-bold tracking-[2px] uppercase transition-colors duration-150',
                       isActive
-                        ? 'text-violet-400 bg-violet-500/[0.08]'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]',
+                        ? 'text-gold-soft'
+                        : 'text-s-text3 hover:text-s-text',
                     ].join(' ')}
+                    style={isActive ? { background: 'rgba(var(--gold2-rgb), 0.08)' } : undefined}
                   >
-                    <Icon size={15} className="flex-shrink-0" />
+                    <Icon size={15} className={`flex-shrink-0 ${isActive ? 'text-gold-soft' : 'text-s-muted'}`} />
                     {item.label}
-                    {isActive && <span className="ml-auto w-1 h-1 rounded-full bg-violet-400" />}
+                    {isActive && <span className="ml-auto w-1 h-1 rounded-full bg-gold" />}
                   </Link>
                 )
               })}
             </nav>
 
             {/* Status footer */}
-            <div className="px-5 py-4 border-t border-white/[0.07]">
-              <div className="text-[9px] font-semibold tracking-[1.5px] uppercase text-slate-600">
+            <div
+              className="px-5 py-4 border-t"
+              style={{ borderColor: 'rgba(var(--gold-rgb), 0.08)' }}
+            >
+              <div className="text-[9px] font-semibold tracking-[2px] uppercase text-s-text3">
                 {statusText}
               </div>
             </div>

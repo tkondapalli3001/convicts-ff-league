@@ -110,7 +110,7 @@ export default function StockStandings({ picks, currentPrices, loading, lastUpda
                 <td className="px-3 py-3 text-right text-[13px] text-s-text2 num whitespace-nowrap">{fmtPrice(row.startPrice)}</td>
                 <td className="px-3 py-3 text-right text-[13px] num whitespace-nowrap">
                   {loading && row.current === undefined ? (
-                    <span className="inline-block w-3 h-3 border-2 border-s-border2 border-t-s-blue rounded-full animate-spin" />
+                    <span className="inline-block w-3 h-3 border-2 border-s-border2 border-t-gold rounded-full animate-spin" />
                   ) : row.current !== undefined ? (
                     <span className="text-s-text">{fmtPrice(row.current)}</span>
                   ) : (
@@ -168,7 +168,7 @@ export default function StockStandings({ picks, currentPrices, loading, lastUpda
       {fundRoi !== null && marketRoi !== null && (
         <div
           className={`mx-4 mb-4 mt-2 rounded-[12px] border p-5 text-center ${
-            beatingMarket ? 'border-green-500/30' : 'border-red-500/30'
+            beatingMarket ? 'border-[rgba(127,168,134,0.3)]' : 'border-[rgba(180,99,107,0.3)]'
           }`}
           style={{
             background: beatingMarket

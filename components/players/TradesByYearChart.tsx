@@ -70,7 +70,7 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
             tickLine={false}
           />
           <Tooltip
-            cursor={{ fill: 'rgba(139, 92, 246, 0.08)' }}
+            cursor={{ fill: 'rgba(201, 150, 46, 0.08)' }}
             contentStyle={{
               background: '#0d1117',
               border: '1px solid rgba(255,255,255,0.08)',
@@ -79,7 +79,7 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
               color: '#e2e8f0',
             }}
             itemStyle={{ color: '#e2e8f0' }}
-            labelStyle={{ color: '#94a3b8' }}
+            labelStyle={{ color: '#9AA0AC' }}
             formatter={(val: number) => [val, 'Trades']}
             labelFormatter={(label) => `${label} Season`}
           />
@@ -87,7 +87,7 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
             {data.map((entry) => (
               <Cell
                 key={entry.year}
-                fill={entry.count > 0 ? '#f59e0b' : '#1e2739'}
+                fill={entry.count > 0 ? '#C9A24B' : '#241f14'}
                 fillOpacity={entry.count > 0 ? 0.85 : 1}
               />
             ))}

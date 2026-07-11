@@ -14,7 +14,7 @@ export default function AnnualBreakdown() {
   return (
     <div className="gl p-[18px] mb-4 relative overflow-hidden">
       <div className="bento-fill" style={{ background: 'rgba(34,197,94,0.15)' }} />
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-[14px] relative z-10">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-[14px] relative z-10">
         Annual Breakdown
       </div>
 
@@ -42,7 +42,7 @@ export default function AnnualBreakdown() {
             {EARNINGS_DATA.map(e => {
               const tc = e.total >= 0 ? 'text-s-green' : 'text-s-red'
               return (
-                <tr key={e.owner} className="hover:bg-indigo-500/10 transition-colors">
+                <tr key={e.owner} className="hover:bg-[rgba(201,150,46,0.05)] transition-colors">
                   <td className="sticky-owner sticky left-0 z-[1] font-bold text-s-text">
                     <div className="flex items-center gap-2">
                       <OwnerAvatar name={e.owner} size="sm" />

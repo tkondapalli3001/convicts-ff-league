@@ -21,7 +21,7 @@ export default function ErrorState({ error }: Props) {
       </p>
       <button
         onClick={() => window.location.reload()}
-        className="px-6 py-[10px] bg-[#1e3a5f] border border-s-blue rounded-[8px] text-[#93c5fd] text-[13px] font-semibold cursor-pointer hover:bg-[#1e4a6f] transition-colors"
+        className="px-6 py-[10px] border border-gold rounded-[2px] text-gold-soft text-[13px] font-semibold cursor-pointer hover:bg-[rgba(201,150,46,0.10)] transition-colors"
       >
         ↺ Retry
       </button>

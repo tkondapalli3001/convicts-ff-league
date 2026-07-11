@@ -1,4 +1,5 @@
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import SectionCard from '@/components/shared/SectionCard'
 
 interface StreakEntry {
   owner: string
@@ -16,22 +17,31 @@ interface Props {
 }
 
 export default function StreakList({ title, streaks, variant }: Props) {
+  const isWin = variant === 'win'
+
   return (
-    <div className="gl p-[14px] relative overflow-hidden">
-      <div className="bento-fill" style={{ background: 'rgba(245,158,11,0.15)' }} />
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-3 relative z-10">{title}</div>
+    <SectionCard title={title} brick={!isWin}>
       {streaks.map(({ owner, streak, startYear, startWeek, endYear, endWeek }) => (
-        <div key={owner} className="flex items-center gap-2 py-[6px] border-b border-s-bg3 text-[12px]">
-          <OwnerAvatar name={owner} size="sm" />
-          <span className="font-bold w-[70px] flex-shrink-0 text-s-text">{owner}</span>
-          <span className={`text-[20px] font-extrabold w-8 num ${variant === 'win' ? 'text-s-green' : 'text-s-red'}`}>
+        <div
+          key={owner}
+          className="flex items-center gap-3 border-b px-5 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(201,150,46,0.05)]"
+          style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+        >
+          <div style={!isWin ? { opacity: 0.75 } : undefined}>
+            <OwnerAvatar name={owner} size="sm" />
+          </div>
+          <span className="w-[80px] flex-shrink-0 text-[13px] font-bold text-s-text">{owner}</span>
+          <span
+            className="w-9 flex-shrink-0 font-display text-[32px] font-bold leading-none"
+            style={{ color: isWin ? '#7FA886' : '#B4636B' }}
+          >
             {streak}
           </span>
-          <span className="text-s-text2 text-[10px]">
+          <span className="text-[10px] uppercase tracking-[0.5px] text-s-text3">
             {startYear} W{startWeek} → {endYear} W{endWeek}
           </span>
         </div>
       ))}
-    </div>
+    </SectionCard>
   )
 }

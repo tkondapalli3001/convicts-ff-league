@@ -3,12 +3,20 @@
 import { useState } from 'react'
 import { Matchup } from '@/types'
 import { h2hVsAll } from '@/lib/stats'
+import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import H2HModal from './H2HModal'
 
 interface Props {
   ownerName: string
   allMatchups: Matchup[]
   allOwnerNames: string[]
+}
+
+/** Win% → Midnight Prime semantic colour (design 4a H2H cards). */
+function pctColor(pct: number): string {
+  if (pct >= 0.55) return '#E8CE8A'
+  if (pct >= 0.45) return '#9AA0AC'
+  return '#B4636B'
 }
 
 export default function H2HGrid({ ownerName, allMatchups, allOwnerNames }: Props) {
@@ -18,24 +26,30 @@ export default function H2HGrid({ ownerName, allMatchups, allOwnerNames }: Props
 
   return (
     <>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-2">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {h2hData.map(({ opp, games, w, l, pfAvg, paAvg }) => {
-          const recCls = w > l ? 'text-s-green' : w < l ? 'text-s-red' : 'text-s-gold'
+          const pct = w / (w + l || 1)
           return (
-            <div
+            <button
               key={opp}
               onClick={() => setModal({ opp, games })}
-              className="bg-s-bg3 border border-s-border rounded-[8px] p-3 cursor-pointer transition-all duration-150 hover:border-s-blue"
+              className="rounded-[6px] border p-3.5 text-left transition-colors hover:bg-[rgba(201,150,46,0.05)]"
+              style={{ background: '#0B0B0D', borderColor: 'rgba(var(--gold-rgb), 0.12)' }}
             >
-              <div className="text-[11px] font-semibold text-s-text2 mb-1">
-                vs {opp}
+              <div className="mb-2 flex items-center gap-2">
+                <OwnerAvatar name={opp} size="sm" />
+                <span className="truncate text-[11px] font-semibold text-s-text2">vs {opp}</span>
               </div>
-              <div className={`text-[22px] font-extrabold leading-none ${recCls}`}>{w}-{l}</div>
-              <div className="text-[10px] text-s-text3 mt-1">
-                PF: {pfAvg.toFixed(1)} · PA: {paAvg.toFixed(1)}
+              <div className="font-display text-[26px] font-bold leading-none" style={{ color: pctColor(pct) }}>
+                {w}–{l}
               </div>
-              <div className="text-[10px] text-s-text3">{games.length} game{games.length !== 1 ? 's' : ''}</div>
-            </div>
+              <div className="mt-1.5 text-[10px] uppercase tracking-[0.5px] text-s-text3">
+                {(pct * 100).toFixed(0)}% · {games.length} game{games.length !== 1 ? 's' : ''}
+              </div>
+              <div className="mt-0.5 text-[10px] text-s-text3 num">
+                PF {pfAvg.toFixed(1)} · PA {paAvg.toFixed(1)}
+              </div>
+            </button>
           )
         })}
       </div>

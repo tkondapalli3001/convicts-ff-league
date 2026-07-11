@@ -10,7 +10,7 @@ export default function AnswerCard({ answer }: { answer: Exclude<Answer, { kind:
   const router = useRouter()
 
   if (answer.kind === 'stat') {
-    const accent = answer.owner ? ownerColor(answer.owner) : '#f59e0b'
+    const accent = answer.owner ? ownerColor(answer.owner) : '#C9A24B'
     return (
       <div className="bento-card relative p-6 animate-fade-in overflow-hidden">
         <div
@@ -72,7 +72,7 @@ export default function AnswerCard({ answer }: { answer: Exclude<Answer, { kind:
               </div>
               <span
                 className="text-[14px] font-black tabular-nums"
-                style={{ color: row.owner ? ownerColor(row.owner) : '#e6edf3' }}
+                style={{ color: row.owner ? ownerColor(row.owner) : '#EDE9E0' }}
               >
                 {row.value}
               </span>

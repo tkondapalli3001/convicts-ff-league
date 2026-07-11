@@ -136,7 +136,7 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
                                 {pos}
                               </span>
                               {pick.is_keeper && (
-                                <span className="text-[9px] font-bold text-s-gold bg-[#3d2000]/60 px-1 rounded border border-[#5a3000]/50">
+                                <span className="text-[9px] font-bold text-s-gold bg-[rgba(201,150,46,0.10)] px-1 rounded border border-[rgba(230,190,90,0.25)]/50">
                                   KEEP
                                 </span>
                               )}

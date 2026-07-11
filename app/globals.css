@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Midnight Prime — gold RGB tuples for variable-alpha hairlines */
+:root {
+  --gold-rgb: 230, 190, 90;   /* light gold — hairline borders */
+  --gold2-rgb: 201, 150, 46;  /* deep gold — washes, emphasis */
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -12,9 +18,9 @@
     scroll-behavior: smooth;
   }
   body {
-    font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #0B0E11;
-    color: #e2e8f0;
+    font-family: var(--font-archivo), system-ui, -apple-system, sans-serif;
+    background-color: #050506;
+    color: #EDE9E0;
     min-height: 100vh;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
@@ -22,31 +28,31 @@
   }
   /* Keyboard-only focus ring — invisible for mouse users */
   :focus-visible {
-    outline: 2px solid rgba(139, 92, 246, 0.6);
+    outline: 2px solid rgba(var(--gold2-rgb), 0.6);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 2px;
   }
   th {
     font-size: 11px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.3);
+    color: #5C6270;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     padding: 10px 12px;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(var(--gold-rgb), 0.10);
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
     transition: color 0.15s;
   }
   th:hover {
-    color: rgba(255, 255, 255, 0.6);
+    color: #C9A24B;
   }
   td {
     padding: 10px 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    color: #cbd5e1;
+    color: #9AA0AC;
     white-space: nowrap;
     transition: background 0.12s;
   }
@@ -61,7 +67,7 @@
     background: rgba(255, 255, 255, 0.02);
   }
   tbody tr:hover td {
-    background: rgba(139, 92, 246, 0.07);
+    background: rgba(var(--gold2-rgb), 0.05);
   }
 }
 
@@ -82,7 +88,7 @@
     border-radius: 999px;
   }
   *::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 92, 246, 0.35);
+    background: rgba(var(--gold2-rgb), 0.35);
   }
 }
 
@@ -107,122 +113,77 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Sticky table columns — #0d121b is rgba(15,23,42,0.4) composited over the page body */
+  /* Sticky table columns — #0B0B0D matches the Midnight Prime card background */
   .sticky-col {
     position: sticky;
     left: 0;
-    background: #0d121b;
+    background: #0B0B0D;
     z-index: 1;
   }
   tbody tr:hover .sticky-col {
-    background: #161a30;
+    background: #17140d;
   }
-  tbody tr:nth-child(even) .sticky-col { background: #0d121b; }
+  tbody tr:nth-child(even) .sticky-col { background: #0B0B0D; }
   .table-sticky-col {
     position: sticky;
     left: 0;
-    background: #0d121b;
+    background: #0B0B0D;
     z-index: 1;
   }
   tbody tr:hover .table-sticky-col {
-    background: #161a30;
+    background: #17140d;
   }
-  tbody tr:nth-child(even) .table-sticky-col { background: #0d121b; }
+  tbody tr:nth-child(even) .table-sticky-col { background: #0B0B0D; }
 
   /* Annual Breakdown + Season Standings: transparent rows, solid sticky first col */
   .ab-table tbody tr td { background: transparent; }
-  .ab-table tbody tr .sticky-owner { background: #0d121b; }
+  .ab-table tbody tr .sticky-owner { background: #0B0B0D; }
   .ss-table tbody tr td { background: transparent; }
-  .ss-table tbody tr .sticky-owner { background: #0d121b; }
-  .ss-table tbody tr:hover .sticky-owner { background: #161a30; }
-  .ab-table tbody tr:hover .sticky-owner { background: #161a30; }
+  .ss-table tbody tr .sticky-owner { background: #0B0B0D; }
+  /* Gold hover wash for sticky-column tables (class specificity beats the transparent rule) */
+  .ss-table tbody tr:hover td { background: rgba(var(--gold2-rgb), 0.05); }
+  .ab-table tbody tr:hover td { background: rgba(var(--gold2-rgb), 0.05); }
+  .ss-table tbody tr:hover .sticky-owner { background: #17140d; }
+  .ab-table tbody tr:hover .sticky-owner { background: #17140d; }
 
-  /* Glassmorphism nav/overlay */
+  /* Modal / overlay scrim — onyx wash with blur (backdrop, not a card) */
   .glass {
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    background: rgba(2, 6, 23, 0.88);
+    background: rgba(7, 7, 8, 0.9);
   }
 
-  /* Standard glass card — data panels */
+  /* Standard card — onyx panel, gold hairline, no blur (Midnight Prime) */
   .gl {
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 16px;
+    background: #0B0B0D;
+    border: 1px solid rgba(var(--gold-rgb), 0.10);
+    border-radius: 6px;
   }
 
-  /* Bento card — interactive, hover lift + sky-blue glow */
+  /* Interactive card — onyx panel; hover = gold hairline + faint gold wash, no lift/shadow */
   .bento-card {
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 16px;
+    background: #0B0B0D;
+    border: 1px solid rgba(var(--gold-rgb), 0.10);
+    border-radius: 6px;
     overflow: hidden;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    transition: background 0.18s ease, border-color 0.18s ease;
   }
   .bento-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), 0 16px 48px rgba(139, 92, 246, 0.10);
-    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(var(--gold2-rgb), 0.04);
+    border-color: rgba(var(--gold-rgb), 0.20);
   }
 
-  /* Nebula card — glass + radial violet flare in top-right corner */
-  .nebula-card {
-    position: relative;
-    isolation: isolate;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    overflow: hidden;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-  }
-  .nebula-card::before {
-    content: '';
-    position: absolute;
-    top: -28px;
-    right: -28px;
-    width: 96px;
-    height: 96px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-  }
-  .nebula-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.04);
-    border-color: rgba(139, 92, 246, 0.42);
-  }
-
-  /* Bento section accent fill — absolute radial orb, color passed via inline style */
+  /* Legacy accent-fill hook — kept as a no-op so residual markup renders nothing */
   .bento-fill {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    transform: translate(50%, -50%);
-    filter: blur(48px);
-    pointer-events: none;
-    z-index: 0;
+    display: none;
   }
 
-  /* Interactive element hover glow — tab buttons, filter pills, action buttons */
+  /* Interactive element hover — subtle gold hairline, no glow */
   .bento-interactive {
     transition: box-shadow 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   }
   .bento-interactive:hover {
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
-  }
-
-  /* Owner avatar glow */
-  .avatar-glow {
-    box-shadow: 0 0 0 2px #020617, 0 0 14px var(--glow-color, rgba(139, 92, 246, 0.35));
+    box-shadow: inset 0 0 0 1px rgba(var(--gold-rgb), 0.20);
   }
 
   /* Tabular numbers for score/stat columns */
@@ -232,39 +193,20 @@
     letter-spacing: -0.02em;
   }
 
-  /* Interactive card — hover scale */
-  .ic {
-    transition: transform 0.15s ease, filter 0.15s ease;
-    cursor: pointer;
-  }
-  .ic:hover {
-    transform: scale(1.02);
-    filter: brightness(1.12);
-  }
-
-  /* Gradient text — violet → blue */
-  .gradient-vb {
-    background: linear-gradient(135deg, #8B5CF6, #3B82F6);
+  /* Midnight Prime — small metallic lockups (monogram, wordmark, gold labels) */
+  .text-metal {
+    background: linear-gradient(180deg, #F5D67B, #C9962E);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Gradient text — gold */
-  .gradient-gold {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  /* Midnight Prime — hero / big display gradient (champion names, page titles) */
+  .text-hero-gold {
+    background: linear-gradient(180deg, #F8E3A0 0%, #E8B84B 45%, #A87A22 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-  }
-
-  /* Champion name glow — slow breathing drop-shadow (color via --champ-color) */
-  .champ-glow {
-    animation: champ-breathe 4s ease-in-out infinite;
-  }
-  @keyframes champ-breathe {
-    0%, 100% { filter: drop-shadow(0 0 14px var(--champ-color, #f59e0b) ) drop-shadow(0 0 2px transparent); opacity: 1; }
-    50%      { filter: drop-shadow(0 0 26px var(--champ-color, #f59e0b) ); opacity: 0.96; }
   }
 }
 
@@ -275,5 +217,17 @@
   }
   td {
     padding: 8px 8px;
+  }
+}
+
+/* Respect reduced-motion: kill Midnight Prime entrance + pulse animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

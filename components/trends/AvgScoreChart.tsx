@@ -27,31 +27,31 @@ export default function AvgScoreChart() {
   return (
     <div className="gl relative overflow-hidden p-[18px] mb-4">
       <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400 mb-3 relative z-10">
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-3 relative z-10">
         Average Score by Season (Points Per Team Per Game)
       </div>
       <div className="h-[200px] relative z-10">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid stroke="#1e2d45" strokeDasharray="3 3" />
+            <CartesianGrid stroke="#241f14" strokeDasharray="3 3" />
             <XAxis
               dataKey="year"
-              tick={{ fill: '#475569', fontSize: 11 }}
-              axisLine={{ stroke: '#1e2d45' }}
+              tick={{ fill: '#5C6270', fontSize: 11 }}
+              axisLine={{ stroke: '#241f14' }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: '#475569', fontSize: 11 }}
-              axisLine={{ stroke: '#1e2d45' }}
+              tick={{ fill: '#5C6270', fontSize: 11 }}
+              axisLine={{ stroke: '#241f14' }}
               tickLine={false}
               domain={['auto', 'auto']}
             />
             <Tooltip
               contentStyle={{
-                background: '#1a2234',
-                border: '1px solid #1e2d45',
+                background: '#0B0B0D',
+                border: '1px solid #241f14',
                 borderRadius: 8,
-                color: '#e2e8f0',
+                color: '#EDE9E0',
                 fontSize: 12,
               }}
               formatter={(val: number) => [`${val.toFixed(2)} pts`, 'Avg']}
@@ -59,11 +59,11 @@ export default function AvgScoreChart() {
             <Line
               type="monotone"
               dataKey="avg"
-              stroke="#f59e0b"
+              stroke="#C9962E"
               strokeWidth={2}
-              dot={{ fill: '#f59e0b', r: 4, strokeWidth: 0 }}
-              activeDot={{ r: 6, fill: '#fbbf24' }}
-              fill="rgba(245,158,11,0.1)"
+              dot={{ fill: '#C9962E', r: 4, strokeWidth: 0 }}
+              activeDot={{ r: 6, fill: '#E8CE8A' }}
+              fill="rgba(201,150,46,0.1)"
             />
           </LineChart>
         </ResponsiveContainer>

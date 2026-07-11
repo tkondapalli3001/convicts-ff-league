@@ -1,24 +1,40 @@
+import OwnerAvatar from '@/components/shared/OwnerAvatar'
+
 interface Props {
-  emoji: string
+  /** Legacy emoji prop — retained for call-site compatibility; no longer rendered. */
+  emoji?: string
   owner: string
   title: string
-  color: string
+  /** Owner identity colour — retained for compatibility; the avatar uses a gold ring. */
+  color?: string
   body: string
 }
 
-export default function TrashTalkCard({ emoji, owner, title, color, body }: Props) {
+/**
+ * Midnight Prime trash-talk card (design 3a): gold-ringed avatar, Barlow gold-bright owner
+ * name, and stat-grounded roast copy. Rendered in a 2-col grid on the Records page.
+ */
+export default function TrashTalkCard({ owner, title, body }: Props) {
   return (
     <div
-      className="gl relative overflow-hidden p-[18px] mb-3 animate-fade-in"
-      style={{ borderLeft: `3px solid ${color}` }}
+      className="overflow-hidden rounded-[6px] animate-fade-in"
+      style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
     >
-      <div className="flex gap-3 items-start">
-        <div className="text-[30px] flex-shrink-0">{emoji}</div>
-        <div>
-          <div className="text-[14px] font-extrabold text-s-text mb-[6px]">
-            {owner} — {title}
+      <div className="flex items-start gap-4 p-5">
+        <div
+          className="flex-shrink-0 rounded-full"
+          style={{ boxShadow: '0 0 0 1.5px #C9962E, 0 0 10px rgba(201,150,46,0.35)' }}
+        >
+          <OwnerAvatar name={owner} size="md" />
+        </div>
+        <div className="min-w-0">
+          <div className="font-display text-[22px] font-bold uppercase leading-none tracking-[0.5px] text-gold-bright">
+            {owner}
           </div>
-          <div className="text-[13px] text-s-text2 leading-[1.65]">{body}</div>
+          {title && (
+            <div className="mt-1 text-[10px] font-bold uppercase tracking-[2px] text-gold-dim">{title}</div>
+          )}
+          <div className="mt-2.5 text-[12px] leading-[1.6] text-s-text2">{body}</div>
         </div>
       </div>
     </div>

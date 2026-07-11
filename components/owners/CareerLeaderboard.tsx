@@ -94,8 +94,8 @@ export default function CareerLeaderboard() {
         stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : '',
       ].filter(Boolean).join(' ')}
       style={{
-        color: sortKey === k ? '#f59e0b' : undefined,
-        background: stickyFirst ? '#0d121b' : undefined,
+        color: sortKey === k ? '#C9A24B' : undefined,
+        background: stickyFirst ? '#0B0B0D' : undefined,
       }}
     >
       {label}
@@ -106,17 +106,19 @@ export default function CareerLeaderboard() {
     <div className="gl p-[18px] relative overflow-hidden">
       <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2 relative z-10">
-        <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-slate-400">
-          Career Leaderboard{playoffOnly ? ' — Playoff Games Only' : ''}
+        <div className="flex items-center gap-2.5">
+          <span className="h-px w-5 bg-gold" />
+          <div className="text-[11px] font-bold tracking-[4px] uppercase text-gold-soft">
+            Career Leaderboard{playoffOnly ? ' — Playoff Only' : ''}
+          </div>
         </div>
         <button
           onClick={() => setPlayoffOnly(p => !p)}
           className={[
-            'px-3 py-[5px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
-            playoffOnly
-              ? 'bg-[#2d1a00] border-s-gold text-s-gold'
-              : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
+            'rounded-[2px] border px-3 py-[5px] text-[10px] font-bold uppercase tracking-[1.5px] transition-colors duration-150',
+            playoffOnly ? 'border-gold text-gold-soft' : 'text-s-text3 hover:text-gold-soft',
           ].join(' ')}
+          style={playoffOnly ? undefined : { borderColor: 'rgba(var(--gold-rgb), 0.18)' }}
         >
           {playoffOnly ? '← All Games' : 'Playoffs Only'}
         </button>
@@ -143,13 +145,11 @@ export default function CareerLeaderboard() {
             </thead>
             <tbody>
               {sorted.map((d, i) => {
-                const rankColors = ['bg-[#3d2000] text-s-gold', 'bg-[#1a2030] text-[#b0c4de]', 'bg-[#1a1000] text-[#cd7f32]']
-                const rankCls = i < 3 ? rankColors[i] : 'bg-s-bg4 text-s-text3'
                 const pct = (d.winpct * 100).toFixed(1)
                 return (
-                  <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)} className="hover:bg-indigo-500/10 transition-colors">
-                    <td>
-                      <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-extrabold num ${rankCls}`}>{i + 1}</span>
+                  <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}>
+                    <td className="text-center font-display text-[17px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#3A4150' }}>
+                      {String(i + 1).padStart(2, '0')}
                     </td>
                     <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06] font-bold text-s-text">
                       <div className="flex items-center gap-2">
@@ -157,17 +157,21 @@ export default function CareerLeaderboard() {
                         {d.name}
                       </div>
                     </td>
-                  <td className="text-s-text3 num">{d.numSeasons}</td>
-                  <td className="text-s-green font-bold num">{d.allW}</td>
-                  <td className="text-s-red num">{d.allL}</td>
+                  <td className="font-display text-[17px] font-semibold text-s-text2">{d.numSeasons}</td>
+                  <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{d.allW}</td>
+                  <td className="font-display text-[17px] font-bold" style={{ color: '#B4636B' }}>{d.allL}</td>
                   <td><WinPctBadge pct={pct} /></td>
-                  <td className="text-s-text2 num">{d.avgPF.toFixed(1)}</td>
-                  <td className="text-s-text2 num">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
-                  {!playoffOnly && <td className="text-s-text2 num">{d.playoffApps}/{d.numSeasons}</td>}
-                  <td>{d.champs > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d2000] text-s-gold border border-[#5a3200]">🏆 {d.champs}x</span> : <span className="text-s-text3">—</span>}</td>
-                  <td>{d.shame > 0 ? <span className="inline-flex items-center px-2 py-[2px] rounded-full text-[10px] font-bold bg-[#3d0000] text-s-red border border-[#5a0000]">🚽 {d.shame}x</span> : <span className="text-s-text3">—</span>}</td>
-                  <td className={`num ${d.earn != null ? (d.earn >= 0 ? 'text-s-green font-bold' : 'text-s-red font-bold') : 'text-s-text3'}`}>
-                    {d.earn != null ? `${d.earn >= 0 ? '+' : ''}$${d.earn}` : '—'}
+                  <td className="font-display text-[17px] font-semibold text-s-text2 num">{d.avgPF.toFixed(1)}</td>
+                  <td className="font-display text-[17px] font-semibold text-s-text2 num">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
+                  {!playoffOnly && <td className="font-display text-[17px] font-semibold text-s-text2 num">{d.playoffApps}/{d.numSeasons}</td>}
+                  <td className="text-center font-display text-[16px] font-bold">{d.champs > 0 ? <span className="text-gold-soft">{d.champs}×</span> : <span className="text-[#3A4150]">—</span>}</td>
+                  <td className="text-center font-display text-[16px] font-bold">{d.shame > 0 ? <span className="text-loss">{d.shame}×</span> : <span className="text-[#3A4150]">—</span>}</td>
+                  <td className="text-[11px] font-bold num">
+                    {d.earn != null ? (
+                      <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>{d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}</span>
+                    ) : (
+                      <span className="text-[#3A4150]">—</span>
+                    )}
                   </td>
                 </tr>
               )
@@ -176,7 +180,7 @@ export default function CareerLeaderboard() {
           </table>
         </div>
         {/* Right-edge gradient fade — signals scrollable content */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,11,13,0.85)] z-10" />
       </div>
     </div>
   )

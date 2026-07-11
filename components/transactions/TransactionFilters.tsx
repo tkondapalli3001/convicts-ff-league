@@ -29,7 +29,7 @@ export default function TransactionFilters({
       <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
       {/* Type filter */}
       <div className="mb-3 relative z-10">
-        <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-400 mb-2">Type</div>
+        <div className="text-[9px] font-bold tracking-[2px] uppercase text-gold-soft mb-2">Type</div>
         <div className="flex gap-[6px] flex-wrap">
           {types.map(t => (
             <button
@@ -38,8 +38,8 @@ export default function TransactionFilters({
               className={[
                 'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                 activeTypes.has(t)
-                  ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
+                  ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
+                  : 'border-[rgba(230,190,90,0.14)] text-s-text3 hover:text-gold-soft',
               ].join(' ')}
             >
               {TYPE_LABELS[t]}
@@ -50,7 +50,7 @@ export default function TransactionFilters({
 
       {/* Year filter */}
       <div className="mb-3 relative z-10">
-        <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-400 mb-2">Year</div>
+        <div className="text-[9px] font-bold tracking-[2px] uppercase text-gold-soft mb-2">Year</div>
         <div className="flex gap-[6px] flex-wrap">
           {years.map(y => (
             <button
@@ -59,8 +59,8 @@ export default function TransactionFilters({
               className={[
                 'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                 activeYears.has(y)
-                  ? 'bg-[#1a2e4a] border-s-blue text-[#93c5fd]'
-                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
+                  ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
+                  : 'border-[rgba(230,190,90,0.14)] text-s-text3 hover:text-gold-soft',
               ].join(' ')}
             >
               {y}
@@ -71,7 +71,7 @@ export default function TransactionFilters({
 
       {/* Owner filter */}
       <div className="relative z-10">
-        <div className="text-[9px] font-bold tracking-[2px] uppercase text-slate-400 mb-2">Owner</div>
+        <div className="text-[9px] font-bold tracking-[2px] uppercase text-gold-soft mb-2">Owner</div>
         <div className="flex gap-[6px] flex-wrap">
           {owners.map(name => (
             <button
@@ -81,7 +81,7 @@ export default function TransactionFilters({
                 'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                 activeOwners.has(name)
                   ? 'bg-[#1a3020] border-s-green text-[#86efac]'
-                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white bento-interactive',
+                  : 'border-[rgba(230,190,90,0.14)] text-s-text3 hover:text-gold-soft',
               ].join(' ')}
             >
               {name}

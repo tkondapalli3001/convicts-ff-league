@@ -6,6 +6,7 @@ import { useRecordsData } from '@/hooks/useRecordsData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import RecordItem from '@/components/shared/RecordItem'
+import SectionCard from '@/components/shared/SectionCard'
 import PillTabs from '@/components/shared/PillTabs'
 import PageHeader from '@/components/shared/PageHeader'
 import ScoreLeaderboard from '@/components/records/ScoreLeaderboard'
@@ -44,6 +45,7 @@ export default function RecordsPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
+        kicker={`The Record Book · ${years.length} Seasons`}
         title="League Records"
         subtitle={`All-time milestones, extremes & fun stats across ${years.length} seasons`}
       />
@@ -53,75 +55,64 @@ export default function RecordsPage() {
       {/* ── EXTREMES TAB ─────────────────────────────────────────── */}
       {activeTab === 'extremes' && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-4">
-            <div>
-              <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">Scoring Extremes</div>
-              <RecordItem icon="🔥" label="Highest Single Game"     value={highScore?.pts.toFixed(2) || '—'}   context={`${highScore?.owner} · ${highScore?.year} Wk${highScore?.week} vs ${highScore?.opp}`} />
-              <RecordItem icon="🥶" label="Lowest Single Game"      value={lowScore?.pts.toFixed(2)  || '—'}   context={`${lowScore?.owner} · ${lowScore?.year} Wk${lowScore?.week} vs ${lowScore?.opp}`} />
-              <RecordItem icon="📈" label="Highest Season PF"       value={highPF?.pf.toFixed(1)     || '—'}   context={`${highPF?.name} · ${highPF?.year} · ${highPF ? (highPF.pf/14).toFixed(1) : '—'} pts/wk avg`} />
-              <RecordItem icon="📉" label="Lowest Season PF"        value={lowPF?.pf.toFixed(1)      || '—'}   context={`${lowPF?.name} · ${lowPF?.year}`} />
-            </div>
-            <div>
-              <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">Matchup Records</div>
-              <RecordItem icon="💥" label="Largest Margin of Victory" value={`${maxMargin?.margin.toFixed(2)} pts`} context={`${maxMargin?.winner} def. ${maxMargin?.loser} · ${maxMargin?.year} Wk${maxMargin?.week}`} />
-              <RecordItem icon="⚖️" label="Narrowest Victory"         value={`${minMargin?.margin.toFixed(2)} pts`} context={`${minMargin?.winner} def. ${minMargin?.loser} · ${minMargin?.year} Wk${minMargin?.week}`} />
+          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+            <SectionCard title="Scoring Extremes">
+              <RecordItem label="Highest Single Game" value={highScore?.pts.toFixed(2) || '—'} context={`${highScore?.owner} · ${highScore?.year} Wk${highScore?.week} vs ${highScore?.opp}`} />
+              <RecordItem label="Lowest Single Game" value={lowScore?.pts.toFixed(2) || '—'} context={`${lowScore?.owner} · ${lowScore?.year} Wk${lowScore?.week} vs ${lowScore?.opp}`} />
+              <RecordItem label="Highest Season PF" value={highPF?.pf.toFixed(1) || '—'} context={`${highPF?.name} · ${highPF?.year} · ${highPF ? (highPF.pf / 14).toFixed(1) : '—'} pts/wk avg`} />
+              <RecordItem label="Lowest Season PF" value={lowPF?.pf.toFixed(1) || '—'} context={`${lowPF?.name} · ${lowPF?.year}`} />
+            </SectionCard>
+            <SectionCard title="Matchup Records">
+              <RecordItem label="Largest Margin of Victory" value={`${maxMargin?.margin.toFixed(2)} pts`} context={`${maxMargin?.winner} def. ${maxMargin?.loser} · ${maxMargin?.year} Wk${maxMargin?.week}`} />
+              <RecordItem label="Narrowest Victory" value={`${minMargin?.margin.toFixed(2)} pts`} context={`${minMargin?.winner} def. ${minMargin?.loser} · ${minMargin?.year} Wk${minMargin?.week}`} />
               {biggestPlayoffBlowout && (
-                <RecordItem icon="🎯" label="Biggest Playoff Blowout" value={`${biggestPlayoffBlowout.margin.toFixed(2)} pts`} context={`${biggestPlayoffBlowout.winner} def. ${biggestPlayoffBlowout.loser} · ${biggestPlayoffBlowout.year} Wk${biggestPlayoffBlowout.week}`} />
+                <RecordItem label="Biggest Playoff Blowout" value={`${biggestPlayoffBlowout.margin.toFixed(2)} pts`} context={`${biggestPlayoffBlowout.winner} def. ${biggestPlayoffBlowout.loser} · ${biggestPlayoffBlowout.year} Wk${biggestPlayoffBlowout.week}`} />
               )}
-              <RecordItem icon="🔄" label="Most Played Rivalry"       value={`${topRivalry?.[1] || 0} games`}   context={`${rv1} vs ${rv2}`} />
-            </div>
+              <RecordItem label="Most Played Rivalry" value={`${topRivalry?.[1] || 0} games`} context={`${rv1} vs ${rv2}`} />
+            </SectionCard>
           </div>
 
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">
-            🔥 140+ Point Explosions ({high140.length} total)
-          </div>
           <ScoreLeaderboard title="140+" scores={high140} variant="high" countByOwner={countByOwner(high140)} />
-
-          <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2 mt-4">
-            🥶 Sub-80 Stinkers ({low80.length} total)
-          </div>
           <ScoreLeaderboard title="Sub-80" scores={low80} variant="low" countByOwner={countByOwner(low80)} />
         </>
       )}
 
       {/* ── RECORDS TAB ──────────────────────────────────────────── */}
       {activeTab === 'records' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
-          <div>
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">Season Records</div>
-            {bestWinPct  && <RecordItem icon="🏆" label="Best Single-Season Win%"   value={`${(bestWinPct.wins /(bestWinPct.wins +bestWinPct.losses )*100).toFixed(1)}%`} context={`${bestWinPct.name} · ${bestWinPct.year} (${bestWinPct.wins}-${bestWinPct.losses})`} />}
-            {worstWinPct && <RecordItem icon="💀" label="Worst Single-Season Win%"  value={`${(worstWinPct.wins/(worstWinPct.wins+worstWinPct.losses)*100).toFixed(1)}%`} context={`${worstWinPct.name} · ${worstWinPct.year} (${worstWinPct.wins}-${worstWinPct.losses})`} />}
-            <RecordItem icon="📊" label="Best Season PF Margin"    value={`+${(bestMarginSeason.pf -bestMarginSeason.pa).toFixed(1)}`}  context={`${bestMarginSeason.name} · ${bestMarginSeason.year}`} />
-            <RecordItem icon="🩸" label="Worst Season PF Margin"   value={`${(worstMarginSeason.pf-worstMarginSeason.pa).toFixed(1)}`} context={`${worstMarginSeason.name} · ${worstMarginSeason.year}`} />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold tracking-[3px] uppercase text-slate-400 mb-2">Career Milestones</div>
-            <RecordItem icon="💰" label="All-Time Most Money Won"   value="+$450"  context="Kerry — won 2025 for +$675 in biggest single-year payout" />
-            <RecordItem icon="🩸" label="All-Time Most Money Lost"  value="-$410"  context="Teja — 7 seasons, 0 rings, 1x toilet bowl (2021) 💔" />
-            <RecordItem icon="👑" label="Most Championships"        value="2x — Daniyaal" context="2020 & 2023 · Armaan & Dustin share 0.5x (2022 co-champs)" />
-            <RecordItem icon="🚽" label="Most Toilet Bowls"         value="2x — Nathan" context="Nathan: 2020 & 2022 · Teja: 2021 · Kerry: 2023 · Dustin: 2024 · Sonu: 2025" />
-          </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <SectionCard title="Season Records">
+            {bestWinPct && <RecordItem label="Best Single-Season Win%" value={`${(bestWinPct.wins / (bestWinPct.wins + bestWinPct.losses) * 100).toFixed(1)}%`} context={`${bestWinPct.name} · ${bestWinPct.year} (${bestWinPct.wins}-${bestWinPct.losses})`} />}
+            {worstWinPct && <RecordItem label="Worst Single-Season Win%" value={`${(worstWinPct.wins / (worstWinPct.wins + worstWinPct.losses) * 100).toFixed(1)}%`} context={`${worstWinPct.name} · ${worstWinPct.year} (${worstWinPct.wins}-${worstWinPct.losses})`} />}
+            <RecordItem label="Best Season PF Margin" value={`+${(bestMarginSeason.pf - bestMarginSeason.pa).toFixed(1)}`} context={`${bestMarginSeason.name} · ${bestMarginSeason.year}`} />
+            <RecordItem label="Worst Season PF Margin" value={`${(worstMarginSeason.pf - worstMarginSeason.pa).toFixed(1)}`} context={`${worstMarginSeason.name} · ${worstMarginSeason.year}`} />
+          </SectionCard>
+          <SectionCard title="Career Milestones">
+            <RecordItem label="All-Time Most Money Won" value="+$450" context="Kerry — won 2025 for +$675 in biggest single-year payout" />
+            <RecordItem label="All-Time Most Money Lost" value="−$410" context="Teja — 7 seasons, 0 rings, 1x toilet bowl (2021)" />
+            <RecordItem label="Most Championships" value="2×" context="Daniyaal · 2020 & 2023" />
+            <RecordItem label="Most Toilet Bowls" value="2×" context="Nathan · 2020 & 2022" />
+          </SectionCard>
         </div>
       )}
 
       {/* ── STREAKS TAB ──────────────────────────────────────────── */}
       {activeTab === 'streaks' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
-          <StreakList title="Longest Win Streaks"    streaks={topWinStreaks}  variant="win" />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <StreakList title="Longest Win Streaks" streaks={topWinStreaks} variant="win" />
           <StreakList title="Longest Losing Streaks" streaks={topLossStreaks} variant="loss" />
         </div>
       )}
 
       {/* ── TRASH TALK TAB ───────────────────────────────────────── */}
       {activeTab === 'trashtalk' && (
-        <div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {TRASH_TALK.map(t => (
             <TrashTalkCard key={t.owner} {...t} />
           ))}
         </div>
       )}
 
-      {/* ── FUN FACTS TAB ────────────────────────────────────────────── */}
+      {/* ── FUN FACTS TAB ────────────────────────────────────────── */}
       {activeTab === 'funfacts' && <FunFacts />}
     </div>
   )
