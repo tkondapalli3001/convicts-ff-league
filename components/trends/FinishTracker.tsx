@@ -50,31 +50,42 @@ export default function FinishTracker() {
         ))}
       </div>
 
-      {/* Year headers */}
-      <div className="flex items-center mb-1" style={{ paddingLeft: 78 }}>
-        {years.map(y => (
-          <span key={y} className="w-[34px] text-[10px] text-s-text3 text-center flex-shrink-0">{y}</span>
-        ))}
-      </div>
-
-      {/* Rows */}
-      {Object.entries(ownerSeasons).map(([name, seasons]) => {
-        const finishByYear: Record<number, number | null> = {}
-        seasons.forEach(s => { finishByYear[s.year] = s.finish })
-        return (
-          <div key={name} className="flex items-center gap-1 my-1">
-            <div className="w-[70px] text-[11px] text-s-text font-semibold flex-shrink-0 text-right pr-2">{name}</div>
-            <div className="flex gap-1 flex-wrap">
-              {years.map(y => {
-                const totalTeams = leagues[y]?.settings?.num_teams || 10
-                return (
-                  <FinishDot key={y} finish={finishByYear[y]} year={y} totalTeams={totalTeams} />
-                )
-              })}
-            </div>
+      {/* Year headers + finish grid — scrolls horizontally on narrow screens,
+          owner names stay pinned on the left */}
+      <div className="relative z-10 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="min-w-max">
+          {/* Year headers */}
+          <div className="flex items-center mb-1" style={{ paddingLeft: 78 }}>
+            {years.map(y => (
+              <span key={y} className="w-[34px] text-[10px] text-s-text3 text-center flex-shrink-0">{y}</span>
+            ))}
           </div>
-        )
-      })}
+
+          {/* Rows */}
+          {Object.entries(ownerSeasons).map(([name, seasons]) => {
+            const finishByYear: Record<number, number | null> = {}
+            seasons.forEach(s => { finishByYear[s.year] = s.finish })
+            return (
+              <div key={name} className="flex items-center gap-1 my-1">
+                <div
+                  className="sticky left-0 z-10 w-[70px] text-[11px] text-s-text font-semibold flex-shrink-0 text-right pr-2"
+                  style={{ background: '#0B0B0D' }}
+                >
+                  {name}
+                </div>
+                <div className="flex gap-1">
+                  {years.map(y => {
+                    const totalTeams = leagues[y]?.settings?.num_teams || 10
+                    return (
+                      <FinishDot key={y} finish={finishByYear[y]} year={y} totalTeams={totalTeams} />
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
