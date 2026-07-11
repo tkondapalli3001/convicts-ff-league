@@ -23,16 +23,16 @@ export default function AnnualBreakdown() {
           <thead>
             <tr>
               <th className="sticky left-0 z-10" style={{ background: '#0B0B0D' }}>Manager</th>
-              <th className="text-s-gold font-bold">Total</th>
+              <th>Total</th>
               {displayYears.map(y => <th key={y}>{y}</th>)}
             </tr>
           </thead>
           <tbody>
             <tr className="border-b-2 border-s-border2">
-              <td className="sticky-owner sticky left-0 z-[1] text-[10px] font-bold uppercase tracking-[1.5px] text-s-text3">
+              <td className="sticky-owner sticky left-0 z-[1] text-[10px] font-bold uppercase tracking-[1.5px] text-s-gold">
                 Buy-In
               </td>
-              <td className="text-s-text3 text-[11px]">—</td>
+              <td></td>
               {displayYears.map(y => (
                 <td key={y} className="text-[12px] font-bold text-s-gold num">
                   ${BUY_INS[y] ?? '—'}

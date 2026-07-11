@@ -172,7 +172,7 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
                     <span className="text-[#3A4150]">—</span>
                   )}
                 </td>
-                <td className="text-right text-[11px] font-bold num">
+                <td className="text-right font-display text-[17px] font-bold num">
                   {d.earn != null ? (
                     <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>
                       {d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}

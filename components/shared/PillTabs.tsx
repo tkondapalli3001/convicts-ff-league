@@ -24,7 +24,7 @@ export default function PillTabs<T extends string>({ tabs, active, onChange, chi
           key={tab.id}
           onClick={() => onChange(tab.id)}
           className={[
-            '-mb-px whitespace-nowrap border-b-2 px-3.5 py-3 text-[10px] font-bold uppercase tracking-[2px]',
+            '-mb-px whitespace-nowrap border-b-2 px-3.5 py-3 text-[13px] font-bold uppercase tracking-[1.5px]',
             'transition-colors duration-150 active:scale-[0.98]',
             active === tab.id
               ? 'border-gold text-s-text'
