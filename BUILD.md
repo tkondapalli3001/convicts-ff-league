@@ -2,7 +2,8 @@
 
 > **Single source of truth for continuing development.** Read this file, then `CLAUDE.md`
 > (rules + directory map), then `DESIGN.md` (visual system) before writing any code.
-> Last updated: **2026-07-11** (offseason; 2026 draft is 2026-08-15).
+> Last updated: **2026-07-11**. Completed tasks are folded into §2; §5 lists only
+> remaining work.
 
 ---
 
@@ -34,18 +35,20 @@ no LLM/API keys anywhere.
 
 ---
 
-## 2. Current State
+## 2. Current State (verified 2026-07-11)
 
-### 2.1 Verified health (as of 2026-07-11)
+### 2.1 Health
 
-- `main` is clean; latest commit `3032f30 spacing borders`.
-- **All 50 unit tests pass** (3 files: `lib/search/__tests__/parse.test.ts`,
-  `lib/stats/__tests__/career.test.ts`, `lib/preview/__tests__/preview.test.ts`).
+- **73 unit tests pass** across 5 files: `lib/search/__tests__/parse.test.ts`,
+  `lib/search/__tests__/resolvers.test.ts`, `lib/stats/__tests__/career.test.ts`,
+  `lib/stats/__tests__/records.test.ts`, `lib/preview/__tests__/preview.test.ts`.
+- `npm run build` succeeds; `npm run lint` has 0 errors (~45 pre-existing
+  `react-hooks` warnings are known noise).
 - Snapshots present for **2019–2025** (7 seasons) + `manifest.json`.
 - `lib/config.ts` `LEAGUE_ID = '1253186296067657729'` → **still the 2025 league**.
-  The 2026 league ID does not exist yet (draft 2026-08-15).
+  The 2026 league ID does not exist yet (draft 2026-08-15; league grows to 10 teams).
 
-### 2.2 Implemented features (all shipped, all working)
+### 2.2 Implemented features
 
 | Page | Route | What it does |
 |---|---|---|
@@ -57,13 +60,13 @@ no LLM/API keys anywhere.
 | Players | `/players` | NFL player win rates, scoring, ownership, transaction counts, headshots, player card modal |
 | Season trends | `/seasons` | Charts: average score, finish tracker, trash-talk cards |
 | This Week | `/this-week` | Live-season matchup previews — projections, playoff implications, deterministic smack talk, H2H popup per matchup |
-| Draft | `/draft` | Draft boards, slot analysis, pick order |
+| Draft | `/draft` | **"Days til Draft" countdown banner**, draft boards, slot analysis, pick order |
 | Transactions | `/transactions` | Trades, waivers, free agency with filters + detail modal |
 
-Cross-cutting features: **"Ask anything" search** (⌘K overlay, regex intent engine with
-13 intents, zero API keys, portaled to `document.body`), mobile hamburger drawer nav,
-PWA manifest + icons + OG card, gold-pulse/fade-in motion with `prefers-reduced-motion`
-support, global gold `:focus-visible` ring.
+Cross-cutting: **"Ask anything" search** (⌘K overlay, regex intent engine with
+**16 intents** incl. blowout / closest-game / who-drafted, zero API keys, portaled to
+`document.body`), mobile hamburger drawer nav, PWA manifest + icons + OG card,
+gold-pulse/fade-in motion with `prefers-reduced-motion` support, gold `:focus-visible` ring.
 
 ### 2.3 Architecture decisions already locked in (do not relitigate)
 
@@ -81,7 +84,8 @@ support, global gold `:focus-visible` ring.
 7. **Barrel imports only:** `@/lib/constants`, `@/lib/stats`, `@/lib/search`,
    `@/lib/preview`, `@/lib/data-processing`.
 8. **Search is local-only by explicit owner decision** — no LLM, no API keys. Extend it
-   by adding intents to `lib/search/parse.ts` + `resolvers.ts`.
+   by adding intents to `lib/search/parse.ts` + `resolvers.ts` (rules are ordered,
+   first hit wins; new resolvers must call existing `lib/stats` math).
 9. **Projections degrade gracefully** — `lib/preview/projections.ts` hits an
    undocumented Sleeper endpoint; every failure path returns `null` and the This Week
    page renders without the projection row.
@@ -89,61 +93,38 @@ support, global gold `:focus-visible` ring.
     fixed descendants). Don't move it back.
 11. **Pages are thin shells** — computation belongs in `hooks/` or `lib/`.
 
----
+### 2.4 Completed offseason work (July 2026) — context, not tasks
 
-## 3. Feature Roadmap
-
-### HIGH — 2026 season readiness (time-boxed: before/at draft 2026-08-15)
-
-- **F1. Season rollover** — point `LEAGUE_ID` at the new 2026 league after the draft.
-  (League grows to **10 teams** in 2026.)
-- **F2. New-owner onboarding** — any owners new in 2026 need entries in
-  `USER_ID_TO_OWNER`, `DISPLAY_NAME_TO_OWNER`, `OWNER_COLORS` (`lib/owner-map.ts`),
-  `BUY_INS` (`lib/league-history.ts`), `EARNINGS_DATA` (`lib/earnings-data.ts`),
-  and `TRASH_TALK` (`lib/narratives.ts`).
-- **F3. 10-team resilience audit** — verify nothing assumes the historical league size
-  (playoff-line math in `lib/preview/implications.ts`, standings, bracket rendering,
-  H2H grid layout, draft board columns).
-- **F4. Offseason behavior check** — confirm Home and This Week render sensibly between
-  now and week 1 (empty current season, no current week).
-
-### MEDIUM — quality and depth
-
-- **F5. Broaden unit tests** — `lib/stats/h2h.ts`, `lib/stats/records.ts`,
-  `lib/search/resolvers.ts`, `lib/data-processing/bracket-finish.ts` have no tests.
-  These encode the trickiest rules (half-titles, tie-as-win, bracket placement).
-- **F6. New search intents** — extend the 13-intent engine (e.g. "longest losing streak",
-  "biggest blowout between X and Y", "who drafted <player> in <year>"). Owner explicitly
-  wants search extended this way, never via an LLM.
-- **F7. 2026 preseason content** — ✅ "Days til Draft" countdown shipped on the Draft
-  Hub (2026-07-11): `NEXT_DRAFT_DATE` in `lib/league-history.ts` drives
-  `components/draft/DraftCountdown.tsx`, which hides itself after draft day.
-  Update the constant each offseason.
-
-### LOW — polish and hygiene
-
-- **F8. Dependency cleanup** — remove unused `framer-motion` (confirmed: zero imports
-  in source).
-- **F9. Repo hygiene** — add `tsconfig.tsbuildinfo` to `.gitignore`; decide whether
-  `design_handoff_midnight_prime/` (committed handoff assets) should stay in the repo.
-- **F10. Accessibility/perf pass** — audit table semantics, modal focus traps,
-  Lighthouse on the GitHub Pages deploy.
+- **10-team resilience audit — PASS, no changes.** Playoff spots come from
+  `league.settings.playoff_teams` (fallback 6) in `hooks/usePreviewData.ts`; the
+  `slice(0, 6)` calls in `lib/stats/records.ts` are top-N leaderboard limits; H2H grid
+  wraps; wide tables scroll in `overflow-x-auto` containers.
+- **Offseason/degraded-mode audit — PASS (code-level).** This Week falls back to the
+  last played week with an explicit empty state; projections and snapshot loaders return
+  null on every failure path. In-browser request-blocking checks still pending at season
+  start (see T4b).
+- **Test coverage added:** `records.test.ts` (computeRecords, game filters, consolation
+  exclusion, cross-season streaks) and `resolvers.test.ts` (new intents).
+- **Search intents added (T6):** `blowout`, `closest-game`, `drafted` — margin extremes
+  scoped by owner pairing/year, and per-player draft history from `ctx.ownership`.
+  `drafted` degrades to a career card when no player is named; `blowout` yields to
+  `win-streak` on "streak" queries.
+- **"Days til Draft" countdown:** `NEXT_DRAFT_DATE` in `lib/league-history.ts` drives
+  `components/draft/DraftCountdown.tsx` on the Draft Hub; hides itself after draft day.
+  **Update the constant each offseason.**
+- **Hygiene:** unused `framer-motion` removed; `tsconfig.tsbuildinfo` untracked and
+  gitignored.
 
 ---
 
-## 4. Bugs & Known Weak Areas
-
-No confirmed open bugs. All tests pass and the site is deployed. The following are
-**suspected/structural risks**, ordered by likelihood of biting:
+## 3. Open Risks
 
 | # | Area | Risk | Detection | Mitigation |
 |---|---|---|---|---|
-| B1 | `lib/config.ts` | LEAGUE_ID still 2025 — after 2026 draft the live season won't appear | Site shows no 2026 data in September | Task T1 |
+| B1 | `lib/config.ts` | LEAGUE_ID still 2025 — after the 2026 draft the live season won't appear | Site shows no 2026 data in September | Task T1 |
 | B2 | `lib/owner-map.ts` | New 2026 owner's user_id/display_name unmapped → games attributed to "Unknown" or dropped | Owner missing from standings/leaderboards | Task T2 |
-| B3 | League-size assumptions | 10-team season may break playoff-line math or grid layouts tuned to prior size | Wrong playoff implications on This Week; cramped H2H grid | Task T3 |
-| B4 | `lib/preview/projections.ts` | Undocumented Sleeper endpoint can change/vanish any time | Projection row silently disappears (this is the designed behavior — verify it stays silent, never throws) | Task T4 |
-| B5 | Offseason rendering | Between seasons, "current week" logic has no live games | Visit `/this-week` and `/` in July–August | Task T4 |
-| B6 | Snapshot drift | If 2026 rosters reuse rotated display names, historical resolution could shift | Career totals change unexpectedly after rollover | Snapshots freeze history — never regenerate old years without diffing |
+| B4 | `lib/preview/projections.ts` | Undocumented Sleeper endpoint can change/vanish any time | Projection row silently disappears (designed behavior — verify it stays silent) | Task T4b |
+| B6 | Snapshot drift | Regenerating old snapshot years could shift historical name resolution | Career totals change unexpectedly | Snapshots freeze history — never regenerate old years without diffing (T9) |
 
 **Reproduction protocol for any data bug:** `npm run dev`, open the affected page,
 compare against Sleeper's own UI for the same league/week. Historical numbers must match
@@ -151,28 +132,19 @@ the committed snapshots — if a change alters pre-2026 career totals, the chang
 
 ---
 
-## 5. Refactoring & Improvements
+## 4. Guardrails for future changes
 
-Deliberately small list — the July 2026 overhaul (Phases 0–5 in git history) already
-extracted the stat engine, thinned pages, and removed dead code. Do **not** restructure
-further without instruction.
-
-1. **Remove `framer-motion`** from `package.json` (unused; motion is pure CSS).
-2. **Gitignore `tsconfig.tsbuildinfo`** (build artifact currently committed).
-3. **Test coverage** for `lib/stats/h2h.ts`, `lib/stats/records.ts`,
-   `lib/data-processing/bracket-finish.ts`, `lib/search/resolvers.ts`.
-4. **Guard league-size constants** — where playoff spots or roster counts are used, read
-   them from the Sleeper league `settings` object rather than literals (only if literals
-   are actually found; audit first).
-5. **Do NOT:** add a backend, add SSR, add API keys, replace the search engine, introduce
+1. **Do NOT:** add a backend, add SSR, add API keys, replace the search engine, introduce
    CSS modules/styled-components, or add abstractions not demanded by a task.
+2. League-size numbers must come from Sleeper league `settings`, never literals.
+3. Never edit `public/data/` by hand — it is generated by `npm run snapshot`.
 
 ---
 
-## 6. Task List (atomic, ordered)
+## 5. Remaining Tasks
 
 Every task ends with the same **verification gate**:
-`npm run build` succeeds **and** `npx vitest run` passes (50+ tests). Data-facing tasks
+`npm run build` succeeds **and** `npx vitest run` passes (73 baseline). Data-facing tasks
 also require a visual check in `npm run dev`.
 
 ---
@@ -180,9 +152,8 @@ also require a visual check in `npm run dev`.
 ### T1 — Season rollover to 2026 league *(HIGH — blocked until draft day 2026-08-15)*
 
 **Description:** Point the app at the new 2026 Sleeper league so live data flows.
-**Inputs:** The new 2026 league ID (get from the owner or from Sleeper: the 2025 league's
-API response has no successor pointer — the *new* league's `previous_league_id` must equal
-`1253186296067657729`).
+**Inputs:** The new 2026 league ID (get from the owner or from Sleeper: the *new*
+league's `previous_league_id` must equal `1253186296067657729`).
 **Outputs:** Updated `lib/config.ts`.
 **Steps:**
 1. Open `lib/config.ts`. Replace the `LEAGUE_ID` value with the 2026 league ID string.
@@ -208,7 +179,7 @@ first name, a hex color, 2026 buy-in amount.
 2. For each user_id **not** already in `USER_ID_TO_OWNER` (`lib/owner-map.ts`): add
    `'<user_id>': '<CanonicalFirstName>'` to `USER_ID_TO_OWNER`, the display name to
    `DISPLAY_NAME_TO_OWNER`, and a distinct hex color to `OWNER_COLORS` (must be visually
-   distinct from the existing 8+ colors on an onyx background).
+   distinct from the existing colors on an onyx background).
 3. Add the owner to `BUY_INS` for 2026 in `lib/league-history.ts` (copy the shape of an
    existing entry exactly).
 4. Add a zeroed/absent-years entry to `EARNINGS_DATA` in `lib/earnings-data.ts`
@@ -221,164 +192,94 @@ exactly — these files are consumed by `lib/stats` with strict typing.
 
 ---
 
-### T3 — 10-team resilience audit *(✅ DONE 2026-07-11 — PASS, no changes needed)*
+### T4b — In-browser degraded-mode checks *(MEDIUM — at 2026 season start)*
 
-**Findings:** playoff spots already read from `league.settings.playoff_teams` with a
-fallback of 6 (`hooks/usePreviewData.ts`); the `slice(0, 6)` calls in
-`lib/stats/records.ts` are top-N leaderboard limits, not league-size assumptions;
-H2H grid is a wrapping card grid; all wide tables sit in `overflow-x-auto` containers.
-
-**Description:** Find and fix any hardcoded league-size assumptions before the league
-grows to 10 teams.
-**Inputs:** none.
-**Outputs:** A short findings report; code fixes only where a literal is confirmed.
+**Description:** The browser half of the degraded-mode audit (code half passed 2026-07-11).
 **Steps:**
-1. Grep the repo (excluding `node_modules`, `public/data`, `out`) for suspicious
-   literals: `Grep pattern: "\b(8|12)\b"` scoped to `lib/preview/`, plus read
-   `lib/preview/implications.ts` and `lib/preview/build-preview.ts` fully.
-2. Check how "playoff line" / number of playoff spots is derived. If it reads
-   `league.settings.playoff_teams` (or equivalent) → no change. If it's a literal →
-   replace with the settings value, defaulting to the literal if settings are absent.
-3. Read `components/owners/H2HGrid.tsx` and `components/draft/` tables: confirm layouts
-   are driven by array length, not fixed column counts. Check mobile overflow
-   (`overflow-x-auto`) exists on wide grids.
-4. Report findings to the owner before making any change that alters rendered output.
-5. Verification gate for any code change.
-**Constraints:** This is an audit — smallest possible diffs, no refactors.
-
----
-
-### T4 — Offseason & degraded-mode smoke test *(✅ DONE 2026-07-11 via code audit — PASS)*
-
-**Findings:** This Week falls back to the last played week of the latest season with
-pairings and has an explicit empty state; every failure path in
-`lib/preview/projections.ts` and `lib/history-snapshot.ts` returns null (fetch errors,
-non-OK responses, empty payloads), so projection rows are omitted and the snapshot
-falls back to full live fetching as designed. Re-run the in-browser portion (steps 3–4)
-at season start.
-
-**Description:** Verify the app behaves during the offseason and when projections fail.
-**Inputs:** none. **Outputs:** findings report; fixes only for crashes/blank pages.
-**Steps:**
-1. `npm run dev`. Visit every route listed in §2.2. Note any crash, empty-state jank, or
-   console error (warnings from Recharts are known noise — note but don't chase).
-2. `/this-week`: confirm the page communicates "no games this week / season over" rather
-   than an empty or broken layout.
-3. Simulate projections failure: in DevTools, block requests to the projections URL
-   (find it in `lib/preview/projections.ts`), reload `/this-week` — cards must render
-   without the projection row, no thrown errors.
-4. Simulate snapshot failure: block `public/data/manifest.json`, reload `/` — the site
-   must still fully load via live Sleeper fetches (slower is fine, broken is not).
-5. Report findings. Fix only crashes/blank states; leave cosmetic issues as new tasks.
-
----
-
-### T5 — Add tests for `lib/stats/h2h.ts` and `lib/stats/records.ts` *(✅ DONE 2026-07-11)*
-
-**Outcome:** `h2h.ts` was already covered in `career.test.ts` (this file's original
-claim was wrong). Added `lib/stats/__tests__/records.test.ts` — 11 tests covering
-`computeRecords()`, `excludeManualGames()`, and `buildConsolationGameKeys()`:
-scoring/margin extremes, low80 consolation exclusion, the >10-game win% threshold,
-cross-season streaks, top rivalry, playoff blowout. Suite is now 61 tests.
-
-**Description:** Lock down the untested halves of the stat engine.
-**Inputs:** existing test patterns in `lib/stats/__tests__/career.test.ts` (copy its
-fixture style exactly). **Outputs:** `lib/stats/__tests__/h2h.test.ts`,
-`lib/stats/__tests__/records.test.ts`.
-**Steps:**
-1. Read `career.test.ts` to learn the fixture shape for `Matchup` objects.
-2. `h2h.test.ts`: cover `h2hRecord()` — basic win/loss counting, tie handling, the
-   consolation/champ-path game filtering (see `lib/stats/game-filters.ts`), and that
-   `EXCLUDED_GAME_SCORES` games are skipped if applicable.
-3. `records.test.ts`: cover `computeRecords()` — highest/lowest single game, largest
-   margin, longest win streak and losing streak across season boundaries.
-4. `npx vitest run` — all tests pass. Do **not** change any `lib/stats` source to make a
-   test pass; if a test reveals a real bug, report it first.
-**Constraints:** Pure unit tests, no network, no snapshot JSON imports.
-
----
-
-### T6 — New search intents *(MEDIUM)*
-
-**Description:** Extend the local search engine with new question types.
-**Inputs:** Intent list to implement (propose to owner first; candidates: longest losing
-streak, biggest blowout between two owners, "who drafted X in YEAR").
-**Outputs:** Edits to `lib/search/parse.ts`, `lib/search/resolvers.ts`, new cases in
-`lib/search/__tests__/parse.test.ts`.
-**Steps (per intent):**
-1. Read `lib/search/parse.ts` — each intent is a regex row in an intent table returning
-   `{ intent, slots }`. Add a new row; reuse `extractYear()` / owner matching from
-   `lib/search/entities.ts`.
-2. Read `lib/search/resolvers.ts` — add a case that calls **existing** `lib/stats`
-   functions (never new inline math) and returns the existing answer shape.
-3. Add ≥3 parse tests per intent (phrasing variants + one negative case).
-4. Manual check: ⌘K in dev, type each phrasing, confirm the AnswerCard renders.
-5. Verification gate.
-**Constraints:** No LLM, no fetch calls, no fuzzy libraries beyond the existing
-`levenshtein()`. Stat math must come from `@/lib/stats`.
-
----
-
-### T7 — Remove `framer-motion` *(✅ DONE 2026-07-11)*
-
-**Steps:** 1. Confirm zero imports: grep `framer-motion` in `app/ components/ lib/
-hooks/ context/` (verified 2026-07-11: none). 2. `npm uninstall framer-motion`.
-3. Verification gate. 4. Commit as `Deps: drop unused framer-motion`.
-
----
-
-### T8 — Gitignore build artifact *(✅ DONE 2026-07-11)*
-
-**Steps:** 1. Append `tsconfig.tsbuildinfo` to `.gitignore`.
-2. `git rm --cached tsconfig.tsbuildinfo`. 3. Commit. (Leave
-`design_handoff_midnight_prime/` alone unless the owner says to archive it.)
+1. `npm run dev`, open `/this-week` during a live week; confirm previews render.
+2. In DevTools, block requests to the projections URL (see
+   `lib/preview/projections.ts`), reload — cards must render without the projection
+   row, no thrown errors.
+3. Block `public/data/manifest.json`, reload `/` — the site must still fully load via
+   live Sleeper fetches (slower is fine, broken is not).
+4. Report findings; fix only crashes/blank states.
 
 ---
 
 ### T9 — Post-season snapshot ritual *(HIGH — after the 2026 season completes, ~Jan 2027)*
 
-**Steps:** 1. `npm run snapshot`. 2. `git diff --stat public/data/` — expect **only**
-`season-2026.json` added and `manifest.json` updated; any change to 2019–2025 files is a
-red flag: stop and diff before committing. 3. Verification gate + visual check that the
-2026 season renders from snapshot with network blocked to `api.sleeper.app`.
+**Steps:**
+1. `npm run snapshot`.
+2. `git diff --stat public/data/` — expect **only** `season-2026.json` added and
+   `manifest.json` updated; any change to 2019–2025 files is a red flag: stop and diff
+   before committing.
+3. Verification gate + visual check that the 2026 season renders from snapshot with
+   network blocked to `api.sleeper.app`.
 4. Commit `public/data/`.
+5. Set `NEXT_DRAFT_DATE` (`lib/league-history.ts`) to the 2027 draft date once known so
+   the Draft Hub countdown returns.
 
 ---
 
-## 7. LLM-Friendly Execution Plan
+### T10 — Accessibility & performance pass *(LOW — anytime)*
+
+**Description:** Audit table semantics, modal focus traps, and Lighthouse scores on the
+GitHub Pages deploy.
+**Steps:**
+1. Run Lighthouse (mobile + desktop) against the deployed site; record scores.
+2. Check every modal (game detail, H2H, matchup, player card, transaction detail) traps
+   focus and closes on Escape.
+3. Check data tables use `<th scope>` headers and that row-hover contrast meets WCAG AA
+   on the onyx palette.
+4. Report findings before fixing; visual changes need owner sign-off (design system is
+   locked).
+
+---
+
+### T11 — Decide fate of `design_handoff_midnight_prime/` *(LOW — owner decision)*
+
+Committed design-handoff assets at the repo root. Options: keep as historical reference,
+move under `docs/`, or delete. **Ask the owner; do not act unilaterally.**
+
+---
+
+## 6. LLM-Friendly Execution Plan
 
 Rules for **any** model (Opus-class or smaller) picking up a task:
 
 ### Before touching code
 1. Read `CLAUDE.md` in full. It overrides your defaults.
-2. Read this file's §2.3 (locked decisions) and §5 item 5 (the DO-NOT list).
+2. Read this file's §2.3 (locked decisions) and §4 (guardrails).
 3. Read every file you will edit, in full, before editing.
 4. Never edit files under `public/data/` by hand — they are generated.
 
 ### While coding
 - **Imports:** only from barrels — `@/lib/constants`, `@/lib/stats`, `@/lib/search`,
   `@/lib/preview`, `@/lib/data-processing`.
-- **Styling:** Tailwind utilities only; copy classes from an existing sibling component
-  (e.g. new table cell → copy from `components/shared/StatChip.tsx` usage). Never invent
-  new colors — use tokens from `tailwind.config.ts` (`gold`, `panel`, `win`, `loss`, `s-*`).
+- **Styling:** Tailwind utilities only; copy classes from an existing sibling component.
+  Never invent new colors — use tokens from `tailwind.config.ts`
+  (`gold`, `panel`, `win`, `loss`, `s-*`).
 - **New computation** over `allMatchups` or `ownerSeasons` → wrap in `useMemo`, put the
   function in `lib/`, call it from a hook, render in the page. Pages stay thin.
+- **New search intents:** add an ordered regex rule in `lib/search/parse.ts`, a resolver
+  in `resolvers.ts` that calls existing `lib/stats` math, extend the `Intent` union in
+  `lib/search/types.ts` (the resolver record is exhaustive — TypeScript will enforce it),
+  and add parse + resolver tests.
 - **Names:** files `kebab-case`, components `PascalCase`, functions `camelCase`.
 - One task = one commit. Do not bundle tasks.
 
 ### After coding (mandatory gate, every task)
 ```
 npm run build      # must succeed (static export, TypeScript strict)
-npx vitest run     # all tests must pass (50 baseline)
+npx vitest run     # all tests must pass (73 baseline)
 npm run dev        # visually check the affected page(s)
 ```
 If the build fails on a page you didn't touch, you broke a shared module — revert and
 re-approach; do not patch the symptom.
 
 ### Execution order
-- **Now (offseason):** ~~T3 → T4 → T5 → T7 → T8~~ all done 2026-07-11 →
-  (T6 after owner confirms intents)
-- **Draft day 2026-08-15:** T1 → T2 → re-run T4 (in-browser steps) → set the next
-  `NEXT_DRAFT_DATE` once known
+- **Draft day 2026-08-15:** T1 → T2
+- **Season start (Sept 2026):** T4b
 - **Season end (~Jan 2027):** T9
+- **Anytime:** T10 (report-first), T11 (owner decision)
 - Anything not listed here that changes features or visuals: **ask the owner first.**
