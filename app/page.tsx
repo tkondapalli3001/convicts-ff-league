@@ -38,11 +38,18 @@ export default function HomePage() {
   const mostChamps  = [...careerData].sort((a, b) => b.champs - a.champs)[0]
   const topStreak   = records.topWinStreaks?.[0]
 
-  // Current season winner / runner-up / shame loser
-  const latestYear     = years.length ? years[years.length - 1] : null
-  const champRecord    = latestYear ? getChampion(latestYear, state) : null
-  const runnerUpRecord = latestYear ? getRunnerUp(latestYear, state) : null
-  const shameRecord    = latestYear ? getShameLoser(latestYear, state) : null
+  // Reigning champion's season: the latest year with a decided title. During
+  // pre-draft/in-season the newest year has no bracket yet, so walk backward.
+  const champYear = useMemo(() => {
+    for (let i = years.length - 1; i >= 0; i--) {
+      if (getChampion(years[i], state).winner !== '—') return years[i]
+    }
+    return null
+  }, [years, state])
+
+  const champRecord    = champYear ? getChampion(champYear, state) : null
+  const runnerUpRecord = champYear ? getRunnerUp(champYear, state) : null
+  const shameRecord    = champYear ? getShameLoser(champYear, state) : null
 
   const champName    = champRecord?.winner ?? 'TBD'
   const runnerUpName = runnerUpRecord?.name ?? '—'
@@ -70,8 +77,8 @@ export default function HomePage() {
         champName={champName}
         runnerUpName={runnerUpName}
         shameName={shameName}
-        seasonCount={leagueChain.length}
-        latestYear={latestYear}
+        seasonCount={champYear ? years.indexOf(champYear) + 1 : leagueChain.length}
+        latestYear={champYear}
         totalGames={allMatchups.length}
         managerCount={careerData.length}
         yearRange={yearRange}
