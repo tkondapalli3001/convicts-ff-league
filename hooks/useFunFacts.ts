@@ -3,6 +3,7 @@ import { useLeague } from '@/context/LeagueContext'
 import { useRecordsData } from '@/hooks/useRecordsData'
 import { computeLuckIndex } from '@/lib/luck'
 import { isSeasonComplete } from '@/lib/data-processing'
+import { playoffByeYears } from '@/lib/stats'
 
 interface HeartbreakEntry {
   owner: string
@@ -49,6 +50,12 @@ interface LuckDuoEntry {
   unluckiest: { owner: string; luckIndex: number }
 }
 
+interface ByeKingEntry {
+  owner: string
+  count: number
+  years: number[]
+}
+
 export interface FunFactsData {
   heartbreak: HeartbreakEntry[]
   perfectStorm: PerfectStormEntry[]
@@ -56,6 +63,7 @@ export interface FunFactsData {
   theOwner: TheOwnerEntry[]
   lowestWins: LowestWinEntry[]
   luckDuo: LuckDuoEntry | null
+  byeKings: ByeKingEntry[]
 }
 
 export function useFunFacts(): FunFactsData {
@@ -183,6 +191,12 @@ export function useFunFacts(): FunFactsData {
       }
     }
 
-    return { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo }
+    // ── Card 7: Rest for the Wicked — most first-round byes ─────────────────
+    const byeKings: ByeKingEntry[] = Object.entries(playoffByeYears(state))
+      .map(([owner, years]) => ({ owner, count: years.length, years }))
+      .sort((a, b) => b.count - a.count || a.owner.localeCompare(b.owner))
+      .slice(0, 5)
+
+    return { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo, byeKings }
   }, [state, allScores, filteredMatchups])
 }

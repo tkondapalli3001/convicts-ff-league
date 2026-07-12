@@ -1,12 +1,12 @@
 'use client'
 
-import { HeartCrack, Zap, Activity, Crown, Trash2, Clover } from 'lucide-react'
+import { HeartCrack, Zap, Activity, Crown, Trash2, Clover, Armchair } from 'lucide-react'
 // Midnight Prime semantic accents (see design 3a Fun Facts): brick loss, gold emphasis, sage luck.
 import { useFunFacts } from '@/hooks/useFunFacts'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
 export default function FunFacts() {
-  const { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo } = useFunFacts()
+  const { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo, byeKings } = useFunFacts()
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -214,6 +214,33 @@ export default function FunFacts() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* ── Rest for the Wicked (col-span-3) ──────────────────────────────── */}
+      <div className="md:col-span-3 bento-card p-[18px]">
+        <div className="flex items-center gap-2 mb-4">
+          <Armchair className="w-4 h-4 text-s-gold" />
+          <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
+            Rest for the Wicked
+          </span>
+          <span className="ml-auto text-[10px] text-s-text3">Most first-round byes earned</span>
+        </div>
+        {byeKings.length === 0 ? (
+          <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
+        ) : byeKings.map((entry, i) => (
+          <div
+            key={entry.owner}
+            className="flex items-center gap-2 py-[6px] border-b border-white/[0.04] text-[12px] last:border-b-0"
+          >
+            <span className="w-5 text-s-text3 text-[10px] num flex-shrink-0">{i + 1}</span>
+            <OwnerAvatar name={entry.owner} size="sm" />
+            <span className="font-bold text-s-text w-[62px] flex-shrink-0">{entry.owner}</span>
+            <span className="text-s-text3 text-[10px] truncate">{entry.years.join(' · ')}</span>
+            <span className="text-gold-bright font-bold num text-[14px] ml-auto flex-shrink-0">
+              {entry.count}
+            </span>
+          </div>
+        ))}
       </div>
 
     </div>

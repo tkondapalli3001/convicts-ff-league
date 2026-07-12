@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
 import { fmtPts, ownerColor, fullNameInitials } from '@/lib/utils'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA } from '@/lib/constants'
-import { buildConsolationGameKeys, excludeManualGames, gameKey } from '@/lib/stats'
+import { buildConsolationGameKeys, excludeManualGames, gameKey, playoffByeYears } from '@/lib/stats'
 import { isSeasonComplete } from '@/lib/data-processing'
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
@@ -145,13 +145,10 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const playoffStats = useMemo(() => {
     let finalsW = 0
     let finalsL = 0
-    let byes = 0
 
     for (const [yearStr, bracket] of Object.entries(brackets)) {
       const year = Number(yearStr)
-      // Byes and finals results only count once the season is complete —
-      // Sleeper pre-fills un-played brackets with placeholder seeds that
-      // would otherwise register phantom byes.
+      // Finals results only count once the season is complete
       if (!isSeasonComplete(leagues[year])) continue
       const rMap = rosterUserMaps[year] ?? {}
       const ownerEntry = Object.entries(rMap).find(([, name]) => name === ownerName)
@@ -163,19 +160,9 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         if (champGame.w === rId) finalsW++
         else if (champGame.l === rId) finalsL++
       }
-
-      const inRound1 = new Set<number>()
-      ;(bracket.winners ?? []).filter(g => g.r === 1).forEach(g => {
-        if (g.t1 != null) inRound1.add(g.t1)
-        if (g.t2 != null) inRound1.add(g.t2)
-      })
-      const directInRound2 = new Set<number>()
-      ;(bracket.winners ?? []).filter(g => g.r === 2).forEach(g => {
-        if (g.t1 != null) directInRound2.add(g.t1)
-        if (g.t2 != null) directInRound2.add(g.t2)
-      })
-      if (directInRound2.has(rId) && !inRound1.has(rId)) byes++
     }
+
+    const byes = playoffByeYears({ brackets, rosterUserMaps, leagues })[ownerName]?.length ?? 0
 
     return { finalsW, finalsL, byes }
   }, [brackets, rosterUserMaps, leagues, ownerName])
