@@ -1,11 +1,24 @@
-import type { LeagueState, OwnerSeason } from '@/types'
+import type { LeagueState, OwnerSeason, SleeperLeague } from '@/types'
 import { getFinishFromBracket } from './bracket-finish'
 import { MANUAL_CHAMPS, MANUAL_SHAME, MANUAL_PLAYOFF_OVERRIDES } from '@/lib/league-history'
 
+/**
+ * Historical stats only count completed seasons. A live season awards no
+ * records, byes, finishes, or any other accolade until Sleeper marks it
+ * complete — until then it exists only for live features (This Week, drafts).
+ */
+export function isSeasonComplete(league: SleeperLeague | undefined): boolean {
+  return (league?.status ?? 'complete') === 'complete'
+}
+
 export function buildOwnerSeasons(state: LeagueState): Record<string, OwnerSeason[]> {
-  // Collect all canonical names seen across all years
+  // Collect all canonical names seen across completed years — an in-progress
+  // season would otherwise emit partial records and provisional finishes
   const allNames = new Set<string>()
-  const loadedYears = Object.keys(state.rosterUserMaps).map(Number).sort((a, b) => a - b)
+  const loadedYears = Object.keys(state.rosterUserMaps)
+    .map(Number)
+    .filter(year => isSeasonComplete(state.leagues[year]))
+    .sort((a, b) => a - b)
   for (const year of loadedYears) {
     Object.values(state.rosterUserMaps[year] || {}).forEach(n => allNames.add(n))
   }

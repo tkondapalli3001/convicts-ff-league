@@ -1,6 +1,7 @@
 import { getChampion, getShameLoser } from '@/lib/utils'
 import { h2hRecord, buildChampPathGameKeys, gameKey } from '@/lib/stats'
 import { computeLuckIndex } from '@/lib/luck'
+import { isSeasonComplete } from '@/lib/data-processing'
 import { EARNINGS_DATA } from '@/lib/constants'
 import type { Answer, ParsedQuery, QueryContext } from './types'
 
@@ -273,10 +274,15 @@ const resolvers: Record<NonNullable<ParsedQuery['intent']>, Resolver> = {
   },
 
   luck(p, ctx) {
+    // Completed seasons only — no luck verdicts on a season in progress
+    const completedMatchups = Object.fromEntries(
+      Object.entries(ctx.state.matchups ?? {}).filter(([y]) =>
+        isSeasonComplete(ctx.state.leagues[Number(y)])
+      )
+    )
     const entries = computeLuckIndex(
-      ctx.state.matchups,
+      completedMatchups,
       ctx.state.rosterUserMaps,
-      ctx.state.ownerSeasons,
       p.year ?? undefined,
     )
     if (!entries.length) return null

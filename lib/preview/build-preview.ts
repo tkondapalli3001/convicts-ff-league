@@ -1,4 +1,5 @@
 import { h2hRecord, type H2HRecord } from '@/lib/stats'
+import { flattenSeasonMatchups } from '@/lib/data-processing'
 import type { LeagueState, Matchup } from '@/types'
 
 export interface TeamPreview {
@@ -55,8 +56,10 @@ export function getSeasonWeeks(state: LeagueState, year: number): number[] {
 export function getDefaultWeek(state: LeagueState, year: number): number {
   const weeks = getSeasonWeeks(state, year)
   if (!weeks.length) return 1
-  const played = state.allMatchups
-    .filter(m => m.year === year && (m.pts1 > 0 || m.pts2 > 0))
+  // Flattened from raw weekly data — allMatchups only holds completed
+  // seasons, and the preview season is usually the live one
+  const played = flattenSeasonMatchups(state, year)
+    .filter(m => m.pts1 > 0 || m.pts2 > 0)
     .map(m => m.week)
   const lastPlayed = played.length ? Math.max(...played) : 0
   const upcoming = weeks.find(w => w > lastPlayed)
@@ -113,17 +116,24 @@ function buildTeam(name: string, rosterId: number, priorGames: Matchup[], standi
 
 /** Build preview cards for one week of a season. */
 export function buildWeekPreviews(state: LeagueState, year: number, week: number): MatchupPreview[] {
-  const games = state.allMatchups.filter(m => m.year === year && m.week === week)
+  // The preview season is usually live and therefore absent from allMatchups
+  // (completed seasons only) — flatten it from the raw weekly data
+  const seasonGames = flattenSeasonMatchups(state, year)
+  const games = seasonGames.filter(m => m.week === week)
   if (!games.length) return []
 
-  const priorGames = state.allMatchups.filter(m => m.year === year && m.week < week)
+  const priorGames = seasonGames.filter(m => m.week < week)
   const standings = computeStandings(priorGames)
   const isPlayoff = state.matchups[year]?.[week]?.isPlayoff ?? false
 
-  // Career H2H excludes this week's own game and never-played pairings
-  const h2hPool = state.allMatchups.filter(
-    m => !(m.year === year && m.week === week) && isPlayed(m)
-  )
+  // Career H2H excludes this week's own game and never-played pairings.
+  // Completed seasons come from allMatchups; the preview season's own games
+  // are added from the flattened set (no overlap — allMatchups excludes it
+  // while live, and we drop the year before concatenating when it's not).
+  const h2hPool = [
+    ...state.allMatchups.filter(m => m.year !== year),
+    ...seasonGames.filter(m => m.week !== week),
+  ].filter(isPlayed)
 
   return games.map(g => ({
     year,

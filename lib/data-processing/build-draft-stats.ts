@@ -1,6 +1,7 @@
 import type { LeagueState, DraftPick, PlayerStat, OwnerSeason } from '@/types'
 import type { PlayerMetadata } from '@/lib/players-cache'
 import { playerDisplayName } from '@/lib/players-cache'
+import { isSeasonComplete } from './build-seasons'
 
 // ─── Player Win Rates ─────────────────────────────────────────────────────────
 // Uses already-fetched starters[] / starters_points[] in LeagueState — zero new API calls.
@@ -21,7 +22,7 @@ export function computePlayerWinRates(
 ): PlayerStat[] {
   const accum: Record<string, WinRateAccum> = {}
 
-  for (const year of Object.keys(state.matchups).map(Number)) {
+  for (const year of Object.keys(state.matchups).map(Number).filter(y => isSeasonComplete(state.leagues[y]))) {
     const rMap = state.rosterUserMaps[year] ?? {}
 
     for (const [, { matchups }] of Object.entries(state.matchups[year])) {
@@ -109,6 +110,7 @@ export function computePlayerScores(
 
   for (const [yearStr, weekMap] of Object.entries(state.matchups)) {
     const year = Number(yearStr)
+    if (!isSeasonComplete(state.leagues[year])) continue
     const rMap = state.rosterUserMaps[year] ?? {}
 
     for (const [, { matchups }] of Object.entries(weekMap)) {

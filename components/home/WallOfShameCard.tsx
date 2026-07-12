@@ -7,7 +7,12 @@ import { getShameLoser, ownerColor, avatarLetters } from '@/lib/utils'
 export default function WallOfShameCard({ years }: { years: number[] }) {
   const { state } = useLeague()
   const router = useRouter()
-  const sortedYears = [...years].sort((a, b) => b - a)
+  // Only years with a decided last place — skips the live season until the
+  // toilet bowl is played
+  const rows = [...years]
+    .sort((a, b) => b - a)
+    .map(year => ({ year, s: getShameLoser(year, state) }))
+    .filter(({ s }) => s.loser !== '—')
 
   return (
     <div
@@ -24,8 +29,7 @@ export default function WallOfShameCard({ years }: { years: number[] }) {
       </div>
 
       <div className="py-1.5">
-        {sortedYears.map(year => {
-          const s = getShameLoser(year, state)
+        {rows.map(({ year, s }) => {
           const shameClr = ownerColor(s.loser)
           const seed = (s as { seed?: number | null }).seed
           return (

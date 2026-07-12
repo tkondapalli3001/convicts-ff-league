@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { useRecordsData } from '@/hooks/useRecordsData'
 import { computeLuckIndex } from '@/lib/luck'
+import { isSeasonComplete } from '@/lib/data-processing'
 
 interface HeartbreakEntry {
   owner: string
@@ -84,8 +85,13 @@ export function useFunFacts(): FunFactsData {
       }
     }
 
+    // Fun facts are accolades — completed seasons only
+    const completedMatchups = Object.fromEntries(
+      Object.entries(state.matchups).filter(([y]) => isSeasonComplete(state.leagues[Number(y)]))
+    )
+
     const playerScores: PerfectStormEntry[] = []
-    for (const [yearStr, weekMap] of Object.entries(state.matchups)) {
+    for (const [yearStr, weekMap] of Object.entries(completedMatchups)) {
       const year = Number(yearStr)
       const rMap = state.rosterUserMaps[year] ?? {}
       for (const [weekStr, { matchups }] of Object.entries(weekMap)) {
@@ -166,7 +172,7 @@ export function useFunFacts(): FunFactsData {
       .map(s => ({ owner: s.owner, pts: s.pts, oppPts: s.oppPts, year: s.year, week: s.week, opp: s.opp }))
 
     // ── Card 6: Lucky Charm / Cosmic Punching Bag ────────────────────────────
-    const luckEntries = computeLuckIndex(state.matchups, state.rosterUserMaps, state.ownerSeasons)
+    const luckEntries = computeLuckIndex(completedMatchups, state.rosterUserMaps)
     let luckDuo: LuckDuoEntry | null = null
     if (luckEntries.length >= 2) {
       const luckiest = luckEntries[0]

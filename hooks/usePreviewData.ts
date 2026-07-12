@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { computeLuckIndex } from '@/lib/luck'
+import { flattenSeasonMatchups } from '@/lib/data-processing'
 import {
   getPreviewSeason, getSeasonWeeks, getDefaultWeek,
   buildWeekPreviews, computeStandings, computeImplication,
@@ -38,7 +39,7 @@ export function usePreviewData(selectedWeek: number | null): PreviewData {
 
   const luck = useMemo(() => {
     if (!season) return {}
-    const entries = computeLuckIndex(state.matchups, state.rosterUserMaps, state.ownerSeasons, season)
+    const entries = computeLuckIndex(state.matchups, state.rosterUserMaps, season)
     return Object.fromEntries(entries.map(e => [e.owner, e.luckIndex]))
   }, [state, season])
 
@@ -61,7 +62,9 @@ export function usePreviewData(selectedWeek: number | null): PreviewData {
   const previews = useMemo<EnrichedPreview[]>(() => {
     if (!season) return []
     const base = buildWeekPreviews(state, season, week)
-    const priorGames = state.allMatchups.filter(m => m.year === season && m.week < week)
+    // The preview season is usually live and absent from allMatchups
+    // (completed seasons only) — flatten it from the raw weekly data
+    const priorGames = flattenSeasonMatchups(state, season).filter(m => m.week < week)
     const standings = computeStandings(priorGames)
     const starters = startersByRoster(state, season, week)
     const settings = state.leagues[season]?.settings as { playoff_teams?: number } | undefined

@@ -7,7 +7,12 @@ import { getChampion, ownerColor, avatarLetters } from '@/lib/utils'
 export default function HallOfFameCard({ years }: { years: number[] }) {
   const { state } = useLeague()
   const router = useRouter()
-  const sortedYears = [...years].sort((a, b) => b - a)
+  // Only years with a decided champion — skips the live season until the
+  // title game is played
+  const rows = [...years]
+    .sort((a, b) => b - a)
+    .map(year => ({ year, c: getChampion(year, state) }))
+    .filter(({ c }) => c.winner !== '—')
 
   return (
     <div
@@ -24,8 +29,7 @@ export default function HallOfFameCard({ years }: { years: number[] }) {
       </div>
 
       <div className="py-1.5">
-        {sortedYears.map(year => {
-          const c = getChampion(year, state)
+        {rows.map(({ year, c }) => {
           const champClr = ownerColor(c.winner)
           const seed = (c as { seed?: number | string | null }).seed
           return (

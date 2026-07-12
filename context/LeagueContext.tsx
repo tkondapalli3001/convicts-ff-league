@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { SLEEPER_API, LEAGUE_ID } from '@/lib/constants'
 import { sleepFetch, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket, fetchLosersBracket, fetchDrafts, fetchDraftPicks } from '@/lib/sleeper-api'
 import { loadAllSnapshotSeasons } from '@/lib/history-snapshot'
-import { resolveOwnerName, buildFlatMatchups, buildOwnerSeasons } from '@/lib/data-processing'
+import { resolveOwnerName, buildFlatMatchups, buildOwnerSeasons, isSeasonComplete } from '@/lib/data-processing'
 import type { LeagueState, LeagueChainEntry, SleeperLeague, SleeperUser, SleeperMatchup } from '@/types'
 
 // ─── Initial State ─────────────────────────────────────────────────────────────
@@ -186,6 +186,13 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      // A season joins `years` (which drives every historical stats surface)
+      // only once Sleeper marks it complete — no records, byes, or accolades
+      // from a season still in progress. The live season stays in
+      // leagueChain/leagues/matchups so live features (This Week, draft
+      // countdown) keep working.
+      const completedYears = years.filter(y => isSeasonComplete(leagues[y]))
+
       // Build derived data
       const partialState: LeagueState = {
         ...initialState,
@@ -201,7 +208,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         allMatchups: [],
         leagueChain: chain,
         draftData,
-        years,
+        years: completedYears,
         loaded: false,
         error: null,
         loadingText: 'Processing data...',
@@ -215,7 +222,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         allMatchups,
         ownerSeasons,
         loaded: true,
-        loadingText: `${years[0]}–${years[years.length - 1]} · ${chain.length} seasons`,
+        loadingText: `${completedYears[0]}–${completedYears[completedYears.length - 1]} · ${completedYears.length} seasons`,
       })
     } catch (err) {
       const msg = (err as Error).message

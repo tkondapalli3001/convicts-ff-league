@@ -6,10 +6,12 @@ import DraftBoardModal from './DraftBoardModal'
 
 export default function PastDrafts() {
   const { state } = useLeague()
-  const { draftData, rosterUserMaps, years } = state
+  const { draftData, rosterUserMaps } = state
   const [modalYear, setModalYear] = useState<number | null>(null)
 
-  const sortedYears = [...years].sort((a, b) => b - a)
+  // Keyed off draftData (not state.years) so a freshly completed draft shows
+  // up immediately, before the season's first games are played
+  const sortedYears = Object.keys(draftData).map(Number).sort((a, b) => b - a)
 
   if (!Object.keys(draftData).length) {
     return (

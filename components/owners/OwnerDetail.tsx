@@ -6,6 +6,7 @@ import { useLeague } from '@/context/LeagueContext'
 import { fmtPts, ownerColor, fullNameInitials } from '@/lib/utils'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA } from '@/lib/constants'
 import { buildConsolationGameKeys, excludeManualGames, gameKey } from '@/lib/stats'
+import { isSeasonComplete } from '@/lib/data-processing'
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import H2HGrid from './H2HGrid'
@@ -118,6 +119,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     const playerPts: Record<string, { name: string; pos: string; pts: number }> = {}
     Object.entries(matchups).forEach(([yearStr, weeks]) => {
       const year = Number(yearStr)
+      if (!isSeasonComplete(leagues[year])) return
       const rId = ownerRosterIds[year]
       if (rId == null) return
       Object.values(weeks).forEach(({ matchups: weekMatchups }) => {
@@ -138,7 +140,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     const topScorers = Object.values(playerPts).sort((a, b) => b.pts - a.pts).slice(0, 5)
 
     return { bestGame, worstGame, topRivalName, rivalW, rivalL, maxStreak, streakStart, streakEnd, topScorers }
-  }, [nonConsolationGames, ownerName, draftData, rosterUserMaps, matchups])
+  }, [nonConsolationGames, ownerName, draftData, rosterUserMaps, matchups, leagues])
 
   const playoffStats = useMemo(() => {
     let finalsW = 0
@@ -147,6 +149,10 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
     for (const [yearStr, bracket] of Object.entries(brackets)) {
       const year = Number(yearStr)
+      // Byes and finals results only count once the season is complete —
+      // Sleeper pre-fills un-played brackets with placeholder seeds that
+      // would otherwise register phantom byes.
+      if (!isSeasonComplete(leagues[year])) continue
       const rMap = rosterUserMaps[year] ?? {}
       const ownerEntry = Object.entries(rMap).find(([, name]) => name === ownerName)
       if (!ownerEntry) continue
@@ -172,7 +178,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     }
 
     return { finalsW, finalsL, byes }
-  }, [brackets, rosterUserMaps, ownerName])
+  }, [brackets, rosterUserMaps, leagues, ownerName])
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
