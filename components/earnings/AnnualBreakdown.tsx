@@ -4,6 +4,13 @@ import { useLeague } from '@/context/LeagueContext'
 import { EARNINGS_DATA, BUY_INS } from '@/lib/constants'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
+/** Sign outside the dollar sign — "$-50" read as a broken value. */
+function fmtMoney(n: number): string {
+  if (n > 0) return `+$${n}`
+  if (n < 0) return `−$${Math.abs(n)}`
+  return '$0'
+}
+
 export default function AnnualBreakdown() {
   const { state } = useLeague()
   const { years } = state
@@ -49,13 +56,13 @@ export default function AnnualBreakdown() {
                       {e.owner}
                     </div>
                   </td>
-                  <td className={`font-bold num ${tc}`}>{e.total >= 0 ? '+' : ''}${e.total}</td>
+                  <td className={`font-bold num ${tc}`}>{fmtMoney(e.total)}</td>
                   {displayYears.map(y => {
                     const v = e[`y${y}` as keyof typeof e] as number | null
                     if (v === null || v === undefined)
                       return <td key={y} className="text-s-text3">–</td>
                     const cls = v > 0 ? 'text-s-green font-bold' : v < 0 ? 'text-s-red' : 'text-s-text3'
-                    return <td key={y} className={`num ${cls}`}>{v > 0 ? '+' : ''}${v}</td>
+                    return <td key={y} className={`num ${cls}`}>{fmtMoney(v)}</td>
                   })}
                 </tr>
               )

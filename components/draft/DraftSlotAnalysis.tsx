@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, Fragment } from 'react'
+import { createPortal } from 'react-dom'
 import { useLeague } from '@/context/LeagueContext'
 import { buildDraftSlotRows } from '@/lib/data-processing'
 
@@ -233,9 +234,11 @@ export default function DraftSlotAnalysis() {
 
       {selectedManager && (() => {
         const history = rows.filter(r => r.owner === selectedManager).sort((a, b) => b.year - a.year)
-        return (
+        // Portaled to body: the page's animate-fade-in transform would otherwise
+        // become the containing block for this fixed overlay and clip it.
+        return createPortal(
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
             onClick={() => setSelectedManager(null)}
           >
             <div
@@ -285,7 +288,8 @@ export default function DraftSlotAnalysis() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </div>,
+          document.body
         )
       })()}
     </div>

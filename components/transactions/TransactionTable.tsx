@@ -21,13 +21,19 @@ function txSummary(tx: EnrichedTransaction): string {
   if (tx.type === 'trade') {
     return `Trade between ${tx.ownerNames.join(' & ')}`
   }
-  const added = tx.addedPlayers.map(p => p.name).slice(0, 2).join(', ')
   const owner = tx.ownerNames[0] ?? '?'
-  if (tx.type === 'waiver') {
-    const bid = tx.settings?.waiver_bid
-    return `${owner} claimed ${added || '—'}${bid ? ` ($${bid})` : ''}`
+  const names = (list: EnrichedTransaction['addedPlayers']) =>
+    list.map(p => p.name).slice(0, 2).join(', ')
+  const added = names(tx.addedPlayers)
+  const dropped = names(tx.droppedPlayers)
+  const bid = tx.type === 'waiver' ? tx.settings?.waiver_bid : undefined
+  const bidSuffix = bid ? ` ($${bid})` : ''
+
+  // Drop-only moves have no adds — "claimed —" read as a broken row
+  if (!added) {
+    return dropped ? `${owner} dropped ${dropped}` : `${owner} — roster move`
   }
-  return `${owner} claimed ${added || '—'}`
+  return `${owner} claimed ${added}${bidSuffix}`
 }
 
 export default function TransactionTable({ transactions, onClick }: Props) {

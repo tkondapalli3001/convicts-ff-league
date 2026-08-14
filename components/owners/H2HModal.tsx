@@ -1,5 +1,6 @@
 'use client'
 
+import { createPortal } from 'react-dom'
 import { Matchup } from '@/types'
 import { fmtPts } from '@/lib/utils'
 import { useModalClose } from '@/hooks/useModalClose'
@@ -27,7 +28,9 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
   // Compute after loop to get final counts
   const title = `${p1} vs ${p2} — ${w1}:${games.length - w1}`
 
-  return (
+  // Portaled to body: the page's animate-fade-in transform would otherwise
+  // become the containing block for this fixed overlay and clip it.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -73,6 +76,7 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

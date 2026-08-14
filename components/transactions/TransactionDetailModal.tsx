@@ -1,5 +1,6 @@
 'use client'
 
+import { createPortal } from 'react-dom'
 import { useModalClose } from '@/hooks/useModalClose'
 import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
 
@@ -24,7 +25,9 @@ export default function TransactionDetailModal({ tx, onClose }: Props) {
 
   const isTrade = tx.type === 'trade'
 
-  return (
+  // Portaled to body: the page's animate-fade-in transform would otherwise
+  // become the containing block for this fixed overlay and clip it.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -122,6 +125,7 @@ export default function TransactionDetailModal({ tx, onClose }: Props) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

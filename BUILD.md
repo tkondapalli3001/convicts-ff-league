@@ -229,7 +229,7 @@ constants, so the rendered site must be **pixel-identical to main** after every 
 `lib/data-processing/build-seasons.ts` · `lib/utils.ts` (`ownerColor`, `getChampion`,
 `getShameLoser`, full names) · `lib/search/entities.ts` · `context/LeagueContext.tsx`
 (`LEAGUE_ID`) · `app/records/page.tsx` (`TRASH_TALK` → `narratives ?? generateTrashTalk`)
-· `app/draft/page.tsx` (`NEXT_DRAFT_DATE`) · `lib/constants.ts` (league exports removed;
+· `app/draft/page.tsx` (`NEXT_DRAFT_AT`, `NEXT_DRAFT_LABEL`) · `lib/constants.ts` (league exports removed;
 keeps `SLEEPER_API`, `BASE_PATH`, `POS_*`, `EARNINGS_DATA`, `BUY_INS`) ·
 `lib/stats/__tests__/*` (fixtures via `setActiveLeague()` with a test config).
 

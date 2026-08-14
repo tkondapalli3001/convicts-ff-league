@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 
@@ -145,7 +146,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
   return (
     <div className="gl p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-[14px]">
-        Season Standings — Click year to isolate · Double-click row to view owner
+        Season Standings — Click year to isolate · Tap a manager to view their profile
       </div>
 
       {/* Year filters */}
@@ -195,10 +196,14 @@ export default function SeasonStandings({ onYearChange }: Props) {
                   className="hover:bg-[rgba(201,150,46,0.05)] transition-colors"
                 >
                   <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06] font-bold text-s-text">
-                    <div className="flex items-center gap-2">
+                    {/* Single tap — double-click on the row alone was unreachable on touch */}
+                    <Link
+                      href={`/owners/${encodeURIComponent(r.manager)}`}
+                      className="flex items-center gap-2 transition-colors hover:text-gold-soft"
+                    >
                       <OwnerAvatar name={r.manager} size="sm" />
                       {r.manager}
-                    </div>
+                    </Link>
                   </td>
                   <td className="font-display text-[17px] font-bold text-s-text2">{r.year}</td>
                   <td><FinishBadge finish={r.finish} /></td>

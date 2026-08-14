@@ -23,6 +23,12 @@ export default function ThisWeekPage() {
   const idx = weeks.indexOf(week)
   const isPlayoff = previews[0]?.isPlayoff ?? false
 
+  // The newest league in the chain has no pairings until rosters are drafted, so
+  // the preview falls back to the last completed season. Say so, or the page
+  // reads as if a finished playoff game were this week's matchup.
+  const latestSeason = Math.max(...Object.keys(state.leagues).map(Number))
+  const preseason = Number.isFinite(latestSeason) && latestSeason > season
+
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -30,6 +36,21 @@ export default function ThisWeekPage() {
         title="This Week"
         subtitle={`Matchup previews, head-to-head history, and group-chat ammo · ${season} season`}
       />
+
+      {preseason && (
+        <div
+          className="mb-5 rounded-[6px] px-4 py-3"
+          style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.16)' }}
+        >
+          <div className="text-[10px] font-bold uppercase tracking-[2px] text-gold-soft">
+            {latestSeason} Preseason
+          </div>
+          <p className="mt-1 text-[12px] leading-snug text-s-text2">
+            The {latestSeason} season hasn&apos;t kicked off yet — previews below are the{' '}
+            {season} archive. Live matchups return in Week 1.
+          </p>
+        </div>
+      )}
 
       {/* Week selector */}
       <div className="flex items-center justify-center gap-3 mb-5">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useModalClose } from '@/hooks/useModalClose'
 import { getPlayersCache, type PlayerMetadata } from '@/lib/players-cache'
 import type { Matchup, SleeperMatchup, LeagueState } from '@/types'
@@ -153,7 +154,9 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
 
   if (!modal) return null
 
-  return (
+  // Portaled to body: the page's animate-fade-in transform would otherwise
+  // become the containing block for this fixed overlay and clip it.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -174,6 +177,7 @@ export default function GameDetailModal({ triggerGame, onClose, rawMatchups, lea
         </div>
         {modal.body}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

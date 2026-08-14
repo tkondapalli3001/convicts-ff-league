@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useLeague } from '@/context/LeagueContext'
 import { getPlayersCache, playerDisplayName } from '@/lib/players-cache'
 import { ownerColor } from '@/lib/utils'
@@ -131,7 +132,9 @@ function GameDetailModal({ detail, onClose }: { detail: GameDetail; onClose: () 
     )
   }
 
-  return (
+  // Portaled to body: the page's animate-fade-in transform would otherwise
+  // become the containing block for this fixed overlay and clip it.
+  return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       style={{ background: 'rgba(8,12,20,0.88)', backdropFilter: 'blur(6px)' }}
@@ -212,7 +215,8 @@ function GameDetailModal({ detail, onClose }: { detail: GameDetail; onClose: () 
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

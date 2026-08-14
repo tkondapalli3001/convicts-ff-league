@@ -9,12 +9,18 @@ export const BUY_INS: Record<number, number> = {
   2023: 75,
   2024: 100,
   2025: 125,
+  2026: 150,
 }
 
-// ─── Next draft date ───────────────────────────────────────────────────────────
-// Local date of the upcoming draft — drives the Draft Hub countdown, which hides
-// itself once the date passes. Update each offseason when the league sets a date.
-export const NEXT_DRAFT_DATE = '2026-08-15'
+// ─── Next draft kickoff ────────────────────────────────────────────────────────
+// Exact instant the draft starts, written with an explicit UTC offset so the
+// countdown is correct for every viewer regardless of their timezone. Drives the
+// Draft Hub countdown, which hides itself once draft day is over. Update each
+// offseason when the league sets a date (mind PDT = -07:00 vs PST = -08:00).
+export const NEXT_DRAFT_AT = '2026-08-15T13:00:00-07:00'
+
+/** Human label for NEXT_DRAFT_AT, shown under the countdown. */
+export const NEXT_DRAFT_LABEL = 'Sat Aug 15 · 1:00 PM PT'
 
 // ─── Champions — fully verified from Sleeper bracket data ─────────────────────
 export const MANUAL_CHAMPS: Champion[] = [

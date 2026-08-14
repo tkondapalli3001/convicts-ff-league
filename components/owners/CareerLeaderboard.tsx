@@ -135,7 +135,7 @@ export default function CareerLeaderboard() {
                 <SortTh k="allW"        label="W" />
                 <SortTh k="allL"        label="L" />
                 <SortTh k="winpct"      label="Win%" />
-                <SortTh k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'Avg PF'} />
+                <SortTh k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'PF/Season'} />
                 <SortTh k="avgFinish"   label="Avg Fin" />
                 {!playoffOnly && <SortTh k="playoffApps" label="Playoffs" />}
                 <SortTh k="champs"      label="🏆" />
