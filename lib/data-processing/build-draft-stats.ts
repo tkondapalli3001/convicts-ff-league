@@ -179,7 +179,8 @@ export function computeDraftOwnership(
       if (!byPlayer[player_id]) {
         byPlayer[player_id] = {
           player_id,
-          name: playerDisplayName(p, player_id),
+          // Picks carry their own name — covers rookies newer than the player index
+          name: playerDisplayName(p ?? pick.metadata, player_id),
           position: p?.position ?? pick.metadata?.position ?? '?',
           team: p?.team ?? pick.metadata?.team ?? '',
           picks: [],

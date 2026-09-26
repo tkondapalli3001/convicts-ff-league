@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { fetchTransactions } from '@/lib/sleeper-api'
-import { loadSnapshotSeason, loadSnapshotManifest } from '@/lib/history-snapshot'
+import { loadSnapshotTransactions, loadSnapshotManifest } from '@/lib/history-snapshot'
 import { getPlayersCache, playerDisplayName } from '@/lib/players-cache'
 import type { Transaction } from '@/types'
 
@@ -34,7 +34,8 @@ async function fetchBatch(leagueId: string, week: number): Promise<Transaction[]
   }
 }
 
-export function useTransactionsData(): TransactionsData {
+/** `enabled` false defers every download until the caller actually shows transactions. */
+export function useTransactionsData(enabled: boolean = true): TransactionsData {
   const { state } = useLeague()
   const [transactions, setTransactions] = useState<EnrichedTransaction[]>(_txCache ?? [])
   const [loading, setLoading] = useState(_txCache === null)
@@ -42,7 +43,7 @@ export function useTransactionsData(): TransactionsData {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!state.loaded || !state.leagueChain.length) return
+    if (!enabled || !state.loaded || !state.leagueChain.length) return
     if (_txCache !== null) {
       setTransactions(_txCache)
       setLoading(false)
@@ -88,16 +89,19 @@ export function useTransactionsData(): TransactionsData {
           }
 
           // Completed seasons come from the static snapshot — no Sleeper calls
-          const snap = snapshotYears.has(entry.year) ? await loadSnapshotSeason(entry.year) : null
-          if (snap) {
-            Object.values(snap.transactionsByWeek).forEach(enrich)
+          const snapTxs = snapshotYears.has(entry.year) ? await loadSnapshotTransactions(entry.year) : null
+          if (snapTxs) {
+            Object.values(snapTxs).forEach(enrich)
             continue
           }
 
-          // Live season: fetch all weeks in batches of 5
-          for (let batch = 1; batch <= WEEKS_PER_SEASON; batch += 5) {
+          // Live season: only weeks played so far (plus the next, where
+          // waivers land) — later weeks can't have moves yet
+          const leg = entry.data.status === 'complete' ? 0 : entry.data.settings?.leg ?? 0
+          const weeks = leg > 0 ? Math.min(WEEKS_PER_SEASON, leg + 1) : WEEKS_PER_SEASON
+          for (let batch = 1; batch <= weeks; batch += 5) {
             if (cancelled) return
-            const weekNums = Array.from({ length: 5 }, (_, i) => batch + i).filter(w => w <= WEEKS_PER_SEASON)
+            const weekNums = Array.from({ length: 5 }, (_, i) => batch + i).filter(w => w <= weeks)
             const results = await Promise.all(weekNums.map(w => fetchBatch(entry.id, w)))
             results.forEach(enrich)
           }
@@ -119,7 +123,7 @@ export function useTransactionsData(): TransactionsData {
     })()
 
     return () => { cancelled = true }
-  }, [state.loaded, state.leagueChain.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled, state.loaded, state.leagueChain.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { transactions, loading, loadingText, error }
 }

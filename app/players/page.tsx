@@ -35,8 +35,9 @@ export default function PlayersPage() {
   const { state } = useLeague()
   const { loaded, error, years, ownerSeasons } = state
   const { playerWinRates, ownership, playerScores, loading, loadingText, error: dataError } = usePlayersData()
-  const { transactions, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData()
   const [activeTab, setActiveTab] = useState<Tab>('winrate')
+  // Transactions download only once their tab is opened (then stay cached)
+  const { transactions, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData(activeTab === 'transactions')
 
   // Player card modal (lifted to page level so fixed positioning works)
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerStat | null>(null)

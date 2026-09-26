@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLeague } from '@/context/LeagueContext'
-import { getPlayersCache, playerDisplayName } from '@/lib/players-cache'
+import { getPlayersCache, playerDisplayName, type PlayerMetadata } from '@/lib/players-cache'
 import { ownerColor } from '@/lib/utils'
 import type { BracketGame, SleeperMatchup } from '@/types'
 
@@ -78,16 +78,10 @@ function resolveGameResults(
 function GameDetailModal({ detail, onClose }: { detail: GameDetail; onClose: () => void }) {
   const { state } = useLeague()
   const { result, year } = detail
-  const [playerNames, setPlayerNames] = useState<Record<string, string>>({})
+  const [players, setPlayers] = useState<Record<string, PlayerMetadata> | null>(null)
 
   useEffect(() => {
-    getPlayersCache().then(cache => {
-      const names: Record<string, string> = {}
-      for (const [id, meta] of Object.entries(cache)) {
-        names[id] = playerDisplayName(meta, id)
-      }
-      setPlayerNames(names)
-    })
+    getPlayersCache().then(setPlayers)
   }, [])
 
   const weekData = state.matchups[year]?.[result.week]
@@ -115,7 +109,7 @@ function GameDetailModal({ detail, onClose }: { detail: GameDetail; onClose: () 
       <div className="divide-y divide-s-border/30">
         {starters.map((pid, idx) => {
           const score = pts[idx] ?? allPts[pid] ?? null
-          const name = playerNames[pid] ?? `#${pid}`
+          const name = players ? playerDisplayName(players[pid], pid) : '…'
           return (
             <div key={pid} className="flex items-center justify-between px-4 py-[7px]">
               <span className="text-[12px] text-s-text2 truncate max-w-[60%]">{name}</span>
@@ -373,7 +367,6 @@ export default function PlayoffBracket({ year }: Props) {
   return (
     <>
       <div className="gl p-[18px] mt-4 relative overflow-hidden">
-        <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-gold-soft mb-1">
           {year} Playoff Bracket
         </div>
