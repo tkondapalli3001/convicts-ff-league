@@ -5,8 +5,12 @@ import type { PlayerStat } from '@/types'
 
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
+import SortHeader from '@/components/shared/SortHeader'
 
 const FLEX_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
+
+const TH_LEFT = 'cursor-pointer select-none text-left'
+const TH_RIGHT = 'cursor-pointer select-none text-right'
 
 type SortKey = 'name' | 'position' | 'games' | 'wins' | 'winRate' | 'topOwner'
 
@@ -49,15 +53,7 @@ export default function PlayerWinRateTable({ players, minGames = 10, onPlayerCli
       })
   }, [players, posFilter, minGames, sortKey, sortDir])
 
-  const SortTh = ({ k, label, right }: { k: SortKey; label: string; right?: boolean }) => (
-    <th
-      onClick={() => handleSort(k)}
-      className={`cursor-pointer select-none ${right ? 'text-right' : 'text-left'}`}
-      style={{ color: sortKey === k ? '#C9A24B' : undefined }}
-    >
-      {label} {sortKey === k ? (sortDir === 1 ? '↑' : '↓') : ''}
-    </th>
-  )
+  const sort = { sortKey, sortDir, onSort: handleSort }
 
   return (
     <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
@@ -87,12 +83,12 @@ export default function PlayerWinRateTable({ players, minGames = 10, onPlayerCli
         <table className="w-full border-collapse text-[12px] min-w-[480px]">
           <thead>
             <tr className="text-[10px] font-bold tracking-[1px] uppercase text-s-text3 border-b border-s-border">
-              <SortTh k="name" label="Player" />
-              <SortTh k="position" label="Pos" />
-              <SortTh k="games" label="G" right />
-              <SortTh k="wins" label="W" right />
-              <SortTh k="winRate" label="Win%" right />
-              <SortTh k="topOwner" label="Top Manager" />
+              <SortHeader {...sort} k="name" label="Player" className={TH_LEFT} />
+              <SortHeader {...sort} k="position" label="Pos" className={TH_LEFT} />
+              <SortHeader {...sort} k="games" label="G" className={TH_RIGHT} />
+              <SortHeader {...sort} k="wins" label="W" className={TH_RIGHT} />
+              <SortHeader {...sort} k="winRate" label="Win%" className={TH_RIGHT} />
+              <SortHeader {...sort} k="topOwner" label="Top Manager" className={TH_LEFT} />
             </tr>
           </thead>
           <tbody>

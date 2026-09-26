@@ -5,8 +5,12 @@ import type { PlayerScoreStat } from '@/lib/data-processing'
 
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
+import SortHeader from '@/components/shared/SortHeader'
 
 const FLEX_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
+
+const TH_LEFT = 'cursor-pointer select-none text-left'
+const TH_RIGHT = 'cursor-pointer select-none text-right'
 
 type SortKey = 'rank' | 'name' | 'position' | 'totalPoints' | 'games' | 'avgPPG'
 
@@ -85,15 +89,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
     )
   }, [playerScores])
 
-  const SortTh = ({ k, label, right }: { k: SortKey; label: string; right?: boolean }) => (
-    <th
-      onClick={() => handleSort(k)}
-      className={`cursor-pointer select-none ${right ? 'text-right' : 'text-left'}`}
-      style={{ color: sortKey === k ? '#C9A24B' : undefined }}
-    >
-      {label} {sortKey === k ? (sortDir === 1 ? '↑' : '↓') : ''}
-    </th>
-  )
+  const sort = { sortKey, sortDir, onSort: handleSort }
 
   return (
     <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
@@ -191,11 +187,11 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
           <thead>
             <tr className="text-[10px] font-bold tracking-[1px] uppercase text-s-text3 border-b border-s-border">
               <th className="text-left w-8">#</th>
-              <SortTh k="name" label="Player" />
-              <SortTh k="position" label="Pos" />
-              <SortTh k="totalPoints" label="Total Pts" right />
-              <SortTh k="games" label="G" right />
-              <SortTh k="avgPPG" label="Avg PPG" right />
+              <SortHeader {...sort} k="name" label="Player" className={TH_LEFT} />
+              <SortHeader {...sort} k="position" label="Pos" className={TH_LEFT} />
+              <SortHeader {...sort} k="totalPoints" label="Total Pts" className={TH_RIGHT} />
+              <SortHeader {...sort} k="games" label="G" className={TH_RIGHT} />
+              <SortHeader {...sort} k="avgPPG" label="Avg PPG" className={TH_RIGHT} />
             </tr>
           </thead>
           <tbody>
