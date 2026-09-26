@@ -26,7 +26,6 @@ export default function AvgScoreChart() {
 
   return (
     <div className="gl relative overflow-hidden p-[18px] mb-4">
-      <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-3 relative z-10">
         Average Score by Season (Points Per Team Per Game)
       </div>

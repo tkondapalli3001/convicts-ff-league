@@ -5,6 +5,8 @@ const config: Config = {
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './context/**/*.{ts,tsx}',
+    // Position palettes (POS_TEXT_CLASSES / POS_BADGE_CLASSES) live in lib/
+    './lib/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {

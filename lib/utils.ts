@@ -29,13 +29,21 @@ export function fmtPts(n: number | null | undefined): string {
   return n != null ? parseFloat(String(n)).toFixed(2) : '—'
 }
 
-export function fmtPct(w: number, l: number): string {
-  const t = w + l
-  return t > 0 ? ((w / t) * 100).toFixed(1) + '%' : '—'
+/** Signed dollars with a true minus sign: +$50, −$50, $0. */
+export function fmtMoney(n: number): string {
+  if (n === 0) return '$0'
+  return `${n > 0 ? '+' : '−'}$${Math.abs(n)}`
 }
 
-export function fmtMoney(n: number): string {
-  return `${n >= 0 ? '+' : ''}$${n}`
+/** Compact elapsed time: "just now", "40s ago", "5m ago", "3h ago", "2d ago". */
+export function timeAgo(ms: number): string {
+  const s = Math.max(0, Math.round(ms / 1000))
+  if (s < 10) return 'just now'
+  if (s < 60) return `${s}s ago`
+  const m = Math.floor(s / 60)
+  if (m < 60) return `${m}m ago`
+  const h = Math.floor(m / 60)
+  return h < 24 ? `${h}h ago` : `${Math.floor(h / 24)}d ago`
 }
 
 // ─── Win% classification ──────────────────────────────────────────────────────
@@ -139,18 +147,4 @@ export function getShameLoser(year: number, state: LeagueState) {
     return { year, loser: rMap[String(toiletGame.w)] || `Team${toiletGame.w}`, seed: seedMap[toiletGame.w] ?? null }
   }
   return { year, loser: '—', seed: null }
-}
-
-// ─── Generic Sorting ──────────────────────────────────────────────────────────
-
-export function sortBy<T>(arr: T[], key: keyof T, dir: 1 | -1 = 1): T[] {
-  return [...arr].sort((a, b) => {
-    let av = a[key] as unknown
-    let bv = b[key] as unknown
-    if (av == null) av = dir > 0 ? Infinity : -Infinity
-    if (bv == null) bv = dir > 0 ? Infinity : -Infinity
-    if (typeof av === 'string' && typeof bv === 'string')
-      return av.localeCompare(bv) * dir
-    return ((av as number) - (bv as number)) * dir
-  })
 }

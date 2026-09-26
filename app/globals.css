@@ -113,28 +113,6 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Sticky table columns — #0B0B0D matches the Midnight Prime card background */
-  .sticky-col {
-    position: sticky;
-    left: 0;
-    background: #0B0B0D;
-    z-index: 1;
-  }
-  tbody tr:hover .sticky-col {
-    background: #17140d;
-  }
-  tbody tr:nth-child(even) .sticky-col { background: #0B0B0D; }
-  .table-sticky-col {
-    position: sticky;
-    left: 0;
-    background: #0B0B0D;
-    z-index: 1;
-  }
-  tbody tr:hover .table-sticky-col {
-    background: #17140d;
-  }
-  tbody tr:nth-child(even) .table-sticky-col { background: #0B0B0D; }
-
   /* Annual Breakdown + Season Standings: transparent rows, solid sticky first col */
   .ab-table tbody tr td { background: transparent; }
   .ab-table tbody tr .sticky-owner { background: #0B0B0D; }
@@ -145,13 +123,6 @@
   .ab-table tbody tr:hover td { background: rgba(var(--gold2-rgb), 0.05); }
   .ss-table tbody tr:hover .sticky-owner { background: #17140d; }
   .ab-table tbody tr:hover .sticky-owner { background: #17140d; }
-
-  /* Modal / overlay scrim — onyx wash with blur (backdrop, not a card) */
-  .glass {
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    background: rgba(7, 7, 8, 0.9);
-  }
 
   /* Standard card — onyx panel, gold hairline, no blur (Midnight Prime) */
   .gl {
@@ -171,19 +142,6 @@
   .bento-card:hover {
     background: rgba(var(--gold2-rgb), 0.04);
     border-color: rgba(var(--gold-rgb), 0.20);
-  }
-
-  /* Legacy accent-fill hook — kept as a no-op so residual markup renders nothing */
-  .bento-fill {
-    display: none;
-  }
-
-  /* Interactive element hover — subtle gold hairline, no glow */
-  .bento-interactive {
-    transition: box-shadow 0.18s ease, border-color 0.18s ease, color 0.18s ease;
-  }
-  .bento-interactive:hover {
-    box-shadow: inset 0 0 0 1px rgba(var(--gold-rgb), 0.20);
   }
 
   /* Tabular numbers for score/stat columns */

@@ -104,7 +104,6 @@ export default function CareerLeaderboard() {
 
   return (
     <div className="gl p-[18px] relative overflow-hidden">
-      <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2 relative z-10">
         <div className="flex items-center gap-2.5">
           <span className="h-px w-5 bg-gold" />

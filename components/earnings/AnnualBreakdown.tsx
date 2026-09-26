@@ -3,13 +3,7 @@
 import { useLeague } from '@/context/LeagueContext'
 import { EARNINGS_DATA, BUY_INS } from '@/lib/constants'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
-
-/** Sign outside the dollar sign — "$-50" read as a broken value. */
-function fmtMoney(n: number): string {
-  if (n > 0) return `+$${n}`
-  if (n < 0) return `−$${Math.abs(n)}`
-  return '$0'
-}
+import { fmtMoney } from '@/lib/utils'
 
 export default function AnnualBreakdown() {
   const { state } = useLeague()
@@ -20,7 +14,6 @@ export default function AnnualBreakdown() {
 
   return (
     <div className="gl p-[18px] mb-4 relative overflow-hidden">
-      <div className="bento-fill" style={{ background: 'rgba(34,197,94,0.15)' }} />
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-[14px] relative z-10">
         Annual Breakdown
       </div>

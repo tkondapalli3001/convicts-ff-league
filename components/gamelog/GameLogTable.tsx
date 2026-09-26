@@ -18,7 +18,6 @@ export default function GameLogTable({ matchups, onClick }: Props) {
 
   return (
     <div className="gl overflow-hidden relative">
-      <div className="bento-fill" style={{ background: 'rgba(59,130,246,0.15)' }} />
       <div className="max-h-[600px] overflow-y-auto overflow-x-auto relative z-10" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div className="min-w-[520px]">
         {matchups.map(g => {
