@@ -2,7 +2,7 @@
 
 > **Single source of truth for continuing development.** Read this file, then `CLAUDE.md`
 > (rules + directory map), then `DESIGN.md` (visual system) before writing any code.
-> Last updated: **2026-07-11**.
+> Last updated: **2026-09-26**.
 
 ---
 
@@ -11,8 +11,10 @@
 This repo now serves two products built on the same config-driven core:
 
 - **Product A — Convicts FF League** (this deployment). The 7-season archive as it exists
-  today. **Feature-frozen and owner-approved** — no new features, no visual changes.
-  Remaining work is a maintenance calendar (§3) tied to the league's yearly rhythm.
+  today. **Feature-frozen and owner-approved** — no new features, no visual changes
+  unless the owner asks (they did on 2026-09-26: the "This Week" tab became the **2026**
+  season hub with Power Rankings and live-synced Rosters). Remaining work is a
+  maintenance calendar (§3) tied to the league's yearly rhythm.
 - **Product B — League App** *(working name — rename later)*. The same pages and
   components, driven by **any Sleeper league ID** via a dynamic `/league/[id]` route,
   deployed to **Vercel** for production testing. Everything league-specific becomes
@@ -36,21 +38,23 @@ Convicts build acts as the regression oracle for all refactors.
 
 ---
 
-## 2. Product A: Convicts — Current State (verified 2026-07-11)
+## 2. Product A: Convicts — Current State (verified 2026-09-26)
 
 Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deployed to
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest.
 
-- **Health:** 73 unit tests pass (5 files); `npm run build` succeeds; lint 0 errors
-  (~45 known `react-hooks` warnings). Snapshots frozen for **2019–2025** + manifest.
+- **Health:** 100 unit tests pass (8 files); `npm run build` succeeds; lint 0 errors
+  (15 known `react-hooks`/`no-img-element` warnings). Snapshots frozen for
+  **2019–2025** (season + transactions files) + `players.json` + manifest.
 - **Live season:** `lib/config.ts` `LEAGUE_ID = '1367670546694705152'` → the **2026
-  league** ("Misc Convicts", `pre_draft`, 10 teams, all user_ids mapped). Draft
-  2026-08-15; `playoff_teams: 6`, `playoff_week_start: 15`.
-- **Pages:** Home, Seasons/game log, Records, Owners (+ per-owner profiles), Players,
-  Season trends, This Week, Draft (countdown banner), Transactions. Cross-cutting:
+  league** ("Misc Convicts", `in_season`, 10 teams, all user_ids mapped). Half-PPR,
+  `playoff_teams: 6`, `playoff_week_start: 15`, trade deadline week 13.
+- **Pages:** Home, Seasons (Standings · Game Log · Finish Tracker · Scoring Trend),
+  Records, Owners (+ per-owner profiles), Players, **2026** (Matchups · Power Rankings ·
+  Rosters — live-synced with Sleeper; `/this-week` redirects here), Draft. Cross-cutting:
   ⌘K "ask anything" search (16 local intents, no API keys), mobile drawer nav, PWA,
-  reduced-motion support. July 2026 offseason plan complete — see git history for detail.
+  reduced-motion support.
 
 ### Commands
 
@@ -61,6 +65,8 @@ Prime) · Recharts · React Context · Vitest.
 | `npm test` / `npx vitest run` | Unit tests (`lib/**/__tests__/**/*.test.ts`) |
 | `npm run lint` | ESLint 9 flat config |
 | `npm run snapshot` | Freeze completed seasons into `public/data/` (yearly ritual) |
+| `npm run snapshot -- --players-only` | Rebuild only `players.json` (after each draft) |
+| `node scripts/luck-index.mjs <leagueId>` | Any league's Luck Index via `lib/stats/luck.ts` |
 
 ---
 
@@ -69,26 +75,22 @@ Prime) · Recharts · React Context · Vitest.
 Every item ends with the standard **verification gate** (§7). Nothing here is actionable
 today — each fires on its date or on an owner decision.
 
-### M1 — 2026 buy-in *(when the league sets it — formerly T2b)*
-`BUY_INS` (currently `lib/league-history.ts`; moves into the Convicts config in Phase 1)
-ends at `2025: 125`. Add the `2026: <amount>` entry so earnings math stays correct at
-season's end.
+### M1 — 2026 buy-in — **done 2026-08-14** (`2026: 150`)
 
-### M2 — In-browser degraded-mode checks *(season start, ~Sept 2026 — formerly T4b)*
-The browser half of the degraded-mode audit (code half passed 2026-07-11):
-1. `npm run dev`, open `/this-week` during a live week; confirm previews render.
-2. In DevTools, block requests to the projections URL (see
-   `lib/preview/projections.ts`), reload — cards must render without the projection row,
-   no thrown errors.
+### M2 — In-browser degraded-mode checks *(formerly T4b)*
+Steps 1–2 **passed 2026-09-26** (Week 3, live): `/2026` renders previews, power
+rankings, and rosters; with `api.sleeper.com` blocked, matchups render without the
+projection row and rosters resolve every name via the player-name fallback, no errors.
+Remaining:
 3. Block `public/data/manifest.json`, reload `/` — the site must still fully load via
    live Sleeper fetches (slower is fine, broken is not).
 4. Report findings; fix only crashes/blank states.
 
 ### M3 — Post-season snapshot ritual *(~Jan 2027 — formerly T9)*
 1. `npm run snapshot`.
-2. `git diff --stat public/data/` — expect **only** `season-2026.json` added and
-   `manifest.json` updated; any change to 2019–2025 files is a red flag: stop and diff
-   before committing.
+2. `git diff --stat public/data/` — expect **only** `season-2026.json` and
+   `transactions-2026.json` added, `players.json` and `manifest.json` updated; any change
+   to 2019–2025 files is a red flag: stop and diff before committing.
 3. Verification gate + visual check that 2026 renders from snapshot with network blocked
    to `api.sleeper.app`.
 4. Commit `public/data/`.
@@ -106,11 +108,26 @@ architecture or the Midnight Prime palette. **No action without owner sign-off.*
 3. **Focus traps:** modals close on Escape and announce as dialogs, but Tab can reach the
    page behind. Full trap is a larger change; add only if the owner wants it.
 
+### M5 — 2026-09-26 audit findings — **done 2026-09-26** (owner-approved)
+1. `/transactions` deleted (duplicate of Players → Transactions); `/gamelog`'s Game Log
+   is now **Seasons → Game Log** (box-score slot labels fixed), route deleted.
+2. Transactions split into lazy `transactions-<year>.json` via a one-off byte-verified
+   split (no regeneration) — first-visit history payload 3.2 MB → 1.3 MB.
+3. `players.json` name index (1,189 players, ~40 KB / 15 KB gzipped) replaces Sleeper's
+   ~15 MB dump everywhere; the dump is only a fallback if the index is missing.
+4. One Luck Index formula in `lib/stats/luck.ts` (ties ½) for Seasons, Records, search,
+   the 2026 tab, and `scripts/luck-index.mjs`. Only 2022 Nathan/Manu moved (≤0.05 wins).
+5. Sort headers hoisted into `components/shared/SortHeader.tsx` — 25 lint warnings gone.
+
+Still open (not approved yet): `ordinal`, `pctColor`, and `formatDate` each have 2–3
+local copies across components.
+
 ### Open risks
 
 | # | Area | Risk | Detection | Mitigation |
 |---|---|---|---|---|
-| B4 | `lib/preview/projections.ts` | Undocumented Sleeper endpoint can change/vanish any time | Projection row silently disappears (designed behavior — verify it stays silent) | M2 |
+| B4 | `lib/preview/projections.ts` | Undocumented `api.sleeper.com` projections + per-player endpoints can change/vanish any time | Projections silently disappear; roster names come from the player index (designed behavior) | M2 |
+| B8 | `lib/preview/live.ts` | Week finality comes from `settings.last_scored_leg`; if Sleeper stops updating it, a finished week stays "in progress" | Power rankings stop advancing past a completed week | Fallback is `leg − 1`; check the league JSON |
 | B6 | Snapshot drift | Regenerating old snapshot years could shift historical name resolution | Career totals change unexpectedly | Snapshots freeze history — never regenerate old years without diffing (M3) |
 | B7 | Sleeper display-name churn | Owner renames mid-season fall back to user_id mapping (fine), but aliases power search | New alias not searchable | Add the alias to the Convicts config when noticed |
 
@@ -275,7 +292,8 @@ unless demand justifies a backend + OAuth/credential handling).
    backend-free in v1.
 2. **Snapshot-first, live-fallback.** The snapshot is an accelerator, never a dependency —
    if `manifest.json` fails, full live fetching must still work.
-3. **One global store** — `LeagueContext` loads once on mount, never refetches.
+3. **One global store** — `LeagueContext` loads once on mount, never refetches. The
+   2026 tab's `useLiveSeason` polls and *overlays* a copy; it never writes back.
 4. **Stat math lives only in `lib/stats/`** — half-titles (0.5), shared-winner matching,
    tie-as-win rules are centralized. Never recompute in components.
 5. **Name resolution via `resolveOwnerName()` / `rosterUserMaps[year]`** — canonical
@@ -288,7 +306,7 @@ unless demand justifies a backend + OAuth/credential handling).
    intents in `lib/search/parse.ts` + `resolvers.ts` (ordered rules, first hit wins;
    resolvers call existing `lib/stats` math).
 9. **Projections degrade gracefully** — every failure path in
-   `lib/preview/projections.ts` returns `null`; This Week renders without the row.
+   `lib/preview/projections.ts` returns `null`; the 2026 tab renders without them.
 10. **Search overlay stays portaled to `document.body`** (navbar `backdrop-filter` clips
     fixed descendants).
 11. **Pages are thin shells** — computation in `hooks/` or `lib/`.

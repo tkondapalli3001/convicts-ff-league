@@ -139,6 +139,10 @@ hooks/ (useMemo wrappers)          → pages render
   zero Sleeper calls for history; only a non-snapshotted (live) season is
   fetched. If the snapshot files are missing, `LeagueContext` falls back to
   full live fetching — the snapshot is an accelerator, never a dependency.
+  Each season is two files: `season-<year>.json` (every visit, ~1.3 MB for all
+  seven) and `transactions-<year>.json` (loaded only by Players → Transactions).
+  `players.json` (~40 KB) names every player the site shows, replacing Sleeper's
+  ~15 MB player dump.
 - **Everything is client-side.** Static export (`output: 'export'`), no SSR,
   no API routes, deployed to GitHub Pages under `basePath /convicts-ff-league`.
 
@@ -146,32 +150,53 @@ hooks/ (useMemo wrappers)          → pages render
 
 Single source of truth for career records, championship counts (0.5 shared
 titles, `winner.includes(name)` matching), H2H records (ties count for the
-perspective owner), and record-book extremes. Locked by vitest tests.
+perspective owner), record-book extremes, power rankings, and the Luck Index
+(`luck.ts`: actual wins − weekly all-play expected wins, ties ½, regular season
+only — the one formula behind Seasons, Records, search, and the 2026 tab).
+Locked by vitest tests.
 
 ### Search (`lib/search/` + `components/search/`)
 
 Local natural-language query engine — tokenizer → entity matching (owners
-with typo tolerance, NFL players) → regex intent table (13 intents) →
+with typo tolerance, NFL players) → regex intent table (16 intents) →
 resolvers over the stat engine. No LLM, no API keys, by explicit decision.
 UI is a ⌘K overlay portaled to `document.body` (the navbar's backdrop-filter
 would trap a fixed overlay — don't move it back inside).
 
-### Previews (`lib/preview/` + `app/this-week/`)
+### The season tab (`lib/preview/` + `app/2026/`)
 
-Weekly matchups render as clickable `MatchupRow`s (season records/streaks/seeds,
-career H2H mini-tally, projections); clicking opens `MatchupModal` with the
-all-time series, last meeting, playoff implications, and copyable group-chat
-smack talk. Smack lines are deterministic (seeded by `year|week|matchup` — same
-lines all week). **Projections use an undocumented Sleeper endpoint** — every
-failure path returns null and the card renders without the row. Keep it that way.
+The current season's hub, named for its year, with three sub-tabs:
+
+- **Matchups** — weekly matchups render as clickable `MatchupRow`s (season
+  records/streaks/seeds, career H2H mini-tally, live scores, projections); clicking
+  opens `MatchupModal` with the all-time series, last meeting, playoff implications,
+  and copyable group-chat smack talk. Smack lines are deterministic (seeded by
+  `year|week|matchup` — same lines all week).
+- **Power Rankings** — the Oberon Mt. power rating
+  (`((avg × 6) + ((high + low) × 2) + ((win% × 200) × 2)) / 10`) over final
+  regular-season weeks, with week-over-week movement, all-play record, and the
+  official standing alongside (`lib/stats/power-rankings.ts`).
+- **Rosters** — every team's lineup, bench, and IR for the current week with
+  league-scored projections, live points, injury tags, and the week's roster moves.
+
+**Live sync:** `useLiveSeason` polls Sleeper while the tab is open — matchups
+(lineups + live points) every minute, league/rosters/moves every five, projections
+every ten (Sleeper's own CDN cache windows) — pausing while the browser tab is
+hidden. It overlays the global store rather than mutating it. A week counts as
+final only once Sleeper's `last_scored_leg` reaches it, so a Thursday game never
+makes a week look finished. **Projections use an undocumented Sleeper endpoint**
+— every failure path returns null and the UI renders without projections (names
+fall back to Sleeper's documented player dump). Keep it that way.
 
 ---
 
 ## Yearly ritual
 
 1. **After the draft (new season created in Sleeper):** update `LEAGUE_ID`
-   in `lib/config.ts` to the new season's league id. The This Week tab and
-   all live data follow automatically.
+   in `lib/config.ts` to the new season's league id, then rename the season tab
+   for the new year: `git mv app/2026 app/2027` and update its `href`/`label` in
+   `components/layout/nav-items.ts`. Run `npm run snapshot -- --players-only`
+   so the new rookies have names. All live data follows automatically.
 2. **After the season ends** (status flips to `complete`): run
    `npm run snapshot`, commit the new `public/data/` files. History is now
    frozen and free.
