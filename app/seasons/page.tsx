@@ -10,11 +10,13 @@ import SeasonStandings from '@/components/home/SeasonStandings'
 import PlayoffBracket from '@/components/home/PlayoffBracket'
 import AvgScoreChart from '@/components/trends/AvgScoreChart'
 import FinishTracker from '@/components/trends/FinishTracker'
+import GameLog from '@/components/gamelog/GameLog'
 
-type Tab = 'standings' | 'finish' | 'avgscore'
+type Tab = 'standings' | 'gamelog' | 'finish' | 'avgscore'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'standings', label: 'Standings'      },
+  { id: 'gamelog',   label: 'Game Log'       },
   { id: 'finish',    label: 'Finish Tracker' },
   { id: 'avgscore',  label: 'Scoring Trend'  },
 ]
@@ -33,7 +35,7 @@ export default function SeasonsPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader kicker="The Season Archive" title="Seasons" subtitle="Year-by-year standings and scoring trends" />
+      <PageHeader kicker="The Season Archive" title="Seasons" subtitle="Year-by-year standings, every game, and scoring trends" />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
@@ -49,6 +51,9 @@ export default function SeasonsPage() {
           </div>
         </>
       )}
+
+      {/* ── GAME LOG TAB ──────────────────────────────────────────── */}
+      {activeTab === 'gamelog' && <GameLog />}
 
       {/* ── FINISH TRACKER TAB ────────────────────────────────────── */}
       {activeTab === 'finish' && <FinishTracker />}
