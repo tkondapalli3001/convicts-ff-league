@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { X, Copy, Check } from 'lucide-react'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import { useModalClose } from '@/hooks/useModalClose'
 import { ownerColor, fmtPts } from '@/lib/utils'
 import { ordinal } from '@/lib/preview'
 import type { EnrichedPreview } from '@/hooks/usePreviewData'
@@ -47,14 +48,15 @@ function SmackLine({ line }: { line: string }) {
 }
 
 /** One side of the modal header: avatar, name, record, seed, streak, avg, score/proj. */
-function TeamColumn({ team, score, proj, played, isWinner }: {
+function TeamColumn({ team, score, proj, status, isWinner }: {
   team: TeamPreview
   score: number
   proj: number | null
-  played: boolean
+  status: EnrichedPreview['status']
   isWinner: boolean
 }) {
   const color = ownerColor(team.name)
+  const played = status === 'final'
   return (
     <div className="flex flex-1 flex-col items-center gap-2 p-4 text-center">
       <div
@@ -75,10 +77,20 @@ function TeamColumn({ team, score, proj, played, isWinner }: {
         {team.wins}–{team.losses}
         {team.seed > 0 && <> · {ordinal(team.seed)} seed</>}
       </div>
-      {played ? (
-        <div className="font-display text-[36px] font-bold leading-none" style={{ color: isWinner ? '#E8CE8A' : '#9AA0AC' }}>
-          {fmtPts(score)}
-        </div>
+      {status !== 'upcoming' ? (
+        <>
+          <div
+            className="font-display text-[36px] font-bold leading-none"
+            style={{ color: !played ? '#EDE9E0' : isWinner ? '#E8CE8A' : '#9AA0AC' }}
+          >
+            {fmtPts(score)}
+          </div>
+          {!played && proj != null && (
+            <div className="text-[10px] uppercase tracking-[1px] text-gold-soft">
+              Proj <span className="font-display text-[14px] font-bold">{proj.toFixed(1)}</span>
+            </div>
+          )}
+        </>
       ) : proj != null ? (
         <div className="text-[10px] uppercase tracking-[1px] text-gold-soft">
           Proj <span className="font-display text-[16px] font-bold">{fmtPts(proj)}</span>
@@ -93,16 +105,7 @@ function TeamColumn({ team, score, proj, played, isWinner }: {
 }
 
 export default function MatchupModal({ p, onClose }: { p: EnrichedPreview; onClose: () => void }) {
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [onClose])
+  useModalClose(onClose)
 
   const winnerIsA = p.ptsA >= p.ptsB
   const h2hTotal = p.h2h.winsA + p.h2h.winsB
@@ -127,6 +130,9 @@ export default function MatchupModal({ p, onClose }: { p: EnrichedPreview; onClo
 
   return createPortal(
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${p.teamA.name} vs ${p.teamB.name}, week ${p.week}`}
       className="fixed inset-0 z-[500] flex items-center justify-center p-4"
       style={{ background: 'rgba(3,3,4,0.8)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -145,13 +151,13 @@ export default function MatchupModal({ p, onClose }: { p: EnrichedPreview; onClo
             <X size={16} />
           </button>
           <div className="flex items-stretch">
-            <TeamColumn team={p.teamA} score={p.ptsA} proj={p.projA} played={p.played} isWinner={winnerIsA} />
+            <TeamColumn team={p.teamA} score={p.ptsA} proj={p.projA} status={p.status} isWinner={winnerIsA} />
             <div className="flex flex-col items-center justify-center px-2">
               <span className="font-display text-[14px] font-bold tracking-[2px] text-gold-dim">
-                {p.played ? 'FINAL' : 'VS'}
+                {p.status === 'final' ? 'FINAL' : p.status === 'live' ? 'LIVE' : 'VS'}
               </span>
             </div>
-            <TeamColumn team={p.teamB} score={p.ptsB} proj={p.projB} played={p.played} isWinner={!winnerIsA} />
+            <TeamColumn team={p.teamB} score={p.ptsB} proj={p.projB} status={p.status} isWinner={!winnerIsA} />
           </div>
         </div>
 

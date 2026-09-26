@@ -1,5 +1,6 @@
 import { h2hRecord, type H2HRecord } from '@/lib/stats'
 import { flattenSeasonMatchups } from '@/lib/data-processing'
+import { lastFinalWeek, weekStatus, type WeekStatus } from './live'
 import type { LeagueState, Matchup } from '@/types'
 
 export interface TeamPreview {
@@ -20,8 +21,8 @@ export interface MatchupPreview {
   year: number
   week: number
   isPlayoff: boolean
-  /** True once the game has actual scores. */
-  played: boolean
+  /** Final once Sleeper has scored the week; live while games are in progress. */
+  status: WeekStatus
   ptsA: number
   ptsB: number
   teamA: TeamPreview
@@ -50,20 +51,14 @@ export function getSeasonWeeks(state: LeagueState, year: number): number[] {
 }
 
 /**
- * Default week to open on: the first upcoming week with pairings if the
- * season is live, otherwise the last played week.
+ * Default week to open on: the current week (in progress or next up) if the
+ * season is live, otherwise the season's last week.
  */
 export function getDefaultWeek(state: LeagueState, year: number): number {
   const weeks = getSeasonWeeks(state, year)
   if (!weeks.length) return 1
-  // Flattened from raw weekly data — allMatchups only holds completed
-  // seasons, and the preview season is usually the live one
-  const played = flattenSeasonMatchups(state, year)
-    .filter(m => m.pts1 > 0 || m.pts2 > 0)
-    .map(m => m.week)
-  const lastPlayed = played.length ? Math.max(...played) : 0
-  const upcoming = weeks.find(w => w > lastPlayed)
-  return upcoming ?? lastPlayed
+  const lastFinal = lastFinalWeek(state, year)
+  return weeks.find(w => w > lastFinal) ?? weeks[weeks.length - 1]
 }
 
 function isPlayed(m: Matchup): boolean {
@@ -122,9 +117,14 @@ export function buildWeekPreviews(state: LeagueState, year: number, week: number
   const games = seasonGames.filter(m => m.week === week)
   if (!games.length) return []
 
-  const priorGames = seasonGames.filter(m => m.week < week)
+  // Records, streaks, and seeds count final weeks only — never a week whose
+  // games are still being played
+  const lastFinal = lastFinalWeek(state, year)
+  const finalGames = seasonGames.filter(m => m.week <= lastFinal)
+  const priorGames = finalGames.filter(m => m.week < week)
   const standings = computeStandings(priorGames)
   const isPlayoff = state.matchups[year]?.[week]?.isPlayoff ?? false
+  const status = weekStatus(state, year, week)
 
   // Career H2H excludes this week's own game and never-played pairings.
   // Completed seasons come from allMatchups; the preview season's own games
@@ -132,14 +132,14 @@ export function buildWeekPreviews(state: LeagueState, year: number, week: number
   // while live, and we drop the year before concatenating when it's not).
   const h2hPool = [
     ...state.allMatchups.filter(m => m.year !== year),
-    ...seasonGames.filter(m => m.week !== week),
+    ...finalGames.filter(m => m.week !== week),
   ].filter(isPlayed)
 
   return games.map(g => ({
     year,
     week,
     isPlayoff,
-    played: isPlayed(g),
+    status,
     ptsA: g.pts1,
     ptsB: g.pts2,
     teamA: buildTeam(g.team1, g.roster1, priorGames, standings),

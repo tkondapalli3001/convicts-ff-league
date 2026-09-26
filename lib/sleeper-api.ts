@@ -1,5 +1,5 @@
 import { SLEEPER_API } from '@/lib/constants'
-import type { SleeperUser, SleeperRoster, SleeperMatchup, BracketGame, SleeperDraft, DraftPick, Transaction } from '@/types'
+import type { SleeperLeague, SleeperUser, SleeperRoster, SleeperMatchup, BracketGame, SleeperDraft, DraftPick, Transaction } from '@/types'
 
 // ─── Core fetch wrapper ────────────────────────────────────────────────────────
 
@@ -28,6 +28,10 @@ export async function sleepFetch<T>(url: string): Promise<T> {
 // ─── Per-season fetchers ──────────────────────────────────────────────────────
 // (The league-chain walk lives in LeagueContext — it is snapshot-aware and
 // only fetches seasons missing from public/data/.)
+
+export function fetchLeague(leagueId: string): Promise<SleeperLeague> {
+  return sleepFetch(`${SLEEPER_API}/league/${leagueId}`)
+}
 
 export function fetchUsers(leagueId: string): Promise<SleeperUser[]> {
   return sleepFetch(`${SLEEPER_API}/league/${leagueId}/users`)

@@ -8,10 +8,18 @@ export interface SleeperLeague {
   previous_league_id: string | null
   settings: {
     playoff_week_start: number
+    /** Current week while in season. */
     leg: number
+    /** Last week whose scores Sleeper has finalized. */
+    last_scored_leg?: number
     num_teams: number
+    playoff_teams?: number
     playoff_round_type?: number
   }
+  /** Lineup slots in order, e.g. ['QB','RB','RB',…,'BN','BN']. */
+  roster_positions?: string[]
+  /** Stat key → fantasy points per unit, e.g. { rec: 0.5, pass_td: 4 }. */
+  scoring_settings?: Record<string, number>
 }
 
 export interface SleeperUser {
@@ -24,6 +32,11 @@ export interface SleeperUser {
 export interface SleeperRoster {
   roster_id: number
   owner_id: string
+  players?: string[] | null
+  starters?: string[] | null
+  /** Injured-reserve slots. */
+  reserve?: string[] | null
+  taxi?: string[] | null
   settings: {
     wins: number
     losses: number
@@ -42,6 +55,8 @@ export interface SleeperMatchup {
   matchup_id: number
   roster_id: number
   points: number
+  /** Every player on the roster that week, starters included. */
+  players?: string[]
   starters?: string[]
   starters_points?: number[]
   players_points?: Record<string, number>
@@ -180,10 +195,12 @@ export interface TradedPick {
 export interface Transaction {
   transaction_id: string
   type: 'trade' | 'waiver' | 'free_agent'
-  status: 'complete' | 'pending'
+  status: 'complete' | 'pending' | 'failed'
   roster_ids: number[]
   leg: number
   created: number
+  /** When the move processed (waivers run hours or days after `created`). */
+  status_updated?: number
   adds?: Record<string, number>
   drops?: Record<string, number>
   draft_picks?: TradedPick[]

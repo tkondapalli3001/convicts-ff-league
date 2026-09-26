@@ -22,12 +22,15 @@ function TeamMeta({ team }: { team: TeamPreview }) {
 }
 
 /**
- * One clickable matchup row (This Week): two teams with quick stats and a live/pre-game
+ * One clickable matchup row (2026 tab): two teams with quick stats and a final/live/pre-game
  * center readout. Opens the head-to-head history + group-chat ammo modal on click.
  */
 export default function MatchupRow({ p, onClick }: { p: EnrichedPreview; onClick: () => void }) {
   const winnerIsA = p.ptsA >= p.ptsB
   const h2hTotal = p.h2h.winsA + p.h2h.winsB
+  // Winner colours only once the week is final — mid-week they'd crown a leader
+  const played = p.status === 'final'
+  const scored = p.status !== 'upcoming'
 
   return (
     <button
@@ -40,7 +43,7 @@ export default function MatchupRow({ p, onClick }: { p: EnrichedPreview; onClick
         <div className="min-w-0">
           <div
             className="truncate text-[14px] font-bold"
-            style={{ color: p.played && winnerIsA ? ownerColor(p.teamA.name) : p.played ? '#5C6270' : '#EDE9E0' }}
+            style={{ color: played && winnerIsA ? ownerColor(p.teamA.name) : played ? '#5C6270' : '#EDE9E0' }}
           >
             {p.teamA.name}
           </div>
@@ -51,11 +54,11 @@ export default function MatchupRow({ p, onClick }: { p: EnrichedPreview; onClick
 
       {/* Center readout */}
       <div className="flex w-[86px] flex-shrink-0 flex-col items-center sm:w-[104px]">
-        {p.played ? (
+        {scored ? (
           <div className="flex items-baseline gap-1 whitespace-nowrap font-display font-bold leading-none">
-            <span className="text-[20px]" style={{ color: winnerIsA ? '#EDE9E0' : '#5C6270' }}>{fmtPts(p.ptsA)}</span>
+            <span className="text-[20px]" style={{ color: !played || winnerIsA ? '#EDE9E0' : '#5C6270' }}>{fmtPts(p.ptsA)}</span>
             <span className="text-[12px] text-[#3A4150]">–</span>
-            <span className="text-[20px]" style={{ color: winnerIsA ? '#5C6270' : '#EDE9E0' }}>{fmtPts(p.ptsB)}</span>
+            <span className="text-[20px]" style={{ color: !played || !winnerIsA ? '#EDE9E0' : '#5C6270' }}>{fmtPts(p.ptsB)}</span>
           </div>
         ) : (
           <span className="font-display text-[16px] font-bold tracking-[2px] text-gold-dim">VS</span>
@@ -63,9 +66,9 @@ export default function MatchupRow({ p, onClick }: { p: EnrichedPreview; onClick
         <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[1px] text-gold-dim">
           {h2hTotal > 0 ? `H2H ${p.h2h.winsA}-${p.h2h.winsB}` : '1st mtg'}
         </div>
-        {!p.played && p.projA != null && p.projB != null && (
-          <div className="text-[9px] uppercase tracking-[0.5px] text-s-text3">
-            {fmtPts(p.projA)}–{fmtPts(p.projB)}
+        {!played && p.projA != null && p.projB != null && (
+          <div className="whitespace-nowrap text-[9px] uppercase tracking-[0.5px] text-s-text3">
+            <span className="hidden sm:inline">Proj </span>{p.projA.toFixed(1)}–{p.projB.toFixed(1)}
           </div>
         )}
       </div>
@@ -76,7 +79,7 @@ export default function MatchupRow({ p, onClick }: { p: EnrichedPreview; onClick
         <div className="min-w-0">
           <div
             className="truncate text-[14px] font-bold"
-            style={{ color: p.played && !winnerIsA ? ownerColor(p.teamB.name) : p.played ? '#5C6270' : '#EDE9E0' }}
+            style={{ color: played && !winnerIsA ? ownerColor(p.teamB.name) : played ? '#5C6270' : '#EDE9E0' }}
           >
             {p.teamB.name}
           </div>
