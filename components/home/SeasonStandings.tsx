@@ -4,10 +4,12 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
+import { computeLuckIndex } from '@/lib/stats'
 
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import SortHeader from '@/components/shared/SortHeader'
 
 type SortKey = 'manager' | 'year' | 'finish' | 'wins' | 'losses' | 'winpct' | 'pf' | 'pa' | 'margin' | 'luck'
 
@@ -22,8 +24,6 @@ interface Row {
   pa: number
   margin: number
   playoffs: boolean
-  allPlayW: number
-  allPlayL: number
   luck: number
 }
 
@@ -55,42 +55,22 @@ export default function SeasonStandings({ onYearChange }: Props) {
   }
 
   function toggleYear(y: number) {
-    setActiveYears(prev => {
-      if (prev.size === 1 && prev.has(y)) {
-        onYearChange?.(null)
-        return new Set(years)
-      }
-      onYearChange?.(y)
-      return new Set([y])
-    })
+    // Notify the parent outside the state updater — updaters run during
+    // render, where updating another component trips a React error
+    const reset = activeYears.size === 1 && activeYears.has(y)
+    setActiveYears(reset ? new Set(years) : new Set([y]))
+    onYearChange?.(reset ? null : y)
   }
 
-  // Compute All-Play W/L per owner per year from raw weekly matchup data
-  const allPlayMap = useMemo<Record<string, { w: number; l: number }>>(() => {
-    const result: Record<string, { w: number; l: number }> = {}
-    for (const [yearStr, weekMap] of Object.entries(matchups)) {
-      const year = Number(yearStr)
-      const rMap = rosterUserMaps[year] ?? {}
-      for (const weekData of Object.values(weekMap)) {
-        if (weekData.isPlayoff) continue
-        const teamScores = weekData.matchups
-          .map(m => ({
-            owner: rMap[String(m.roster_id)] ?? `Team${m.roster_id}`,
-            score: m.points ?? 0,
-          }))
-          .filter(t => t.score > 0)
-        const N = teamScores.length
-        if (N < 2) continue
-        for (const team of teamScores) {
-          const key = `${team.owner}:${year}`
-          if (!result[key]) result[key] = { w: 0, l: 0 }
-          result[key].w += teamScores.filter(t => t.owner !== team.owner && t.score < team.score).length
-          result[key].l += teamScores.filter(t => t.owner !== team.owner && t.score > team.score).length
-        }
-      }
+  // Season Luck Index per owner — the shared lib/stats implementation, so it
+  // matches Records, search, and the 2026 tab
+  const luckMap = useMemo<Record<string, number>>(() => {
+    const result: Record<string, number> = {}
+    for (const year of years) {
+      for (const e of computeLuckIndex(matchups, rosterUserMaps, year)) result[`${e.owner}:${year}`] = e.luckIndex
     }
     return result
-  }, [matchups, rosterUserMaps])
+  }, [matchups, rosterUserMaps, years])
 
   const rows = useMemo<Row[]>(() => {
     const result: Row[] = []
@@ -99,10 +79,6 @@ export default function SeasonStandings({ onYearChange }: Props) {
         if (!activeYears.has(s.year)) return
         const games = s.wins + s.losses
         const margin = games > 0 ? parseFloat(((s.pf - s.pa) / games).toFixed(2)) : 0
-        const ap = allPlayMap[`${name}:${s.year}`] ?? { w: 0, l: 0 }
-        const apTotal = ap.w + ap.l
-        const expectedWins = apTotal > 0 ? (s.wins + s.losses) * (ap.w / apTotal) : 0
-        const luck = parseFloat((s.wins - expectedWins).toFixed(2))
         result.push({
           manager: name,
           year: s.year,
@@ -114,9 +90,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
           pa: s.pa,
           margin,
           playoffs: s.inPlayoffs,
-          allPlayW: ap.w,
-          allPlayL: ap.l,
-          luck,
+          luck: luckMap[`${name}:${s.year}`] ?? 0,
         })
       })
     }
@@ -128,20 +102,9 @@ export default function SeasonStandings({ onYearChange }: Props) {
       return ((av as number) - (bv as number)) * sortDir
     })
     return result
-  }, [ownerSeasons, activeYears, sortKey, sortDir, allPlayMap])
+  }, [ownerSeasons, activeYears, sortKey, sortDir, luckMap])
 
-  const SortTh = ({ k, label, hideOnMobile, stickyFirst }: { k: SortKey; label: string; hideOnMobile?: boolean; stickyFirst?: boolean }) => (
-    <th
-      onClick={() => handleSort(k)}
-      className={[hideOnMobile ? 'hidden md:table-cell' : '', stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : ''].filter(Boolean).join(' ')}
-      style={{
-        color: sortKey === k ? '#C9A24B' : undefined,
-        background: stickyFirst ? '#0B0B0D' : undefined,
-      }}
-    >
-      {label} {sortKey === k ? (sortDir === 1 ? '↑' : '↓') : ''}
-    </th>
-  )
+  const sort = { sortKey, sortDir, onSort: handleSort }
 
   return (
     <div className="gl p-[18px]">
@@ -173,16 +136,17 @@ export default function SeasonStandings({ onYearChange }: Props) {
           <table className="w-full border-collapse min-w-[640px]">
             <thead>
               <tr>
-                <SortTh k="manager" label="Manager" stickyFirst />
-                <SortTh k="year"    label="Year" />
-                <SortTh k="finish"  label="Finish" />
-                <SortTh k="wins"    label="W" />
-                <SortTh k="losses"  label="L" />
-                <SortTh k="winpct"  label="Win%" />
-                <SortTh k="pf"      label="PF/Gm" />
-                <SortTh k="pa"      label="PA/Gm" />
-                <SortTh k="margin"  label="+/−/Gm" />
-                <SortTh k="luck"    label="Luck" />
+                <SortHeader {...sort} k="manager" label="Manager"
+                  className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#0B0B0D' }} />
+                <SortHeader {...sort} k="year"    label="Year" />
+                <SortHeader {...sort} k="finish"  label="Finish" />
+                <SortHeader {...sort} k="wins"    label="W" />
+                <SortHeader {...sort} k="losses"  label="L" />
+                <SortHeader {...sort} k="winpct"  label="Win%" />
+                <SortHeader {...sort} k="pf"      label="PF/Gm" />
+                <SortHeader {...sort} k="pa"      label="PA/Gm" />
+                <SortHeader {...sort} k="margin"  label="+/−/Gm" />
+                <SortHeader {...sort} k="luck"    label="Luck" />
                 <th>Playoffs</th>
               </tr>
             </thead>
@@ -241,7 +205,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
 
       <p className="mt-3 px-1 text-[10px] text-s-text3 leading-relaxed">
         <span className="font-bold text-s-text2">Luck Index</span> = Actual Wins − Expected Wins.
-        Expected Wins is your All-Play win rate (how often you beat the rest of the field each week) applied to your actual schedule length.
+        Expected Wins adds up, week by week, the share of the league you outscored (as if you played everyone; ties count half).
         Positive = you won more than your scoring deserved; negative = you were unlucky.
       </p>
     </div>

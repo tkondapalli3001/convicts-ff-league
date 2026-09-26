@@ -1,3 +1,4 @@
+import { allPlayRecords } from './luck'
 import type { Matchup } from '@/types'
 
 export interface PowerRankingRow {
@@ -32,7 +33,6 @@ function isPlayed(g: Matchup): boolean {
 function lines(games: Matchup[]): Line[] {
   const scores: Record<string, number[]> = {}
   const rec: Record<string, { w: number; l: number; t: number }> = {}
-  const allPlay: Record<string, { w: number; l: number; t: number }> = {}
   const weekScores: Record<number, { name: string; pts: number }[]> = {}
 
   for (const g of games) {
@@ -47,17 +47,8 @@ function lines(games: Matchup[]): Line[] {
     }
   }
 
-  for (const week of Object.values(weekScores)) {
-    for (const me of week) {
-      const a = (allPlay[me.name] ??= { w: 0, l: 0, t: 0 })
-      for (const other of week) {
-        if (other.name === me.name) continue
-        if (me.pts > other.pts) a.w++
-        else if (me.pts < other.pts) a.l++
-        else a.t++
-      }
-    }
-  }
+  // Same all-play math as the Luck Index
+  const allPlay = allPlayRecords(Object.values(weekScores))
 
   return Object.entries(scores).map(([name, pts]) => {
     const { w, l, t } = rec[name]
@@ -67,12 +58,12 @@ function lines(games: Matchup[]): Line[] {
     const high = Math.max(...pts)
     const low = Math.min(...pts)
     const winPct = (w + t / 2) / games
-    const ap = allPlay[name]
+    const ap = allPlay[name] ?? { wins: 0, losses: 0, ties: 0 }
     return {
       name,
       score: (avg * 6 + (high + low) * 2 + winPct * 200 * 2) / 10,
       wins: w, losses: l, ties: t, winPct, pf, avg, high, low,
-      allPlayWins: ap.w, allPlayLosses: ap.l, allPlayTies: ap.t,
+      allPlayWins: ap.wins, allPlayLosses: ap.losses, allPlayTies: ap.ties,
     }
   })
 }

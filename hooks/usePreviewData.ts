@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { computeLuckIndex } from '@/lib/luck'
+import { computeLuckIndex } from '@/lib/stats'
 import { flattenSeasonMatchups } from '@/lib/data-processing'
 import {
   getSeasonWeeks, buildWeekPreviews, computeStandings, computeImplication,

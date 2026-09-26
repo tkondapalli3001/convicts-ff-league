@@ -1,9 +1,17 @@
-const SLEEPER_API = 'https://api.sleeper.app/v1'
-const WEEKS = 14
+// Print the Luck Index for any Sleeper league season:
+//
+//   node scripts/luck-index.mjs <leagueId>
+//
+// Runs the site's own implementation (lib/stats/luck.ts, loaded through
+// Node's built-in TypeScript type stripping — Node 22.18+ / 23.6+), so the
+// numbers match the Seasons standings, Records, and search exactly. Regular
+// season only; for a season in progress, final weeks only.
 
-function assert(value, message) {
-  if (!value) throw new Error(message)
-}
+// Silence Node's one-time "module type not specified" notice for the .ts import
+process.removeAllListeners('warning')
+const { computeLuckIndex } = await import('../lib/stats/luck.ts')
+
+const SLEEPER_API = 'https://api.sleeper.app/v1'
 
 async function fetchJson(url) {
   const res = await fetch(url, { headers: { Accept: 'application/json' } })
@@ -11,120 +19,41 @@ async function fetchJson(url) {
   return res.json()
 }
 
-async function fetchUsers(leagueId) {
-  return fetchJson(`${SLEEPER_API}/league/${leagueId}/users`)
+const leagueId = process.argv[2]
+if (!leagueId) {
+  console.error('Usage: node scripts/luck-index.mjs <leagueId>')
+  process.exit(1)
 }
 
-async function fetchRosters(leagueId) {
-  return fetchJson(`${SLEEPER_API}/league/${leagueId}/rosters`)
-}
+try {
+  const [league, users, rosters] = await Promise.all([
+    fetchJson(`${SLEEPER_API}/league/${leagueId}`),
+    fetchJson(`${SLEEPER_API}/league/${leagueId}/users`),
+    fetchJson(`${SLEEPER_API}/league/${leagueId}/rosters`),
+  ])
 
-async function fetchMatchupsForWeek(leagueId, week) {
-  return fetchJson(`${SLEEPER_API}/league/${leagueId}/matchups/${week}`)
-}
+  const year = Number(league.season)
+  const playoffStart = league.settings?.playoff_week_start > 0 ? league.settings.playoff_week_start : 15
+  const lastWeek = league.status === 'complete'
+    ? playoffStart - 1
+    : Math.min(playoffStart - 1, league.settings?.last_scored_leg ?? 0)
 
-function formatNumber(value) {
-  return Number(value.toFixed(2))
-}
+  const nameOf = Object.fromEntries(users.map(u => [u.user_id, u.display_name || u.username || u.user_id]))
+  const rosterNames = Object.fromEntries(
+    rosters.map(r => [String(r.roster_id), nameOf[r.owner_id] ?? `Team ${r.roster_id}`])
+  )
 
-function buildActualRecord(matchupsByWeek) {
-  const record = {}
-
-  for (const weekMatchups of Object.values(matchupsByWeek)) {
-    const groups = {}
-    for (const matchup of weekMatchups) {
-      if (!groups[matchup.matchup_id]) groups[matchup.matchup_id] = []
-      groups[matchup.matchup_id].push(matchup)
-    }
-
-    for (const games of Object.values(groups)) {
-      if (games.length !== 2) continue
-      const [home, away] = games
-      const homePoints = home.points ?? 0
-      const awayPoints = away.points ?? 0
-
-      const result = homePoints === awayPoints ? 0.5 : homePoints > awayPoints ? 1 : 0
-      const opponentResult = homePoints === awayPoints ? 0.5 : homePoints < awayPoints ? 1 : 0
-
-      record[home.roster_id] = (record[home.roster_id] || 0) + result
-      record[away.roster_id] = (record[away.roster_id] || 0) + opponentResult
-    }
-  }
-
-  return record
-}
-
-function buildExpectedWins(matchupsByWeek, teamCount) {
-  const expected = {}
-
-  for (const [week, matchups] of Object.entries(matchupsByWeek)) {
-    const scores = matchups.map(m => ({ roster_id: m.roster_id, points: m.points ?? 0 }))
-
-    for (const entry of scores) {
-      const weeklyWins = scores.reduce((sum, opponent) => {
-        if (opponent.roster_id === entry.roster_id) return sum
-        if (entry.points > opponent.points) return sum + 1
-        if (entry.points === opponent.points) return sum + 0.5
-        return sum
-      }, 0)
-
-      expected[entry.roster_id] = (expected[entry.roster_id] || 0) + weeklyWins / (teamCount - 1)
-    }
-  }
-
-  return expected
-}
-
-async function buildLuckIndex(leagueId) {
-  assert(leagueId, 'Please pass your league ID as the first argument')
-
-  const [users, rosters] = await Promise.all([fetchUsers(leagueId), fetchRosters(leagueId)])
-  const rosterMap = new Map(rosters.map(r => [r.roster_id, r.owner_id]))
-  const ownerNameByUserId = new Map(users.map(u => [u.user_id, u.display_name || u.username || u.user_id]))
-
-  const matchupsByWeek = {}
-  for (let week = 1; week <= WEEKS; week += 1) {
-    matchupsByWeek[week] = await fetchMatchupsForWeek(leagueId, week)
-  }
-
-  const teamCount = rosters.length
-  const actualWins = buildActualRecord(matchupsByWeek)
-  const expectedWins = buildExpectedWins(matchupsByWeek, teamCount)
-
-  const ownerRows = []
-
-  for (const roster of rosters) {
-    const ownerId = roster.owner_id
-    const ownerName = ownerNameByUserId.get(ownerId) || `Owner ${ownerId}`
-    const rosterId = roster.roster_id
-    const actual = formatNumber(actualWins[rosterId] ?? 0)
-    const expected = formatNumber(expectedWins[rosterId] ?? 0)
-    const luck = formatNumber(actual - expected)
-    const narrative = luck < -2.0 ? 'The League Martyr' : ''
-
-    ownerRows.push({
-      ownerName,
-      rosterId,
-      actualWins: actual,
-      expectedWins: expected,
-      luckIndex: luck,
-      narrative,
+  const weeks = {}
+  await Promise.all(
+    Array.from({ length: lastWeek }, (_, i) => i + 1).map(async w => {
+      weeks[w] = { matchups: await fetchJson(`${SLEEPER_API}/league/${leagueId}/matchups/${w}`), isPlayoff: false }
     })
-  }
+  )
 
-  ownerRows.sort((a, b) => a.luckIndex - b.luckIndex)
-  return ownerRows
+  const rows = computeLuckIndex({ [year]: weeks }, { [year]: rosterNames }, year)
+  console.log(`${league.name} ${year} — weeks 1–${lastWeek}, luckiest first`)
+  console.log(JSON.stringify(rows, null, 2))
+} catch (error) {
+  console.error('Error building Luck Index:', error.message || error)
+  process.exit(1)
 }
-
-async function main() {
-  try {
-    const leagueId = process.argv[2]
-    const output = await buildLuckIndex(leagueId)
-    console.log(JSON.stringify(output, null, 2))
-  } catch (error) {
-    console.error('Error building Luck Index:', error.message || error)
-    process.exit(1)
-  }
-}
-
-main()

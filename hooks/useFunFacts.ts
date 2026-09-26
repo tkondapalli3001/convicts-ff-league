@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { useRecordsData } from '@/hooks/useRecordsData'
-import { computeLuckIndex } from '@/lib/luck'
+import { computeLuckIndex, playoffByeYears } from '@/lib/stats'
 import { isSeasonComplete } from '@/lib/data-processing'
-import { playoffByeYears } from '@/lib/stats'
 
 interface HeartbreakEntry {
   owner: string

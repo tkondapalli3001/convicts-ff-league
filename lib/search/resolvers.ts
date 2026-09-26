@@ -1,11 +1,8 @@
-import { getChampion, getShameLoser } from '@/lib/utils'
-import { h2hRecord, buildChampPathGameKeys, gameKey } from '@/lib/stats'
-import { computeLuckIndex } from '@/lib/luck'
+import { getChampion, getShameLoser, fmtMoney } from '@/lib/utils'
+import { h2hRecord, buildChampPathGameKeys, gameKey, computeLuckIndex } from '@/lib/stats'
 import { isSeasonComplete } from '@/lib/data-processing'
 import { EARNINGS_DATA } from '@/lib/constants'
 import type { Answer, ParsedQuery, QueryContext } from './types'
-
-const fmtMoney = (n: number) => `${n >= 0 ? '+' : '−'}$${Math.abs(n)}`
 
 type Resolver = (p: ParsedQuery, ctx: QueryContext) => Answer | null
 
