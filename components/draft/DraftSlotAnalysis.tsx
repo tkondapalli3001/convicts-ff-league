@@ -149,8 +149,8 @@ export default function DraftSlotAnalysis() {
                       <td colSpan={3} className="px-4 py-0 border-b border-s-border/40 bg-s-bg3/20">
                         <div className="py-3">
                           <div className="text-[10px] font-bold tracking-[2px] uppercase text-s-text3 mb-2">
-                            {slotRows.length} manager{slotRows.length !== 1 ? 's' : ''} from Slot {slot} —&nbsp;
-                            {d?.playoffs ?? 0} of {d?.total ?? 0} made playoffs
+                            {slotRows.length} manager{slotRows.length !== 1 ? 's' : ''} from Slot {slot}
+                            {' '}—&nbsp;{d?.playoffs ?? 0} of {d?.total ?? 0} made playoffs
                           </div>
                           <table className="w-full border-collapse text-[12px]">
                             <thead>
