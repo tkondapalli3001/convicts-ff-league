@@ -128,13 +128,15 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         })
         rosterUserMaps[year] = rMap
 
-        // Update ownerMap + ownerAvatarMap
+        // Update ownerMap + ownerAvatarMap. Seasons run oldest → newest, so each
+        // owner ends up with their latest picture: the league team photo Sleeper
+        // shows inside the league when they've set one, else the account avatar.
         fetchedUsers.forEach(u => {
           const name = resolveOwnerName(u.user_id, u.display_name)
           ownerMap[name] = u.user_id
-          if (u.avatar && name) {
-            ownerAvatarMap[name] = `https://sleepercdn.com/avatars/${u.avatar}`
-          }
+          const teamPic = u.metadata?.avatar?.startsWith('https://') ? u.metadata.avatar : null
+          const pic = teamPic ?? (u.avatar ? `https://sleepercdn.com/avatars/${u.avatar}` : null)
+          if (pic && name) ownerAvatarMap[name] = pic
         })
 
         // Matchups — same week-count logic for both sources

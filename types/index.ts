@@ -27,8 +27,8 @@ export interface SleeperUser {
   display_name: string
   username: string
   avatar?: string | null
-  /** Sleeper team name lives here, when the manager set one. */
-  metadata?: { team_name?: string } | null
+  /** The manager's league-specific team name and team photo (a full URL), when set. */
+  metadata?: { team_name?: string; avatar?: string } | null
 }
 
 export interface SleeperRoster {
