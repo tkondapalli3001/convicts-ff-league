@@ -68,6 +68,29 @@ export async function syncLiveSeason(
   return { league, rosters, transactions, matchups: { ...prev.matchups, ...Object.fromEntries(fetched) } }
 }
 
+const _pairings = new Map<string, Promise<SleeperMatchup[]>>()
+
+/**
+ * Pairings for weeks the base state doesn't load — the rest of a live
+ * season's schedule, which Sleeper publishes from the start. Fetched once per
+ * league and week; a failed week is retried on the next call.
+ */
+export async function loadWeekPairings(leagueId: string, weeks: number[]): Promise<Record<number, SleeperMatchup[]>> {
+  const rows = await Promise.all(weeks.map(week => {
+    const key = `${leagueId}:${week}`
+    let p = _pairings.get(key)
+    if (!p) {
+      p = fetchMatchupsForWeek(leagueId, week).catch(() => {
+        _pairings.delete(key)
+        return []
+      })
+      _pairings.set(key, p)
+    }
+    return p.then(r => [week, r] as const)
+  }))
+  return Object.fromEntries(rows.filter(([, r]) => r.length))
+}
+
 /** Global state with the live overlay applied to one season. */
 export function withLiveSeason(state: LeagueState, year: number, live: LiveOverlay): LeagueState {
   const league = live.league ?? state.leagues[year]

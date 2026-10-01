@@ -5,7 +5,7 @@
 
 import { gameKey, type H2HRecord } from '@/lib/stats'
 import { DADDY_WIN_RATE, seriesStreak, type DaddyStatus, type PowerRankPoint, type SeasonHonors } from './facts'
-import { ordinal, type Implication } from './implications'
+import { ordinal, formatOdds, type TeamStakes } from './stakes'
 import type { TeamPreview } from './build-preview'
 import type { WeekStatus } from './live'
 
@@ -18,8 +18,8 @@ export interface MotwCandidate {
   ptsB: number
   projA: number | null
   projB: number | null
-  implicationA: Implication | null
-  implicationB: Implication | null
+  stakesA: TeamStakes | null
+  stakesB: TeamStakes | null
   daddy: DaddyStatus | null
 }
 
@@ -50,23 +50,25 @@ interface Factor {
   text: string
 }
 
-function lowerFirst(s: string): string {
-  return s.charAt(0).toLowerCase() + s.slice(1)
-}
-
 /** Every factor a matchup earns, unsorted. Exported for tests. */
 export function matchupFactors(c: MotwCandidate, ctx: MotwContext, avgProjTotal: number | null): Factor[] {
   const { teamA: A, teamB: B, h2h } = c
   const out: Factor[] = []
   const add = (topic: string, weight: number, text: string) => { if (weight > 0) out.push({ topic, weight, text }) }
 
-  // ── Playoff picture — weighs more as the standings firm up ─────────────────
-  const firm = Math.min(1, ctx.week / 8)
-  for (const [t, imp] of [[A, c.implicationA], [B, c.implicationB]] as const) {
-    if (!imp) continue
-    if (imp.playoffNote) add('standings', 1 + 3 * firm, `${t.name}: ${lowerFirst(imp.playoffNote)}`)
-    const swing = imp.lossSeed - imp.winSeed
-    if (swing >= 3) add('standings', swing * 0.3 * firm, `${t.name} swings ${swing} spots in the standings on the result`)
+  // ── Playoff picture: exact clinch/elimination stakes, else how far the
+  //    result moves both teams' playoff odds (which grows on its own as the
+  //    season wears on). One odds reason — the bigger swing — weighted by both.
+  const swings: { name: string; s: TeamStakes; swing: number }[] = []
+  for (const [t, s] of [[A, c.stakesA], [B, c.stakesB]] as const) {
+    if (!s || s.status !== 'alive') continue
+    if (s.scenarios.length) for (const line of s.scenarios) add('standings', 3, `${t.name} ${line}`)
+    else if (s.ifWin - s.ifLoss >= 0.1) swings.push({ name: t.name, s, swing: s.ifWin - s.ifLoss })
+  }
+  if (swings.length) {
+    const top = swings.reduce((x, y) => (y.swing > x.swing ? y : x))
+    add('standings', 8 * swings.reduce((a, x) => a + x.swing, 0),
+      `${top.name}'s playoff odds: ${formatOdds(top.s.ifWin, top.s.ifWinStatus)} with a win, ${formatOdds(top.s.ifLoss, top.s.ifLossStatus)} with a loss`)
   }
   if (A.wins + A.losses > 0 && A.wins === B.wins && A.losses === B.losses) {
     add('standings', 0.8, `Both ${A.wins}–${A.losses} — the winner pulls ahead`)

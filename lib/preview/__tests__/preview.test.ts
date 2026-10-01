@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeImplication, ordinal } from '../implications'
-import type { StandingRow } from '../implications'
+import { ordinal } from '../stakes'
 import { smackLines } from '../smack-talk'
 import type { SmackContext } from '../smack-talk'
 import { computeStandings } from '../build-preview'
@@ -31,17 +30,6 @@ function team(over: Partial<TeamPreview>): TeamPreview {
   }
 }
 
-const STANDINGS: StandingRow[] = [
-  { name: 'One',   wins: 6, losses: 1, pf: 900 },
-  { name: 'Two',   wins: 5, losses: 2, pf: 880 },
-  { name: 'Three', wins: 5, losses: 2, pf: 860 },
-  { name: 'Four',  wins: 4, losses: 3, pf: 850 },
-  { name: 'Five',  wins: 3, losses: 4, pf: 840 },
-  { name: 'Six',   wins: 3, losses: 4, pf: 820 },
-  { name: 'Seven', wins: 2, losses: 5, pf: 810 },
-  { name: 'Eight', wins: 1, losses: 6, pf: 800 },
-]
-
 // ── ordinal ───────────────────────────────────────────────────────────────────
 
 describe('ordinal', () => {
@@ -52,39 +40,6 @@ describe('ordinal', () => {
     expect(ordinal(4)).toBe('4th')
     expect(ordinal(11)).toBe('11th')
     expect(ordinal(12)).toBe('12th')
-  })
-})
-
-// ── computeImplication ────────────────────────────────────────────────────────
-
-describe('computeImplication', () => {
-  it('a win climbs, a loss falls', () => {
-    // Three (5-2, 860pf): win → 6-2 passes Two (5-2) → 2nd; loss → 5-3 behind Four? no, Four is 4-3 → stays 3rd
-    const imp = computeImplication(STANDINGS, 'Three', 6)!
-    expect(imp.currentSeed).toBe(3)
-    expect(imp.winSeed).toBe(2)
-    expect(imp.line).toContain('climbs to 2nd')
-  })
-
-  it('flags the team sitting on the playoff line', () => {
-    const imp = computeImplication(STANDINGS, 'Six', 6)!
-    expect(imp.currentSeed).toBe(6)
-    expect(imp.playoffNote).toContain('playoff line')
-  })
-
-  it('flags the first team out', () => {
-    const imp = computeImplication(STANDINGS, 'Seven', 6)!
-    expect(imp.playoffNote).toContain('First team out')
-  })
-
-  it('returns null for a team not in the standings', () => {
-    expect(computeImplication(STANDINGS, 'Nobody', 6)).toBeNull()
-  })
-
-  it('1st place with a comfortable lead has no movement line', () => {
-    const imp = computeImplication(STANDINGS, 'One', 6)!
-    expect(imp.winSeed).toBe(1)
-    expect(imp.line).toBeNull()
   })
 })
 

@@ -5,21 +5,24 @@ import { computeLuckIndex, buildChampPathGameKeys } from '@/lib/stats'
 import { flattenSeasonMatchups } from '@/lib/data-processing'
 import { localDateKey } from '@/lib/utils'
 import {
-  getSeasonWeeks, buildWeekPreviews, computeStandings, computeImplication,
+  getSeasonWeeks, buildWeekPreviews, computeStandings,
   smackFacts, projectTeam, startersByRoster, lastFinalWeek, playerLookup,
   daddyOf, seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore,
   injuryReport, weeklyMoves, matchupBadges, pickMatchupOfTheWeek,
+  fitScoringModel, weekStakes,
 } from '@/lib/preview'
 import type {
-  MatchupPreview, Implication, Badge, DaddyStatus, PowerRankPoint, MatchupOfTheWeek,
+  MatchupPreview, TeamStakes, TeamResults, Badge, DaddyStatus, PowerRankPoint, MatchupOfTheWeek,
 } from '@/lib/preview'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
+import { useSeasonSchedule } from '@/hooks/useSeasonSchedule'
 
 export interface EnrichedPreview extends MatchupPreview {
   /** Today's group-chat ammo, in order — the modal pages through it. */
   smack: string[]
-  implicationA: Implication | null
-  implicationB: Implication | null
+  /** Playoff odds and exact clinch/elimination conditions entering the week; null in the playoffs. */
+  stakesA: TeamStakes | null
+  stakesB: TeamStakes | null
   projA: number | null
   projB: number | null
   /** Set when either owner has won 75%+ of 5+ meetings. */
@@ -65,6 +68,18 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
   // Title-path playoff games, so a consolation meeting isn't billed as an elimination
   const champPath = useMemo(() => buildChampPathGameKeys(state), [state])
 
+  // Every regular-season game, played or not — the playoff odds simulate them all
+  const schedule = useSeasonSchedule(live)
+
+  // How scores behave week to week, learned from completed seasons
+  const history = useMemo(
+    () => state.allMatchups
+      .filter(m => m.type === 'R')
+      .flatMap(m => [{ season: m.year, team: m.team1, pts: m.pts1 }, { season: m.year, team: m.team2, pts: m.pts2 }])
+      .filter(g => g.pts > 0),
+    [state.allMatchups],
+  )
+
   const { previews, motw } = useMemo(() => {
     if (!season) return { previews: [] as EnrichedPreview[], motw: null }
     const base = buildWeekPreviews(state, season, week)
@@ -79,6 +94,25 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
     const playoffStart = settings?.playoff_week_start || 15
 
     const standings = computeStandings(priorGames)
+    const stakes = !base.length || base[0].isPlayoff ? {} : (() => {
+      const remaining = Object.values(schedule).flat().filter(g => g.week >= week)
+      const regEnd = playoffStart - 1
+      // Only with the whole remaining schedule — a partial one would understate every race
+      for (let w = week; w <= regEnd; w++) if (!schedule[w]?.length) return {}
+      const scores: Record<string, number[]> = {}
+      for (const g of priorGames) {
+        if (g.type !== 'R') continue
+        ;(scores[g.team1] ??= []).push(g.pts1)
+        ;(scores[g.team2] ??= []).push(g.pts2)
+      }
+      const names = new Set([...Object.values(state.rosterUserMaps[season] ?? {}), ...remaining.flatMap(g => [g.a, g.b])])
+      const teams: TeamResults[] = [...names].map(name => {
+        const row = standings.find(r => r.name === name)
+        return { name, wins: row?.wins ?? 0, pf: row?.pf ?? 0, scores: scores[name] ?? [] }
+      })
+      const model = fitScoringModel(history, Object.values(scores).flat())
+      return weekStakes({ teams, schedule: remaining, week, playoffSpots, model, seedKey: `${season}-${week}` })
+    })()
     const ranks = powerRanksThrough(finalGames, Math.min(week - 1, lastFinal, playoffStart - 1))
     const { high, low } = seasonExtremes(priorGames)
     const honors = seasonHonors(state, season)
@@ -118,8 +152,8 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
       }, dayKey)
       const preview: EnrichedPreview = {
         ...p,
-        implicationA: p.isPlayoff ? null : computeImplication(standings, p.teamA.name, playoffSpots),
-        implicationB: p.isPlayoff ? null : computeImplication(standings, p.teamB.name, playoffSpots),
+        stakesA: p.isPlayoff ? null : stakes[p.teamA.name] ?? null,
+        stakesB: p.isPlayoff ? null : stakes[p.teamB.name] ?? null,
         projA,
         projB,
         daddy,
@@ -140,7 +174,7 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
       ammo: rows[pick.index].facts.find(f => !pick.topics.includes(f.topic))?.text ?? null,
     }
     return { previews: enriched, motw }
-  }, [state, season, week, live.week, luck, champPath, projections, extraPlayers, transactions, dayKey])
+  }, [state, season, week, live.week, luck, champPath, projections, extraPlayers, transactions, dayKey, schedule, history])
 
   return { weeks, week, previews, motw }
 }

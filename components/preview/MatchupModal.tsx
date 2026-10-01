@@ -7,10 +7,11 @@ import { X } from 'lucide-react'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import FlairBadges from '@/components/preview/FlairBadges'
 import SmackLine from '@/components/preview/SmackLine'
+import InfoTip from '@/components/shared/InfoTip'
 import { useModalClose } from '@/hooks/useModalClose'
 import { ownerColor, fmtPts } from '@/lib/utils'
-import { ordinal } from '@/lib/preview'
-import type { Badge, TeamPreview } from '@/lib/preview'
+import { formatOdds, ordinal } from '@/lib/preview'
+import type { Badge, TeamPreview, TeamStakes } from '@/lib/preview'
 import type { EnrichedPreview } from '@/hooks/usePreviewData'
 
 /** Ammo lines shown at once; the reroll button steps to the next batch. */
@@ -75,6 +76,38 @@ function TeamColumn({ team, badges, score, proj, status, isWinner }: {
   )
 }
 
+/** One team's playoff stakes: odds now, with a win, and with a loss — plus exact scenarios once they exist. */
+function StakesColumn({ name, s }: { name: string; s: TeamStakes }) {
+  return (
+    <div className="min-w-0">
+      <div className="truncate text-[12px] font-bold uppercase tracking-[1.5px] text-s-text sm:text-[13px]">{name}</div>
+      {s.status === 'alive' ? (
+        <>
+          {/* Phones stack the label under the number so it doesn't wrap */}
+          <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-2">
+            <span className="font-display text-[30px] font-bold leading-none text-gold-bright sm:text-[34px]">{formatOdds(s.odds)}</span>
+            <span className="whitespace-nowrap text-[10px] uppercase tracking-[1.5px] text-s-text3 sm:text-[11px]">playoff odds</span>
+          </div>
+          <div className="mt-1.5 text-[12px] text-s-text3 sm:text-[13px]">
+            Win <span className="font-display text-[17px] font-bold text-win">{formatOdds(s.ifWin, s.ifWinStatus)}</span>
+            <span className="mx-1.5 text-s-muted">·</span>
+            Loss <span className="font-display text-[17px] font-bold text-loss">{formatOdds(s.ifLoss, s.ifLossStatus)}</span>
+          </div>
+        </>
+      ) : (
+        <div className={`mt-1 font-display text-[22px] font-bold uppercase leading-none ${s.status === 'clinched' ? 'text-win' : 'text-loss'}`}>
+          {s.status === 'clinched' ? 'Clinched a playoff spot' : 'Eliminated'}
+        </div>
+      )}
+      {s.scenarios.map(line => (
+        <p key={line} className="mt-2 text-[12px] leading-snug text-gold-soft sm:text-[13px]">
+          {line.charAt(0).toUpperCase() + line.slice(1)}
+        </p>
+      ))}
+    </div>
+  )
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="mb-3 flex items-center gap-2.5">
@@ -103,11 +136,6 @@ export default function MatchupModal({ p, onClose }: { p: EnrichedPreview; onClo
   const lastLine = last
     ? `${last.winner} won ${fmtPts(last.winner === last.team1 ? last.pts1 : last.pts2)}–${fmtPts(last.winner === last.team1 ? last.pts2 : last.pts1)} · ${last.year} Week ${last.week}`
     : null
-
-  const implications = [
-    { team: p.teamA, imp: p.implicationA },
-    { team: p.teamB, imp: p.implicationB },
-  ].filter(({ imp }) => imp && (imp.line || imp.playoffNote))
 
   const flair = [
     ...p.badgesA.map(b => ({ team: p.teamA.name, b })),
@@ -175,18 +203,21 @@ export default function MatchupModal({ p, onClose }: { p: EnrichedPreview; onClo
           </div>
         )}
 
-        {/* Playoff implications */}
-        {implications.length > 0 && (
+        {/* Playoff stakes — every other game of the week accounted for */}
+        {p.stakesA && p.stakesB && (
           <div className="border-b px-5 py-4 sm:px-6" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
-            <SectionLabel>Stakes</SectionLabel>
-            <div className="space-y-1.5">
-              {implications.map(({ team, imp }) => (
-                <div key={team.name} className="text-[13px] text-s-text2 sm:text-[14px]">
-                  <span className="font-semibold text-s-text">{team.name}</span>
-                  {imp!.line && <> — {imp!.line}</>}
-                  {imp!.playoffNote && <span className="text-gold-soft"> {imp!.line ? '·' : '—'} {imp!.playoffNote}</span>}
-                </div>
-              ))}
+            <SectionLabel>
+              Stakes
+              <InfoTip term="Playoff odds">
+                how often a team makes the playoffs in 10,000 simulations of the rest of the regular season,
+                as of the start of this week. Scores come from each team’s average so far, pulled toward
+                the league average early in the year. Clinch and elimination lines aren’t estimates — they
+                hold whatever else happens.
+              </InfoTip>
+            </SectionLabel>
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
+              <StakesColumn name={p.teamA.name} s={p.stakesA} />
+              <StakesColumn name={p.teamB.name} s={p.stakesB} />
             </div>
           </div>
         )}

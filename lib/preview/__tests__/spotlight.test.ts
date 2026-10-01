@@ -137,7 +137,7 @@ function candidate(over: Partial<MotwCandidate>): MotwCandidate {
   return {
     teamA: team({ name: 'A' }), teamB: team({ name: 'B', rosterId: 2 }), h2h: record(4, 2),
     status: 'upcoming', ptsA: 0, ptsB: 0, projA: 110, projB: 125,
-    implicationA: null, implicationB: null, daddy: null, ...over,
+    stakesA: null, stakesB: null, daddy: null, ...over,
   }
 }
 
@@ -148,13 +148,20 @@ describe('pickMatchupOfTheWeek', () => {
     const stakes = candidate({
       teamA: team({ name: 'C' }), teamB: team({ name: 'D', rosterId: 2 }),
       h2h: record(5, 5, 'C', 'D'), projA: 118, projB: 119,
-      implicationA: { currentSeed: 6, winSeed: 4, lossSeed: 8, line: null, playoffNote: 'Sitting on the playoff line (6th of 6 spots)' },
+      stakesA: { status: 'alive', odds: 0.5, ifWin: 0.7, ifLoss: 0.3, ifWinStatus: 'alive', ifLossStatus: 'alive', scenarios: [] },
     })
     const motw = pickMatchupOfTheWeek([candidate({}), stakes, candidate({ projA: 90, projB: 140 })], ctx)!
     expect(motw.index).toBe(1)
-    expect(motw.reasons[0]).toBe('C: sitting on the playoff line (6th of 6 spots)')
+    expect(motw.reasons[0]).toBe("C's playoff odds: 70% with a win, 30% with a loss")
     expect(motw.reasons.length).toBeLessThanOrEqual(3)
     expect(motw.topics).toEqual(['standings', 'proj', 'series'])
+  })
+
+  it('leads with an exact clinch scenario once one exists', () => {
+    const motw = pickMatchupOfTheWeek([candidate({
+      stakesB: { status: 'alive', odds: 0.9, ifWin: 1, ifLoss: 0.8, ifWinStatus: 'clinched', ifLossStatus: 'alive', scenarios: ['clinches a playoff spot with a win'] },
+    })], ctx)!
+    expect(motw.reasons[0]).toBe('B clinches a playoff spot with a win')
   })
 
   it("flags a Daddy whose status rides on the result", () => {
