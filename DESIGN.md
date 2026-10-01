@@ -110,6 +110,7 @@ locally or fold into the gold palette.
 | `OwnerAvatar` | Owner photo/initials; gold ring for champions, dimmed for shame context |
 | `PlayerHeadshot` | NFL player photo; position-badge fallback, team logo for DEF |
 | `FinishBadge`, `WinPctBadge` | Season-finish square chip / threshold-colored win% numeral |
+| `InfoTip` | Small ? icon beside a header or label; its definition pops up on hover, focus, or tap (portaled — table scrollers can't clip it) |
 | `LoadingSpinner`, `ErrorState` | Standard page loading & error states |
 
 Use these instead of re-rolling markup. Tables are standardized site-wide:
@@ -165,21 +166,30 @@ would trap a fixed overlay — don't move it back inside).
 
 ### The season tab (`lib/preview/` + `app/2026/`)
 
-The current season's hub, named for its year, with three sub-tabs (it lands on
+The current season's hub, named for its year, with five sub-tabs (it lands on
 Power Rankings):
 
-- **Power Rankings** — the Oberon Mt. power rating with all-play win% in place
-  of head-to-head win%, so schedule luck can't move it
+- **Power Rankings** — the Power Index: the Oberon Mt. power rating with all-play
+  win% in place of head-to-head win%, so schedule luck can't move it
   (`0.6 × avg + 0.2 × (high + low) + 0.2 × (all-play win% × 200)`), over final
   regular-season weeks, with week-over-week movement, all-play record, streak and
   last-season flair, and the official standing alongside (`lib/stats/power-rankings.ts`).
+  Power Index and All-Play are defined in `InfoTip`s on their column headers; the
+  All-Play cell adds the all-play win % the baseball way (.852).
 - **Matchups** — a gold-bordered **Matchup of the Week** card leads: the pairing
-  with the most on the line, scored on playoff stakes (implications, seed swings),
-  action (projected closeness and total, power ranks, streaks, live closeness), and
-  history at stake (series lead or tie, 💦 Daddy status, H2H streaks, title-run
-  rematches, career-win milestones), with its top three reasons listed. The rest
-  render as `MatchupRow`s; tapping opens `MatchupModal` (series, flair, stakes,
-  ammo). **Flair** (`lib/preview/flair.ts`, legend on the page): 💦 Daddy — wins
+  with the most on the line, scored on playoff stakes (exact clinch/elimination
+  conditions, else how far the result swings the playoff odds), action (projected
+  closeness and total, power ranks, streaks, live closeness), and history at stake
+  (series lead or tie, 💦 Daddy status, H2H streaks, title-run rematches,
+  career-win milestones), with its top three reasons listed. The rest render as
+  `MatchupRow`s; tapping opens `MatchupModal` (series, flair, stakes, ammo).
+  **Stakes** never look at one game alone: each team's playoff odds come from
+  10,000 seeded simulations of the rest of the regular season (scores drawn from
+  each team's average, regressed toward the league average by a prior fit to
+  league history), shown entering the week and with a win vs a loss. Once the
+  math allows, exact sentences replace guesswork — "clinches a playoff spot with
+  a win and a Nathan loss", "is eliminated with a loss" — true in every outcome,
+  with ties in wins never counted (points for can't be known ahead). **Flair** (`lib/preview/flair.ts`, legend on the page): 💦 Daddy — wins
   75%+ of 5+ all-time meetings vs this opponent; 🔥 3+ straight wins; 🧊 3+ straight
   losses; 👑 No. 1 power ranking; 🏆 defending champ; 🚽 last season's toilet bowl;
   🚑 starting a player listed out or doubtful. **Ammo** comes from ~25 true fact
@@ -188,13 +198,29 @@ Power Rankings):
   matchup + date, so it rotates daily, holds still within a day, and a 🎲 reroll
   steps through the rest. On phones the flair moves under each name so names keep
   their width.
-- **Rosters** — every team's lineup, bench, and IR for the current week with
-  league-scored projections, live points, injury tags, and the week's roster moves.
+- **Rosters** — pick a manager from the avatar row. The header carries the Sleeper
+  team name and the season line — owner · PR · record · all-play (rank) · PF (rank) ·
+  PA (rank), ranks most-first across the league — with a week picker. The lineup
+  table (starters, bench, and — for the current week — IR) shows each player's
+  position-tinted slot, team logo, and game, then Proj (or points once the game
+  kicks off), Season Rank (e.g. QB4), GP, FPTS, and PPG, all under league scoring.
+  Beside it, the manager's season schedule: result, score, running record, and
+  season-high/low marks for played weeks; opponents for the rest; "Matchup →" opens
+  that week's game on Matchups.
+- **Transactions** — every completed move this season (trades, waivers, free
+  agents), filterable by type and manager, using the Players → Transactions table
+  and detail modal. Past weeks load once; the current week rides the live sync.
+- **Draft** — the season's draft board, every pick tinted by position
+  (`POS_COLORS`), with pick numbers, owner columns pinned while the board scrolls,
+  and traded picks marked with who made them.
 
 **Live sync:** `useLiveSeason` polls Sleeper while the tab is open — matchups
 (lineups + live points) every minute, league/rosters/moves every five, projections
 every ten (Sleeper's own CDN cache windows) — pausing while the browser tab is
-hidden. It overlays the global store rather than mutating it. A week counts as
+hidden. The rest of the regular-season schedule (Sleeper publishes every week's
+pairings up front) loads once per visit for the playoff odds and roster schedules,
+and every player's season stats refresh with Sleeper's 10-minute feed. It overlays
+the global store rather than mutating it. A week counts as
 final only once Sleeper's `last_scored_leg` reaches it, so a Thursday game never
 makes a week look finished. **Projections use an undocumented Sleeper endpoint**
 — every failure path returns null and the UI renders without projections (names

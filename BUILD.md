@@ -2,7 +2,7 @@
 
 > **Single source of truth for continuing development.** Read this file, then `CLAUDE.md`
 > (rules + directory map), then `DESIGN.md` (visual system) before writing any code.
-> Last updated: **2026-09-26**.
+> Last updated: **2026-10-01**.
 
 ---
 
@@ -13,8 +13,9 @@ This repo now serves two products built on the same config-driven core:
 - **Product A — Convicts FF League** (this deployment). The 7-season archive as it exists
   today. **Feature-frozen and owner-approved** — no new features, no visual changes
   unless the owner asks (they did on 2026-09-26: the "This Week" tab became the **2026**
-  season hub with Power Rankings and live-synced Rosters). Remaining work is a
-  maintenance calendar (§3) tied to the league's yearly rhythm.
+  season hub with Power Rankings and live-synced Rosters; and on 2026-10-01: Transactions
+  and Draft sub-tabs, playoff-odds stakes). Remaining work is a maintenance calendar (§3)
+  tied to the league's yearly rhythm, plus the owner-deferred Search 2.0 (M6).
 - **Product B — League App** *(working name — rename later)*. The same pages and
   components, driven by **any Sleeper league ID** via a dynamic `/league/[id]` route,
   deployed to **Vercel** for production testing. Everything league-specific becomes
@@ -38,13 +39,13 @@ Convicts build acts as the regression oracle for all refactors.
 
 ---
 
-## 2. Product A: Convicts — Current State (verified 2026-09-26)
+## 2. Product A: Convicts — Current State (verified 2026-10-01)
 
 Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deployed to
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest.
 
-- **Health:** 121 unit tests pass (9 files); `npm run build` succeeds; lint 0 errors
+- **Health:** 137 unit tests pass (11 files); `npm run build` succeeds; lint 0 errors
   (15 known `react-hooks`/`no-img-element` warnings). Snapshots frozen for
   **2019–2025** (season + transactions files) + `players.json` + manifest.
 - **Live season:** `lib/config.ts` `LEAGUE_ID = '1367670546694705152'` → the **2026
@@ -52,8 +53,10 @@ Prime) · Recharts · React Context · Vitest.
   `playoff_teams: 6`, `playoff_week_start: 15`, trade deadline week 13.
 - **Pages:** Home, Seasons (Standings · Game Log · Finish Tracker · Scoring Trend),
   Records, Owners (+ per-owner profiles), Players, **2026** (Power Rankings · Matchups with
-  Matchup of the Week, emoji flair, and daily ammo · Rosters — live-synced with Sleeper;
-  `/this-week` redirects here), Draft. Cross-cutting:
+  Matchup of the Week, playoff-odds stakes, emoji flair, and daily ammo · Rosters with
+  season stats and schedules · Transactions · Draft board — live-synced with Sleeper;
+  `/this-week` redirects here),
+  Draft. Cross-cutting:
   ⌘K "ask anything" search (16 local intents, no API keys), mobile drawer nav, PWA,
   reduced-motion support.
 
@@ -123,12 +126,36 @@ architecture or the Midnight Prime palette. **No action without owner sign-off.*
 Still open (not approved yet): `ordinal`, `pctColor`, and `formatDate` each have 2–3
 local copies across components.
 
+### M6 — Search 2.0: open questions over the league database *(owner-deferred 2026-10-01 — a later build)*
+Goal: answer open-ended stat questions — e.g. *"what's Daniyaal's top scoring wide
+receiver?"* — instead of today's 16 fixed intents. Stays **local-only** (§6.8): truly
+"any question" would need an AI model, which means an API key plus a server (GitHub
+Pages can't hide a key), already ruled out.
+1. **Slot grammar** (`lib/search/`): parse a question into composable slots — subject
+   (owner, player, position, NFL team), scope (season, week, regular season vs playoffs,
+   vs an opponent), metric (points as a starter, starts, record, trades, adds, FAAB,
+   draft picks, finishes), and shape (top / most / least / average / count / top N).
+   Ordered rules as today, but slots compose instead of one regex per question.
+2. **Fact tables**, built once and memoized: per-player × owner × week starter points
+   from the season snapshots' `players_points` + `starters` (all seven seasons are in
+   `public/data/`), transactions from the lazy `transactions-<year>.json`, picks from
+   `draftData`.
+3. **Resolver:** slots → filter, group, aggregate → an answer card (top result plus the
+   next few) with chips showing how the question was read ("Daniyaal · WR · all seasons").
+4. **Fallbacks:** unparseable phrasing gets the closest reading plus example chips —
+   never a guess presented as an answer.
+5. **Tests** per slot and per launch question; the 16 current intents keep working.
+Launch questions: "Daniyaal's top scoring WR", "most points by a QB in 2024", "who has
+made the most trades", "Kerry's best draft pick", "Teja's record vs Eric in the
+playoffs", "most FAAB spent in 2025".
+
 ### Open risks
 
 | # | Area | Risk | Detection | Mitigation |
 |---|---|---|---|---|
-| B4 | `lib/preview/projections.ts` | Undocumented `api.sleeper.com` projections + per-player endpoints can change/vanish any time | Projections silently disappear; roster names come from the player index (designed behavior) | M2 |
+| B4 | `lib/preview/projections.ts`, `season-stats.ts` | Undocumented `api.sleeper.com` projections, season-stats, and per-player endpoints can change/vanish any time | Projections or the Rosters season columns go blank (dashes); roster names come from the player index (designed behavior) | M2 |
 | B8 | `lib/preview/live.ts` | Week finality comes from `settings.last_scored_leg`; if Sleeper stops updating it, a finished week stays "in progress" | Power rankings stop advancing past a completed week | Fallback is `leg − 1`; check the league JSON |
+| B9 | `lib/preview/stakes.ts` | Playoff odds need every remaining week's pairings, fetched once per visit from `/league/<id>/matchups/<week>` | Matchup stakes disappear (odds hide rather than simulate a partial schedule) | Designed behavior — check a future week's matchups JSON |
 | B6 | Snapshot drift | Regenerating old snapshot years could shift historical name resolution | Career totals change unexpectedly | Snapshots freeze history — never regenerate old years without diffing (M3) |
 | B7 | Sleeper display-name churn | Owner renames mid-season fall back to user_id mapping (fine), but aliases power search | New alias not searchable | Add the alias to the Convicts config when noticed |
 
