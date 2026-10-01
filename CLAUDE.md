@@ -103,7 +103,8 @@ lib/                        Business logic and static data
     career.ts               buildCareerStats(), championshipCount(), activeOwnerNames()
     h2h.ts                  h2hRecord(), h2hVsAll()
     records.ts              computeRecords() — record-book extremes and streaks
-    power-rankings.ts       computePowerRankings() — Oberon Mt. rating, movement, all-play
+    power-rankings.ts       computePowerRankings() — Oberon Mt. weights on all-play win%,
+                            movement, all-play record, streaks
     luck.ts                 computeLuckIndex(), allPlayRecords() — the ONLY luck/all-play math
                             (Seasons, Records, search, 2026 tab, scripts/luck-index.mjs)
     index.ts                Barrel re-export (import from '@/lib/stats')
@@ -198,6 +199,7 @@ rookies have names; after a season completes, run `npm run snapshot` and commit
 - **Projections degrade gracefully.** `lib/preview/projections.ts` hits an undocumented Sleeper endpoint; every failure returns null and the 2026 tab renders without projections (roster names fall back to the player index). Never let a projections change break the 2026 page.
 - **Flair and ammo are true stats, never invented.** Every badge, ammo line, and Matchup of the Week reason comes from `lib/preview/facts.ts` and the stat engine. Only championship-path games (`buildChampPathGameKeys`) count as playoff eliminations — a consolation or toilet-bowl game is never billed as one.
 - **One luck formula.** Luck Index = actual wins (ties ½) − Σ weekly all-play expected wins ((teams outscored + ½ tied) / (teams that played − 1)), regular season only. It lives only in `lib/stats/luck.ts` — never recompute luck or all-play inline.
+- **Power ratings ignore schedule luck.** The power rating is the Oberon Mt. formula with all-play win% in place of head-to-head win% (`0.6 × avg + 0.2 × (high + low) + 40 × all-play win%`) — a deliberate league choice, not a bug. Don't swap the actual record back in.
 - **Live data overlays; it never mutates.** Only the 2026 tab polls, via `useLiveSeason`, which layers fresh league/roster/matchup data over a copy of the global state (`withLiveSeason`). The global store still loads once. A week is final only once `settings.last_scored_leg` reaches it — never infer "final" from points on the board (a Thursday game puts points up for the whole week).
 - **The search overlay is portaled to `document.body`.** The navbar's `backdrop-filter` makes it the containing block for fixed descendants — rendering the overlay inside the nav clips it. Don't move it back.
 - **Pages are thin shells.** Computation belongs in `hooks/` or `lib/`. Pages should only call hooks, destructure results, and render JSX.

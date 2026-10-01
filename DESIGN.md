@@ -168,8 +168,9 @@ would trap a fixed overlay — don't move it back inside).
 The current season's hub, named for its year, with three sub-tabs (it lands on
 Power Rankings):
 
-- **Power Rankings** — the Oberon Mt. power rating
-  (`((avg × 6) + ((high + low) × 2) + ((win% × 200) × 2)) / 10`) over final
+- **Power Rankings** — the Oberon Mt. power rating with all-play win% in place
+  of head-to-head win%, so schedule luck can't move it
+  (`0.6 × avg + 0.2 × (high + low) + 40 × all-play win%`), over final
   regular-season weeks, with week-over-week movement, all-play record, streak and
   last-season flair, and the official standing alongside (`lib/stats/power-rankings.ts`).
 - **Matchups** — a gold-bordered **Matchup of the Week** card leads: the pairing

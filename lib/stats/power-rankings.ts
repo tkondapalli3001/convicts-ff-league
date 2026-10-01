@@ -20,6 +20,8 @@ export interface PowerRankingRow {
   allPlayWins: number
   allPlayLosses: number
   allPlayTies: number
+  /** All-play win% (ties ½), 0–1 — the rating's results term. */
+  allPlayPct: number
   /** Position in the official standings (wins, then points for). */
   standing: number
   /** Current run of wins or losses (2+ games); a tie ends it. */
@@ -64,11 +66,13 @@ function lines(games: Matchup[]): Line[] {
     const low = Math.min(...pts)
     const winPct = (w + t / 2) / games
     const ap = allPlay[name] ?? { wins: 0, losses: 0, ties: 0 }
+    const apGames = ap.wins + ap.losses + ap.ties
+    const allPlayPct = apGames ? (ap.wins + ap.ties / 2) / apGames : 0
     return {
       name,
-      score: (avg * 6 + (high + low) * 2 + winPct * 200 * 2) / 10,
+      score: 0.6 * avg + 0.2 * (high + low) + 40 * allPlayPct,
       wins: w, losses: l, ties: t, winPct, pf, avg, high, low,
-      allPlayWins: ap.wins, allPlayLosses: ap.losses, allPlayTies: ap.ties,
+      allPlayWins: ap.wins, allPlayLosses: ap.losses, allPlayTies: ap.ties, allPlayPct,
       streak: currentStreak(results[name]),
     }
   })
@@ -88,14 +92,16 @@ function byScore(a: Line, b: Line): number {
 
 /**
  * Weekly power rankings using the Oberon Mt. Power Rating — the long-standing
- * standard formula for fantasy power rankings:
+ * standard formula for fantasy power rankings — with all-play win% in place of
+ * the head-to-head win%, so schedule luck can't move a team's rating:
  *
- *   rating = ((avg score × 6) + ((high score + low score) × 2) + ((win% × 200) × 2)) / 10
+ *   rating = ((avg × 6) + ((high + low) × 2) + ((all-play win% × 200) × 2)) / 10
+ *          = 0.6 × avg + 0.2 × (high + low) + 40 × all-play win%
  *
- * Designed as 60% average score, 20% ceiling + floor, 20% winning percentage,
- * so a team that scores a lot but drops close games still ranks near the top.
+ * Designed as 60% average score, 20% ceiling + floor, 20% winning percentage.
  * `games` should hold one season's final regular-season games; ties count as
- * half a win.
+ * half a win. Exact rating ties go to the better head-to-head record, then
+ * points for.
  */
 export function computePowerRankings(games: Matchup[], throughWeek: number): PowerRankingRow[] {
   const regular = games.filter(g => g.type === 'R')

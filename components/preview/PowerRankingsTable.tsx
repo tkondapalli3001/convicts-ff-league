@@ -32,7 +32,7 @@ function record(w: number, l: number, t: number): string {
   return t ? `${w}–${l}–${t}` : `${w}–${l}`
 }
 
-/** Power Rankings tab: Oberon Mt. power ratings with week-over-week movement and streak flair. */
+/** Power Rankings tab: power ratings (Oberon Mt. weights, all-play win%) with week-over-week movement and streak flair. */
 export default function PowerRankingsTable({ rows, throughWeek, badges }: {
   rows: PowerRankingRow[]
   throughWeek: number
@@ -111,12 +111,12 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] sm:hidden" />
       </div>
 
+      {/* No HTML entities here: SWC drops the leading space of a line-ending text run that has one */}
       <p className="border-t px-5 py-3.5 text-[10px] leading-relaxed text-s-text3" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
-        <span className="font-bold text-s-text2">Power</span> = ((Avg × 6) + ((High + Low) × 2) + ((Win% × 200) × 2)) ÷ 10
-        — the Oberon Mt. formula: 60% scoring average, 20% ceiling + floor, 20% winning.
-        {' '}<span className="font-bold text-s-text2">▲▼</span> places moved since last week.
-        {' '}<span className="font-bold text-s-text2">All-Play</span> = record if you played all {rows.length - 1} teams every week.
-        {' '}Standing is Sleeper&apos;s order (wins, then points). Final scores only.
+        <span className="font-bold text-s-text2">Power</span> = 0.6 × PF/Gm + 0.2 × (High + Low) + 40 × All-Play Win%.
+        {' '}<span className="font-bold text-s-text2">All-Play</span> = record if you played all {rows.length - 1} teams every week (no schedule luck).
+        {' '}<span className="font-bold text-s-text2">▲▼</span> = places moved since last week.
+        {' '}<span className="font-bold text-s-text2">Standing</span> = Sleeper standings (wins, then points). Final scores only.
       </p>
       <div className="px-5 pb-4">
         <FlairLegend badges={Object.values(badges).flat()} />
