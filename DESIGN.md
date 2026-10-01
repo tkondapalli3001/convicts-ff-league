@@ -110,7 +110,7 @@ locally or fold into the gold palette.
 | `OwnerAvatar` | Owner photo/initials; gold ring for champions, dimmed for shame context |
 | `PlayerHeadshot` | NFL player photo; position-badge fallback, team logo for DEF |
 | `FinishBadge`, `WinPctBadge` | Season-finish square chip / threshold-colored win% numeral |
-| `InfoTip` | Small ? icon beside a header or label; its definition pops up on hover, focus, or tap (portaled — table scrollers can't clip it) |
+| `InfoTip` | Small ? icon beside a header or label; its definition pops up on hover, focus, or tap (portaled — table scrollers can't clip it). Every definition on the site lives in one — Luck, the fun-fact cards, steals/busts, draft strategy, player win rate, Power Index, All-Play, stakes, roster columns. Emoji legends stay as footnotes. |
 | `LoadingSpinner`, `ErrorState` | Standard page loading & error states |
 
 Use these instead of re-rolling markup. Tables are standardized site-wide:
@@ -169,10 +169,9 @@ would trap a fixed overlay — don't move it back inside).
 The current season's hub, named for its year, with five sub-tabs (it lands on
 Power Rankings):
 
-- **Power Rankings** — the Power Index: the Oberon Mt. power rating with all-play
-  win% in place of head-to-head win%, so schedule luck can't move it
-  (`0.6 × avg + 0.2 × (high + low) + 0.2 × (all-play win% × 200)`), over final
-  regular-season weeks, with week-over-week movement, all-play record, streak and
+- **Power Rankings** — the Power Index: the original Oberon Mt. power rating
+  (`0.6 × avg + 0.2 × (high + low) + 0.2 × (win% × 200)`, the actual record's
+  win%), over final regular-season weeks, with week-over-week movement, all-play record, streak and
   last-season flair, and the official standing alongside (`lib/stats/power-rankings.ts`).
   Power Index and All-Play are defined in `InfoTip`s on their column headers; the
   All-Play cell adds the all-play win % the baseball way (.852).
