@@ -14,6 +14,25 @@ export interface EnrichedTransaction extends Transaction {
   droppedPlayers: { playerId: string; name: string; owner: string }[]
 }
 
+/** A Sleeper transaction with owner and player names attached. */
+export function enrichTransaction(
+  tx: Transaction,
+  year: number,
+  rMap: Record<string, string>,
+  playerName: (id: string) => string,
+): EnrichedTransaction {
+  const owner = (rid: number) => rMap[String(rid)] ?? `Team${rid}`
+  const players = (moves: Record<string, number> | null | undefined) =>
+    Object.entries(moves ?? {}).map(([pid, rid]) => ({ playerId: pid, name: playerName(pid), owner: owner(rid) }))
+  return {
+    ...tx,
+    year,
+    ownerNames: tx.roster_ids.map(owner),
+    addedPlayers: players(tx.adds),
+    droppedPlayers: players(tx.drops),
+  }
+}
+
 // Module-level cache — persists across page visits without re-fetching
 let _txCache: EnrichedTransaction[] | null = null
 
@@ -69,22 +88,7 @@ export function useTransactionsData(enabled: boolean = true): TransactionsData {
           const enrich = (weekTxs: Transaction[]) => {
             for (const tx of weekTxs) {
               if (tx.status !== 'complete') continue
-
-              const ownerNames = tx.roster_ids.map(rid => rMap[String(rid)] ?? `Team${rid}`)
-
-              const addedPlayers = Object.entries(tx.adds ?? {}).map(([pid, rid]) => ({
-                playerId: pid,
-                name: playerDisplayName(playersCache[pid], pid),
-                owner: rMap[String(rid)] ?? `Team${rid}`,
-              }))
-
-              const droppedPlayers = Object.entries(tx.drops ?? {}).map(([pid, rid]) => ({
-                playerId: pid,
-                name: playerDisplayName(playersCache[pid], pid),
-                owner: rMap[String(rid)] ?? `Team${rid}`,
-              }))
-
-              allTxs.push({ ...tx, year: entry.year, ownerNames, addedPlayers, droppedPlayers })
+              allTxs.push(enrichTransaction(tx, entry.year, rMap, pid => playerDisplayName(playersCache[pid], pid)))
             }
           }
 

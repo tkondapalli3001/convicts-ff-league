@@ -7,6 +7,7 @@ import { useLiveSeason } from '@/hooks/useLiveSeason'
 import { usePreviewData } from '@/hooks/usePreviewData'
 import { usePowerRankings } from '@/hooks/usePowerRankings'
 import { useTeamRosters } from '@/hooks/useTeamRosters'
+import { useSeasonTransactions } from '@/hooks/useSeasonTransactions'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PageHeader from '@/components/shared/PageHeader'
@@ -17,14 +18,18 @@ import MatchupOfTheWeek from '@/components/preview/MatchupOfTheWeek'
 import FlairLegend from '@/components/preview/FlairLegend'
 import PowerRankingsTable from '@/components/preview/PowerRankingsTable'
 import RosterView from '@/components/preview/RosterView'
+import SeasonTransactions from '@/components/preview/SeasonTransactions'
+import SeasonDraftBoard from '@/components/preview/SeasonDraftBoard'
 import SyncStatus from '@/components/preview/SyncStatus'
 
-type Tab = 'rankings' | 'matchups' | 'rosters'
+type Tab = 'rankings' | 'matchups' | 'rosters' | 'transactions' | 'draft'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'rankings', label: 'Power Rankings' },
   { id: 'matchups', label: 'Matchups'       },
   { id: 'rosters',  label: 'Rosters'        },
+  { id: 'transactions', label: 'Transactions' },
+  { id: 'draft',    label: 'Draft'          },
 ]
 
 const STATUS_LABEL = { final: 'Final', live: 'In progress', upcoming: 'Regular season' } as const
@@ -38,6 +43,7 @@ export default function SeasonPage() {
   const { weeks, week, previews, motw } = usePreviewData(live, selectedWeek)
   const rankings = usePowerRankings(live)
   const rosters = useTeamRosters(live)
+  const moves = useSeasonTransactions(live, tab === 'transactions')
 
   if (state.error) return <ErrorState error={state.error} />
   if (!state.loaded) return <LoadingSpinner />
@@ -48,6 +54,7 @@ export default function SeasonPage() {
   if (!season) return <ErrorState error="No matchup data available yet" />
 
   const idx = weeks.indexOf(week)
+  const draft = live.state.draftData[season]
   const isPlayoff = previews[0]?.isPlayoff ?? false
   const status = previews[0]?.status ?? 'upcoming'
 
@@ -61,7 +68,7 @@ export default function SeasonPage() {
       <PageHeader
         kicker={preseason ? `The ${latestSeason} Preseason` : live.live ? `Week ${live.week} · Live from Sleeper` : `The ${season} Season`}
         title={String(Number.isFinite(latestSeason) ? latestSeason : season)}
-        subtitle="Matchups, power rankings, and every roster — synced with Sleeper"
+        subtitle="Power rankings, matchups, rosters, every move, and the draft — synced with Sleeper"
       />
 
       <PillTabs tabs={TABS} active={tab} onChange={setTab} />
@@ -176,6 +183,23 @@ export default function SeasonPage() {
       {/* ── ROSTERS ──────────────────────────────────────────────── */}
       {tab === 'rosters' && (
         <RosterView rosters={rosters.rosters} moves={rosters.moves} week={rosters.week} status={rosters.status} />
+      )}
+
+      {/* ── TRANSACTIONS ─────────────────────────────────────────── */}
+      {tab === 'transactions' && <SeasonTransactions data={moves} />}
+
+      {/* ── DRAFT ────────────────────────────────────────────────── */}
+      {tab === 'draft' && (
+        draft?.picks.length ? (
+          <SeasonDraftBoard year={season} draft={draft.draft} picks={draft.picks} rMap={live.state.rosterUserMaps[season] ?? {}} />
+        ) : (
+          <div
+            className="rounded-[6px] px-4 py-8 text-center text-[13px] text-s-text3"
+            style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
+          >
+            The {season} draft board shows up here once the draft is done.
+          </div>
+        )
       )}
     </div>
   )

@@ -5,6 +5,7 @@ import type { DraftPick, SleeperDraft } from '@/types'
 
 import { useModalClose } from '@/hooks/useModalClose'
 import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/constants'
+import { buildDraftBoard } from '@/lib/data-processing'
 
 interface Props {
   year: number
@@ -16,54 +17,9 @@ interface Props {
 
 export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: Props) {
   useModalClose(onClose)
-  // Build slot → canonical owner map (pre-trade assignment).
-  // Round-1 picks reflect whoever used the pick after trades, so we can't use
-  // them for column headers. Use slot_to_roster_id first, then infer from the
-  // mode of roster_id across rounds 2+ (almost never traded), then fall back
-  // to round 1 only for slots still unresolved.
-  const draftAny = draft as unknown as {
-    slot_to_roster_id?: Record<string, number> | null
-  }
-  const slotOwner: Record<number, string> = {}
-
-  // Tier 1: slot_to_roster_id (set at draft creation, unaffected by trades)
-  const s2r = draftAny.slot_to_roster_id
-  if (s2r && typeof s2r === 'object') {
-    for (const [slotStr, rosterId] of Object.entries(s2r)) {
-      const owner = rMap[String(rosterId)]
-      if (owner) slotOwner[Number(slotStr)] = owner
-    }
-  }
-
-  // Tier 2: mode of roster_id across rounds 2+ for any slots still missing
-  const votes: Record<number, Record<string, number>> = {}
-  for (const pick of picks) {
-    if (pick.round < 2) continue
-    const owner = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
-    if (!votes[pick.draft_slot]) votes[pick.draft_slot] = {}
-    votes[pick.draft_slot][owner] = (votes[pick.draft_slot][owner] || 0) + 1
-  }
-  for (const [slotStr, counts] of Object.entries(votes)) {
-    const slot = Number(slotStr)
-    if (slotOwner[slot]) continue
-    slotOwner[slot] = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
-  }
-
-  // Tier 3: round-1 fallback for any slots still unresolved
-  for (const pick of picks) {
-    if (pick.round !== 1 || slotOwner[pick.draft_slot] !== undefined) continue
-    slotOwner[pick.draft_slot] = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
-  }
-
-  const numSlots = Math.max(...picks.map(p => p.draft_slot), 0) || 10
-  const numRounds = Math.max(...picks.map(p => p.round), 0) || 16
-  const slots = Array.from({ length: numSlots }, (_, i) => i + 1)
-
-  // Build pick lookup: round × slot → DraftPick
-  const pickMap: Record<string, DraftPick> = {}
-  for (const pick of picks) {
-    pickMap[`${pick.round}-${pick.draft_slot}`] = pick
-  }
+  const board = buildDraftBoard(draft, picks, rMap)
+  const numSlots = board.slots.length
+  const numRounds = board.rounds
 
   // Portaled to body: the page's animate-fade-in transform would otherwise
   // become the containing block for this fixed overlay and clip it.
@@ -101,7 +57,7 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
                 <th className="sticky left-0 top-0 z-20 text-center px-2 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border w-12 bg-s-bg4">
                   Rd
                 </th>
-                {slots.map(slot => (
+                {board.slots.map(({ slot, owner }) => (
                   <th
                     key={slot}
                     className="sticky top-0 z-10 text-center px-2 py-3 text-[11px] font-bold text-s-text border-b border-s-border border-l border-s-border/40 bg-s-bg4"
@@ -109,7 +65,7 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
                   >
                     <div className="text-[9px] text-s-text3 font-semibold mb-0.5">Slot {slot}</div>
                     <div className="truncate max-w-[100px] mx-auto">
-                      {slotOwner[slot] ?? `—`}
+                      {owner}
                     </div>
                   </th>
                 ))}
@@ -123,8 +79,8 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
                     <td className="sticky left-0 z-10 px-2 py-1 text-center text-[11px] font-extrabold text-s-text3 bg-s-bg3 border-r border-s-border/40">
                       {round}
                     </td>
-                    {slots.map(slot => {
-                      const pick = pickMap[`${round}-${slot}`]
+                    {board.slots.map(({ slot }) => {
+                      const pick = board.picks[`${round}-${slot}`]
                       if (!pick) {
                         return (
                           <td key={slot} className="px-2 py-1.5 border-l border-s-border/40 text-center">

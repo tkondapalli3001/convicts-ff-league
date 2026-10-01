@@ -47,26 +47,28 @@ export default function TransactionFilters({
         </div>
       </div>
 
-      {/* Year filter */}
-      <div className="mb-3 relative z-10">
-        <div className="text-[9px] font-bold tracking-[2px] uppercase text-gold-soft mb-2">Year</div>
-        <div className="flex gap-[6px] flex-wrap">
-          {years.map(y => (
-            <button
-              key={y}
-              onClick={() => onToggleYear(y)}
-              className={[
-                'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
-                activeYears.has(y)
-                  ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
-                  : 'border-[rgba(230,190,90,0.14)] text-s-text3 hover:text-gold-soft',
-              ].join(' ')}
-            >
-              {y}
-            </button>
-          ))}
+      {/* Year filter — hidden for a single-season view */}
+      {years.length > 1 && (
+        <div className="mb-3 relative z-10">
+          <div className="text-[9px] font-bold tracking-[2px] uppercase text-gold-soft mb-2">Year</div>
+          <div className="flex gap-[6px] flex-wrap">
+            {years.map(y => (
+              <button
+                key={y}
+                onClick={() => onToggleYear(y)}
+                className={[
+                  'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+                  activeYears.has(y)
+                    ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
+                    : 'border-[rgba(230,190,90,0.14)] text-s-text3 hover:text-gold-soft',
+                ].join(' ')}
+              >
+                {y}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Owner filter */}
       <div className="relative z-10">
