@@ -35,6 +35,13 @@ export function fmtMoney(n: number): string {
   return `${n > 0 ? '+' : '−'}$${Math.abs(n)}`
 }
 
+/** Local calendar date as YYYY-MM-DD (comparable with Sleeper's game dates). */
+export function localDateKey(date: Date): string {
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${m}-${d}`
+}
+
 /** Compact elapsed time: "just now", "40s ago", "5m ago", "3h ago", "2d ago". */
 export function timeAgo(ms: number): string {
   const s = Math.max(0, Math.round(ms / 1000))

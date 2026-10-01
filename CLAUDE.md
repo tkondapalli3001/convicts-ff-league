@@ -34,9 +34,9 @@ app/                        Next.js App Router pages (thin render shells only)
   players/page.tsx          NFL player stats — win rate, scoring, ownership, transactions
   seasons/page.tsx          Standings + playoff bracket, Game Log (every game + box scores),
                             finish tracker, scoring trend
-  2026/page.tsx             Current-season hub (nav label = the year) — Matchups (previews,
-                            projections, implications, smack talk), Power Rankings, and
-                            live Rosters, all synced with Sleeper while open
+  2026/page.tsx             Current-season hub (nav label = the year) — Power Rankings (lands
+                            here), Matchups (Matchup of the Week, previews, emoji flair, daily
+                            group-chat ammo), and live Rosters, all synced with Sleeper while open
   this-week/page.tsx        Redirect to /2026 (the tab's old name — keeps shared links alive)
   draft/page.tsx            Draft boards, slot analysis, pick order
   layout.tsx                Root layout — wraps app in <LeagueProvider>; site metadata/PWA
@@ -51,8 +51,9 @@ components/                 Feature-organized UI components
                             wordmark), SearchStrip (home search bar), Footer, nav-items.ts
   search/                   GlobalSearch (⌘K trigger), SearchOverlay, AnswerCard,
                             ManagerCard, PlayerCard
-  preview/                  2026 tab: MatchupRow + MatchupModal (clickable rows → H2H popup),
-                            PowerRankingsTable, RosterView, SyncStatus
+  preview/                  2026 tab: MatchupOfTheWeek (featured card), MatchupRow + MatchupModal
+                            (clickable rows → H2H, flair, rerollable ammo), FlairBadges +
+                            FlairLegend, SmackLine, PowerRankingsTable, RosterView, SyncStatus
   owners/                   OwnerDetail, CareerLeaderboard, H2HGrid, H2HModal
   records/                  ScoreLeaderboard, StreakList, FunFacts, RivalryCalc
   players/                  PlayerWinRateTable, PlayerScoringTable, PlayerCardModal, etc.
@@ -75,8 +76,9 @@ hooks/
   useRecordsData.ts         Memoized wrapper for lib/stats computeRecords()
   usePlayersData.ts         NFL player stats (player names from lib/players-cache; picks from state)
   useLiveSeason.ts          2026 tab's live sync — polls Sleeper, overlays the global state
-  usePreviewData.ts         2026 → Matchups previews (lib/preview, fed by useLiveSeason)
-  usePowerRankings.ts       2026 → Power Rankings (lib/stats computePowerRankings)
+  usePreviewData.ts         2026 → Matchups: previews + flair + Matchup of the Week + daily ammo
+                            (lib/preview, fed by useLiveSeason)
+  usePowerRankings.ts       2026 → Power Rankings + streak/honors flair (lib/stats computePowerRankings)
   useTeamRosters.ts         2026 → Rosters + the week's roster moves (lib/preview)
   useModalClose.ts          Escape-to-close + body scroll lock shared by every modal
   useTransactionsData.ts    Transaction history (lazy transactions-<year>.json, live current season)
@@ -114,7 +116,12 @@ lib/                        Business logic and static data
   preview/                  2026 tab engine — pure functions plus the live-season fetchers
     build-preview.ts        buildWeekPreviews(), computeStandings(), week selection
     implications.ts         computeImplication() — win/loss seed movement, playoff line
-    smack-talk.ts           smackLines() — deterministic template smack talk
+    smack-talk.ts           smackFacts()/smackPool() — template ammo from ~25 fact types, phrasing
+                            and order seeded by matchup + date (rotates daily, stable intraday)
+    facts.ts                Season facts shared by flair, ammo, and MOTW — daddyOf() (75%+ over
+                            5+ meetings), seasonHonors(), lineupRegrets(), injuryReport(), …
+    flair.ts                matchupBadges()/standingBadges() — 💦 🔥 🧊 👑 🏆 🚽 🚑 rules
+    matchup-of-the-week.ts  pickMatchupOfTheWeek() — scores playoff stakes, action, and history
     projections.ts          Sleeper projections + player names/injuries/opponents, scored with
                             league settings (UNDOCUMENTED endpoint — degrade gracefully)
     live.ts                 syncLiveSeason() polling pass, withLiveSeason() overlay,
@@ -189,6 +196,7 @@ rookies have names; after a season completes, run `npm run snapshot` and commit
 - **Stat math lives in `lib/stats/`.** Career records, championship counts, H2H records, and record-book extremes have one implementation each. Never recompute them inline in a component — half-titles (0.5), shared-winner substring matching, and tie-as-win rules are easy to get subtly wrong.
 - **The snapshot is an accelerator, never a dependency.** If `public/data/manifest.json` fails to load, `LeagueContext` must fall back to full live fetching. Don't break that path.
 - **Projections degrade gracefully.** `lib/preview/projections.ts` hits an undocumented Sleeper endpoint; every failure returns null and the 2026 tab renders without projections (roster names fall back to the player index). Never let a projections change break the 2026 page.
+- **Flair and ammo are true stats, never invented.** Every badge, ammo line, and Matchup of the Week reason comes from `lib/preview/facts.ts` and the stat engine. Only championship-path games (`buildChampPathGameKeys`) count as playoff eliminations — a consolation or toilet-bowl game is never billed as one.
 - **One luck formula.** Luck Index = actual wins (ties ½) − Σ weekly all-play expected wins ((teams outscored + ½ tied) / (teams that played − 1)), regular season only. It lives only in `lib/stats/luck.ts` — never recompute luck or all-play inline.
 - **Live data overlays; it never mutates.** Only the 2026 tab polls, via `useLiveSeason`, which layers fresh league/roster/matchup data over a copy of the global state (`withLiveSeason`). The global store still loads once. A week is final only once `settings.last_scored_leg` reaches it — never infer "final" from points on the board (a Thursday game puts points up for the whole week).
 - **The search overlay is portaled to `document.body`.** The navbar's `backdrop-filter` makes it the containing block for fixed descendants — rendering the overlay inside the nav clips it. Don't move it back.

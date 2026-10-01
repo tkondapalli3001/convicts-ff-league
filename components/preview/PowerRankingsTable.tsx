@@ -4,7 +4,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import SectionCard from '@/components/shared/SectionCard'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import FlairBadges from '@/components/preview/FlairBadges'
+import FlairLegend from '@/components/preview/FlairLegend'
 import { ordinal } from '@/lib/preview'
+import type { Badge } from '@/lib/preview'
 import type { PowerRankingRow } from '@/lib/stats'
 
 function Movement({ n }: { n: number | null }) {
@@ -29,8 +32,12 @@ function record(w: number, l: number, t: number): string {
   return t ? `${w}–${l}–${t}` : `${w}–${l}`
 }
 
-/** Power Rankings tab: Oberon Mt. power ratings with week-over-week movement. */
-export default function PowerRankingsTable({ rows, throughWeek }: { rows: PowerRankingRow[]; throughWeek: number }) {
+/** Power Rankings tab: Oberon Mt. power ratings with week-over-week movement and streak flair. */
+export default function PowerRankingsTable({ rows, throughWeek, badges }: {
+  rows: PowerRankingRow[]
+  throughWeek: number
+  badges: Record<string, Badge[]>
+}) {
   const router = useRouter()
 
   if (!rows.length) {
@@ -83,6 +90,7 @@ export default function PowerRankingsTable({ rows, throughWeek }: { rows: PowerR
                         <OwnerAvatar name={r.name} size="sm" />
                         {r.name}
                       </Link>
+                      <FlairBadges badges={badges[r.name] ?? []} className="text-[14px]" />
                     </div>
                   </td>
                   <td className="font-display text-[20px] font-bold num" style={{ color: '#E8CE8A' }}>
@@ -110,6 +118,9 @@ export default function PowerRankingsTable({ rows, throughWeek }: { rows: PowerR
         {' '}<span className="font-bold text-s-text2">All-Play</span> = record if you played all {rows.length - 1} teams every week.
         {' '}Standing is Sleeper&apos;s order (wins, then points). Final scores only.
       </p>
+      <div className="px-5 pb-4">
+        <FlairLegend badges={Object.values(badges).flat()} />
+      </div>
     </SectionCard>
   )
 }

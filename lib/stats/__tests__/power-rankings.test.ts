@@ -75,6 +75,11 @@ describe('computePowerRankings', () => {
     expect(rows.map(r => r.name)).toEqual(['A', 'C', 'D', 'B'])
   })
 
+  it('tracks each team’s current streak (2+ games)', () => {
+    const streak = Object.fromEntries(computePowerRankings(GAMES, 2).map(r => [r.name, r.streak]))
+    expect(streak).toEqual({ A: { type: 'W', len: 2 }, B: { type: 'L', len: 2 }, C: null, D: null })
+  })
+
   it('reports the official standing: wins, then points for', () => {
     const standing = Object.fromEntries(computePowerRankings(GAMES, 2).map(r => [r.name, r.standing]))
     // A 2–0; C and D 1–1 (C 235 PF vs D 230); B 0–2

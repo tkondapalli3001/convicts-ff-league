@@ -1,35 +1,54 @@
 'use client'
 
-import { useMemo } from 'react'
-import { computeLuckIndex } from '@/lib/stats'
+import { useMemo, useState } from 'react'
+import { computeLuckIndex, buildChampPathGameKeys } from '@/lib/stats'
 import { flattenSeasonMatchups } from '@/lib/data-processing'
+import { localDateKey } from '@/lib/utils'
 import {
   getSeasonWeeks, buildWeekPreviews, computeStandings, computeImplication,
-  smackLines, projectTeam, startersByRoster, lastFinalWeek,
+  smackFacts, projectTeam, startersByRoster, lastFinalWeek, playerLookup,
+  daddyOf, seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore,
+  injuryReport, weeklyMoves, matchupBadges, pickMatchupOfTheWeek,
 } from '@/lib/preview'
-import type { MatchupPreview, Implication } from '@/lib/preview'
+import type {
+  MatchupPreview, Implication, Badge, DaddyStatus, PowerRankPoint, MatchupOfTheWeek,
+} from '@/lib/preview'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
 
 export interface EnrichedPreview extends MatchupPreview {
+  /** Today's group-chat ammo, in order — the modal pages through it. */
   smack: string[]
   implicationA: Implication | null
   implicationB: Implication | null
   projA: number | null
   projB: number | null
+  /** Set when either owner has won 75%+ of 5+ meetings. */
+  daddy: DaddyStatus | null
+  badgesA: Badge[]
+  badgesB: Badge[]
+  /** Power ranks entering the week. */
+  rankA: PowerRankPoint | null
+  rankB: PowerRankPoint | null
 }
 
 export interface PreviewData {
   weeks: number[]
   week: number
   previews: EnrichedPreview[]
+  /** The week's featured matchup — `index` points into `previews`; `ammo` avoids its reasons' topics. */
+  motw: (MatchupOfTheWeek & { ammo: string | null }) | null
 }
 
 /** Matchups tab of the 2026 page. `selectedWeek` null = the current week. */
 export function usePreviewData(live: LiveSeason, selectedWeek: number | null): PreviewData {
-  const { state, season, projections } = live
+  const { state, season, projections, extraPlayers, transactions } = live
 
   const weeks = useMemo(() => (season ? getSeasonWeeks(state, season) : []), [state, season])
   const week = selectedWeek ?? live.week
+
+  // Ammo rotates daily: key it to the day of the latest sync, else the day the page opened
+  const [openedOn] = useState(() => localDateKey(new Date()))
+  const dayKey = live.syncedAt ? localDateKey(new Date(live.syncedAt)) : openedOn
 
   // Season luck from final weeks only — a Thursday game's partial scores
   // would otherwise skew the all-play math for the whole week
@@ -43,28 +62,85 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
     return Object.fromEntries(entries.map(e => [e.owner, e.luckIndex]))
   }, [state, season])
 
-  const previews = useMemo<EnrichedPreview[]>(() => {
-    if (!season) return []
+  // Title-path playoff games, so a consolation meeting isn't billed as an elimination
+  const champPath = useMemo(() => buildChampPathGameKeys(state), [state])
+
+  const { previews, motw } = useMemo(() => {
+    if (!season) return { previews: [] as EnrichedPreview[], motw: null }
     const base = buildWeekPreviews(state, season, week)
+
     // The preview season is usually live and absent from allMatchups
     // (completed seasons only) — flatten it from the raw weekly data
     const lastFinal = lastFinalWeek(state, season)
-    const priorGames = flattenSeasonMatchups(state, season).filter(m => m.week < week && m.week <= lastFinal)
+    const finalGames = flattenSeasonMatchups(state, season).filter(m => m.week <= lastFinal)
+    const priorGames = finalGames.filter(m => m.week < week)
+    const settings = state.leagues[season]?.settings
+    const playoffSpots = settings?.playoff_teams ?? 6
+    const playoffStart = settings?.playoff_week_start || 15
+
     const standings = computeStandings(priorGames)
+    const ranks = powerRanksThrough(finalGames, Math.min(week - 1, lastFinal, playoffStart - 1))
+    const { high, low } = seasonExtremes(priorGames)
+    const honors = seasonHonors(state, season)
+    const careerBefore = careerWinsBefore(state, season)
+    const careerWins: Record<string, number> = {}
+    for (const p of base) {
+      for (const t of [p.teamA, p.teamB]) careerWins[t.name] = (careerBefore[t.name] ?? 0) + t.wins
+    }
+
+    // Projections, lineups, and waiver moves describe the current week only
+    const rMap = state.rosterUserMaps[season] ?? {}
     const starters = startersByRoster(state, season, week)
-    const playoffSpots = state.leagues[season]?.settings?.playoff_teams ?? 6
-    // Projections cover the current week only
-    const proj = week === live.week ? projections : null
+    const current = week === live.week
+    const proj = current ? projections : null
+    const lookup = playerLookup(state, season, projections, extraPlayers)
+    const injuries = current && base[0]?.status !== 'final' ? injuryReport(starters, rMap, lookup) : {}
+    const moves = current ? weeklyMoves(transactions, rMap, lookup) : {}
+    const regrets = week - 1 >= 1 && week - 1 <= lastFinal ? lineupRegrets(state, season, week - 1, lookup) : {}
 
-    return base.map(p => ({
-      ...p,
-      smack: smackLines({ year: season, week, teamA: p.teamA, teamB: p.teamB, h2h: p.h2h, luck }),
-      implicationA: p.isPlayoff ? null : computeImplication(standings, p.teamA.name, playoffSpots),
-      implicationB: p.isPlayoff ? null : computeImplication(standings, p.teamB.name, playoffSpots),
-      projA: projectTeam(starters[p.teamA.rosterId], proj),
-      projB: projectTeam(starters[p.teamB.rosterId], proj),
-    }))
-  }, [state, season, week, live.week, luck, projections])
+    const rows = base.map(p => {
+      const daddy = daddyOf(p.h2h, p.teamA.name, p.teamB.name)
+      const projA = projectTeam(starters[p.teamA.rosterId], proj)
+      const projB = projectTeam(starters[p.teamB.rosterId], proj)
+      const badges = (team: typeof p.teamA, opponent: string) => matchupBadges({
+        name: team.name,
+        opponent,
+        streak: team.streak,
+        daddy,
+        powerRank: ranks[team.name]?.rank ?? null,
+        honors,
+        injuries: injuries[team.name] ?? null,
+      })
+      const facts = smackFacts({
+        year: season, week, teamA: p.teamA, teamB: p.teamB, h2h: p.h2h, luck,
+        status: p.status, ptsA: p.ptsA, ptsB: p.ptsB, projA, projB, daddy, ranks, honors,
+        careerWins, seasonHigh: high, seasonLow: low, regrets, injuries, moves, champPath,
+      }, dayKey)
+      const preview: EnrichedPreview = {
+        ...p,
+        implicationA: p.isPlayoff ? null : computeImplication(standings, p.teamA.name, playoffSpots),
+        implicationB: p.isPlayoff ? null : computeImplication(standings, p.teamB.name, playoffSpots),
+        projA,
+        projB,
+        daddy,
+        badgesA: badges(p.teamA, p.teamB.name),
+        badgesB: badges(p.teamB, p.teamA.name),
+        rankA: ranks[p.teamA.name] ?? null,
+        rankB: ranks[p.teamB.name] ?? null,
+        smack: facts.map(f => f.text),
+      }
+      return { preview, facts }
+    })
 
-  return { weeks, week, previews }
+    const enriched = rows.map(r => r.preview)
+    const pick = pickMatchupOfTheWeek(enriched, { week, ranks, careerWins, honors, champPath })
+    const motw = pick && {
+      ...pick,
+      // The card's ammo line covers something its reasons don't
+      ammo: rows[pick.index].facts.find(f => !pick.topics.includes(f.topic))?.text ?? null,
+    }
+    return { previews: enriched, motw }
+  }, [state, season, week, live.week, luck, champPath, projections, extraPlayers, transactions, dayKey])
+
+  return { weeks, week, previews, motw }
 }

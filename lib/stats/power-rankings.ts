@@ -22,6 +22,8 @@ export interface PowerRankingRow {
   allPlayTies: number
   /** Position in the official standings (wins, then points for). */
   standing: number
+  /** Current run of wins or losses (2+ games); a tie ends it. */
+  streak: { type: 'W' | 'L'; len: number } | null
 }
 
 type Line = Omit<PowerRankingRow, 'rank' | 'movement' | 'standing'>
@@ -33,16 +35,19 @@ function isPlayed(g: Matchup): boolean {
 function lines(games: Matchup[]): Line[] {
   const scores: Record<string, number[]> = {}
   const rec: Record<string, { w: number; l: number; t: number }> = {}
+  const results: Record<string, ('W' | 'L' | 'T')[]> = {}
   const weekScores: Record<number, { name: string; pts: number }[]> = {}
 
-  for (const g of games) {
+  for (const g of [...games].sort((x, y) => x.week - y.week)) {
     if (!isPlayed(g)) continue
     for (const [name, pts, opp] of [[g.team1, g.pts1, g.pts2], [g.team2, g.pts2, g.pts1]] as const) {
       ;(scores[name] ??= []).push(pts)
       const r = (rec[name] ??= { w: 0, l: 0, t: 0 })
-      if (pts > opp) r.w++
-      else if (pts < opp) r.l++
+      const result = pts > opp ? 'W' : pts < opp ? 'L' : 'T'
+      if (result === 'W') r.w++
+      else if (result === 'L') r.l++
       else r.t++
+      ;(results[name] ??= []).push(result)
       ;(weekScores[g.week] ??= []).push({ name, pts })
     }
   }
@@ -64,8 +69,17 @@ function lines(games: Matchup[]): Line[] {
       score: (avg * 6 + (high + low) * 2 + winPct * 200 * 2) / 10,
       wins: w, losses: l, ties: t, winPct, pf, avg, high, low,
       allPlayWins: ap.wins, allPlayLosses: ap.losses, allPlayTies: ap.ties,
+      streak: currentStreak(results[name]),
     }
   })
+}
+
+function currentStreak(results: ('W' | 'L' | 'T')[]): PowerRankingRow['streak'] {
+  const last = results[results.length - 1]
+  if (!last || last === 'T') return null
+  let len = 0
+  for (let i = results.length - 1; i >= 0 && results[i] === last; i--) len++
+  return len >= 2 ? { type: last, len } : null
 }
 
 function byScore(a: Line, b: Line): number {

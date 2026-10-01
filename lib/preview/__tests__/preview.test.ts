@@ -154,13 +154,15 @@ describe('smackLines', () => {
     expect(lines.some(l => l.includes('straight') || l.includes("hasn't lost"))).toBe(true)
   })
 
-  it('returns nothing for a first career meeting with no season data', () => {
+  it('a first career meeting with no season data gets only the first-meeting line', () => {
     const ctx = smackCtx({
       teamA: team({ name: 'A', wins: 0, losses: 0, lastScores: [], streak: null }),
       teamB: team({ name: 'B', rosterId: 2, wins: 0, losses: 0, lastScores: [], streak: null }),
       h2h: { games: [], winsA: 0, winsB: 0, avgA: 0, avgB: 0, highA: 0, highB: 0, lastGame: null },
     })
-    expect(smackLines(ctx)).toEqual([])
+    const lines = smackLines(ctx, 10)
+    expect(lines).toHaveLength(1)
+    expect(lines[0]).toMatch(/first career meeting|never met/i)
   })
 
   it('every line only references the two owners in the matchup', () => {

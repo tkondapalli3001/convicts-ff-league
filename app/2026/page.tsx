@@ -13,15 +13,17 @@ import PageHeader from '@/components/shared/PageHeader'
 import PillTabs from '@/components/shared/PillTabs'
 import MatchupRow from '@/components/preview/MatchupRow'
 import MatchupModal from '@/components/preview/MatchupModal'
+import MatchupOfTheWeek from '@/components/preview/MatchupOfTheWeek'
+import FlairLegend from '@/components/preview/FlairLegend'
 import PowerRankingsTable from '@/components/preview/PowerRankingsTable'
 import RosterView from '@/components/preview/RosterView'
 import SyncStatus from '@/components/preview/SyncStatus'
 
-type Tab = 'matchups' | 'rankings' | 'rosters'
+type Tab = 'rankings' | 'matchups' | 'rosters'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'matchups', label: 'Matchups'       },
   { id: 'rankings', label: 'Power Rankings' },
+  { id: 'matchups', label: 'Matchups'       },
   { id: 'rosters',  label: 'Rosters'        },
 ]
 
@@ -30,10 +32,10 @@ const STATUS_LABEL = { final: 'Final', live: 'In progress', upcoming: 'Regular s
 export default function SeasonPage() {
   const { state } = useLeague()
   const live = useLiveSeason()
-  const [tab, setTab] = useState<Tab>('matchups')
+  const [tab, setTab] = useState<Tab>('rankings')
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
   const [openIdx, setOpenIdx] = useState<number | null>(null)
-  const { weeks, week, previews } = usePreviewData(live, selectedWeek)
+  const { weeks, week, previews, motw } = usePreviewData(live, selectedWeek)
   const rankings = usePowerRankings(live)
   const rosters = useTeamRosters(live)
 
@@ -93,19 +95,21 @@ export default function SeasonPage() {
       {tab === 'matchups' && (
         <>
           {/* Week selector */}
-          <div className="mb-5 flex items-center justify-center gap-3">
+          <div className="mb-6 flex items-center justify-center gap-4">
             <button
               onClick={() => setSelectedWeek(weeks[idx - 1])}
               disabled={idx <= 0}
-              className="rounded-full border border-white/[0.07] bg-white/[0.04] p-2 text-s-text3 transition-all hover:border-white/20 hover:text-s-text active:scale-[0.98] disabled:pointer-events-none disabled:opacity-30"
+              className="rounded-full border border-white/[0.07] bg-white/[0.04] p-2.5 text-s-text3 transition-all hover:border-white/20 hover:text-s-text active:scale-[0.98] disabled:pointer-events-none disabled:opacity-30"
               aria-label="Previous week"
             >
-              <ChevronLeft size={15} />
+              <ChevronLeft size={18} />
             </button>
 
-            <div className="min-w-[130px] text-center">
-              <div className="text-[16px] font-extrabold text-s-text">Week {week}</div>
-              <div className="text-[10px] font-bold uppercase tracking-[2px] text-s-text3">
+            <div className="min-w-[150px] text-center">
+              <div className="font-display text-[24px] font-bold uppercase leading-none tracking-[1px] text-s-text sm:text-[30px]">
+                Week {week}
+              </div>
+              <div className="mt-1 text-[11px] font-bold uppercase tracking-[2px] text-s-text3 sm:text-[12px]">
                 {isPlayoff
                   ? <span className="text-s-gold">Playoffs</span>
                   : status === 'live'
@@ -117,26 +121,37 @@ export default function SeasonPage() {
             <button
               onClick={() => setSelectedWeek(weeks[idx + 1])}
               disabled={idx >= weeks.length - 1}
-              className="rounded-full border border-white/[0.07] bg-white/[0.04] p-2 text-s-text3 transition-all hover:border-white/20 hover:text-s-text active:scale-[0.98] disabled:pointer-events-none disabled:opacity-30"
+              className="rounded-full border border-white/[0.07] bg-white/[0.04] p-2.5 text-s-text3 transition-all hover:border-white/20 hover:text-s-text active:scale-[0.98] disabled:pointer-events-none disabled:opacity-30"
               aria-label="Next week"
             >
-              <ChevronRight size={15} />
+              <ChevronRight size={18} />
             </button>
           </div>
 
           {previews.length > 0 ? (
             <>
-              <div
-                className="overflow-hidden rounded-[6px]"
-                style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
-              >
-                {previews.map((p, i) => (
-                  <MatchupRow key={`${p.teamA.name}-${p.teamB.name}`} p={p} onClick={() => setOpenIdx(i)} />
-                ))}
-              </div>
-              <p className="mt-3 text-center text-[10px] uppercase tracking-[1px] text-s-text3">
-                Tap a matchup for head-to-head history &amp; group-chat ammo
+              {motw && previews[motw.index] && (
+                <MatchupOfTheWeek
+                  p={previews[motw.index]}
+                  reasons={motw.reasons}
+                  ammo={motw.ammo}
+                  onOpen={() => setOpenIdx(motw.index)}
+                />
+              )}
+              {previews.length > 1 && (
+                <div
+                  className="overflow-hidden rounded-[6px]"
+                  style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
+                >
+                  {previews.map((p, i) => i === motw?.index ? null : (
+                    <MatchupRow key={`${p.teamA.name}-${p.teamB.name}`} p={p} onClick={() => setOpenIdx(i)} />
+                  ))}
+                </div>
+              )}
+              <p className="mt-3 text-center text-[11px] uppercase tracking-[1px] text-s-text3 sm:text-[12px]">
+                Tap a matchup for head-to-head history, flair &amp; group-chat ammo
               </p>
+              <FlairLegend badges={previews.flatMap(p => [...p.badgesA, ...p.badgesB])} />
             </>
           ) : (
             <div
@@ -154,7 +169,9 @@ export default function SeasonPage() {
       )}
 
       {/* ── POWER RANKINGS ───────────────────────────────────────── */}
-      {tab === 'rankings' && <PowerRankingsTable rows={rankings.rows} throughWeek={rankings.throughWeek} />}
+      {tab === 'rankings' && (
+        <PowerRankingsTable rows={rankings.rows} throughWeek={rankings.throughWeek} badges={rankings.badges} />
+      )}
 
       {/* ── ROSTERS ──────────────────────────────────────────────── */}
       {tab === 'rosters' && (

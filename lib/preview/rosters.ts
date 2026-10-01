@@ -2,6 +2,7 @@
 // week, joined with projections and player metadata. Pure — the live data
 // comes in through `state` (see live.ts) and the projections argument.
 
+import { localDateKey } from '@/lib/utils'
 import type { LeagueState, SleeperMatchup, Transaction } from '@/types'
 import type { ProjectedPlayer, WeekProjections } from './projections'
 import type { WeekStatus } from './live'
@@ -64,13 +65,6 @@ const SLOT_LABELS: Record<string, string> = {
 const NON_STARTER_SLOTS = new Set(['BN', 'IR', 'TAXI'])
 const WEEKDAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-/** Local calendar date as YYYY-MM-DD, comparable with the feed's game dates. */
-function localDate(now: Date): string {
-  const m = String(now.getMonth() + 1).padStart(2, '0')
-  const d = String(now.getDate()).padStart(2, '0')
-  return `${now.getFullYear()}-${m}-${d}`
-}
-
 function gameLabel(team: string | null, projections: WeekProjections | null): string | null {
   if (!team || !projections) return null
   const game = projections.games[team]
@@ -130,7 +124,7 @@ export function buildTeamRosters(
   const rows: SleeperMatchup[] = state.matchups[season]?.[week]?.matchups ?? []
   const byRoster = new Map(rows.map(m => [m.roster_id, m]))
   const slots = (league?.roster_positions ?? []).filter(s => !NON_STARTER_SLOTS.has(s))
-  const today = localDate(now)
+  const today = localDateKey(now)
   const started = status !== 'upcoming'
 
   const opponentOf = (m: SleeperMatchup | undefined): string | null => {

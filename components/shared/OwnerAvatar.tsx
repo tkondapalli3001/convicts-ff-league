@@ -6,7 +6,8 @@ import { ownerColor, fullNameInitials } from '@/lib/utils'
 
 interface Props {
   name: string
-  size?: 'sm' | 'md' | 'lg'
+  /** `sm-md` is small on phones and medium from the `sm` breakpoint up. */
+  size?: 'sm' | 'md' | 'lg' | 'sm-md'
   className?: string
 }
 
@@ -14,6 +15,7 @@ const SIZES: Record<string, { box: string; text: string }> = {
   sm: { box: 'w-8 h-8',   text: 'text-[11px]' },
   md: { box: 'w-11 h-11', text: 'text-[15px]' },
   lg: { box: 'w-14 h-14', text: 'text-[19px]' },
+  'sm-md': { box: 'w-8 h-8 sm:w-11 sm:h-11', text: 'text-[11px] sm:text-[15px]' },
 }
 
 export default function OwnerAvatar({ name, size = 'md', className = '' }: Props) {

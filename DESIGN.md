@@ -165,17 +165,28 @@ would trap a fixed overlay — don't move it back inside).
 
 ### The season tab (`lib/preview/` + `app/2026/`)
 
-The current season's hub, named for its year, with three sub-tabs:
+The current season's hub, named for its year, with three sub-tabs (it lands on
+Power Rankings):
 
-- **Matchups** — weekly matchups render as clickable `MatchupRow`s (season
-  records/streaks/seeds, career H2H mini-tally, live scores, projections); clicking
-  opens `MatchupModal` with the all-time series, last meeting, playoff implications,
-  and copyable group-chat smack talk. Smack lines are deterministic (seeded by
-  `year|week|matchup` — same lines all week).
 - **Power Rankings** — the Oberon Mt. power rating
   (`((avg × 6) + ((high + low) × 2) + ((win% × 200) × 2)) / 10`) over final
-  regular-season weeks, with week-over-week movement, all-play record, and the
-  official standing alongside (`lib/stats/power-rankings.ts`).
+  regular-season weeks, with week-over-week movement, all-play record, streak and
+  last-season flair, and the official standing alongside (`lib/stats/power-rankings.ts`).
+- **Matchups** — a gold-bordered **Matchup of the Week** card leads: the pairing
+  with the most on the line, scored on playoff stakes (implications, seed swings),
+  action (projected closeness and total, power ranks, streaks, live closeness), and
+  history at stake (series lead or tie, 💦 Daddy status, H2H streaks, title-run
+  rematches, career-win milestones), with its top three reasons listed. The rest
+  render as `MatchupRow`s; tapping opens `MatchupModal` (series, flair, stakes,
+  ammo). **Flair** (`lib/preview/flair.ts`, legend on the page): 💦 Daddy — wins
+  75%+ of 5+ all-time meetings vs this opponent; 🔥 3+ straight wins; 🧊 3+ straight
+  losses; 👑 No. 1 power ranking; 🏆 defending champ; 🚽 last season's toilet bowl;
+  🚑 starting a player listed out or doubtful. **Ammo** comes from ~25 true fact
+  types (series, form, power rankings, projections, live score, injuries, FAAB,
+  last week's worst lineup call, milestones); order and phrasing are seeded by the
+  matchup + date, so it rotates daily, holds still within a day, and a 🎲 reroll
+  steps through the rest. On phones the flair moves under each name so names keep
+  their width.
 - **Rosters** — every team's lineup, bench, and IR for the current week with
   league-scored projections, live points, injury tags, and the week's roster moves.
 
@@ -186,7 +197,7 @@ hidden. It overlays the global store rather than mutating it. A week counts as
 final only once Sleeper's `last_scored_leg` reaches it, so a Thursday game never
 makes a week look finished. **Projections use an undocumented Sleeper endpoint**
 — every failure path returns null and the UI renders without projections (names
-fall back to Sleeper's documented player dump). Keep it that way.
+fall back to the player index). Keep it that way.
 
 ---
 

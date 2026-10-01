@@ -44,15 +44,16 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest.
 
-- **Health:** 100 unit tests pass (8 files); `npm run build` succeeds; lint 0 errors
+- **Health:** 120 unit tests pass (9 files); `npm run build` succeeds; lint 0 errors
   (15 known `react-hooks`/`no-img-element` warnings). Snapshots frozen for
   **2019–2025** (season + transactions files) + `players.json` + manifest.
 - **Live season:** `lib/config.ts` `LEAGUE_ID = '1367670546694705152'` → the **2026
   league** ("Misc Convicts", `in_season`, 10 teams, all user_ids mapped). Half-PPR,
   `playoff_teams: 6`, `playoff_week_start: 15`, trade deadline week 13.
 - **Pages:** Home, Seasons (Standings · Game Log · Finish Tracker · Scoring Trend),
-  Records, Owners (+ per-owner profiles), Players, **2026** (Matchups · Power Rankings ·
-  Rosters — live-synced with Sleeper; `/this-week` redirects here), Draft. Cross-cutting:
+  Records, Owners (+ per-owner profiles), Players, **2026** (Power Rankings · Matchups with
+  Matchup of the Week, emoji flair, and daily ammo · Rosters — live-synced with Sleeper;
+  `/this-week` redirects here), Draft. Cross-cutting:
   ⌘K "ask anything" search (16 local intents, no API keys), mobile drawer nav, PWA,
   reduced-motion support.
 
