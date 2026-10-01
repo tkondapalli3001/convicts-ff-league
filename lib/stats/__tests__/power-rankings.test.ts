@@ -25,7 +25,7 @@ const GAMES: Matchup[] = [
 describe('computePowerRankings', () => {
   it('applies the Oberon Mt. weights to all-play win%', () => {
     const a = computePowerRankings(GAMES, 2).find(r => r.name === 'A')!
-    // avg 115, high 120, low 110, 2–0 but 4–2 all-play → 0.6×115 + 0.2×(120+110) + 40×(4/6)
+    // avg 115, high 120, low 110, 2–0 but 4–2 all-play → 0.6×115 + 0.2×(120+110) + 0.2×(4/6 × 200)
     expect(a.allPlayPct).toBeCloseTo(4 / 6)
     expect(a.score).toBeCloseTo(69 + 46 + 80 / 3)
     expect(a).toMatchObject({ wins: 2, losses: 0, avg: 115, high: 120, low: 110 })

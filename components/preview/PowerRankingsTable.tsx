@@ -113,7 +113,7 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
 
       {/* No HTML entities here: SWC drops the leading space of a line-ending text run that has one */}
       <p className="border-t px-5 py-3.5 text-[10px] leading-relaxed text-s-text3" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
-        <span className="font-bold text-s-text2">Power</span> = 0.6 × PF/Gm + 0.2 × (High + Low) + 40 × All-Play Win%.
+        <span className="font-bold text-s-text2">Power</span> = 0.6 × PF/Gm + 0.2 × (High + Low) + 0.2 × (All-Play Win% × 200).
         {' '}<span className="font-bold text-s-text2">All-Play</span> = record if you played all {rows.length - 1} teams every week (no schedule luck).
         {' '}<span className="font-bold text-s-text2">▲▼</span> = places moved since last week.
         {' '}<span className="font-bold text-s-text2">Standing</span> = Sleeper standings (wins, then points). Final scores only.

@@ -70,7 +70,7 @@ function lines(games: Matchup[]): Line[] {
     const allPlayPct = apGames ? (ap.wins + ap.ties / 2) / apGames : 0
     return {
       name,
-      score: 0.6 * avg + 0.2 * (high + low) + 40 * allPlayPct,
+      score: 0.6 * avg + 0.2 * (high + low) + 0.2 * (allPlayPct * 200),
       wins: w, losses: l, ties: t, winPct, pf, avg, high, low,
       allPlayWins: ap.wins, allPlayLosses: ap.losses, allPlayTies: ap.ties, allPlayPct,
       streak: currentStreak(results[name]),
@@ -96,9 +96,11 @@ function byScore(a: Line, b: Line): number {
  * the head-to-head win%, so schedule luck can't move a team's rating:
  *
  *   rating = ((avg × 6) + ((high + low) × 2) + ((all-play win% × 200) × 2)) / 10
- *          = 0.6 × avg + 0.2 × (high + low) + 40 × all-play win%
+ *          = 0.6 × avg + 0.2 × (high + low) + 0.2 × (all-play win% × 200)
  *
  * Designed as 60% average score, 20% ceiling + floor, 20% winning percentage.
+ * The × 200 puts win% on a points scale (.500 → 100, perfect → 200) so its
+ * 20% weight counts for as much as the scoring terms' weights do.
  * `games` should hold one season's final regular-season games; ties count as
  * half a win. Exact rating ties go to the better head-to-head record, then
  * points for.
