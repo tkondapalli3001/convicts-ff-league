@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import SectionCard from '@/components/shared/SectionCard'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import InfoTip from '@/components/shared/InfoTip'
 import FlairBadges from '@/components/preview/FlairBadges'
 import FlairLegend from '@/components/preview/FlairLegend'
 import { ordinal } from '@/lib/preview'
@@ -30,6 +31,11 @@ const TH = 'cursor-default hover:text-s-text3'
 
 function record(w: number, l: number, t: number): string {
   return t ? `${w}–${l}–${t}` : `${w}–${l}`
+}
+
+/** Win % the baseball way: .852, 1.000 */
+function pct3(p: number): string {
+  return p >= 1 ? '1.000' : p.toFixed(3).replace(/^0/, '')
 }
 
 /** Power Rankings tab: power ratings (Oberon Mt. weights, all-play win%) with week-over-week movement and streak flair. */
@@ -61,13 +67,22 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
             <thead>
               <tr>
                 <th className={`sticky left-0 z-10 border-r border-white/[0.06] ${TH}`} style={{ background: '#0B0B0D' }}>Rank · Manager</th>
-                <th className={TH}>Power</th>
+                <th className={TH}>
+                  Power Index
+                  <InfoTip term="Power Index">
+                    0.6 × PF/Gm + 0.2 × (High + Low) + 0.2 × (All-Play Win% × 200) — 60% scoring
+                    average, 20% best + worst game, 20% all-play win%.
+                  </InfoTip>
+                </th>
                 <th className={TH}>Record</th>
                 <th className={TH}>Standing</th>
                 <th className={TH}>PF/Gm</th>
                 <th className={TH}>High</th>
                 <th className={TH}>Low</th>
-                <th className={TH}>All-Play</th>
+                <th className={TH}>
+                  All-Play
+                  <InfoTip term="All-Play">a team&apos;s record if it had played every other team every week.</InfoTip>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -97,11 +112,14 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
                     {r.score.toFixed(1)}
                   </td>
                   <td className="font-display text-[17px] font-bold text-s-text">{record(r.wins, r.losses, r.ties)}</td>
-                  <td className="text-[12px] font-semibold text-s-text2">{ordinal(r.standing)}</td>
+                  <td className={`${num} text-s-text2`}>{ordinal(r.standing)}</td>
                   <td className={`${num} text-s-text2`}>{r.avg.toFixed(1)}</td>
                   <td className={num} style={{ color: '#7FA886' }}>{r.high.toFixed(1)}</td>
                   <td className={num} style={{ color: '#B4636B' }}>{r.low.toFixed(1)}</td>
-                  <td className={`${num} text-s-text2`}>{record(r.allPlayWins, r.allPlayLosses, r.allPlayTies)}</td>
+                  <td className={`${num} text-s-text2`}>
+                    {record(r.allPlayWins, r.allPlayLosses, r.allPlayTies)}
+                    <span className="ml-2 text-[14px] font-medium text-s-text3">{pct3(r.allPlayPct)}</span>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -111,14 +129,7 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] sm:hidden" />
       </div>
 
-      {/* No HTML entities here: SWC drops the leading space of a line-ending text run that has one */}
-      <p className="border-t px-5 py-3.5 text-[10px] leading-relaxed text-s-text3" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
-        <span className="font-bold text-s-text2">Power</span> = 0.6 × PF/Gm + 0.2 × (High + Low) + 0.2 × (All-Play Win% × 200).
-        {' '}<span className="font-bold text-s-text2">All-Play</span> = record if you played all {rows.length - 1} teams every week (no schedule luck).
-        {' '}<span className="font-bold text-s-text2">▲▼</span> = places moved since last week.
-        {' '}<span className="font-bold text-s-text2">Standing</span> = Sleeper standings (wins, then points). Final scores only.
-      </p>
-      <div className="px-5 pb-4">
+      <div className="border-t px-5 pb-4" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
         <FlairLegend badges={Object.values(badges).flat()} />
       </div>
     </SectionCard>
