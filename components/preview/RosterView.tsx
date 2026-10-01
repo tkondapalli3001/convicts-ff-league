@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import SectionCard from '@/components/shared/SectionCard'
+import InfoTip from '@/components/shared/InfoTip'
 import { ordinal } from '@/lib/preview'
 import { POS_COLORS } from '@/lib/constants'
 import type { TeamRoster, RosterPlayer, PlayerSeason, ScheduleRow, WeekStatus } from '@/lib/preview'
@@ -169,7 +170,13 @@ function PlayerRow({ slot, p, stat, current }: { slot: string | null; p: RosterP
   )
 }
 
-function GroupHeader({ label, valueLabel, total }: { label: string; valueLabel: string; total?: React.ReactNode }) {
+function GroupHeader({ label, valueLabel, total, first }: {
+  label: string
+  valueLabel: string
+  total?: React.ReactNode
+  /** The first group's header carries the column definitions. */
+  first: boolean
+}) {
   const th = 'cursor-default text-center hover:text-s-text3'
   return (
     <tr className="cursor-default">
@@ -179,10 +186,27 @@ function GroupHeader({ label, valueLabel, total }: { label: string; valueLabel: 
           {total}
         </span>
       </th>
-      <th className={th}>{valueLabel}</th>
+      <th className={th}>
+        {valueLabel}
+        {first && (
+          <InfoTip term={valueLabel}>
+            {valueLabel === 'Pts'
+              ? 'points scored this week — or Sleeper’s projection (PROJ), scored with our league settings, for players who haven’t played yet.'
+              : 'Sleeper’s projected stats for the week, scored with our league settings. Turns into actual points (PTS) once the player’s game kicks off.'}
+          </InfoTip>
+        )}
+      </th>
       <th className={th}>Season Rank</th>
       <th className={th}>GP</th>
-      <th className={th}>FPTS</th>
+      <th className={th}>
+        FPTS
+        {first && (
+          <InfoTip term="FPTS">
+            season fantasy points — Sleeper’s season stats scored with our league settings. Season Rank ranks them at
+            the position; PPG divides them by games played (GP).
+          </InfoTip>
+        )}
+      </th>
       <th className={th}>PPG</th>
     </tr>
   )
@@ -214,6 +238,7 @@ function RosterTable({ team, stats, status, current }: {
           {groups.map((g, gi) => (
             <tbody key={g.label}>
               <GroupHeader
+                first={gi === 0}
                 label={g.label}
                 valueLabel={valueLabel}
                 total={gi === 0 && total != null && (
@@ -415,9 +440,6 @@ export default function RosterView({ data, liveWeek, matchupWeeks, onWeek, onOpe
         />
       </div>
 
-      <p className="mt-3 text-center text-[10px] uppercase tracking-[1px] text-s-text3">
-        Projections and season stats are Sleeper’s, scored with league settings · refreshes automatically
-      </p>
     </div>
   )
 }

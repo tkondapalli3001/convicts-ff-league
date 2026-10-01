@@ -60,7 +60,7 @@ export default function InfoTip({ term, children }: { term: string; children: Re
       <button
         ref={btn}
         type="button"
-        aria-label={`What is ${term}?`}
+        aria-label={`About ${term}`}
         aria-describedby={open ? id : undefined}
         onPointerDown={e => { lastPointer.current = e.pointerType }}
         onPointerEnter={e => { if (e.pointerType === 'mouse') setOpen(true) }}

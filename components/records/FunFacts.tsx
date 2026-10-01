@@ -4,6 +4,7 @@ import { HeartCrack, Zap, Activity, Crown, Trash2, Clover, Armchair } from 'luci
 // Midnight Prime semantic accents (see design 3a Fun Facts): brick loss, gold emphasis, sage luck.
 import { useFunFacts } from '@/hooks/useFunFacts'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import InfoTip from '@/components/shared/InfoTip'
 
 export default function FunFacts() {
   const { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo, byeKings } = useFunFacts()
@@ -18,7 +19,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Heartbreak Hotel
           </span>
-          <span className="ml-auto text-[10px] text-s-text3">Highest score in a loss</span>
+          <InfoTip term="Heartbreak Hotel">the highest scores that still lost, all-time.</InfoTip>
         </div>
         {heartbreak.length === 0 ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
@@ -50,7 +51,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             The Perfect Storm
           </span>
-          <span className="ml-auto text-[10px] text-s-text3">Highest Player Scores</span>
+          <InfoTip term="The Perfect Storm">the biggest single-game scores by one starting player, all-time.</InfoTip>
         </div>
         {perfectStorm.length === 0 ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
@@ -80,7 +81,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Dumpster Divers
           </span>
-          <span className="ml-auto text-[10px] text-s-text3">Lowest score in a win</span>
+          <InfoTip term="Dumpster Divers">the lowest scores that still won, all-time.</InfoTip>
         </div>
         {lowestWins.length === 0 ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
@@ -112,7 +113,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Boom-Bust Specialist
           </span>
-          <span className="ml-auto text-[10px] text-s-text3">All-time</span>
+          <InfoTip term="Boom-Bust Specialist">the biggest swings in weekly scoring — the standard deviation of every regular-season game, all-time (4+ games).</InfoTip>
         </div>
         {boomBust.length === 0 ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">Insufficient data</div>
@@ -144,7 +145,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Who&apos;s Your Daddy? 🍆
           </span>
-          <span className="ml-auto text-[10px] text-s-text3">All-time · ≥75% win rate · min 4 games</span>
+          <InfoTip term="Who’s Your Daddy?">managers who’ve won at least 75% of their all-time meetings with one opponent (4+ games).</InfoTip>
         </div>
         {theOwner.length === 0 ? (
           <div className="py-6 text-s-text3 text-[12px] text-center">
@@ -180,7 +181,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Luck of the Draw
           </span>
-          <span className="ml-auto text-[10px] text-s-text3">Career luck index</span>
+          <InfoTip term="Luck of the Draw">career Luck Index — actual wins minus the wins your weekly scoring earned against the whole league (regular season). Positive = luckier than your points deserved.</InfoTip>
         </div>
         {!luckDuo ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>
@@ -223,7 +224,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Rest for the Wicked
           </span>
-          <span className="ml-auto text-[10px] text-s-text3">Most first-round byes earned</span>
+          <InfoTip term="Rest for the Wicked">the most first-round playoff byes earned.</InfoTip>
         </div>
         {byeKings.length === 0 ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>

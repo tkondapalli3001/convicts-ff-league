@@ -71,21 +71,11 @@ export default function DraftPage() {
       )}
 
       {/* ── STEALS & BUSTS TAB ───────────────────────────────────── */}
-      {activeTab === 'steals' && (
-        <>
-          <p className="text-[11px] text-s-text3 mb-3">
-            Based on draft position within each position group vs actual points scored that season.
-          </p>
-          <StealsBusts />
-        </>
-      )}
+      {activeTab === 'steals' && <StealsBusts />}
 
       {/* ── DRAFT STRATEGY TAB ───────────────────────────────────── */}
       {activeTab === 'strategy' && (
         <>
-          <p className="text-[11px] text-s-text3 mb-3">
-            Based on rounds 1–5 position selection across all seasons.
-          </p>
           {strategyLoading && !draftStructure.length
             ? <div className="text-s-text3 text-[12px] text-center py-12">Loading draft picks…</div>
             : <DraftStructureTable data={draftStructure} />

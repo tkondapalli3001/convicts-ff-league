@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { DraftStructureEntry } from '@/lib/data-processing'
+import InfoTip from '@/components/shared/InfoTip'
 
 const STRATEGY_DESCRIPTIONS: Record<string, string> = {
   'Zero-RB':  'No RBs in rounds 1–5. Loads up on WRs and TEs early, grabs RBs on the waiver wire.',
@@ -61,10 +62,12 @@ export default function DraftStructureTable({ data }: Props) {
     <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text2 mb-1">
         Draft Strategy vs Season Outcome
+        <InfoTip term="Draft strategy">
+          how each team spent rounds 1–5, across every season. Zero-RB: no running backs. RB-Heavy: three or more.
+          Hero-RB: a first-round running back and at most one more. Balanced: everything else.
+        </InfoTip>
       </div>
-      <div className="text-[11px] text-s-text3 mb-4">
-        Based on rounds 1–5 position selection across all seasons · Click a strategy to see instances
-      </div>
+      <div className="text-[11px] text-s-text3 mb-4">Click a strategy to see instances</div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {data.map(entry => {

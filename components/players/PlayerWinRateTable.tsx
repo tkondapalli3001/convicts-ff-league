@@ -6,6 +6,7 @@ import type { PlayerStat } from '@/types'
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 import SortHeader from '@/components/shared/SortHeader'
+import InfoTip from '@/components/shared/InfoTip'
 
 const FLEX_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
 
@@ -58,7 +59,10 @@ export default function PlayerWinRateTable({ players, minGames = 10, onPlayerCli
   return (
     <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text2 mb-3">
-        Player Win Rate — min {minGames} games started
+        Player Win Rate
+        <InfoTip term="Player win rate">
+          how often the manager won when the player was in the starting lineup. Players need {minGames}+ starts to show up.
+        </InfoTip>
       </div>
 
       {/* Position filter */}

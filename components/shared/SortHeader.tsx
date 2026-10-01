@@ -1,5 +1,7 @@
 'use client'
 
+import InfoTip from '@/components/shared/InfoTip'
+
 interface Props<K extends string> {
   k: K
   label: string
@@ -8,6 +10,8 @@ interface Props<K extends string> {
   onSort: (k: K) => void
   className?: string
   style?: React.CSSProperties
+  /** A definition behind a ? beside the label (tapping it doesn't sort). */
+  tip?: { term: string; text: React.ReactNode }
 }
 
 /**
@@ -15,7 +19,7 @@ interface Props<K extends string> {
  * Module-level on purpose — defined inside a table's render it would remount
  * on every render.
  */
-export default function SortHeader<K extends string>({ k, label, sortKey, sortDir, onSort, className, style }: Props<K>) {
+export default function SortHeader<K extends string>({ k, label, sortKey, sortDir, onSort, className, style, tip }: Props<K>) {
   const active = sortKey === k
   return (
     <th
@@ -24,7 +28,9 @@ export default function SortHeader<K extends string>({ k, label, sortKey, sortDi
       className={className}
       style={{ ...style, color: active ? '#C9A24B' : style?.color }}
     >
-      {label} {active ? (sortDir === 1 ? '↑' : '↓') : ''}
+      {label}
+      {tip && <InfoTip term={tip.term}>{tip.text}</InfoTip>}
+      {active ? ` ${sortDir === 1 ? '↑' : '↓'}` : ''}
     </th>
   )
 }

@@ -146,7 +146,15 @@ export default function SeasonStandings({ onYearChange }: Props) {
                 <SortHeader {...sort} k="pf"      label="PF/Gm" />
                 <SortHeader {...sort} k="pa"      label="PA/Gm" />
                 <SortHeader {...sort} k="margin"  label="+/−/Gm" />
-                <SortHeader {...sort} k="luck"    label="Luck" />
+                <SortHeader
+                  {...sort}
+                  k="luck"
+                  label="Luck"
+                  tip={{
+                    term: 'Luck Index',
+                    text: 'actual wins minus expected wins. Expected wins add up, week by week, the share of the league you outscored — as if you played everyone (ties count half). Positive = more wins than your scoring deserved; negative = unlucky.',
+                  }}
+                />
                 <th>Playoffs</th>
               </tr>
             </thead>
@@ -203,11 +211,6 @@ export default function SeasonStandings({ onYearChange }: Props) {
         <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] z-10" />
       </div>
 
-      <p className="mt-3 px-1 text-[10px] text-s-text3 leading-relaxed">
-        <span className="font-bold text-s-text2">Luck Index</span> = Actual Wins − Expected Wins.
-        Expected Wins adds up, week by week, the share of the league you outscored (as if you played everyone; ties count half).
-        Positive = you won more than your scoring deserved; negative = you were unlucky.
-      </p>
     </div>
   )
 }

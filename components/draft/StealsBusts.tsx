@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 
 import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/constants'
+import InfoTip from '@/components/shared/InfoTip'
 
 interface PickResult {
   year: number
@@ -125,22 +126,33 @@ export default function StealsBusts() {
         ))}
       </div>
 
-      <p className="text-[11px] text-s-text3">
-        Steals picked later than their positional peers but outscored them. Busts were drafted early but underperformed.
-      </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <PickList title="Top Steals" emoji="💎" picks={steals} isSteal />
-        <PickList title="Top Busts" emoji="💀" picks={busts} isSteal={false} />
+        <PickList
+          title="Top Steals"
+          emoji="💎"
+          picks={steals}
+          isSteal
+          tip="drafted later than their positional peers but outscored them. Value = draft rank at the position minus finish rank there in points that season."
+        />
+        <PickList
+          title="Top Busts"
+          emoji="💀"
+          picks={busts}
+          isSteal={false}
+          tip="drafted early at their position but outscored by players taken after them — a negative Value (draft rank at the position minus finish rank there in points that season)."
+        />
       </div>
     </div>
   )
 }
 
-function PickList({ title, emoji, picks, isSteal }: {
+function PickList({ title, emoji, picks, isSteal, tip }: {
   title: string
   emoji: string
   picks: PickResult[]
   isSteal: boolean
+  /** What makes a steal or a bust — behind a ? beside the title. */
+  tip: string
 }) {
   const [sortKey, setSortKey] = useState<'playerName' | 'owner' | 'pickNo' | 'totalPts' | 'value'>('value')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(isSteal ? 'desc' : 'asc')
@@ -164,7 +176,10 @@ function PickList({ title, emoji, picks, isSteal }: {
     <div className="gl">
       <div className="px-4 py-3 border-b border-s-border flex items-center gap-2">
         <span className="text-[16px]">{emoji}</span>
-        <span className="text-[12px] font-extrabold tracking-[1.5px] uppercase text-s-text">{title}</span>
+        <span className="text-[12px] font-extrabold tracking-[1.5px] uppercase text-s-text">
+          {title}
+          <InfoTip term={title.replace('Top ', '')}>{tip}</InfoTip>
+        </span>
       </div>
       {/* Scroll wrapper — overflow-hidden on parent clips gradient to card bounds */}
       <div className="relative">
