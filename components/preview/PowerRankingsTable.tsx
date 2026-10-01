@@ -38,7 +38,7 @@ function pct3(p: number): string {
   return p >= 1 ? '1.000' : p.toFixed(3).replace(/^0/, '')
 }
 
-/** Power Rankings tab: power ratings (Oberon Mt. weights, all-play win%) with week-over-week movement and streak flair. */
+/** Power Rankings tab: Oberon Mt. power ratings with week-over-week movement and streak flair. */
 export default function PowerRankingsTable({ rows, throughWeek, badges }: {
   rows: PowerRankingRow[]
   throughWeek: number
@@ -70,8 +70,8 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
                 <th className={TH}>
                   Power Index
                   <InfoTip term="Power Index">
-                    0.6 × PF/Gm + 0.2 × (High + Low) + 0.2 × (All-Play Win% × 200) — 60% scoring
-                    average, 20% best + worst game, 20% all-play win%.
+                    0.6 × PF/Gm + 0.2 × (High + Low) + 0.2 × (Win% × 200) — the Oberon Mt. formula:
+                    60% scoring average, 20% best + worst game, 20% win %.
                   </InfoTip>
                 </th>
                 <th className={TH}>Record</th>

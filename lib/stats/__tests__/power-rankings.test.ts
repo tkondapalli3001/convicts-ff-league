@@ -13,8 +13,8 @@ function game(week: number, t1: string, p1: number, t2: string, p2: number, type
 }
 
 // Four teams, two weeks. Week 1: A beats B, C beats D. Week 2: A beats C, D beats B.
-//   through week 1 → C 170, A 146.7, B 113.3, D 90
-//   through week 2 → C 144.2, A 141.7, D 135, B 96.7
+//   through week 1 → C 170, A 160, B 100, D 90
+//   through week 2 → A 155, C 137.5, D 135, B 90
 const GAMES: Matchup[] = [
   game(1, 'A', 120, 'B', 100),
   game(1, 'C', 130, 'D', 90),
@@ -23,30 +23,28 @@ const GAMES: Matchup[] = [
 ]
 
 describe('computePowerRankings', () => {
-  it('applies the Oberon Mt. weights to all-play win%', () => {
+  it('applies the Oberon Mt. formula', () => {
     const a = computePowerRankings(GAMES, 2).find(r => r.name === 'A')!
-    // avg 115, high 120, low 110, 2–0 but 4–2 all-play → 0.6×115 + 0.2×(120+110) + 0.2×(4/6 × 200)
-    expect(a.allPlayPct).toBeCloseTo(4 / 6)
-    expect(a.score).toBeCloseTo(69 + 46 + 80 / 3)
+    // avg 115, high 120, low 110, 2–0 → (115×6 + (120+110)×2 + (1×200)×2) / 10
+    expect(a.score).toBeCloseTo(155)
     expect(a).toMatchObject({ wins: 2, losses: 0, avg: 115, high: 120, low: 110 })
+    expect(a.allPlayPct).toBeCloseTo(4 / 6) // shown beside the rating, not part of it
   })
 
   it('orders by rating and numbers the ranks', () => {
     const rows = computePowerRankings(GAMES, 2)
-    expect(rows.map(r => r.name)).toEqual(['C', 'A', 'D', 'B'])
+    expect(rows.map(r => r.name)).toEqual(['A', 'C', 'D', 'B'])
     expect(rows.map(r => r.rank)).toEqual([1, 2, 3, 4])
   })
 
-  it('ignores schedule luck: same scores, same rating, whatever the record', () => {
+  it('counts the actual record: same scores, the winner rates higher', () => {
     // A and C both score 120 — A drew the week's top scorer and lost, C won
     const rows = computePowerRankings([
       game(1, 'A', 120, 'B', 130),
       game(1, 'C', 120, 'D', 100),
     ], 1)
     const by = Object.fromEntries(rows.map(r => [r.name, r]))
-    expect([by.A.wins, by.C.wins]).toEqual([0, 1])
-    expect(by.A.score).toBe(by.C.score)
-    // Exact rating ties go to the better head-to-head record
+    expect(by.C.score - by.A.score).toBeCloseTo(40) // 0.2 × (1.000 × 200)
     expect(rows.map(r => r.name)).toEqual(['B', 'C', 'A', 'D'])
   })
 
@@ -65,7 +63,7 @@ describe('computePowerRankings', () => {
   it('reports movement since the previous week, none in week 1', () => {
     expect(computePowerRankings(GAMES, 1).every(r => r.movement === null)).toBe(true)
     const move = Object.fromEntries(computePowerRankings(GAMES, 2).map(r => [r.name, r.movement]))
-    expect(move).toEqual({ C: 0, A: 0, D: 1, B: -1 })
+    expect(move).toEqual({ A: 1, C: -1, D: 1, B: -1 })
   })
 
   it('counts the all-play record against every team each week', () => {
@@ -86,7 +84,7 @@ describe('computePowerRankings', () => {
       game(15, 'B', 200, 'A', 50, 'P'),
       game(2, 'X', 0, 'Y', 0),
     ], 2)
-    expect(rows.map(r => r.name)).toEqual(['C', 'A', 'D', 'B'])
+    expect(rows.map(r => r.name)).toEqual(['A', 'C', 'D', 'B'])
   })
 
   it('tracks each team’s current streak (2+ games)', () => {

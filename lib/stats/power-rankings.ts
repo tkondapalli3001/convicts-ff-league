@@ -22,7 +22,7 @@ export interface PowerRankingRow {
   allPlayWins: number
   allPlayLosses: number
   allPlayTies: number
-  /** All-play win% (ties ½), 0–1 — the rating's results term. */
+  /** All-play win% (ties ½), 0–1. */
   allPlayPct: number
   /** Position in the official standings (wins, then points for). */
   standing: number
@@ -74,7 +74,7 @@ function lines(games: Matchup[]): Line[] {
     const allPlayPct = apGames ? (ap.wins + ap.ties / 2) / apGames : 0
     return {
       name,
-      score: 0.6 * avg + 0.2 * (high + low) + 0.2 * (allPlayPct * 200),
+      score: 0.6 * avg + 0.2 * (high + low) + 0.2 * (winPct * 200),
       wins: w, losses: l, ties: t, winPct, pf, pa: against[name], avg, high, low,
       allPlayWins: ap.wins, allPlayLosses: ap.losses, allPlayTies: ap.ties, allPlayPct,
       streak: currentStreak(results[name]),
@@ -96,18 +96,17 @@ function byScore(a: Line, b: Line): number {
 
 /**
  * Weekly power rankings using the Oberon Mt. Power Rating — the long-standing
- * standard formula for fantasy power rankings — with all-play win% in place of
- * the head-to-head win%, so schedule luck can't move a team's rating:
+ * standard formula for fantasy power rankings:
  *
- *   rating = ((avg × 6) + ((high + low) × 2) + ((all-play win% × 200) × 2)) / 10
- *          = 0.6 × avg + 0.2 × (high + low) + 0.2 × (all-play win% × 200)
+ *   rating = ((avg × 6) + ((high + low) × 2) + ((win% × 200) × 2)) / 10
+ *          = 0.6 × avg + 0.2 × (high + low) + 0.2 × (win% × 200)
  *
- * Designed as 60% average score, 20% ceiling + floor, 20% winning percentage.
- * The × 200 puts win% on a points scale (.500 → 100, perfect → 200) so its
- * 20% weight counts for as much as the scoring terms' weights do.
+ * Designed as 60% average score, 20% ceiling + floor, 20% winning percentage
+ * (the actual record — the league tried all-play win% and went back to the
+ * original). The × 200 puts win% on a points scale (.500 → 100, perfect → 200)
+ * so its 20% weight counts for as much as the scoring terms' weights do.
  * `games` should hold one season's final regular-season games; ties count as
- * half a win. Exact rating ties go to the better head-to-head record, then
- * points for.
+ * half a win. Exact rating ties go to the better record, then points for.
  */
 export function computePowerRankings(games: Matchup[], throughWeek: number): PowerRankingRow[] {
   const regular = games.filter(g => g.type === 'R')
