@@ -6,7 +6,10 @@ export {
 export type { MatchupPreview, TeamPreview } from './build-preview'
 export { ordinal, formatOdds, weekStakes, clinchPhrase, eliminationPhrase } from './stakes'
 export type { TeamStakes } from './stakes'
-export { seasonSchedule, scheduleGaps } from './schedule'
+export { seasonSchedule, scheduleGaps, ownerSchedule } from './schedule'
+export type { ScheduleRow } from './schedule'
+export { loadSeasonStats, rankSeasonStats } from './season-stats'
+export type { SeasonStats, PlayerSeason } from './season-stats'
 export { fitScoringModel, simulatePlayoffOdds, hashSeed } from './playoff-odds'
 export type { ScheduleGame, TeamResults, ScoringModel, PlayoffOdds } from './playoff-odds'
 export { playoffScenarios } from './playoff-scenarios'
@@ -17,8 +20,8 @@ export { loadWeekProjections, loadPlayerMeta, loadPlayerMetaFromIndex, projectTe
 export type { WeekProjections, ProjectedPlayer, NflGame } from './projections'
 export { EMPTY_OVERLAY, liveSeasonEntry, withLiveSeason, lastFinalWeek, weekStatus, syncLiveSeason, loadWeekPairings } from './live'
 export type { LiveOverlay, WeekStatus } from './live'
-export { playerLookup, rosteredPlayerIds, buildTeamRosters, buildRosterMoves } from './rosters'
-export type { RosterPlayer, LineupSlot, TeamRoster, RosterMove } from './rosters'
+export { playerLookup, rosteredPlayerIds, buildTeamRosters } from './rosters'
+export type { RosterPlayer, LineupSlot, TeamRoster } from './rosters'
 export {
   DADDY_WIN_RATE, DADDY_MIN_GAMES, daddyOf, seriesStreak, seasonHonors, powerRanksThrough,
   seasonExtremes, lineupRegrets, careerWinsBefore, injuryReport, weeklyMoves,

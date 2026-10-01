@@ -3,7 +3,7 @@
 // comes in through `state` (see live.ts) and the projections argument.
 
 import { localDateKey } from '@/lib/utils'
-import type { LeagueState, SleeperMatchup, Transaction } from '@/types'
+import type { LeagueState, SleeperMatchup } from '@/types'
 import type { ProjectedPlayer, WeekProjections } from './projections'
 import type { WeekStatus } from './live'
 
@@ -43,17 +43,6 @@ export interface TeamRoster {
   taxi: RosterPlayer[]
   projTotal: number | null
   ptsTotal: number | null
-}
-
-export interface RosterMove {
-  id: string
-  type: 'trade' | 'waiver' | 'free_agent'
-  owners: string[]
-  adds: { owner: string; player: string }[]
-  drops: { owner: string; player: string }[]
-  /** FAAB spent on a waiver claim. */
-  bid: number | null
-  at: number
 }
 
 const SLOT_LABELS: Record<string, string> = {
@@ -204,25 +193,4 @@ export function buildTeamRosters(
       ptsTotal: started && m ? m.points ?? 0 : null,
     }
   })
-}
-
-/** The week's completed roster moves, newest first. */
-export function buildRosterMoves(
-  transactions: Transaction[],
-  rMap: Record<string, string>,
-  lookup: (id: string) => ProjectedPlayer,
-): RosterMove[] {
-  const owner = (rid: number) => rMap[String(rid)] ?? `Team ${rid}`
-  return transactions
-    .filter(t => t.status === 'complete')
-    .map(t => ({
-      id: t.transaction_id,
-      type: t.type,
-      owners: t.roster_ids.map(owner),
-      adds: Object.entries(t.adds ?? {}).map(([pid, rid]) => ({ owner: owner(rid), player: lookup(pid).name })),
-      drops: Object.entries(t.drops ?? {}).map(([pid, rid]) => ({ owner: owner(rid), player: lookup(pid).name })),
-      bid: t.type === 'waiver' ? t.settings?.waiver_bid ?? null : null,
-      at: t.status_updated ?? t.created,
-    }))
-    .sort((a, b) => b.at - a.at)
 }

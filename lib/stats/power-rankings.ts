@@ -13,6 +13,8 @@ export interface PowerRankingRow {
   ties: number
   winPct: number
   pf: number
+  /** Points scored against this team. */
+  pa: number
   avg: number
   high: number
   low: number
@@ -36,6 +38,7 @@ function isPlayed(g: Matchup): boolean {
 
 function lines(games: Matchup[]): Line[] {
   const scores: Record<string, number[]> = {}
+  const against: Record<string, number> = {}
   const rec: Record<string, { w: number; l: number; t: number }> = {}
   const results: Record<string, ('W' | 'L' | 'T')[]> = {}
   const weekScores: Record<number, { name: string; pts: number }[]> = {}
@@ -44,6 +47,7 @@ function lines(games: Matchup[]): Line[] {
     if (!isPlayed(g)) continue
     for (const [name, pts, opp] of [[g.team1, g.pts1, g.pts2], [g.team2, g.pts2, g.pts1]] as const) {
       ;(scores[name] ??= []).push(pts)
+      against[name] = (against[name] ?? 0) + opp
       const r = (rec[name] ??= { w: 0, l: 0, t: 0 })
       const result = pts > opp ? 'W' : pts < opp ? 'L' : 'T'
       if (result === 'W') r.w++
@@ -71,7 +75,7 @@ function lines(games: Matchup[]): Line[] {
     return {
       name,
       score: 0.6 * avg + 0.2 * (high + low) + 0.2 * (allPlayPct * 200),
-      wins: w, losses: l, ties: t, winPct, pf, avg, high, low,
+      wins: w, losses: l, ties: t, winPct, pf, pa: against[name], avg, high, low,
       allPlayWins: ap.wins, allPlayLosses: ap.losses, allPlayTies: ap.ties, allPlayPct,
       streak: currentStreak(results[name]),
     }
@@ -127,4 +131,25 @@ export function computePowerRankings(games: Matchup[], throughWeek: number): Pow
       standing: standing.get(r.name)!,
     }
   })
+}
+
+export interface SeasonRanks {
+  allPlay: number
+  pf: number
+  pa: number
+}
+
+/**
+ * League ranks for a team's season line (2026 → Rosters header), most first:
+ * all-play win %, points for, and points against. Ties share a rank (1, 2, 2, 4).
+ */
+export function seasonRanks(rows: PowerRankingRow[]): Record<string, SeasonRanks> {
+  const ranker = (value: (r: PowerRankingRow) => number) => {
+    const sorted = rows.map(value).sort((a, b) => b - a)
+    return (r: PowerRankingRow) => sorted.indexOf(value(r)) + 1
+  }
+  const allPlay = ranker(r => r.allPlayPct)
+  const pf = ranker(r => r.pf)
+  const pa = ranker(r => r.pa)
+  return Object.fromEntries(rows.map(r => [r.name, { allPlay: allPlay(r), pf: pf(r), pa: pa(r) }]))
 }

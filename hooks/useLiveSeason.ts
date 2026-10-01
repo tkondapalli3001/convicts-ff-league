@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import {
   EMPTY_OVERLAY, liveSeasonEntry, withLiveSeason, syncLiveSeason, getPreviewSeason, getDefaultWeek,
-  loadWeekProjections, loadPlayerMeta, loadPlayerMetaFromIndex, rosteredPlayerIds,
+  loadWeekProjections, loadPlayerMeta, loadPlayerMetaFromIndex, rosteredPlayerIds, weekStatus,
 } from '@/lib/preview'
-import type { LiveOverlay, WeekProjections, ProjectedPlayer } from '@/lib/preview'
+import type { LiveOverlay, WeekProjections, ProjectedPlayer, WeekStatus } from '@/lib/preview'
 import type { LeagueState, Transaction } from '@/types'
 
 // Sleeper's CDN refreshes matchups (lineups + live points) every minute and
@@ -24,6 +24,8 @@ export interface LiveSeason {
   season: number | null
   /** The shown season's current week (in progress or next up), else its last week. */
   week: number
+  /** That week: final, in progress, or not started. */
+  status: WeekStatus
   /** True while a season is in progress and being polled. */
   live: boolean
   projections: WeekProjections | null
@@ -133,11 +135,13 @@ export function useLiveSeason(): LiveSeason {
   )
   const season = useMemo(() => (merged.loaded ? getPreviewSeason(merged) : null), [merged])
   const week = useMemo(() => (season ? getDefaultWeek(merged, season) : 1), [merged, season])
+  const status = useMemo(() => (season ? weekStatus(merged, season, week) : 'upcoming'), [merged, season, week])
 
   return {
     state: merged,
     season,
     week,
+    status,
     live: entry != null && entry.year === season,
     projections: entry && entry.year === season ? projections : null,
     extraPlayers,

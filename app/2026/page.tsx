@@ -39,10 +39,12 @@ export default function SeasonPage() {
   const live = useLiveSeason()
   const [tab, setTab] = useState<Tab>('rankings')
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
-  const [openIdx, setOpenIdx] = useState<number | null>(null)
+  // The open matchup is keyed by a team in it, so the Rosters schedule can open any week's game
+  const [openOwner, setOpenOwner] = useState<string | null>(null)
+  const [rosterWeek, setRosterWeek] = useState<number | null>(null)
   const { weeks, week, previews, motw } = usePreviewData(live, selectedWeek)
   const rankings = usePowerRankings(live)
-  const rosters = useTeamRosters(live)
+  const rosters = useTeamRosters(live, rosterWeek, rankings.rows)
   const moves = useSeasonTransactions(live, tab === 'transactions')
 
   if (state.error) return <ErrorState error={state.error} />
@@ -54,6 +56,7 @@ export default function SeasonPage() {
   if (!season) return <ErrorState error="No matchup data available yet" />
 
   const idx = weeks.indexOf(week)
+  const openIdx = openOwner ? previews.findIndex(p => p.teamA.name === openOwner || p.teamB.name === openOwner) : -1
   const draft = live.state.draftData[season]
   const isPlayoff = previews[0]?.isPlayoff ?? false
   const status = previews[0]?.status ?? 'upcoming'
@@ -90,7 +93,7 @@ export default function SeasonPage() {
 
       {live.live && (
         <SyncStatus
-          label={`Week ${live.week} · ${STATUS_LABEL[rosters.status]}`}
+          label={`Week ${live.week} · ${STATUS_LABEL[live.status]}`}
           syncedAt={live.syncedAt}
           syncing={live.syncing}
           stale={live.stale}
@@ -142,7 +145,7 @@ export default function SeasonPage() {
                   p={previews[motw.index]}
                   reasons={motw.reasons}
                   ammo={motw.ammo}
-                  onOpen={() => setOpenIdx(motw.index)}
+                  onOpen={() => setOpenOwner(previews[motw.index].teamA.name)}
                 />
               )}
               {previews.length > 1 && (
@@ -151,7 +154,7 @@ export default function SeasonPage() {
                   style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
                 >
                   {previews.map((p, i) => i === motw?.index ? null : (
-                    <MatchupRow key={`${p.teamA.name}-${p.teamB.name}`} p={p} onClick={() => setOpenIdx(i)} />
+                    <MatchupRow key={`${p.teamA.name}-${p.teamB.name}`} p={p} onClick={() => setOpenOwner(p.teamA.name)} />
                   ))}
                 </div>
               )}
@@ -169,8 +172,8 @@ export default function SeasonPage() {
             </div>
           )}
 
-          {openIdx != null && previews[openIdx] && (
-            <MatchupModal p={previews[openIdx]} onClose={() => setOpenIdx(null)} />
+          {openIdx >= 0 && (
+            <MatchupModal p={previews[openIdx]} onClose={() => setOpenOwner(null)} />
           )}
         </>
       )}
@@ -182,7 +185,17 @@ export default function SeasonPage() {
 
       {/* ── ROSTERS ──────────────────────────────────────────────── */}
       {tab === 'rosters' && (
-        <RosterView rosters={rosters.rosters} moves={rosters.moves} week={rosters.week} status={rosters.status} />
+        <RosterView
+          data={rosters}
+          liveWeek={live.week}
+          matchupWeeks={weeks}
+          onWeek={setRosterWeek}
+          onOpenMatchup={(w, owner) => {
+            setSelectedWeek(w)
+            setOpenOwner(owner)
+            setTab('matchups')
+          }}
+        />
       )}
 
       {/* ── TRANSACTIONS ─────────────────────────────────────────── */}

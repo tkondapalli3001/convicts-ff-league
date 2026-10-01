@@ -7,11 +7,12 @@ import { ownerColor, fullNameInitials } from '@/lib/utils'
 interface Props {
   name: string
   /** `sm-md` is small on phones and medium from the `sm` breakpoint up. */
-  size?: 'sm' | 'md' | 'lg' | 'sm-md'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'sm-md'
   className?: string
 }
 
 const SIZES: Record<string, { box: string; text: string }> = {
+  xs: { box: 'w-6 h-6',   text: 'text-[9px]' },
   sm: { box: 'w-8 h-8',   text: 'text-[11px]' },
   md: { box: 'w-11 h-11', text: 'text-[15px]' },
   lg: { box: 'w-14 h-14', text: 'text-[19px]' },

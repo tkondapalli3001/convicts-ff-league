@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computePowerRankings } from '../power-rankings'
+import { computePowerRankings, seasonRanks } from '../power-rankings'
 import type { Matchup } from '@/types'
 
 function game(week: number, t1: string, p1: number, t2: string, p2: number, type: 'R' | 'P' = 'R'): Matchup {
@@ -92,6 +92,23 @@ describe('computePowerRankings', () => {
   it('tracks each team’s current streak (2+ games)', () => {
     const streak = Object.fromEntries(computePowerRankings(GAMES, 2).map(r => [r.name, r.streak]))
     expect(streak).toEqual({ A: { type: 'W', len: 2 }, B: { type: 'L', len: 2 }, C: null, D: null })
+  })
+
+  it('totals points against', () => {
+    const pa = Object.fromEntries(computePowerRankings(GAMES, 2).map(r => [r.name, r.pa]))
+    // A faced B (100) then C (105); C faced D (90) then A (110); D faced C (130) then B (80)
+    expect(pa).toEqual({ A: 205, B: 260, C: 200, D: 210 })
+  })
+
+  it('ranks all-play, points for, and points against across the league, ties shared', () => {
+    const ranks = seasonRanks(computePowerRankings(GAMES, 2))
+    // All-play: A and C 4–2, D 3–3, B 1–5 · PF: C 235, A and D 230, B 180 · PA: B 260, D 210, A 205, C 200
+    expect(ranks).toEqual({
+      A: { allPlay: 1, pf: 2, pa: 3 },
+      C: { allPlay: 1, pf: 1, pa: 4 },
+      D: { allPlay: 3, pf: 2, pa: 2 },
+      B: { allPlay: 4, pf: 4, pa: 1 },
+    })
   })
 
   it('reports the official standing: wins, then points for', () => {
