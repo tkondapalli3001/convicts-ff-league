@@ -255,7 +255,7 @@ function MatchupCard({
           </div>
         ))}
       </div>
-      <div className="text-[8px] text-s-text3/60 text-right mt-1.5 tracking-wide">tap for details</div>
+      <div className="text-[9px] text-s-text3/60 text-right mt-1.5 tracking-wide">tap for details</div>
     </div>
   )
 }

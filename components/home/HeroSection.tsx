@@ -134,13 +134,13 @@ export default function HeroSection({
         style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}
       >
         <div className="border-r px-[18px] py-3.5" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[2.5px] text-gold-dim">Runner-Up</div>
+          <div className="mb-1 text-[9px] font-bold uppercase tracking-[2.5px] text-gold-dim">Runner-Up</div>
           <div className="font-display text-[22px] font-bold uppercase leading-none text-[#D8D3C8]">
             {runnerUpName}
           </div>
         </div>
         <div className="px-[18px] py-3.5">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[2.5px] text-[#8A4A46]">Toilet Bowl</div>
+          <div className="mb-1 text-[9px] font-bold uppercase tracking-[2.5px] text-[#8A4A46]">Toilet Bowl</div>
           <div className="font-display text-[22px] font-bold uppercase leading-none text-loss">{shameName}</div>
         </div>
       </div>

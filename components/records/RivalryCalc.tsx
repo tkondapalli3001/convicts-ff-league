@@ -26,7 +26,7 @@ export default function RivalryCalc() {
     return h2hRecord(allMatchups, ownerA, ownerB)
   }, [allMatchups, ownerA, ownerB])
 
-  const selectCls = 'flex-1 min-w-[140px] bg-s-bg3 border border-s-border text-s-text text-[13px] rounded-[8px] px-3 py-2 outline-none focus:border-s-border2 transition-colors'
+  const selectCls = 'flex-1 min-w-[140px] bg-s-bg3 border border-s-border text-s-text text-[16px] sm:text-[13px] rounded-[8px] px-3 py-2 outline-none focus:border-s-border2 transition-colors'
 
   return (
     <div className="gl p-[18px] animate-fade-in">

@@ -98,10 +98,10 @@ export default function SeasonDraftBoard({ year, draft, picks, rMap }: {
                           <span className="text-s-text3">{round}.{String(inRound).padStart(2, '0')}</span>
                           <span style={{ color }}>{pos}</span>
                         </div>
-                        <div className="mt-0.5 max-w-[92px] truncate text-[10px] leading-tight text-s-text2">
+                        <div className="mt-0.5 max-w-[92px] break-words text-[10px] leading-tight text-s-text2">
                           {pick.metadata.first_name}
                         </div>
-                        <div className="max-w-[92px] truncate font-display text-[15px] font-bold uppercase leading-tight text-s-text">
+                        <div className="max-w-[92px] break-words font-display text-[15px] font-bold uppercase leading-tight text-s-text">
                           {pick.metadata.last_name || pick.player_id}
                         </div>
                         <div className="mt-0.5 flex items-center gap-1 text-[9px] text-s-text3">

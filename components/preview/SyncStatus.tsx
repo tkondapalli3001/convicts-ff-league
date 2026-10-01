@@ -35,7 +35,7 @@ export default function SyncStatus({ label, syncedAt, syncing, stale, onRefresh 
         style={{ background: stale ? '#B4636B' : '#7FA886' }}
         aria-hidden
       />
-      <span className="truncate">
+      <span className="min-w-0 text-right leading-snug">
         <span className="text-s-text2">{label}</span> · {freshness}
       </span>
       <button

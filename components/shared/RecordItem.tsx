@@ -19,7 +19,7 @@ export default function RecordItem({ label, value, context }: Props) {
     >
       <div className="min-w-0">
         <div className="text-[10px] font-bold uppercase tracking-[2px] text-s-text2">{label}</div>
-        <div className="mt-1 truncate text-[10px] tracking-[0.5px] text-s-text3">{context}</div>
+        <div className="mt-1 text-[10px] leading-snug tracking-[0.5px] text-s-text3">{context}</div>
       </div>
       <div className="flex-shrink-0 font-display text-[28px] font-bold leading-none text-gold-bright num">
         {value}

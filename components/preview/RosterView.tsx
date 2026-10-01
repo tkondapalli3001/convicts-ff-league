@@ -31,7 +31,7 @@ function InjuryTag({ status }: { status: string | null }) {
   const mild = label === 'Q'
   return (
     <span
-      className="flex-shrink-0 rounded-[2px] border px-1 py-px text-[8px] font-bold tracking-[0.5px]"
+      className="flex-shrink-0 rounded-[2px] border px-1 py-px text-[9px] font-bold tracking-[0.5px]"
       style={mild
         ? { color: '#C9A24B', borderColor: 'rgba(var(--gold-rgb), 0.3)' }
         : { color: '#B4636B', borderColor: 'rgba(180,99,107,0.35)' }}
@@ -65,7 +65,7 @@ function StatLine({ owner, h, showName }: { owner: string; h: OwnerHeader | unde
   const items: React.ReactNode[] = []
   if (showName) {
     items.push(
-      <Link key="name" href={`/owners/${encodeURIComponent(owner)}`} className="font-semibold normal-case tracking-normal text-s-text2 transition-colors hover:text-gold-soft">
+      <Link key="name" href={`/owners/${encodeURIComponent(owner)}`} className="-my-1.5 py-1.5 font-semibold normal-case tracking-normal text-s-text2 transition-colors hover:text-gold-soft">
         {owner}
       </Link>,
     )
@@ -140,7 +140,7 @@ function PlayerRow({ slot, p, stat, current }: { slot: string | null; p: RosterP
           {p ? (
             <div className="min-w-0 max-w-[168px] py-2 pl-3 pr-2 sm:max-w-[260px]">
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className="truncate text-[13px] font-bold text-s-text sm:text-[14px]">{p.name}</span>
+                <span className="min-w-0 text-[13px] font-bold leading-tight text-s-text sm:text-[14px]">{p.name}</span>
                 <TeamLogo team={p.team} />
                 {/* Injury designations are today's — they'd mislabel a past week */}
                 {current && <InjuryTag status={p.injury} />}
@@ -159,7 +159,7 @@ function PlayerRow({ slot, p, stat, current }: { slot: string | null; p: RosterP
           {actual ? p!.pts!.toFixed(2) : p?.proj != null ? p.proj.toFixed(1) : '—'}
         </div>
         {p && (actual || p.proj != null) && (
-          <div className="mt-1 text-[8px] font-bold uppercase tracking-[1.5px] text-s-text3">{actual ? 'Pts' : 'Proj'}</div>
+          <div className="mt-1 text-[9px] font-bold uppercase tracking-[1.5px] text-s-text3">{actual ? 'Pts' : 'Proj'}</div>
         )}
       </td>
       <td className={num}>{stat?.rank ? `${stat.position}${stat.rank}` : '—'}</td>
@@ -271,7 +271,7 @@ function ResultBox({ row }: { row: ScheduleRow }) {
   if (row.result === 'W') return <span className={`${base} border border-win text-win`} style={{ background: 'rgba(127,168,134,0.14)' }}>W</span>
   if (row.result === 'L') return <span className={`${base} border border-loss text-loss`} style={{ background: 'rgba(180,99,107,0.14)' }}>L</span>
   if (row.result === 'T') return <span className={`${base} border border-white/20 text-s-text2`}>T</span>
-  if (row.status === 'live') return <span className="flex-shrink-0 text-[8px] font-bold uppercase tracking-[1px] text-win">Live</span>
+  if (row.status === 'live') return <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-[1px] text-win">Live</span>
   return <span className={`${base} border border-dashed border-white/15 text-s-text3`}>–</span>
 }
 
@@ -294,12 +294,9 @@ function SchedulePanel({ rows, liveWeek, matchupWeeks, onOpen }: {
         <ul>
           {rows.map(r => {
             const now = r.week === liveWeek
-            return (
-              <li
-                key={r.week}
-                className="flex min-h-[44px] items-center gap-1.5 border-b px-4 py-2 last:border-b-0 sm:gap-2"
-                style={{ borderColor: ROW_RULE, background: now ? 'rgba(var(--gold2-rgb), 0.06)' : undefined }}
-              >
+            const open = matchupWeeks.includes(r.week)
+            const cells = (
+              <>
                 <span className={`w-9 flex-shrink-0 text-[10px] font-bold uppercase tracking-[1px] ${now ? 'text-gold-soft' : 'text-s-text3'}`}>
                   Wk {r.week}
                 </span>
@@ -316,20 +313,37 @@ function SchedulePanel({ rows, liveWeek, matchupWeeks, onOpen }: {
                   : <span className="min-w-0 truncate text-[12px] font-semibold text-s-text2">{r.opponent}</span>}
                 {r.mark && (
                   <span
-                    className={`flex-shrink-0 rounded-[2px] border px-1 py-px text-[8px] font-bold tracking-[1px] ${r.mark === 'high' ? 'border-win text-win' : 'border-loss text-loss'}`}
+                    className={`flex-shrink-0 rounded-[2px] border px-1 py-px text-[9px] font-bold tracking-[1px] ${r.mark === 'high' ? 'border-win text-win' : 'border-loss text-loss'}`}
                     title={r.mark === 'high' ? 'Season-high score' : 'Season-low score'}
                   >
                     {r.mark === 'high' ? 'HIGH' : 'LOW'}
                   </span>
                 )}
-                {matchupWeeks.includes(r.week) && (
+                {open && (
+                  <span aria-hidden className="ml-auto flex-shrink-0 whitespace-nowrap pl-1 text-[10px] font-bold uppercase tracking-[1px] text-gold-soft">
+                    <span className="hidden sm:inline">Matchup </span>→
+                  </span>
+                )}
+              </>
+            )
+            const row = 'flex min-h-[44px] w-full items-center gap-1.5 px-4 py-2 text-left sm:gap-2'
+            return (
+              <li
+                key={r.week}
+                className="border-b last:border-b-0"
+                style={{ borderColor: ROW_RULE, background: now ? 'rgba(var(--gold2-rgb), 0.06)' : undefined }}
+              >
+                {/* The whole row opens the week's game — a thumb-sized target */}
+                {open ? (
                   <button
                     onClick={() => onOpen(r.week)}
-                    className="ml-auto flex-shrink-0 whitespace-nowrap text-[10px] font-bold uppercase tracking-[1px] text-gold-soft transition-colors hover:text-gold-bright"
+                    className={`${row} transition-colors hover:bg-[rgba(201,150,46,0.05)]`}
                     aria-label={`Week ${r.week} matchup vs ${r.opponent}`}
                   >
-                    <span className="hidden sm:inline">Matchup </span>→
+                    {cells}
                   </button>
+                ) : (
+                  <div className={row}>{cells}</div>
                 )}
               </li>
             )

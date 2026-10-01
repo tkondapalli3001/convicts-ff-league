@@ -23,7 +23,7 @@ export default function StatChip({
       className={`flex flex-col gap-1.5 border-b border-r px-5 py-5 transition-colors hover:bg-[rgba(201,150,46,0.04)] sm:px-8 sm:py-[26px] ${animClass ?? ''}`}
       style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}
     >
-      <div className="text-[8px] font-bold uppercase tracking-[2px] text-s-text3 sm:text-[9px] sm:tracking-[3px]">
+      <div className="text-[9px] font-bold uppercase tracking-[2px] text-s-text3 sm:tracking-[3px]">
         {label}
       </div>
       <div className="font-display text-[30px] font-bold leading-none text-s-text sm:text-[44px]">

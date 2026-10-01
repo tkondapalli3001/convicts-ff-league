@@ -36,7 +36,7 @@ export default function HallOfFameCard({ years }: { years: number[] }) {
             <button
               key={year}
               onClick={() => router.push(`/owners/${encodeURIComponent(c.winner)}`)}
-              className="flex w-full items-center gap-3.5 px-6 py-2.5 text-left transition-colors hover:bg-[rgba(201,150,46,0.05)]"
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left sm:gap-3.5 sm:px-6 transition-colors hover:bg-[rgba(201,150,46,0.05)]"
             >
               <span className="w-9 flex-shrink-0 text-[10px] font-bold tracking-[1px] text-gold-dim">{year}</span>
               <div

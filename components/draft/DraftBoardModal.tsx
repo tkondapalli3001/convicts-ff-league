@@ -106,7 +106,7 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
                                 </span>
                               )}
                             </div>
-                            <span className="text-[11px] font-semibold text-s-text leading-tight truncate max-w-[100px]">
+                            <span className="text-[11px] font-semibold text-s-text leading-tight break-words max-w-[100px]">
                               {playerName}
                             </span>
                             {pick.metadata.team && (

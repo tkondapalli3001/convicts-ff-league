@@ -170,7 +170,7 @@ export default function SearchOverlay({ onClose }: Props) {
             onChange={e => { setQuery(e.target.value); setSelected(null); setFocusIdx(-1) }}
             onKeyDown={handleKeyDown}
             placeholder="Ask anything about the league…"
-            className="flex-1 bg-transparent text-[15px] text-s-text placeholder:text-s-text3 outline-none"
+            className="flex-1 bg-transparent text-[16px] text-s-text placeholder:text-s-text3 outline-none sm:text-[15px]"
             autoComplete="off"
             spellCheck={false}
           />

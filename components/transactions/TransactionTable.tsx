@@ -65,7 +65,7 @@ export default function TransactionTable({ transactions, onClick }: Props) {
               </span>
 
               {/* Summary */}
-              <span className="flex-1 text-[12px] text-s-text truncate">{txSummary(tx)}</span>
+              <span className="min-w-0 flex-1 text-[12px] leading-snug text-s-text sm:truncate">{txSummary(tx)}</span>
 
               {/* Date */}
               <span className="text-[10px] text-s-text3 flex-shrink-0 hidden sm:block">

@@ -72,7 +72,8 @@ export default function InfoTip({ term, children }: { term: string; children: Re
           e.stopPropagation()
           setOpen(o => lastPointer.current === 'mouse' || !o)
         }}
-        className="ml-1 inline-flex translate-y-[-1px] align-middle text-s-text3 transition-colors hover:text-gold-soft focus-visible:text-gold-soft"
+        // 8px of padding (offset by negative margins) makes a ~29px tap target around the 13px icon
+        className="-my-2 mx-[-4px] inline-flex translate-y-[-1px] p-2 align-middle text-s-text3 transition-colors hover:text-gold-soft focus-visible:text-gold-soft"
       >
         <CircleHelp size={13} strokeWidth={2.25} aria-hidden />
       </button>

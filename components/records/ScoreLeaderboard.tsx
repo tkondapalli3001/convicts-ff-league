@@ -38,11 +38,15 @@ export default function ScoreLeaderboard({ title, scores, variant, countByOwner 
           >
             <span className="w-5 flex-shrink-0 font-display text-[15px] font-bold text-[#3A4150]">{rank + 1}</span>
             <OwnerAvatar name={s.owner} size="sm" />
-            <span className="w-[70px] flex-shrink-0 text-[12px] font-bold text-s-text">{s.owner}</span>
+            <div className="min-w-0 flex-1 sm:w-[70px] sm:flex-none">
+              <div className="truncate text-[12px] font-bold text-s-text">{s.owner}</div>
+              {/* Phones: the game's context sits under the name, where it has room */}
+              <div className="truncate text-[10px] text-s-text3 sm:hidden">vs {s.opp} · {s.year} W{s.week}</div>
+            </div>
             <span className={`w-[62px] flex-shrink-0 font-display text-[19px] font-bold ${valColor}`}>
               {s.pts.toFixed(2)}
             </span>
-            <span className="flex-1 truncate text-[10px] text-s-text3">
+            <span className="hidden flex-1 truncate text-[10px] text-s-text3 sm:block">
               vs {s.opp} · {s.year} W{s.week}
             </span>
             <span

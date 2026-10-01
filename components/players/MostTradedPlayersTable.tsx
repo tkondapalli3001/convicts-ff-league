@@ -60,7 +60,7 @@ export default function MostTradedPlayersTable({ transactions, playerWinRates }:
         <select
           value={selectedYear}
           onChange={e => setSelectedYear(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-          className="bg-s-bg3 border border-s-border text-s-text2 text-[11px] font-semibold rounded-[6px] px-2 py-1 cursor-pointer outline-none hover:border-s-border2 transition-colors"
+          className="bg-s-bg3 border border-s-border text-s-text2 text-[16px] sm:text-[11px] font-semibold rounded-[6px] px-2 py-1 cursor-pointer outline-none hover:border-s-border2 transition-colors"
         >
           <option value="all">All Time</option>
           {tradeYears.map(y => (

@@ -10,7 +10,7 @@ export default function Footer() {
         className="w-8 h-px flex-shrink-0"
         style={{ background: 'linear-gradient(to right, transparent, rgba(var(--gold2-rgb), 0.5))' }}
       />
-      <span className="text-[8px] font-bold tracking-[5px] uppercase text-s-text3 whitespace-nowrap">
+      <span className="text-[9px] font-bold tracking-[4px] uppercase text-s-text3 whitespace-nowrap sm:tracking-[5px]">
         Convicts FF – 7 Seasons
       </span>
       <span
