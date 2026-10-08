@@ -19,7 +19,7 @@ const FULL_MS = 5 * 60_000
 const MAX_LOOKUPS = 40
 
 export interface LiveSeason {
-  /** Global state with the live season overlaid — feed this to every 2026-tab computation. */
+  /** Global state with the live season overlaid — feed this to every season-tab computation. */
   state: LeagueState
   /** The global store without the overlay. Facts about past seasons memoize on it, so polls don't redo them. */
   base: LeagueState
@@ -47,7 +47,7 @@ export interface LiveSeason {
 }
 
 /**
- * Keeps the in-progress season current while the 2026 tab is open: re-reads
+ * Keeps the in-progress season current while the season tab is open: re-reads
  * lineups and live scores every minute, rosters and moves every five, and
  * projections every ten — pausing while the tab is hidden and catching up the
  * moment it's visible again. The global store still loads once; this overlay

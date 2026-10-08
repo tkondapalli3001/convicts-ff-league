@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { fetchTransactionWeeks, loadSnapshotTransactions, loadSnapshotManifest, getPlayersCache, playerDisplayName } from '@/lib/sources'
 import { enrichTransaction, transactionWeeks } from '@/lib/data-processing'
@@ -11,6 +11,8 @@ let _txCache: EnrichedTransaction[] | null = null
 
 interface TransactionsData {
   transactions: EnrichedTransaction[]
+  /** Every season the moves cover, the one in progress included. */
+  years: number[]
   loading: boolean
   loadingText: string
   error: string | null
@@ -77,5 +79,7 @@ export function useTransactionsData(enabled: boolean = true): TransactionsData {
     return () => { cancelled = true }
   }, [enabled, state.loaded, state.leagueChain.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { transactions, loading, loadingText, error }
+  const years = useMemo(() => state.leagueChain.map(e => e.year), [state.leagueChain])
+
+  return { transactions, years, loading, loadingText, error }
 }

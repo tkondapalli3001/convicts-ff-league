@@ -10,7 +10,7 @@ import type { DraftPick, SleeperDraft } from '@/types'
 const POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 const FALLBACK = '#6e7681'
 
-/** 2026 → Draft: the season's board, every pick tinted by position. */
+/** Season tab → Draft: the season's board, every pick tinted by position. */
 export default function SeasonDraftBoard({ year, draft, picks, rMap }: {
   year: number
   draft: SleeperDraft

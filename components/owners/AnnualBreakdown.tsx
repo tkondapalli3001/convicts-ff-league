@@ -9,8 +9,10 @@ export default function AnnualBreakdown() {
   const { state } = useLeague()
   const { years } = state
 
-  // Use all years from earnings data if league hasn't loaded yet
-  const displayYears = years.length > 0 ? years : [2019, 2020, 2021, 2022, 2023, 2024, 2025]
+  // Use every season in the earnings data if the league hasn't loaded yet
+  const displayYears = years.length > 0
+    ? years
+    : [...new Set(EARNINGS_DATA.flatMap(e => Object.keys(e.byYear).map(Number)))].sort((a, b) => a - b)
 
   return (
     <div className="gl p-[18px] mb-4 relative overflow-hidden">
@@ -51,8 +53,8 @@ export default function AnnualBreakdown() {
                   </td>
                   <td className={`font-bold num ${tc}`}>{fmtMoney(e.total)}</td>
                   {displayYears.map(y => {
-                    const v = e[`y${y}` as keyof typeof e] as number | null
-                    if (v === null || v === undefined)
+                    const v = e.byYear[y]
+                    if (v === undefined)
                       return <td key={y} className="text-s-text3">–</td>
                     const cls = v > 0 ? 'text-s-green font-bold' : v < 0 ? 'text-s-red' : 'text-s-text3'
                     return <td key={y} className={`num ${cls}`}>{fmtMoney(v)}</td>

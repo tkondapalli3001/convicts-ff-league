@@ -1,5 +1,5 @@
-// The live season on the 2026 tab. LeagueContext loads once and never
-// refetches; the 2026 tab polls the few Sleeper endpoints that change during
+// The live season on the season tab. LeagueContext loads once and never
+// refetches; the season tab polls the few Sleeper endpoints that change during
 // a week (useLiveSeason) and overlays them on the global state here, so every
 // pure function downstream (previews, standings, power rankings, rosters)
 // runs unchanged on fresher data.

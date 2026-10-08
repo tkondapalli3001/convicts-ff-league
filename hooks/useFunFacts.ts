@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { useRecordsData } from '@/hooks/useRecordsData'
-import { computeLuckIndex, playoffByeYears } from '@/lib/stats'
+import { computeLuckIndex, playoffByeYears, h2hRecord, daddyOf } from '@/lib/stats'
 import { isSeasonComplete } from '@/lib/data-processing'
 import { INACTIVE_OWNERS } from '@/lib/league'
 
@@ -146,28 +146,14 @@ export function useFunFacts(): FunFactsData {
       .sort((a, b) => b.stdDev - a.stdDev)
       .slice(0, 3)
 
-    // ── Card 4: The Owner ─────────────────────────────────────────────────────
-    const pairGames: Record<string, number> = {}
-    const dirWins: Record<string, number> = {}
-
-    for (const m of filteredMatchups.filter(m => !INACTIVE_OWNERS.has(m.team1) && !INACTIVE_OWNERS.has(m.team2))) {
-      const sortedKey = [m.team1, m.team2].sort().join('|||')
-      pairGames[sortedKey] = (pairGames[sortedKey] ?? 0) + 1
-      const winKey = `${m.winner}|||${m.loser}`
-      dirWins[winKey] = (dirWins[winKey] ?? 0) + 1
-    }
-
+    // ── Card 4: Who's Your Daddy — the same rule as the season tab's 💦 ────────
+    const activeGames = filteredMatchups.filter(m => !INACTIVE_OWNERS.has(m.team1) && !INACTIVE_OWNERS.has(m.team2))
+    const pairs = new Set(activeGames.map(m => [m.team1, m.team2].sort().join('|||')))
     const theOwner: TheOwnerEntry[] = []
-    for (const [sortedKey, totalGames] of Object.entries(pairGames)) {
-      if (totalGames < 4) continue
-      const [nameA, nameB] = sortedKey.split('|||')
-      const winsA = dirWins[`${nameA}|||${nameB}`] ?? 0
-      const winsB = dirWins[`${nameB}|||${nameA}`] ?? 0
-      const [dominant, victim, wins, losses] =
-        winsA >= winsB ? [nameA, nameB, winsA, winsB] : [nameB, nameA, winsB, winsA]
-      if (wins / totalGames >= 0.75) {
-        theOwner.push({ dominant, victim, wins, losses, winPct: wins / totalGames })
-      }
+    for (const pair of pairs) {
+      const [a, b] = pair.split('|||')
+      const d = daddyOf(h2hRecord(activeGames, a, b), a, b)
+      if (d) theOwner.push({ dominant: d.daddy, victim: d.son, wins: d.wins, losses: d.losses, winPct: d.rate })
     }
     theOwner.sort((a, b) => b.winPct - a.winPct || b.wins - a.wins)
 

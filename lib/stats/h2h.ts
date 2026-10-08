@@ -42,6 +42,30 @@ export function h2hRecord(matchups: Matchup[], a: string, b: string): H2HRecord 
   return { games, winsA, winsB, avgA, avgB, highA, highB, lastGame: games[0] }
 }
 
+/** "Daddy": wins at least this share of all-time meetings with one opponent… */
+export const DADDY_WIN_RATE = 0.75
+/** …over at least this many meetings. The one rule for Records and the season tab. */
+export const DADDY_MIN_GAMES = 5
+
+export interface DaddyStatus {
+  daddy: string
+  son: string
+  wins: number
+  losses: number
+  rate: number
+}
+
+/** The owner who has won 75%+ of 5+ meetings in this head-to-head, if either has. */
+export function daddyOf(h2h: H2HRecord, a: string, b: string): DaddyStatus | null {
+  const total = h2h.winsA + h2h.winsB
+  if (total < DADDY_MIN_GAMES) return null
+  const aLeads = h2h.winsA >= h2h.winsB
+  const wins = aLeads ? h2h.winsA : h2h.winsB
+  const rate = wins / total
+  if (rate < DADDY_WIN_RATE) return null
+  return { daddy: aLeads ? a : b, son: aLeads ? b : a, wins, losses: total - wins, rate }
+}
+
 export interface H2HOpponentRecord {
   opp: string
   games: Matchup[]

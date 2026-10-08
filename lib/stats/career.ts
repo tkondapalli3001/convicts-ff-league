@@ -1,5 +1,6 @@
 import type { LeagueState } from '@/types'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER, INACTIVE_OWNERS } from '@/lib/league'
+import { fmtMoney } from '@/lib/utils'
 
 /**
  * Championship count for an owner. Substring match is intentional: shared
@@ -133,4 +134,59 @@ export function buildCareerStats(
       if (Math.abs(diff) > 0.0001) return diff
       return b.totalPF - a.totalPF
     })
+}
+
+// ─── Records → Career Milestones ──────────────────────────────────────────────
+
+export interface Milestone {
+  value: string
+  context: string
+}
+
+const titleYears = (name: string) =>
+  MANUAL_CHAMPS.filter(c => c.winner?.includes(name)).map(c => c.year).sort((a, b) => a - b)
+const toiletYears = (name: string) =>
+  MANUAL_SHAME.filter(s => s.loser === name).map(s => s.year).sort((a, b) => a - b)
+
+/** Whoever has the most of something, every leader listed: "2×", "Daniyaal · 2020 & 2023". */
+function mostOf(count: (name: string) => number, years: (name: string) => number[]): Milestone {
+  const names = [...new Set(Object.values(USER_ID_TO_OWNER))]
+  const best = Math.max(0, ...names.map(count))
+  const leaders = names.filter(n => count(n) === best)
+  return { value: `${best}×`, context: leaders.map(n => `${n} · ${years(n).join(' & ')}`).join(' / ') }
+}
+
+/**
+ * Records → Career Milestones: the biggest net winner and loser, and the most
+ * titles and toilet bowls — computed from the league's history, never typed.
+ */
+export function careerMilestones(): Record<'mostWon' | 'mostLost' | 'mostTitles' | 'mostToilets', Milestone> {
+  const byTotal = [...EARNINGS_DATA].sort((a, b) => b.total - a.total)
+  const top = byTotal[0]
+  const bottom = byTotal[byTotal.length - 1]
+
+  const [bestYear, bestNet] = Object.entries(top.byYear)
+    .map(([y, net]) => [Number(y), net] as const)
+    .reduce((a, b) => (b[1] > a[1] ? b : a))
+  const leagueBest = Math.max(...EARNINGS_DATA.flatMap(e => Object.values(e.byYear)))
+  const wonIt = titleYears(top.owner).includes(bestYear)
+
+  const seasons = Object.keys(bottom.byYear).length
+  const rings = championshipCount(bottom.owner)
+  const toilets = toiletYears(bottom.owner)
+
+  return {
+    mostWon: {
+      value: fmtMoney(top.total),
+      context: `${top.owner} — ${wonIt ? 'won' : 'best season'} ${bestYear} for ${fmtMoney(bestNet)}`
+        + (bestNet === leagueBest ? ' in biggest single-year payout' : ''),
+    },
+    mostLost: {
+      value: fmtMoney(bottom.total),
+      context: `${bottom.owner} — ${seasons} season${seasons === 1 ? '' : 's'}, ${rings} ring${rings === 1 ? '' : 's'}, `
+        + `${toilets.length}x toilet bowl${toilets.length ? ` (${toilets.join(' & ')})` : ''}`,
+    },
+    mostTitles: mostOf(championshipCount, titleYears),
+    mostToilets: mostOf(shameCount, toiletYears),
+  }
 }

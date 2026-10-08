@@ -1,4 +1,4 @@
-// Season facts for the 2026 tab's flair, smack talk, and Matchup of the Week.
+// Season facts for the season tab's flair, smack talk, and Matchup of the Week.
 // Pure extractors — every badge, ammo line, and spotlight reason is built
 // from one of these, so all three always agree on the numbers.
 
@@ -7,20 +7,7 @@ import { getChampion, getShameLoser } from '@/lib/utils'
 import type { LeagueState, Matchup, Transaction } from '@/types'
 import type { ProjectedPlayer } from './projections'
 
-// ─── Daddy: owns the all-time series ──────────────────────────────────────────
-
-/** "Daddy": wins at least this share of all-time meetings with the opponent… */
-export const DADDY_WIN_RATE = 0.75
-/** …over at least this many meetings. */
-const DADDY_MIN_GAMES = 5
-
-export interface DaddyStatus {
-  daddy: string
-  son: string
-  wins: number
-  losses: number
-  rate: number
-}
+// ─── Series streaks ───────────────────────────────────────────────────────────
 
 /** Who has won the last 2+ meetings in a row, and how many (games are newest first). */
 export function seriesStreak(h2h: H2HRecord, a: string): { owner: string; len: number } | null {
@@ -34,17 +21,6 @@ export function seriesStreak(h2h: H2HRecord, a: string): { owner: string; len: n
     else break
   }
   return len >= 2 ? { owner, len } : null
-}
-
-/** The owner who has won 75%+ of 5+ all-time meetings, if either has. */
-export function daddyOf(h2h: H2HRecord, a: string, b: string): DaddyStatus | null {
-  const total = h2h.winsA + h2h.winsB
-  if (total < DADDY_MIN_GAMES) return null
-  const aLeads = h2h.winsA >= h2h.winsB
-  const wins = aLeads ? h2h.winsA : h2h.winsB
-  const rate = wins / total
-  if (rate < DADDY_WIN_RATE) return null
-  return { daddy: aLeads ? a : b, son: aLeads ? b : a, wins, losses: total - wins, rate }
 }
 
 // ─── Last season's honors ─────────────────────────────────────────────────────

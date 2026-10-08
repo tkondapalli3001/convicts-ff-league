@@ -1,4 +1,4 @@
-// Roster views for the 2026 tab: every team's lineup, bench, and IR for one
+// Roster views for the season tab: every team's lineup, bench, and IR for one
 // week, joined with projections and player metadata. Pure — the live data
 // comes in through `state` (see live.ts) and the projections argument.
 

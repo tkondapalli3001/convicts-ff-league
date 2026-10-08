@@ -5,6 +5,7 @@ import { HeartCrack, Zap, Activity, Crown, Trash2, Clover, Armchair } from 'luci
 import { useFunFacts } from '@/hooks/useFunFacts'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import InfoTip from '@/components/shared/InfoTip'
+import { DADDY_MIN_GAMES, DADDY_WIN_RATE } from '@/lib/stats'
 
 export default function FunFacts() {
   const { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo, byeKings } = useFunFacts()
@@ -145,7 +146,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Who&apos;s Your Daddy? 🍆
           </span>
-          <InfoTip term="Who’s Your Daddy?">managers who’ve won at least 75% of their all-time meetings with one opponent (4+ games).</InfoTip>
+          <InfoTip term="Who’s Your Daddy?">managers who’ve won at least {DADDY_WIN_RATE * 100}% of their all-time meetings with one opponent ({DADDY_MIN_GAMES}+ games).</InfoTip>
         </div>
         {theOwner.length === 0 ? (
           <div className="py-6 text-s-text3 text-[12px] text-center">

@@ -14,7 +14,7 @@ export interface PowerRankingsData {
   badges: Record<string, Badge[]>
 }
 
-/** Power Rankings tab of the 2026 page — final regular-season weeks only. */
+/** Power Rankings on the season tab — final regular-season weeks only. */
 export function usePowerRankings(live: LiveSeason): PowerRankingsData {
   const { state, base, season, games } = live
   // Last season's champ and toilet bowl don't change between polls

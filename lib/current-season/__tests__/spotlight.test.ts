@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { daddyOf, seasonHonors, seasonExtremes, weeklyMoves, injuryReport, lineupRegrets } from '../facts'
+import { daddyOf } from '@/lib/stats'
+import { seasonHonors, seasonExtremes, weeklyMoves, injuryReport, lineupRegrets } from '../facts'
 import { matchupBadges, standingBadges } from '../flair'
 import { pickMatchupOfTheWeek, type MotwCandidate } from '../matchup-of-the-week'
 import { smackFacts, smackPool, type SmackContext } from '../smack-talk'

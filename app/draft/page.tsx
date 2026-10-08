@@ -13,12 +13,13 @@ import StealsBusts from '@/components/draft/StealsBusts'
 import DraftSlotAnalysis from '@/components/draft/DraftSlotAnalysis'
 import PastDrafts from '@/components/draft/PastDrafts'
 import DraftStructureTable from '@/components/draft/DraftStructureTable'
-import { STOCK_PICKS_2026 } from '@/lib/league'
+import { STOCK_PICKS, MARKET_BENCHMARK, STOCK_PICK_SEASON } from '@/lib/league'
+import { fmtDate } from '@/lib/utils'
 
 type Tab = 'pickorder' | 'history' | 'slots' | 'steals' | 'strategy'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'pickorder', label: '2026 Pick Order'  },
+  { id: 'pickorder', label: `${STOCK_PICK_SEASON} Pick Order` },
   { id: 'history',   label: 'Past Drafts'      },
   { id: 'slots',     label: 'Slot Analysis'    },
   { id: 'steals',    label: 'Steals & Busts'   },
@@ -40,20 +41,20 @@ export default function DraftPage() {
       <PageHeader
         kicker="The Draft Room"
         title="Draft Hub"
-        subtitle="Draft history, 2026 pick order standings, slot vs outcome analysis, and historical steals & busts"
+        subtitle={`Draft history, ${STOCK_PICK_SEASON} pick order standings, slot vs outcome analysis, and historical steals & busts`}
       />
 
       <DraftCountdown />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
-      {/* ── 2026 PICK ORDER TAB ───────────────────────────────────── */}
+      {/* ── PICK ORDER TAB ───────────────────────────────────────── */}
       {activeTab === 'pickorder' && (
         <>
           <div className="text-[11px] text-s-text3 mb-3">
-            Jan 12 → Jul 15 · Best ROI drafts first
+            {fmtDate(MARKET_BENCHMARK.startDate, 'short', false)} → {fmtDate(MARKET_BENCHMARK.endDate, 'short', false)} · Best ROI drafts first
           </div>
-          <StockStandings picks={STOCK_PICKS_2026} />
+          <StockStandings picks={STOCK_PICKS} />
         </>
       )}
 

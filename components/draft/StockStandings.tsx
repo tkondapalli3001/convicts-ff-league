@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { StockPick } from '@/lib/league'
-import { MARKET_BENCHMARK_2026 } from '@/lib/league'
+import { MARKET_BENCHMARK } from '@/lib/league'
 import { fmtDate } from '@/lib/utils'
 
 interface Props {
@@ -54,10 +54,10 @@ export default function StockStandings({ picks }: Props) {
   const fundEnd   = picks.reduce((s, p) => s + p.endPrice, 0)
   const fundRoi   = roi(fundEnd, fundStart)
 
-  const marketRoi = roi(MARKET_BENCHMARK_2026.endPrice, MARKET_BENCHMARK_2026.startPrice)
+  const marketRoi = roi(MARKET_BENCHMARK.endPrice, MARKET_BENCHMARK.startPrice)
 
-  const startLabel = fmtDate(picks[0]?.startDate ?? MARKET_BENCHMARK_2026.startDate, 'numeric')
-  const endLabel   = fmtDate(picks[0]?.endDate ?? MARKET_BENCHMARK_2026.endDate, 'numeric')
+  const startLabel = fmtDate(picks[0]?.startDate ?? MARKET_BENCHMARK.startDate, 'numeric')
+  const endLabel   = fmtDate(picks[0]?.endDate ?? MARKET_BENCHMARK.endDate, 'numeric')
 
   const roiColor = (pct: number) => pct >= 0 ? 'text-s-green' : 'text-s-red'
 
@@ -114,13 +114,13 @@ export default function StockStandings({ picks }: Props) {
             <tr className="border-t border-s-border/40 bg-s-bg3/20">
               <td className="px-3 py-3 text-center text-[11px] text-s-text3">—</td>
               <td className="px-4 py-3 text-[12px] font-extrabold text-s-text2 whitespace-nowrap" colSpan={2}>
-                {MARKET_BENCHMARK_2026.displayTicker}
+                {MARKET_BENCHMARK.displayTicker}
               </td>
               <td className={`px-4 py-3 text-right text-[13px] font-bold num whitespace-nowrap ${roiColor(marketRoi)}`}>
                 {fmtRoi(marketRoi)}
               </td>
-              <td className="px-3 py-3 text-right text-[13px] text-s-text3 num whitespace-nowrap">{fmtPrice(MARKET_BENCHMARK_2026.startPrice)}</td>
-              <td className="px-3 py-3 text-right text-[13px] text-s-text2 num whitespace-nowrap">{fmtPrice(MARKET_BENCHMARK_2026.endPrice)}</td>
+              <td className="px-3 py-3 text-right text-[13px] text-s-text3 num whitespace-nowrap">{fmtPrice(MARKET_BENCHMARK.startPrice)}</td>
+              <td className="px-3 py-3 text-right text-[13px] text-s-text2 num whitespace-nowrap">{fmtPrice(MARKET_BENCHMARK.endPrice)}</td>
             </tr>
           </tbody>
         </table>

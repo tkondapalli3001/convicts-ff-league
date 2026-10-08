@@ -4,6 +4,7 @@ import './globals.css'
 import { LeagueProvider } from '@/context/LeagueContext'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import snapshot from '@/public/data/manifest.json'
 
 // Midnight Prime — Archivo for UI/body, Barlow Condensed for display numerals/names.
 const archivo = Archivo({
@@ -22,7 +23,7 @@ const barlow = Barlow_Condensed({
 
 const SITE_URL = 'https://tkondapalli3001.github.io/convicts-ff-league'
 const DESCRIPTION =
-  'The Convicts League — 7 seasons of fantasy football history, records, earnings, matchup previews & trash talk. Live from the Sleeper API.'
+  `The Convicts League — ${snapshot.years.length} seasons of fantasy football history, records, earnings, matchup previews & trash talk. Live from the Sleeper API.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

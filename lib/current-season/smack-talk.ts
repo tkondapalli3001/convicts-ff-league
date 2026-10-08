@@ -7,13 +7,13 @@
 // changes day to day but holds still while live numbers tick inside a line.
 // The page shows a few at a time and a reroll steps through the rest.
 
-import { gameKey, type H2HRecord } from '@/lib/stats'
+import { gameKey, type DaddyStatus, type H2HRecord } from '@/lib/stats'
 import type { TeamPreview } from './build-preview'
 import type { WeekStatus } from './live'
 import { ordinal } from '@/lib/utils'
 import {
   seriesStreak,
-  type DaddyStatus, type InjuryReport, type LineupRegret, type PowerRankPoint, type ScoreMark,
+  type InjuryReport, type LineupRegret, type PowerRankPoint, type ScoreMark,
   type SeasonHonors, type WeekMoves,
 } from './facts'
 

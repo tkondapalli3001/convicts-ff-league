@@ -1,9 +1,9 @@
 // Barrel — import from '@/lib/stats', not the individual files.
 export { gameKey, buildConsolationGameKeys, buildChampPathGameKeys, excludeManualGames } from './game-filters'
-export { championshipCount, shameCount, activeOwnerNames, buildCareerStats } from './career'
+export { championshipCount, shameCount, activeOwnerNames, buildCareerStats, careerMilestones } from './career'
 export type { CareerStats } from './career'
-export { h2hRecord, h2hVsAll } from './h2h'
-export type { H2HRecord, H2HOpponentRecord } from './h2h'
+export { h2hRecord, h2hVsAll, daddyOf, DADDY_WIN_RATE, DADDY_MIN_GAMES } from './h2h'
+export type { H2HRecord, H2HOpponentRecord, DaddyStatus } from './h2h'
 export { computeRecords } from './records'
 export type { RecordsData } from './records'
 export { playoffByeYears } from './byes'

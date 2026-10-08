@@ -1,5 +1,5 @@
 // Season-to-date stats for every NFL player, scored with the league's own
-// settings — the 2026 Rosters table's Season Rank / GP / FPTS / PPG. One
+// settings — the season tab's Rosters table: Season Rank / GP / FPTS / PPG. One
 // request covers every player; scoring Sleeper's season totals this way
 // matches the points Sleeper credits rostered players to the cent.
 //

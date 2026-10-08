@@ -22,9 +22,9 @@ export type { LiveOverlay, WeekStatus } from './live'
 export { playerLookup, rosteredPlayerIds, buildTeamRosters } from './rosters'
 export type { RosterPlayer, LineupSlot, TeamRoster } from './rosters'
 export {
-  daddyOf, seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore, injuryReport, weeklyMoves,
+  seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore, injuryReport, weeklyMoves,
 } from './facts'
-export type { DaddyStatus, SeasonHonors, PowerRankPoint, ScoreMark, InjuryReport, WeekMoves, LineupRegret } from './facts'
+export type { SeasonHonors, PowerRankPoint, ScoreMark, InjuryReport, WeekMoves, LineupRegret } from './facts'
 export { standingBadges, matchupBadges } from './flair'
 export type { Badge } from './flair'
 export { pickMatchupOfTheWeek } from './matchup-of-the-week'

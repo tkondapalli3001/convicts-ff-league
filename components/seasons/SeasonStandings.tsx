@@ -63,7 +63,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
   }
 
   // Season Luck Index per owner — the shared lib/stats implementation, so it
-  // matches Records, search, and the 2026 tab
+  // matches Records, search, and the season tab
   const luckMap = useMemo<Record<string, number>>(() => {
     const result: Record<string, number> = {}
     for (const year of years) {

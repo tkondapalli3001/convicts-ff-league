@@ -187,7 +187,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       // A season joins `years` (which drives every historical stats surface)
       // only once Sleeper marks it complete — no records, byes, or accolades
       // from a season still in progress. The live season stays in
-      // leagueChain/leagues/matchups so live features (This Week, draft
+      // leagueChain/leagues/matchups so live features (the season tab, draft
       // countdown) keep working.
       const completedYears = years.filter(y => isSeasonComplete(leagues[y]))
 

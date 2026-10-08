@@ -139,7 +139,7 @@ export interface SeasonRanks {
 }
 
 /**
- * League ranks for a team's season line (2026 → Rosters header), most first:
+ * League ranks for a team's season line (the season tab's Rosters header), most first:
  * all-play win %, points for, and points against. Ties share a rank (1, 2, 2, 4).
  */
 export function seasonRanks(rows: PowerRankingRow[]): Record<string, SeasonRanks> {

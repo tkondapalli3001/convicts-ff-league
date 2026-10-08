@@ -54,11 +54,12 @@ export function fmtRecord(w: number, l: number, t = 0): string {
 
 /**
  * A calendar date, US style: "Sep 30, 2026" (short), "September 30, 2026" (long),
- * "9/30/2026" (numeric). Takes epoch ms, or an ISO day ("2026-07-15") read as local midnight.
+ * "9/30/2026" (numeric); "Sep 30" without the year. Takes epoch ms, or an ISO day
+ * ("2026-07-15") read as local midnight.
  */
-export function fmtDate(date: number | string, month: 'short' | 'long' | 'numeric' = 'short'): string {
+export function fmtDate(date: number | string, month: 'short' | 'long' | 'numeric' = 'short', withYear = true): string {
   const d = typeof date === 'string' ? new Date(`${date}T00:00:00`) : new Date(date)
-  return d.toLocaleDateString('en-US', { month, day: 'numeric', year: 'numeric' })
+  return d.toLocaleDateString('en-US', withYear ? { month, day: 'numeric', year: 'numeric' } : { month, day: 'numeric' })
 }
 
 /** Local calendar date as YYYY-MM-DD (comparable with Sleeper's game dates). */

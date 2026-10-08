@@ -21,10 +21,14 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+// Which weeks hold a season's moves: the site's own rule (lib/data-processing/
+// season-settings.ts, loaded through Node's TypeScript type stripping)
+process.removeAllListeners('warning')
+const { transactionWeeks } = await import('../lib/data-processing/season-settings.ts')
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT_DIR = join(ROOT, 'public', 'data')
 const SLEEPER_API = 'https://api.sleeper.app/v1'
-const TX_WEEKS = 17 // matches WEEKS_PER_SEASON in hooks/useTransactionsData.ts
 
 // Single source of truth for the league id: parse it out of lib/league/config.ts
 const configSrc = readFileSync(join(ROOT, 'lib', 'league', 'config.ts'), 'utf8')
@@ -74,7 +78,7 @@ async function snapshotSeason(league) {
   process.stdout.write(', transactions')
   const transactionsByWeek = {}
   await Promise.all(
-    Array.from({ length: TX_WEEKS }, (_, i) => i + 1).map(async w => {
+    transactionWeeks(league).map(async w => {
       transactionsByWeek[w] = await fetchJson(`${SLEEPER_API}/league/${id}/transactions/${w}`).catch(() => [])
     })
   )

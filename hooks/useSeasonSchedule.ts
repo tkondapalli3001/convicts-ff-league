@@ -7,7 +7,7 @@ import type { LiveSeason } from '@/hooks/useLiveSeason'
 import type { SleeperMatchup } from '@/types'
 
 /**
- * The 2026 tab's full regular-season schedule, week → pairings. The base
+ * The season tab's full regular-season schedule, week → pairings. The base
  * state loads only the weeks played so far; the rest (Sleeper publishes the
  * whole schedule up front) loads once per visit — shared by the playoff odds
  * and each owner's schedule on Rosters.

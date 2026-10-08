@@ -117,14 +117,10 @@ export interface LeagueChainEntry {
 
 export interface EarningsEntry {
   owner: string
+  /** Net across every season, summed from byYear. */
   total: number
-  y2019: number | null
-  y2020: number | null
-  y2021: number | null
-  y2022: number | null
-  y2023: number | null
-  y2024: number | null
-  y2025: number | null
+  /** season → net result (payout minus buy-in); seasons not played are absent. */
+  byYear: Record<number, number>
 }
 
 export interface Champion {

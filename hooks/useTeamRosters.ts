@@ -37,7 +37,7 @@ export interface TeamRostersData {
 }
 
 /**
- * 2026 → Rosters: every lineup for the chosen week (the current one by
+ * Season tab → Rosters: every lineup for the chosen week (the current one by
  * default), each player's season line, and each owner's season header and
  * schedule. Header numbers come from final games, like Power Rankings.
  */

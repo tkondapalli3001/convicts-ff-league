@@ -3,8 +3,8 @@
 // top scorer is featured, and its biggest factors become the "why it matters"
 // reasons on the card.
 
-import { gameKey, type H2HRecord } from '@/lib/stats'
-import { DADDY_WIN_RATE, seriesStreak, type DaddyStatus, type PowerRankPoint, type SeasonHonors } from './facts'
+import { gameKey, DADDY_WIN_RATE, type DaddyStatus, type H2HRecord } from '@/lib/stats'
+import { seriesStreak, type PowerRankPoint, type SeasonHonors } from './facts'
 import { ordinal } from '@/lib/utils'
 import { formatOdds, type TeamStakes } from './stakes'
 import type { TeamPreview } from './build-preview'

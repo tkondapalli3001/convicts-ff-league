@@ -11,7 +11,7 @@ export type StockPick = {
 // 2026 draft cycle: Jan 12 → Jul 15. Settled — endPrice is the 7/15/2026 close.
 // Pick order is the final ROI ranking (highest ROI drafts first) and is locked;
 // quoting live prices after the close would drift away from the real order.
-export const STOCK_PICKS_2026: StockPick[] = [
+export const STOCK_PICKS: StockPick[] = [
   { owner: 'Daniyaal', ticker: 'RIOT', startPrice: 16.45,   endPrice: 20.10,   startDate: '2026-01-12', endDate: '2026-07-15' },
   { owner: 'Nathan',   ticker: 'NVDA', startPrice: 184.94,  endPrice: 212.50,  startDate: '2026-01-12', endDate: '2026-07-15' },
   { owner: 'Armaan',   ticker: 'MSFT', startPrice: 477.18,  endPrice: 395.63,  startDate: '2026-01-12', endDate: '2026-07-15' },
@@ -24,7 +24,7 @@ export const STOCK_PICKS_2026: StockPick[] = [
   { owner: 'Sonu',     ticker: 'LLY',  startPrice: 1081.00, endPrice: 1156.63, startDate: '2026-01-12', endDate: '2026-07-15' },
 ]
 
-export const MARKET_BENCHMARK_2026 = {
+export const MARKET_BENCHMARK = {
   label: 'Market',
   ticker: '%5EGSPC',   // ^GSPC URL-encoded for Yahoo Finance
   displayTicker: 'S&P 500',
@@ -33,3 +33,6 @@ export const MARKET_BENCHMARK_2026 = {
   startDate: '2026-01-12',
   endDate: '2026-07-15',
 }
+
+/** The draft these picks set the order for — the window closes Jul 15 of draft year. */
+export const STOCK_PICK_SEASON = Number(MARKET_BENCHMARK.endDate.slice(0, 4))

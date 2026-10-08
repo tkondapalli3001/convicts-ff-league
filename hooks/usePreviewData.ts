@@ -1,18 +1,18 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { computeLuckIndex, buildChampPathGameKeys } from '@/lib/stats'
+import { computeLuckIndex, buildChampPathGameKeys, daddyOf, type DaddyStatus } from '@/lib/stats'
 import { playoffStartWeek } from '@/lib/data-processing'
 import { localDateKey } from '@/lib/utils'
 import {
   getSeasonWeeks, buildWeekPreviews, computeStandings,
   smackFacts, projectTeam, startersByRoster, lastFinalWeek, playerLookup,
-  daddyOf, seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore,
+  seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore,
   injuryReport, weeklyMoves, matchupBadges, pickMatchupOfTheWeek,
   fitScoringModel, weekStakes,
 } from '@/lib/current-season'
 import type {
-  MatchupPreview, TeamStakes, TeamResults, Badge, DaddyStatus, PowerRankPoint, MatchupOfTheWeek,
+  MatchupPreview, TeamStakes, TeamResults, Badge, PowerRankPoint, MatchupOfTheWeek,
 } from '@/lib/current-season'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
 import { useSeasonSchedule } from '@/hooks/useSeasonSchedule'
@@ -42,7 +42,7 @@ export interface PreviewData {
   motw: (MatchupOfTheWeek & { ammo: string | null }) | null
 }
 
-/** Matchups tab of the 2026 page. `selectedWeek` null = the current week. */
+/** Matchups on the season tab. `selectedWeek` null = the current week. */
 export function usePreviewData(live: LiveSeason, selectedWeek: number | null): PreviewData {
   const { state, base, season, games, projections, extraPlayers, transactions } = live
 

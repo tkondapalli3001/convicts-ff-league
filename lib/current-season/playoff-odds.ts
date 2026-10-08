@@ -1,4 +1,4 @@
-// Playoff odds for the 2026 tab: simulate the rest of the regular season many
+// Playoff odds for the season tab: simulate the rest of the regular season many
 // times and count how often each team finishes in the playoff spots. Pure and
 // seeded, so the same inputs always give the same odds (no flicker between
 // renders or devices).

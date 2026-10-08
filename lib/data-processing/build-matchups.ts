@@ -3,8 +3,8 @@ import { isSeasonComplete } from './season-settings'
 
 /**
  * Flatten one season's raw weekly matchups into Matchup[] rows. Used by
- * buildFlatMatchups for completed seasons and by the This Week preview
- * engine, which needs the live season's games too.
+ * buildFlatMatchups for completed seasons and by the season tab, which
+ * needs the live season's games too.
  */
 export function flattenSeasonMatchups(state: LeagueState, year: number): Matchup[] {
   const out: Matchup[] = []

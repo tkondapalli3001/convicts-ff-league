@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
-import { fmtPts, ownerColor, fullNameInitials } from '@/lib/utils'
+import { fmtPts, fmtMoney, ownerColor, fullNameInitials } from '@/lib/utils'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA } from '@/lib/league'
 import { buildConsolationGameKeys, excludeManualGames, gameKey, playoffByeYears } from '@/lib/stats'
 import { isSeasonComplete } from '@/lib/data-processing'
@@ -213,7 +213,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     { label: 'Career Record', value: `${totalW}–${totalL}`, sub: `${pct}% win rate` },
     { label: 'Avg PF / Game', value: avgPFg, sub: `${avgPF.toFixed(0)} pts/season` },
     { label: 'Avg PA / Game', value: avgPAg, sub: `${avgPA.toFixed(0)} allowed/season`, color: BRICK },
-    { label: 'Net Earnings', value: earn ? `${earn.total >= 0 ? '+' : '−'}$${Math.abs(earn.total)}` : 'N/A', color: earn ? (earn.total >= 0 ? SAGE : BRICK) : undefined },
+    { label: 'Net Earnings', value: earn ? fmtMoney(earn.total) : 'N/A', color: earn ? (earn.total >= 0 ? SAGE : BRICK) : undefined },
     { label: 'Finals Record', value: finalsGames > 0 ? `${playoffStats.finalsW}–${playoffStats.finalsL}` : '—', sub: finalsGames > 0 ? `${finalsGames} Finals appearance${finalsGames !== 1 ? 's' : ''}` : 'Never reached Finals', color: playoffStats.finalsW > 0 ? GOLD : undefined },
     { label: 'Playoff Byes', value: playoffStats.byes > 0 ? String(playoffStats.byes) : '—', sub: playoffStats.byes > 0 ? `first-round bye${playoffStats.byes !== 1 ? 's' : ''}` : 'No byes earned', color: playoffStats.byes > 0 ? GOLD : undefined },
     { label: 'Best Season', value: String(best.year), sub: `${best.wins}–${best.losses} record`, color: SAGE },
@@ -282,7 +282,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
             ))}
             {earn && (
               <span className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px]" style={{ color: earn.total >= 0 ? '#7FA886' : '#B4636B', borderColor: earn.total >= 0 ? 'rgba(127,168,134,0.35)' : 'rgba(180,90,90,0.35)' }}>
-                {earn.total >= 0 ? '+' : '−'}${Math.abs(earn.total)} Net
+                {fmtMoney(earn.total)} Net
               </span>
             )}
           </div>

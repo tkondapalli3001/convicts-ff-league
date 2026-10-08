@@ -1,7 +1,8 @@
-// Emoji flair for the 2026 tab. Every badge is a true, checkable stat — the
+// Emoji flair for the season tab. Every badge is a true, checkable stat — the
 // legend under the matchups spells out each rule.
 
-import type { DaddyStatus, InjuryReport, SeasonHonors } from './facts'
+import { DADDY_MIN_GAMES, DADDY_WIN_RATE, type DaddyStatus } from '@/lib/stats'
+import type { InjuryReport, SeasonHonors } from './facts'
 
 export interface Badge {
   emoji: string
@@ -52,7 +53,7 @@ export function matchupBadges(opts: {
     out.push({
       emoji: '💦',
       label: 'Daddy',
-      rule: 'Wins 75%+ of all-time meetings (5+ games) vs this opponent',
+      rule: `Wins ${DADDY_WIN_RATE * 100}%+ of all-time meetings (${DADDY_MIN_GAMES}+ games) vs this opponent`,
       detail: `${name} is ${daddy.wins}–${daddy.losses} all-time vs ${opts.opponent} (${Math.round(daddy.rate * 100)}%)`,
     })
   }

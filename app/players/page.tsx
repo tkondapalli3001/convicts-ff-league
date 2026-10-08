@@ -36,7 +36,7 @@ export default function PlayersPage() {
   const { playerWinRates, ownership, playerScores, loading, loadingText, error: dataError } = usePlayersData()
   const [activeTab, setActiveTab] = useState<Tab>('winrate')
   // Transactions download only once their tab is opened (then stay cached)
-  const { transactions, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData(activeTab === 'transactions')
+  const { transactions, years: txYears, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData(activeTab === 'transactions')
 
   // Player card modal (lifted to page level so fixed positioning works)
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerStat | null>(null)
@@ -48,8 +48,8 @@ export default function PlayersPage() {
   const [selectedTx, setSelectedTx]     = useState<EnrichedTransaction | null>(null)
 
   useEffect(() => {
-    if (years.length) setActiveYears(new Set(years))
-  }, [years.length]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (txYears.length) setActiveYears(new Set(txYears))
+  }, [txYears.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredTx = useMemo(() => {
     return transactions.filter(tx => {
@@ -152,7 +152,7 @@ export default function PlayersPage() {
             </div>
           )}
           <TransactionFilters
-            years={years}
+            years={txYears}
             owners={ownerNames}
             activeYears={activeYears}
             activeOwners={activeOwners}
@@ -166,7 +166,7 @@ export default function PlayersPage() {
               transactions={transactions}
               activeYears={activeYears}
               activeOwners={activeOwners}
-              years={years}
+              years={txYears}
             />
           )}
           {!txLoading && (

@@ -1,5 +1,5 @@
 // The one Luck Index implementation — Seasons standings, Records fun facts,
-// search, 2026 smack talk, power rankings' all-play, and
+// search, the season tab's smack talk, power rankings' all-play, and
 // scripts/luck-index.mjs all read from here.
 //
 // Type-only imports on purpose: scripts/luck-index.mjs loads this file

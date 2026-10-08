@@ -14,8 +14,12 @@ import StreakList from '@/components/records/StreakList'
 import TrashTalkCard from '@/components/records/TrashTalkCard'
 import FunFacts from '@/components/records/FunFacts'
 import { TRASH_TALK } from '@/lib/league'
+import { careerMilestones } from '@/lib/stats'
 
 type Tab = 'extremes' | 'records' | 'streaks' | 'trashtalk' | 'funfacts'
+
+// Built from the league's history files alone — the same on every visit
+const milestones = careerMilestones()
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'extremes',  label: 'Extremes'   },
@@ -87,10 +91,10 @@ export default function RecordsPage() {
             <RecordItem label="Worst Season PF Margin" value={`${(worstMarginSeason.pf - worstMarginSeason.pa).toFixed(1)}`} context={`${worstMarginSeason.name} · ${worstMarginSeason.year}`} />
           </SectionCard>
           <SectionCard title="Career Milestones">
-            <RecordItem label="All-Time Most Money Won" value="+$450" context="Kerry — won 2025 for +$675 in biggest single-year payout" />
-            <RecordItem label="All-Time Most Money Lost" value="−$410" context="Teja — 7 seasons, 0 rings, 1x toilet bowl (2021)" />
-            <RecordItem label="Most Championships" value="2×" context="Daniyaal · 2020 & 2023" />
-            <RecordItem label="Most Toilet Bowls" value="2×" context="Nathan · 2020 & 2022" />
+            <RecordItem label="All-Time Most Money Won" {...milestones.mostWon} />
+            <RecordItem label="All-Time Most Money Lost" {...milestones.mostLost} />
+            <RecordItem label="Most Championships" {...milestones.mostTitles} />
+            <RecordItem label="Most Toilet Bowls" {...milestones.mostToilets} />
           </SectionCard>
         </div>
       )}

@@ -5,7 +5,7 @@ import { RefreshCw } from 'lucide-react'
 import { timeAgo } from '@/lib/utils'
 
 /**
- * Live-sync readout for the 2026 tab: a status dot, what's being shown, how
+ * Live-sync readout for the season tab: a status dot, what's being shown, how
  * fresh it is, and a manual sync button. Brick dot + "offline" when the last
  * sync failed and the page is showing the previous data.
  */

@@ -26,7 +26,7 @@ function TeamMeta({ team, badges, align }: { team: TeamPreview; badges: Badge[];
 }
 
 /**
- * One clickable matchup row (2026 tab): two teams with quick stats, flair, and a
+ * One clickable matchup row (season tab): two teams with quick stats, flair, and a
  * final/live/pre-game center readout. Opens the head-to-head + ammo modal on click.
  */
 export default function MatchupRow({ p, onClick }: { p: EnrichedPreview; onClick: () => void }) {

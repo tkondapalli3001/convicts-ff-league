@@ -14,7 +14,7 @@ function plural(n: number, noun: string): string {
   return `${n} ${noun}${n === 1 ? '' : 's'}`
 }
 
-/** 2026 → Transactions: every move this season, filterable by type and manager. */
+/** Season tab → Transactions: every move this season, filterable by type and manager. */
 export default function SeasonTransactions({ data }: { data: Data }) {
   const { transactions, owners, loading, failedWeeks } = data
   const [types, setTypes] = useState<Set<TxTypeFilter>>(new Set(['trade', 'waivers']))

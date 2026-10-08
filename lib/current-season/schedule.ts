@@ -1,6 +1,6 @@
 // The regular-season schedule: every week's pairings (the loaded weeks plus
 // the rest of a live season, which Sleeper publishes up front), and each
-// owner's season at a glance for the 2026 Rosters tab.
+// owner's season at a glance on the season tab's Rosters.
 
 import type { ScheduleGame } from './playoff-odds'
 import type { WeekStatus } from './live'

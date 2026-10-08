@@ -28,7 +28,7 @@ interface Fetched {
 }
 
 /**
- * 2026 → Transactions. Past weeks load once, when the tab first opens; the
+ * Season tab → Transactions. Past weeks load once, when the tab first opens; the
  * current week rides the live sync (useLiveSeason re-reads it every five
  * minutes), so new moves appear without a reload.
  */

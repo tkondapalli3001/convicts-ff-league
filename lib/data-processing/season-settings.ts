@@ -5,13 +5,13 @@
 // straight into Node (type stripping), where '@/' aliases can't resolve.
 import type { SleeperLeague } from '@/types'
 
-/** Weeks of moves read for a finished season — the snapshot stores the same. */
+/** Fewest weeks of moves read for a finished season (2021 ran 18). */
 const SEASON_TX_WEEKS = 17
 
 /**
  * Historical stats only count completed seasons. A live season awards no
  * records, byes, finishes, or any other accolade until Sleeper marks it
- * complete — until then it exists only for live features (the 2026 tab, drafts).
+ * complete — until then it exists only for live features (the season tab, drafts).
  */
 export function isSeasonComplete(league: SleeperLeague | undefined): boolean {
   return (league?.status ?? 'complete') === 'complete'
@@ -24,12 +24,13 @@ export function playoffStartWeek(league: SleeperLeague | undefined): number {
 }
 
 /**
- * The weeks a season's roster moves are filed under: a finished season's
- * full slate; in season, the weeks so far plus the next, where waivers that
- * clear after this week's games land.
+ * The weeks a season's roster moves are filed under — the site and the
+ * snapshot script both read these. A finished season: through its last week.
+ * In season: the weeks so far plus the next, where waivers that clear after
+ * this week's games land.
  */
 export function transactionWeeks(league: SleeperLeague): number[] {
-  const leg = league.status === 'complete' ? 0 : league.settings?.leg ?? 0
-  const n = leg > 0 ? leg + 1 : SEASON_TX_WEEKS
+  const leg = league.settings?.leg ?? 0
+  const n = league.status === 'complete' || leg <= 0 ? Math.max(SEASON_TX_WEEKS, leg) : leg + 1
   return Array.from({ length: n }, (_, i) => i + 1)
 }

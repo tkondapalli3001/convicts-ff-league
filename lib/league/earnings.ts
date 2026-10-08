@@ -7,17 +7,26 @@ import type { EarningsEntry } from '@/types'
 // 2025 payouts: 1st $800, 2nd $325, 3rd $125 (10 active players, $1250 pot)
 //   1st: Kerry (+675)  2nd: Nathan (+200)  3rd: Armaan (0)  Others: -125
 //   Toilet bowl loser: Sonu
-export const EARNINGS_DATA: EarningsEntry[] = [
-  { owner: 'Kerry',    total: 450,  y2019: null, y2020: null, y2021: null, y2022: -50,  y2023: -75,  y2024: -100, y2025: 675  },
-  { owner: 'Armaan',   total: 350,  y2019: -20,  y2020: -30,  y2021: 0,    y2022: 200,  y2023: 100,  y2024: 100,  y2025: 0    },
-  { owner: 'Daniyaal', total: 330,  y2019: -20,  y2020: 240,  y2021: -40,  y2022: -50,  y2023: 425,  y2024: -100, y2025: -125 },
-  { owner: 'Sonu',     total: 260,  y2019: -20,  y2020: -30,  y2021: -40,  y2022: -50,  y2023: -75,  y2024: 600,  y2025: -125 },
-  { owner: 'Nathan',   total: 5,    y2019: 0,    y2020: -30,  y2021: -40,  y2022: -50,  y2023: -75,  y2024: 0,    y2025: 200  },
-  { owner: 'Sangram',  total: -20,  y2019: -20,  y2020: null, y2021: null, y2022: null, y2023: null, y2024: null, y2025: null },
-  { owner: 'Manu',     total: -80,  y2019: -20,  y2020: -30,  y2021: 320,  y2022: -50,  y2023: -75,  y2024: -100, y2025: -125 },
-  { owner: 'Hamza',    total: -90,  y2019: -20,  y2020: -30,  y2021: -40,  y2022: null, y2023: null, y2024: null, y2025: null },
-  { owner: 'Dustin',   total: -190, y2019: -20,  y2020: -30,  y2021: -40,  y2022: 200,  y2023: -75,  y2024: -100, y2025: -125 },
-  { owner: 'Raghav',   total: -260, y2019: 160,  y2020: -30,  y2021: -40,  y2022: -50,  y2023: -75,  y2024: -100, y2025: -125 },
-  { owner: 'Eric',     total: -345, y2019: null, y2020: -30,  y2021: -40,  y2022: -50,  y2023: 0,    y2024: -100, y2025: -125 },
-  { owner: 'Teja',     total: -410, y2019: -20,  y2020: 0,    y2021: -40,  y2022: -50,  y2023: -75,  y2024: -100, y2025: -125 },
-]
+//
+// Each owner's net result per season (payout minus buy-in); a season they
+// didn't play is left out. Add each new season's line after the title game —
+// totals and the ranking are computed, never typed.
+const NET_BY_YEAR: Record<string, Record<number, number>> = {
+  Kerry:    {                                    2022: -50, 2023: -75, 2024: -100, 2025: 675  },
+  Armaan:   { 2019: -20, 2020: -30, 2021: 0,   2022: 200, 2023: 100, 2024: 100,  2025: 0    },
+  Daniyaal: { 2019: -20, 2020: 240, 2021: -40, 2022: -50, 2023: 425, 2024: -100, 2025: -125 },
+  Sonu:     { 2019: -20, 2020: -30, 2021: -40, 2022: -50, 2023: -75, 2024: 600,  2025: -125 },
+  Nathan:   { 2019: 0,   2020: -30, 2021: -40, 2022: -50, 2023: -75, 2024: 0,    2025: 200  },
+  Sangram:  { 2019: -20                                                                     },
+  Manu:     { 2019: -20, 2020: -30, 2021: 320, 2022: -50, 2023: -75, 2024: -100, 2025: -125 },
+  Hamza:    { 2019: -20, 2020: -30, 2021: -40                                               },
+  Dustin:   { 2019: -20, 2020: -30, 2021: -40, 2022: 200, 2023: -75, 2024: -100, 2025: -125 },
+  Raghav:   { 2019: 160, 2020: -30, 2021: -40, 2022: -50, 2023: -75, 2024: -100, 2025: -125 },
+  Eric:     {            2020: -30, 2021: -40, 2022: -50, 2023: 0,   2024: -100, 2025: -125 },
+  Teja:     { 2019: -20, 2020: 0,   2021: -40, 2022: -50, 2023: -75, 2024: -100, 2025: -125 },
+}
+
+/** Every owner's earnings, biggest net winner first. */
+export const EARNINGS_DATA: EarningsEntry[] = Object.entries(NET_BY_YEAR)
+  .map(([owner, byYear]) => ({ owner, byYear, total: Object.values(byYear).reduce((a, b) => a + b, 0) }))
+  .sort((a, b) => b.total - a.total)
