@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
-import { EARNINGS_DATA } from '@/lib/constants'
+import { EARNINGS_DATA } from '@/lib/league'
 import { activeOwnerNames, championshipCount, shameCount, buildChampPathGameKeys, gameKey } from '@/lib/stats'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'

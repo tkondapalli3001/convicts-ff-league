@@ -1,4 +1,4 @@
-import { OWNER_FULL_NAMES } from '@/lib/constants'
+import { OWNER_FULL_NAMES } from '@/lib/league'
 import { levenshtein, normalize } from './tokenize'
 import type { EntityIndex, OwnerEntity, PlayerEntity } from './types'
 

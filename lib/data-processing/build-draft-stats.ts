@@ -1,6 +1,6 @@
 import type { LeagueState, DraftPick, PlayerStat, OwnerSeason } from '@/types'
-import type { PlayerMetadata } from '@/lib/players-cache'
-import { playerDisplayName } from '@/lib/players-cache'
+import type { PlayerMetadata } from '@/lib/sources'
+import { playerDisplayName } from '@/lib/sources'
 import { isSeasonComplete } from './build-seasons'
 
 // ─── Player Win Rates ─────────────────────────────────────────────────────────

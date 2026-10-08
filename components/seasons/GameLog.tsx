@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from 'react'
 import { useLeague } from '@/context/LeagueContext'
-import { USER_ID_TO_OWNER } from '@/lib/constants'
-import GameLogFilters from '@/components/gamelog/GameLogFilters'
-import GameLogTable from '@/components/gamelog/GameLogTable'
-import GameDetailModal from '@/components/gamelog/GameDetailModal'
+import { USER_ID_TO_OWNER } from '@/lib/league'
+import GameLogFilters from '@/components/seasons/GameLogFilters'
+import GameLogTable from '@/components/seasons/GameLogTable'
+import GameDetailModal from '@/components/seasons/GameDetailModal'
 import type { Matchup } from '@/types'
 
 /**

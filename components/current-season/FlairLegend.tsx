@@ -1,6 +1,6 @@
 'use client'
 
-import type { Badge } from '@/lib/preview'
+import type { Badge } from '@/lib/current-season'
 
 /** Key for the flair showing this week — only the badges somebody actually earned. */
 export default function FlairLegend({ badges }: { badges: Badge[] }) {

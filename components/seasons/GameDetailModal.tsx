@@ -3,7 +3,7 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useModalClose } from '@/hooks/useModalClose'
-import { getPlayersCache, type PlayerMetadata } from '@/lib/players-cache'
+import { getPlayersCache, type PlayerMetadata } from '@/lib/sources'
 import type { Matchup, SleeperMatchup, LeagueState } from '@/types'
 
 interface ModalState {

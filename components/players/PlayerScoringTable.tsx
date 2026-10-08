@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import type { PlayerScoreStat } from '@/lib/data-processing'
 
-import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
+import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/positions'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 import SortHeader from '@/components/shared/SortHeader'
 

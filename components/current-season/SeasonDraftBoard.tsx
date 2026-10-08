@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import SectionCard from '@/components/shared/SectionCard'
-import { POS_COLORS } from '@/lib/constants'
+import { POS_COLORS } from '@/lib/positions'
 import { buildDraftBoard } from '@/lib/data-processing'
 import type { DraftPick, SleeperDraft } from '@/types'
 

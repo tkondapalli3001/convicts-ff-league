@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { POS_COLORS } from '@/lib/constants'
+import { POS_COLORS } from '@/lib/positions'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 import type { OwnershipEntry } from '@/lib/data-processing'
 import type { PlayerStat } from '@/types'

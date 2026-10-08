@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
-import { getPlayersCache, type PlayerMetadata } from '@/lib/players-cache'
+import { getPlayersCache, type PlayerMetadata } from '@/lib/sources'
 import { computePlayerWinRates, computeDraftOwnership, computeDraftStructure, computePlayerScores } from '@/lib/data-processing'
 import type { OwnershipEntry, DraftStructureEntry, PlayerScoreStat } from '@/lib/data-processing'
 import type { PlayerStat, DraftPick } from '@/types'

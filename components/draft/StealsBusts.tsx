@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 
-import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/constants'
+import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/positions'
 import InfoTip from '@/components/shared/InfoTip'
 
 interface PickResult {

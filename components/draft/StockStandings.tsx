@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import type { StockPick } from '@/lib/stock-picks'
-import { MARKET_BENCHMARK_2026 } from '@/lib/stock-picks'
+import type { StockPick } from '@/lib/league'
+import { MARKET_BENCHMARK_2026 } from '@/lib/league'
 
 interface Props {
   picks: StockPick[]

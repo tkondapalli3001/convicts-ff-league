@@ -1,5 +1,5 @@
 import type { LeagueState, Matchup } from '@/types'
-import { EXCLUDED_GAME_SCORES } from '@/lib/constants'
+import { EXCLUDED_GAME_SCORES } from '@/lib/league'
 
 /** Canonical key for one game from one perspective: year|||week|||teamA|||teamB */
 export function gameKey(year: number, week: number, a: string, b: string): string {

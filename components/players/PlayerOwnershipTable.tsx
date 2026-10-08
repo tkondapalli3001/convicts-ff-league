@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react'
 import type { OwnershipEntry } from '@/lib/data-processing'
-import { USER_ID_TO_OWNER } from '@/lib/constants'
+import { USER_ID_TO_OWNER } from '@/lib/league'
 
-import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/constants'
+import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/positions'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 import SortHeader from '@/components/shared/SortHeader'
 

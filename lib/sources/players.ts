@@ -1,5 +1,5 @@
-import { SLEEPER_API } from '@/lib/constants'
-import { loadPlayerIndex } from '@/lib/history-snapshot'
+import { SLEEPER_API } from '@/lib/league'
+import { loadPlayerIndex } from './snapshot'
 
 export interface PlayerMetadata {
   full_name?: string

@@ -7,8 +7,8 @@ import ErrorState from '@/components/shared/ErrorState'
 import PillTabs from '@/components/shared/PillTabs'
 import PageHeader from '@/components/shared/PageHeader'
 import CareerLeaderboard from '@/components/owners/CareerLeaderboard'
-import AnnualBreakdown from '@/components/earnings/AnnualBreakdown'
-import RivalryCalc from '@/components/records/RivalryCalc'
+import AnnualBreakdown from '@/components/owners/AnnualBreakdown'
+import RivalryCalc from '@/components/owners/RivalryCalc'
 
 type Tab = 'leaderboard' | 'earnings' | 'h2h'
 

@@ -1,4 +1,4 @@
-import { OWNER_COLORS, OWNER_FULL_NAMES } from '@/lib/constants'
+import { OWNER_COLORS, OWNER_FULL_NAMES, MANUAL_CHAMPS, MANUAL_SHAME } from '@/lib/league'
 
 // ─── Owner Utilities ──────────────────────────────────────────────────────────
 
@@ -64,7 +64,6 @@ export function pctClass(pct: string | number): 'good' | 'mid' | 'bad' {
 
 // ─── Champion / Shame lookups ─────────────────────────────────────────────────
 
-import { MANUAL_CHAMPS, MANUAL_SHAME } from '@/lib/constants'
 import type { BracketGame, LeagueState } from '@/types'
 
 function buildSeedMap(games: BracketGame[]): Record<number, number> {

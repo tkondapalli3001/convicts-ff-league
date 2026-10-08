@@ -5,8 +5,8 @@ import { useLeague } from '@/context/LeagueContext'
 import {
   EMPTY_OVERLAY, liveSeasonEntry, withLiveSeason, syncLiveSeason, getPreviewSeason, getDefaultWeek,
   loadWeekProjections, loadPlayerMeta, loadPlayerMetaFromIndex, rosteredPlayerIds, weekStatus,
-} from '@/lib/preview'
-import type { LiveOverlay, WeekProjections, ProjectedPlayer, WeekStatus } from '@/lib/preview'
+} from '@/lib/current-season'
+import type { LiveOverlay, WeekProjections, ProjectedPlayer, WeekStatus } from '@/lib/current-season'
 import type { LeagueState, Transaction } from '@/types'
 
 // Sleeper's CDN refreshes matchups (lineups + live points) every minute and

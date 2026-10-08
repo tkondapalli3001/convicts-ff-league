@@ -11,9 +11,9 @@ import PillTabs from '@/components/shared/PillTabs'
 import PageHeader from '@/components/shared/PageHeader'
 import ScoreLeaderboard from '@/components/records/ScoreLeaderboard'
 import StreakList from '@/components/records/StreakList'
-import TrashTalkCard from '@/components/trends/TrashTalkCard'
+import TrashTalkCard from '@/components/records/TrashTalkCard'
 import FunFacts from '@/components/records/FunFacts'
-import { TRASH_TALK } from '@/lib/constants'
+import { TRASH_TALK } from '@/lib/league'
 
 type Tab = 'extremes' | 'records' | 'streaks' | 'trashtalk' | 'funfacts'
 

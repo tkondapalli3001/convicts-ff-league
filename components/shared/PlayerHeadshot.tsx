@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { POS_COLORS } from '@/lib/constants'
+import { POS_COLORS } from '@/lib/positions'
 
 interface Props {
   playerId: string

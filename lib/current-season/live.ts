@@ -5,7 +5,7 @@
 // runs unchanged on fresher data.
 
 import { isSeasonComplete } from '@/lib/data-processing'
-import { fetchLeague, fetchRosters, fetchMatchupsForWeek, fetchTransactions } from '@/lib/sleeper-api'
+import { fetchLeague, fetchRosters, fetchMatchupsForWeek, fetchTransactions } from '@/lib/sources'
 import type { LeagueState, SleeperLeague, SleeperRoster, SleeperMatchup, Transaction } from '@/types'
 
 export interface LiveOverlay {

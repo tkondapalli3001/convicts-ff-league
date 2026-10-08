@@ -5,8 +5,8 @@ import { flattenSeasonMatchups } from '@/lib/data-processing'
 import { seasonRanks, type PowerRankingRow } from '@/lib/stats'
 import {
   playerLookup, buildTeamRosters, weekStatus, getSeasonWeeks, loadWeekProjections, loadSeasonStats, ownerSchedule,
-} from '@/lib/preview'
-import type { TeamRoster, WeekStatus, WeekProjections, SeasonStats, PlayerSeason, ScheduleRow } from '@/lib/preview'
+} from '@/lib/current-season'
+import type { TeamRoster, WeekStatus, WeekProjections, SeasonStats, PlayerSeason, ScheduleRow } from '@/lib/current-season'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
 import { useSeasonSchedule } from '@/hooks/useSeasonSchedule'
 

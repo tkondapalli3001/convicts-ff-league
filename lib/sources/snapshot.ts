@@ -5,7 +5,7 @@
 // here returns null on any failure: the snapshot is an accelerator, never a
 // dependency. Callers must fall back to live fetching when it's missing.
 
-import { BASE_PATH } from '@/lib/constants'
+import { BASE_PATH } from '@/lib/league'
 import type {
   SleeperLeague, SleeperUser, SleeperRoster, SleeperMatchup,
   BracketGame, SleeperDraft, DraftPick, Transaction,

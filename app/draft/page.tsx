@@ -12,8 +12,8 @@ import StockStandings from '@/components/draft/StockStandings'
 import StealsBusts from '@/components/draft/StealsBusts'
 import DraftSlotAnalysis from '@/components/draft/DraftSlotAnalysis'
 import PastDrafts from '@/components/draft/PastDrafts'
-import DraftStructureTable from '@/components/players/DraftStructureTable'
-import { STOCK_PICKS_2026 } from '@/lib/stock-picks'
+import DraftStructureTable from '@/components/draft/DraftStructureTable'
+import { STOCK_PICKS_2026 } from '@/lib/league'
 
 type Tab = 'pickorder' | 'history' | 'slots' | 'steals' | 'strategy'
 

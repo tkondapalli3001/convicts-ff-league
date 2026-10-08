@@ -1,4 +1,4 @@
-import { SLEEPER_API } from '@/lib/constants'
+import { SLEEPER_API } from '@/lib/league'
 import type { SleeperLeague, SleeperUser, SleeperRoster, SleeperMatchup, BracketGame, SleeperDraft, DraftPick, Transaction } from '@/types'
 
 // ─── Core fetch wrapper ────────────────────────────────────────────────────────

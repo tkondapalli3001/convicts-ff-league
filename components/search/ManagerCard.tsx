@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import { ownerColor, fullNameInitials } from '@/lib/utils'
-import { OWNER_FULL_NAMES } from '@/lib/constants'
+import { OWNER_FULL_NAMES } from '@/lib/league'
 import type { CareerStats } from '@/lib/stats'
 import type { PlayerStat } from '@/types'
 

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
-import { USER_ID_TO_OWNER } from '@/lib/constants'
+import { USER_ID_TO_OWNER } from '@/lib/league'
 import { h2hRecord } from '@/lib/stats'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 

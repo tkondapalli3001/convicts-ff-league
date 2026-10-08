@@ -1,6 +1,6 @@
 'use client'
 
-import type { Badge } from '@/lib/preview'
+import type { Badge } from '@/lib/current-season'
 
 /** A team's emoji flair; hover (or long-press) explains each one. */
 export default function FlairBadges({ badges, className = '' }: { badges: Badge[]; className?: string }) {

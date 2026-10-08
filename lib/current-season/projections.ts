@@ -6,7 +6,7 @@
 // projections (rosters fall back to draft-pick names). Never let this module
 // break a preview card or a roster.
 
-import { getPlayersCache, playerDisplayName } from '@/lib/players-cache'
+import { getPlayersCache, playerDisplayName } from '@/lib/sources'
 import type { LeagueState, SleeperMatchup } from '@/types'
 
 export interface ProjectedPlayer {

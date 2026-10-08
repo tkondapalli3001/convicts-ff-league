@@ -1,6 +1,6 @@
 import type { LeagueState, OwnerSeason, SleeperLeague } from '@/types'
 import { getFinishFromBracket } from './bracket-finish'
-import { MANUAL_CHAMPS, MANUAL_SHAME, MANUAL_PLAYOFF_OVERRIDES } from '@/lib/league-history'
+import { MANUAL_CHAMPS, MANUAL_SHAME, MANUAL_PLAYOFF_OVERRIDES } from '@/lib/league'
 
 /**
  * Historical stats only count completed seasons. A live season awards no

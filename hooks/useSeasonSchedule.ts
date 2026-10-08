@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { loadWeekPairings, scheduleGaps, seasonSchedule } from '@/lib/preview'
-import type { ScheduleGame } from '@/lib/preview'
+import { loadWeekPairings, scheduleGaps, seasonSchedule } from '@/lib/current-season'
+import type { ScheduleGame } from '@/lib/current-season'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
 import type { SleeperMatchup } from '@/types'
 

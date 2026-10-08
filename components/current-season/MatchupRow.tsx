@@ -2,10 +2,10 @@
 
 import { ChevronRight } from 'lucide-react'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
-import FlairBadges from '@/components/preview/FlairBadges'
+import FlairBadges from '@/components/current-season/FlairBadges'
 import { ownerColor, fmtPts } from '@/lib/utils'
-import { ordinal } from '@/lib/preview'
-import type { Badge, TeamPreview } from '@/lib/preview'
+import { ordinal } from '@/lib/current-season'
+import type { Badge, TeamPreview } from '@/lib/current-season'
 import type { EnrichedPreview } from '@/hooks/usePreviewData'
 
 /** Record · seed · short streak. On phones the flair rides here, out of the name's way. */

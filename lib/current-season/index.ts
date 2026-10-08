@@ -1,4 +1,4 @@
-// Barrel — import from '@/lib/preview', not the individual files.
+// Barrel — import from '@/lib/current-season', not the individual files.
 export {
   getPreviewSeason, getSeasonWeeks, getDefaultWeek,
   buildWeekPreviews, computeStandings,

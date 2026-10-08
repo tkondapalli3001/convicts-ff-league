@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLeague } from '@/context/LeagueContext'
-import { getPlayersCache, playerDisplayName, type PlayerMetadata } from '@/lib/players-cache'
+import { getPlayersCache, playerDisplayName, type PlayerMetadata } from '@/lib/sources'
 import { ownerColor } from '@/lib/utils'
 import type { BracketGame, SleeperMatchup } from '@/types'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { NEXT_DRAFT_AT, NEXT_DRAFT_LABEL } from '@/lib/constants'
+import { NEXT_DRAFT_AT, NEXT_DRAFT_LABEL } from '@/lib/league'
 
 const KICKOFF_MS = new Date(NEXT_DRAFT_AT).getTime()
 /** Keep the banner up (as "on the clock") for the length of a draft. */

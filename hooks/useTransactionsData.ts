@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useLeague } from '@/context/LeagueContext'
-import { fetchTransactions } from '@/lib/sleeper-api'
-import { loadSnapshotTransactions, loadSnapshotManifest } from '@/lib/history-snapshot'
-import { getPlayersCache, playerDisplayName } from '@/lib/players-cache'
+import { fetchTransactions, loadSnapshotTransactions, loadSnapshotManifest, getPlayersCache, playerDisplayName } from '@/lib/sources'
 import type { Transaction } from '@/types'
 
 export interface EnrichedTransaction extends Transaction {

@@ -1,4 +1,4 @@
-import { USER_ID_TO_OWNER } from '@/lib/constants'
+import { USER_ID_TO_OWNER } from '@/lib/league'
 import OwnerDetail from '@/components/owners/OwnerDetail'
 
 // Generate static paths for all owner names at build time

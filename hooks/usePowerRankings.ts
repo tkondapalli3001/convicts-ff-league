@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { flattenSeasonMatchups } from '@/lib/data-processing'
-import { lastFinalWeek, seasonHonors, standingBadges, type Badge } from '@/lib/preview'
+import { lastFinalWeek, seasonHonors, standingBadges, type Badge } from '@/lib/current-season'
 import { computePowerRankings, type PowerRankingRow } from '@/lib/stats'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
 

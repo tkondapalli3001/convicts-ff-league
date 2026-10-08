@@ -1,7 +1,7 @@
 'use client'
 
 import { useLeague } from '@/context/LeagueContext'
-import { EARNINGS_DATA, BUY_INS } from '@/lib/constants'
+import { EARNINGS_DATA, BUY_INS } from '@/lib/league'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import { fmtMoney } from '@/lib/utils'
 

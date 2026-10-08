@@ -1,4 +1,4 @@
-import { USER_ID_TO_OWNER, DISPLAY_NAME_TO_OWNER } from '@/lib/owner-map'
+import { USER_ID_TO_OWNER, DISPLAY_NAME_TO_OWNER } from '@/lib/league'
 
 export function resolveOwnerName(userId: string | undefined, displayName: string | undefined): string {
   if (userId && USER_ID_TO_OWNER[userId]) return USER_ID_TO_OWNER[userId]

@@ -10,10 +10,10 @@ import {
   daddyOf, seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore,
   injuryReport, weeklyMoves, matchupBadges, pickMatchupOfTheWeek,
   fitScoringModel, weekStakes,
-} from '@/lib/preview'
+} from '@/lib/current-season'
 import type {
   MatchupPreview, TeamStakes, TeamResults, Badge, DaddyStatus, PowerRankPoint, MatchupOfTheWeek,
-} from '@/lib/preview'
+} from '@/lib/current-season'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
 import { useSeasonSchedule } from '@/hooks/useSeasonSchedule'
 

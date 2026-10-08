@@ -1,11 +1,11 @@
 'use client'
 
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
-import FlairBadges from '@/components/preview/FlairBadges'
-import SmackLine from '@/components/preview/SmackLine'
+import FlairBadges from '@/components/current-season/FlairBadges'
+import SmackLine from '@/components/current-season/SmackLine'
 import { ownerColor, fmtPts } from '@/lib/utils'
-import { ordinal } from '@/lib/preview'
-import type { Badge, TeamPreview } from '@/lib/preview'
+import { ordinal } from '@/lib/current-season'
+import type { Badge, TeamPreview } from '@/lib/current-season'
 import type { EnrichedPreview } from '@/hooks/usePreviewData'
 
 function Side({ team, badges, proj, score, p, isWinner, align }: {

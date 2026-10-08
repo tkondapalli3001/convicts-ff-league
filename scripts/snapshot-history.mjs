@@ -26,11 +26,11 @@ const OUT_DIR = join(ROOT, 'public', 'data')
 const SLEEPER_API = 'https://api.sleeper.app/v1'
 const TX_WEEKS = 17 // matches WEEKS_PER_SEASON in hooks/useTransactionsData.ts
 
-// Single source of truth for the league id: parse it out of lib/config.ts
-const configSrc = readFileSync(join(ROOT, 'lib', 'config.ts'), 'utf8')
+// Single source of truth for the league id: parse it out of lib/league/config.ts
+const configSrc = readFileSync(join(ROOT, 'lib', 'league', 'config.ts'), 'utf8')
 const LEAGUE_ID = configSrc.match(/LEAGUE_ID\s*=\s*'(\d+)'/)?.[1]
 if (!LEAGUE_ID) {
-  console.error('Could not find LEAGUE_ID in lib/config.ts')
+  console.error('Could not find LEAGUE_ID in lib/league/config.ts')
   process.exit(1)
 }
 

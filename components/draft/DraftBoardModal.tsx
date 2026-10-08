@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import type { DraftPick, SleeperDraft } from '@/types'
 
 import { useModalClose } from '@/hooks/useModalClose'
-import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/constants'
+import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/positions'
 import { buildDraftBoard } from '@/lib/data-processing'
 
 interface Props {
