@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { computeLuckIndex, buildChampPathGameKeys } from '@/lib/stats'
-import { flattenSeasonMatchups, playoffStartWeek } from '@/lib/data-processing'
+import { playoffStartWeek } from '@/lib/data-processing'
 import { localDateKey } from '@/lib/utils'
 import {
   getSeasonWeeks, buildWeekPreviews, computeStandings,
@@ -44,7 +44,7 @@ export interface PreviewData {
 
 /** Matchups tab of the 2026 page. `selectedWeek` null = the current week. */
 export function usePreviewData(live: LiveSeason, selectedWeek: number | null): PreviewData {
-  const { state, season, projections, extraPlayers, transactions } = live
+  const { state, base, season, games, projections, extraPlayers, transactions } = live
 
   const weeks = useMemo(() => (season ? getSeasonWeeks(state, season) : []), [state, season])
   const week = selectedWeek ?? live.week
@@ -65,8 +65,12 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
     return Object.fromEntries(entries.map(e => [e.owner, e.luckIndex]))
   }, [state, season])
 
-  // Title-path playoff games, so a consolation meeting isn't billed as an elimination
-  const champPath = useMemo(() => buildChampPathGameKeys(state), [state])
+  // Past seasons don't change between polls: title-path playoff games (so a
+  // consolation meeting isn't billed as an elimination), last season's champ
+  // and toilet bowl, and career wins entering the season
+  const champPath = useMemo(() => buildChampPathGameKeys(base), [base])
+  const honors = useMemo(() => (season ? seasonHonors(base, season) : null), [base, season])
+  const careerBefore = useMemo(() => (season ? careerWinsBefore(base, season) : {}), [base, season])
 
   // Every regular-season game, played or not — the playoff odds simulate them all
   const schedule = useSeasonSchedule(live)
@@ -81,20 +85,18 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
   )
 
   const { previews, motw } = useMemo(() => {
-    if (!season) return { previews: [] as EnrichedPreview[], motw: null }
-    const base = buildWeekPreviews(state, season, week)
+    if (!season || !honors) return { previews: [] as EnrichedPreview[], motw: null }
+    const cards = buildWeekPreviews(state, season, week, games)
 
-    // The preview season is usually live and absent from allMatchups
-    // (completed seasons only) — flatten it from the raw weekly data
     const lastFinal = lastFinalWeek(state, season)
-    const finalGames = flattenSeasonMatchups(state, season).filter(m => m.week <= lastFinal)
+    const finalGames = games.filter(m => m.week <= lastFinal)
     const priorGames = finalGames.filter(m => m.week < week)
     const settings = state.leagues[season]?.settings
     const playoffSpots = settings?.playoff_teams ?? 6
     const playoffStart = playoffStartWeek(state.leagues[season])
 
     const standings = computeStandings(priorGames)
-    const stakes = !base.length || base[0].isPlayoff ? {} : (() => {
+    const stakes = !cards.length || cards[0].isPlayoff ? {} : (() => {
       const remaining = Object.values(schedule).flat().filter(g => g.week >= week)
       const regEnd = playoffStart - 1
       // Only with the whole remaining schedule — a partial one would understate every race
@@ -115,10 +117,8 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
     })()
     const ranks = powerRanksThrough(finalGames, Math.min(week - 1, lastFinal, playoffStart - 1))
     const { high, low } = seasonExtremes(priorGames)
-    const honors = seasonHonors(state, season)
-    const careerBefore = careerWinsBefore(state, season)
     const careerWins: Record<string, number> = {}
-    for (const p of base) {
+    for (const p of cards) {
       for (const t of [p.teamA, p.teamB]) careerWins[t.name] = (careerBefore[t.name] ?? 0) + t.wins
     }
 
@@ -128,11 +128,11 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
     const current = week === live.week
     const proj = current ? projections : null
     const lookup = playerLookup(state, season, projections, extraPlayers)
-    const injuries = current && base[0]?.status !== 'final' ? injuryReport(starters, rMap, lookup) : {}
+    const injuries = current && cards[0]?.status !== 'final' ? injuryReport(starters, rMap, lookup) : {}
     const moves = current ? weeklyMoves(transactions, rMap, lookup) : {}
     const regrets = week - 1 >= 1 && week - 1 <= lastFinal ? lineupRegrets(state, season, week - 1, lookup) : {}
 
-    const rows = base.map(p => {
+    const rows = cards.map(p => {
       const daddy = daddyOf(p.h2h, p.teamA.name, p.teamB.name)
       const projA = projectTeam(starters[p.teamA.rosterId], proj)
       const projB = projectTeam(starters[p.teamB.rosterId], proj)
@@ -174,7 +174,7 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
       ammo: rows[pick.index].facts.find(f => !pick.topics.includes(f.topic))?.text ?? null,
     }
     return { previews: enriched, motw }
-  }, [state, season, week, live.week, luck, champPath, projections, extraPlayers, transactions, dayKey, schedule, history])
+  }, [state, season, games, week, live.week, luck, champPath, honors, careerBefore, projections, extraPlayers, transactions, dayKey, schedule, history])
 
   return { weeks, week, previews, motw }
 }

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { flattenSeasonMatchups } from '@/lib/data-processing'
 import { seasonRanks, type PowerRankingRow } from '@/lib/stats'
 import {
   playerLookup, buildTeamRosters, weekStatus, getSeasonWeeks, loadWeekProjections, loadSeasonStats, ownerSchedule,
@@ -43,7 +42,7 @@ export interface TeamRostersData {
  * schedule. Header numbers come from final games, like Power Rankings.
  */
 export function useTeamRosters(live: LiveSeason, selectedWeek: number | null, rankings: PowerRankingRow[]): TeamRostersData {
-  const { state, season, projections, extraPlayers } = live
+  const { state, season, games, projections, extraPlayers } = live
   const week = selectedWeek ?? live.week
   const current = week === live.week
   const schedule = useSeasonSchedule(live)
@@ -103,11 +102,10 @@ export function useTeamRosters(live: LiveSeason, selectedWeek: number | null, ra
 
   const schedules = useMemo(() => {
     if (!season) return {}
-    const games = flattenSeasonMatchups(state, season)
     const statusOf = (w: number) => weekStatus(state, season, w)
     const owners = [...new Set(Object.values(state.rosterUserMaps[season] ?? {}))]
     return Object.fromEntries(owners.map(o => [o, ownerSchedule(o, schedule, games, statusOf)]))
-  }, [state, season, schedule])
+  }, [state, season, games, schedule])
 
   const weeks = useMemo(() => (season ? getSeasonWeeks(state, season) : []), [state, season])
 

@@ -109,11 +109,17 @@ function buildTeam(name: string, rosterId: number, priorGames: Matchup[], standi
   return { name, rosterId, wins, losses, avgPts, lastScores: scores, streak, seed }
 }
 
-/** Build preview cards for one week of a season. */
-export function buildWeekPreviews(state: LeagueState, year: number, week: number): MatchupPreview[] {
-  // The preview season is usually live and therefore absent from allMatchups
-  // (completed seasons only) — flatten it from the raw weekly data
-  const seasonGames = flattenSeasonMatchups(state, year)
+/**
+ * Build preview cards for one week of a season. The preview season is usually
+ * live and therefore absent from allMatchups (completed seasons only), so its
+ * games come flattened from the raw weekly data.
+ */
+export function buildWeekPreviews(
+  state: LeagueState,
+  year: number,
+  week: number,
+  seasonGames: Matchup[] = flattenSeasonMatchups(state, year),
+): MatchupPreview[] {
   const games = seasonGames.filter(m => m.week === week)
   if (!games.length) return []
 

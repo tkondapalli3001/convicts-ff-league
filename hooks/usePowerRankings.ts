@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { flattenSeasonMatchups, playoffStartWeek } from '@/lib/data-processing'
+import { playoffStartWeek } from '@/lib/data-processing'
 import { lastFinalWeek, seasonHonors, standingBadges, type Badge } from '@/lib/current-season'
 import { computePowerRankings, type PowerRankingRow } from '@/lib/stats'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
@@ -16,15 +16,15 @@ export interface PowerRankingsData {
 
 /** Power Rankings tab of the 2026 page — final regular-season weeks only. */
 export function usePowerRankings(live: LiveSeason): PowerRankingsData {
-  const { state, season } = live
+  const { state, base, season, games } = live
+  // Last season's champ and toilet bowl don't change between polls
+  const honors = useMemo(() => (season ? seasonHonors(base, season) : null), [base, season])
   return useMemo(() => {
-    if (!season) return { rows: [], throughWeek: 0, badges: {} }
+    if (!season || !honors) return { rows: [], throughWeek: 0, badges: {} }
     const playoffStart = playoffStartWeek(state.leagues[season])
     const throughWeek = Math.min(lastFinalWeek(state, season), playoffStart - 1)
-    const games = flattenSeasonMatchups(state, season).filter(m => m.week <= throughWeek)
-    const rows = computePowerRankings(games, throughWeek)
-    const honors = seasonHonors(state, season)
+    const rows = computePowerRankings(games.filter(m => m.week <= throughWeek), throughWeek)
     const badges = Object.fromEntries(rows.map(r => [r.name, standingBadges(r.name, r.streak, honors)]))
     return { rows, throughWeek, badges }
-  }, [state, season])
+  }, [state, season, games, honors])
 }

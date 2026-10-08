@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLeague } from '@/context/LeagueContext'
+import { flattenSeasonMatchups } from '@/lib/data-processing'
 import {
   EMPTY_OVERLAY, liveSeasonEntry, withLiveSeason, syncLiveSeason, getPreviewSeason, getDefaultWeek,
   loadWeekProjections, loadPlayerMeta, loadPlayerMetaFromIndex, rosteredPlayerIds, weekStatus,
 } from '@/lib/current-season'
 import type { LiveOverlay, WeekProjections, ProjectedPlayer, WeekStatus } from '@/lib/current-season'
-import type { LeagueState, Transaction } from '@/types'
+import type { LeagueState, Matchup, Transaction } from '@/types'
 
 // Sleeper's CDN refreshes matchups (lineups + live points) every minute and
 // the league, rosters, and transactions every five — polling any faster
@@ -20,12 +21,16 @@ const MAX_LOOKUPS = 40
 export interface LiveSeason {
   /** Global state with the live season overlaid — feed this to every 2026-tab computation. */
   state: LeagueState
+  /** The global store without the overlay. Facts about past seasons memoize on it, so polls don't redo them. */
+  base: LeagueState
   /** Season on the tab: the live one, else the latest season with games. */
   season: number | null
   /** The shown season's current week (in progress or next up), else its last week. */
   week: number
   /** That week: final, in progress, or not started. */
   status: WeekStatus
+  /** The shown season's games, flattened once per sync. */
+  games: Matchup[]
   /** True while a season is in progress and being polled. */
   live: boolean
   projections: WeekProjections | null
@@ -136,12 +141,15 @@ export function useLiveSeason(): LiveSeason {
   const season = useMemo(() => (merged.loaded ? getPreviewSeason(merged) : null), [merged])
   const week = useMemo(() => (season ? getDefaultWeek(merged, season) : 1), [merged, season])
   const status = useMemo(() => (season ? weekStatus(merged, season, week) : 'upcoming'), [merged, season, week])
+  const games = useMemo(() => (season ? flattenSeasonMatchups(merged, season) : []), [merged, season])
 
   return {
     state: merged,
+    base: state,
     season,
     week,
     status,
+    games,
     live: entry != null && entry.year === season,
     projections: entry && entry.year === season ? projections : null,
     extraPlayers,
