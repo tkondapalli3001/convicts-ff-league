@@ -17,3 +17,7 @@ out/
 *.pem
 npm-debug.log*
 tsconfig.tsbuildinfo
+
+# Local-only files (each machine writes its own)
+.claude/settings.local.json
+next-env.d.ts
