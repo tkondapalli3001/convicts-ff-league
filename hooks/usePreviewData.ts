@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { computeLuckIndex, buildChampPathGameKeys } from '@/lib/stats'
-import { flattenSeasonMatchups } from '@/lib/data-processing'
+import { flattenSeasonMatchups, playoffStartWeek } from '@/lib/data-processing'
 import { localDateKey } from '@/lib/utils'
 import {
   getSeasonWeeks, buildWeekPreviews, computeStandings,
@@ -91,7 +91,7 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
     const priorGames = finalGames.filter(m => m.week < week)
     const settings = state.leagues[season]?.settings
     const playoffSpots = settings?.playoff_teams ?? 6
-    const playoffStart = settings?.playoff_week_start || 15
+    const playoffStart = playoffStartWeek(state.leagues[season])
 
     const standings = computeStandings(priorGames)
     const stakes = !base.length || base[0].isPlayoff ? {} : (() => {

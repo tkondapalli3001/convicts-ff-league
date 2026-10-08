@@ -10,7 +10,7 @@
 import { gameKey, type H2HRecord } from '@/lib/stats'
 import type { TeamPreview } from './build-preview'
 import type { WeekStatus } from './live'
-import { ordinal } from './stakes'
+import { ordinal } from '@/lib/utils'
 import {
   seriesStreak,
   type DaddyStatus, type InjuryReport, type LineupRegret, type PowerRankPoint, type ScoreMark,

@@ -5,10 +5,6 @@ import { resolveAnswer } from './resolvers'
 import type { Answer, EntityIndex, ParsedQuery, QueryContext } from './types'
 
 export { buildEntityIndex } from './entities'
-export { matchOwners, matchPlayer } from './entities'
-export { parseQuery } from './parse'
-export { resolveAnswer } from './resolvers'
-export { normalize, tokens, extractYear, levenshtein } from './tokenize'
 export type { Answer, EntityIndex, Intent, ParsedQuery, QueryContext, OwnerEntity, PlayerEntity } from './types'
 
 /** One-shot convenience: parse a question and resolve it against the data. */

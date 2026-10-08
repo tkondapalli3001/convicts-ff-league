@@ -1,8 +1,5 @@
 import type { LeagueState } from '@/types'
-import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER } from '@/lib/league'
-
-/** Owners no longer in the league — excluded from career leaderboards. */
-export const INACTIVE_OWNERS = new Set(['Hamza', 'Sangram'])
+import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER, INACTIVE_OWNERS } from '@/lib/league'
 
 /**
  * Championship count for an owner. Substring match is intentional: shared

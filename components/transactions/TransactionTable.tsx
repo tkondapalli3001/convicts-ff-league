@@ -1,6 +1,7 @@
 'use client'
 
-import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
+import { fmtDate } from '@/lib/utils'
+import type { EnrichedTransaction } from '@/types'
 
 const TYPE_BADGE: Record<string, { label: string; className: string }> = {
   trade:      { label: 'TRADE',  className: 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]' },
@@ -11,10 +12,6 @@ const TYPE_BADGE: Record<string, { label: string; className: string }> = {
 interface Props {
   transactions: EnrichedTransaction[]
   onClick: (tx: EnrichedTransaction) => void
-}
-
-function formatDate(ms: number): string {
-  return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function txSummary(tx: EnrichedTransaction): string {
@@ -69,7 +66,7 @@ export default function TransactionTable({ transactions, onClick }: Props) {
 
               {/* Date */}
               <span className="text-[10px] text-s-text3 flex-shrink-0 hidden sm:block">
-                {formatDate(tx.created)}
+                {fmtDate(tx.created)}
               </span>
 
               {/* Chevron */}

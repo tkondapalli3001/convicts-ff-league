@@ -7,7 +7,7 @@ import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import InfoTip from '@/components/shared/InfoTip'
 import FlairBadges from '@/components/current-season/FlairBadges'
 import FlairLegend from '@/components/current-season/FlairLegend'
-import { ordinal } from '@/lib/current-season'
+import { fmtRecord, ordinal } from '@/lib/utils'
 import type { Badge } from '@/lib/current-season'
 import type { PowerRankingRow } from '@/lib/stats'
 
@@ -28,10 +28,6 @@ function Movement({ n }: { n: number | null }) {
 
 // Rank order is the point of this table — headers aren't sort controls
 const TH = 'cursor-default hover:text-s-text3'
-
-function record(w: number, l: number, t: number): string {
-  return t ? `${w}–${l}–${t}` : `${w}–${l}`
-}
 
 /** Win % the baseball way: .852, 1.000 */
 function pct3(p: number): string {
@@ -111,13 +107,13 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
                   <td className="font-display text-[20px] font-bold num" style={{ color: '#E8CE8A' }}>
                     {r.score.toFixed(1)}
                   </td>
-                  <td className="font-display text-[17px] font-bold text-s-text">{record(r.wins, r.losses, r.ties)}</td>
+                  <td className="font-display text-[17px] font-bold text-s-text">{fmtRecord(r.wins, r.losses, r.ties)}</td>
                   <td className={`${num} text-s-text2`}>{ordinal(r.standing)}</td>
                   <td className={`${num} text-s-text2`}>{r.avg.toFixed(1)}</td>
                   <td className={num} style={{ color: '#7FA886' }}>{r.high.toFixed(1)}</td>
                   <td className={num} style={{ color: '#B4636B' }}>{r.low.toFixed(1)}</td>
                   <td className={`${num} text-s-text2`}>
-                    {record(r.allPlayWins, r.allPlayLosses, r.allPlayTies)}
+                    {fmtRecord(r.allPlayWins, r.allPlayLosses, r.allPlayTies)}
                     <span className="ml-2 text-[14px] font-medium text-s-text3">{pct3(r.allPlayPct)}</span>
                   </td>
                 </tr>

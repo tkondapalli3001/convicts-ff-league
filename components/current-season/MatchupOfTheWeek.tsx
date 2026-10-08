@@ -3,8 +3,7 @@
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import FlairBadges from '@/components/current-season/FlairBadges'
 import SmackLine from '@/components/current-season/SmackLine'
-import { ownerColor, fmtPts } from '@/lib/utils'
-import { ordinal } from '@/lib/current-season'
+import { ownerColor, fmtPts, ordinal } from '@/lib/utils'
 import type { Badge, TeamPreview } from '@/lib/current-season'
 import type { EnrichedPreview } from '@/hooks/usePreviewData'
 

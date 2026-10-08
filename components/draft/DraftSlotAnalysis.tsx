@@ -4,13 +4,7 @@ import { useState, useMemo, Fragment } from 'react'
 import { createPortal } from 'react-dom'
 import { useLeague } from '@/context/LeagueContext'
 import { buildDraftSlotRows } from '@/lib/data-processing'
-
-function ordinal(n: number) {
-  if (n === 1) return 'st'
-  if (n === 2) return 'nd'
-  if (n === 3) return 'rd'
-  return 'th'
-}
+import { ordinal } from '@/lib/utils'
 
 export default function DraftSlotAnalysis() {
   const { state } = useLeague()
@@ -169,7 +163,7 @@ export default function DraftSlotAnalysis() {
                                   <td className="py-1 pr-4 text-center font-bold text-s-text2">
                                     {r.finish === null ? '—'
                                       : r.finish === 1 ? '🏆 1st'
-                                      : `${r.finish}${ordinal(r.finish)}`}
+                                      : ordinal(r.finish)}
                                   </td>
                                   <td className="py-1 text-center">
                                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -272,7 +266,7 @@ export default function DraftSlotAnalysis() {
                       <td className="py-2 text-center font-bold text-s-text2">
                         {r.finish === null ? '—'
                           : r.finish === 1 ? '🏆 1st'
-                          : `${r.finish}${ordinal(r.finish)}`}
+                          : ordinal(r.finish)}
                       </td>
                       <td className="py-2 text-center">
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${

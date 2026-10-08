@@ -12,7 +12,7 @@ import type { ProjectedPlayer } from './projections'
 /** "Daddy": wins at least this share of all-time meetings with the opponent… */
 export const DADDY_WIN_RATE = 0.75
 /** …over at least this many meetings. */
-export const DADDY_MIN_GAMES = 5
+const DADDY_MIN_GAMES = 5
 
 export interface DaddyStatus {
   daddy: string

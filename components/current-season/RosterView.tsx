@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import SectionCard from '@/components/shared/SectionCard'
 import InfoTip from '@/components/shared/InfoTip'
-import { ordinal } from '@/lib/current-season'
+import { fmtRecord, ordinal } from '@/lib/utils'
 import { POS_COLORS } from '@/lib/positions'
 import type { TeamRoster, RosterPlayer, PlayerSeason, ScheduleRow, WeekStatus } from '@/lib/current-season'
 import type { OwnerHeader, TeamRostersData } from '@/hooks/useTeamRosters'
@@ -20,10 +20,6 @@ const INJURY_LABELS: Record<string, string> = {
 }
 
 const STATUS_LABEL: Record<WeekStatus, string> = { final: 'Final', live: 'In progress', upcoming: 'Upcoming' }
-
-function record(w: number, l: number, t: number): string {
-  return t ? `${w}–${l}–${t}` : `${w}–${l}`
-}
 
 function InjuryTag({ status }: { status: string | null }) {
   if (!status) return null
@@ -71,11 +67,11 @@ function StatLine({ owner, h, showName }: { owner: string; h: OwnerHeader | unde
     )
   }
   items.push(<span key="pr">PR <Value>{h?.powerRank ? ordinal(h.powerRank) : '—'}</Value></span>)
-  items.push(<Value key="rec">{h ? record(h.wins, h.losses, h.ties) : '—'}</Value>)
+  items.push(<Value key="rec">{h ? fmtRecord(h.wins, h.losses, h.ties) : '—'}</Value>)
   if (h?.allPlay) {
     items.push(
       <span key="ap">
-        <Value>{record(h.allPlay.wins, h.allPlay.losses, h.allPlay.ties)}</Value> All-Play ({ordinal(h.allPlay.rank)})
+        <Value>{fmtRecord(h.allPlay.wins, h.allPlay.losses, h.allPlay.ties)}</Value> All-Play ({ordinal(h.allPlay.rank)})
       </span>,
     )
   }

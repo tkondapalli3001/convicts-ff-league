@@ -1,5 +1,5 @@
 import type { LeagueState, Matchup } from '@/types'
-import { isSeasonComplete } from './build-seasons'
+import { isSeasonComplete } from './season-settings'
 
 /**
  * Flatten one season's raw weekly matchups into Matchup[] rows. Used by

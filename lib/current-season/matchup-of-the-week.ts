@@ -5,7 +5,8 @@
 
 import { gameKey, type H2HRecord } from '@/lib/stats'
 import { DADDY_WIN_RATE, seriesStreak, type DaddyStatus, type PowerRankPoint, type SeasonHonors } from './facts'
-import { ordinal, formatOdds, type TeamStakes } from './stakes'
+import { ordinal } from '@/lib/utils'
+import { formatOdds, type TeamStakes } from './stakes'
 import type { TeamPreview } from './build-preview'
 import type { WeekStatus } from './live'
 
@@ -51,7 +52,7 @@ interface Factor {
 }
 
 /** Every factor a matchup earns, unsorted. Exported for tests. */
-export function matchupFactors(c: MotwCandidate, ctx: MotwContext, avgProjTotal: number | null): Factor[] {
+function matchupFactors(c: MotwCandidate, ctx: MotwContext, avgProjTotal: number | null): Factor[] {
   const { teamA: A, teamB: B, h2h } = c
   const out: Factor[] = []
   const add = (topic: string, weight: number, text: string) => { if (weight > 0) out.push({ topic, weight, text }) }

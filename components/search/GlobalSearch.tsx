@@ -6,7 +6,7 @@ import { useLeague } from '@/context/LeagueContext'
 import SearchOverlay from './SearchOverlay'
 
 /** Event name other components (e.g. the home hero input) fire to open the overlay. */
-export const OPEN_SEARCH_EVENT = 'convicts:open-search'
+const OPEN_SEARCH_EVENT = 'convicts:open-search'
 
 export function openLeagueSearch() {
   window.dispatchEvent(new CustomEvent(OPEN_SEARCH_EVENT))

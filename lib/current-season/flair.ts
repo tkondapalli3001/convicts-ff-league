@@ -14,7 +14,7 @@ export interface Badge {
 }
 
 /** Win or loss streak length that earns 🔥 / 🧊. */
-export const STREAK_BADGE_LEN = 3
+const STREAK_BADGE_LEN = 3
 
 type Streak = { type: 'W' | 'L'; len: number } | null
 

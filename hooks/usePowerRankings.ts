@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { flattenSeasonMatchups } from '@/lib/data-processing'
+import { flattenSeasonMatchups, playoffStartWeek } from '@/lib/data-processing'
 import { lastFinalWeek, seasonHonors, standingBadges, type Badge } from '@/lib/current-season'
 import { computePowerRankings, type PowerRankingRow } from '@/lib/stats'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
@@ -19,7 +19,7 @@ export function usePowerRankings(live: LiveSeason): PowerRankingsData {
   const { state, season } = live
   return useMemo(() => {
     if (!season) return { rows: [], throughWeek: 0, badges: {} }
-    const playoffStart = state.leagues[season]?.settings?.playoff_week_start || 15
+    const playoffStart = playoffStartWeek(state.leagues[season])
     const throughWeek = Math.min(lastFinalWeek(state, season), playoffStart - 1)
     const games = flattenSeasonMatchups(state, season).filter(m => m.week <= throughWeek)
     const rows = computePowerRankings(games, throughWeek)

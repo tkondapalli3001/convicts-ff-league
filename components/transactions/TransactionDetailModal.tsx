@@ -2,15 +2,12 @@
 
 import { createPortal } from 'react-dom'
 import { useModalClose } from '@/hooks/useModalClose'
-import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
+import { fmtDate } from '@/lib/utils'
+import type { EnrichedTransaction } from '@/types'
 
 interface Props {
   tx: EnrichedTransaction | null
   onClose: () => void
-}
-
-function formatDate(ms: number): string {
-  return new Date(ms).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -41,7 +38,7 @@ export default function TransactionDetailModal({ tx, onClose }: Props) {
           <div>
             <div className="text-[15px] font-extrabold text-s-text">{TYPE_LABEL[tx.type] ?? tx.type}</div>
             <div className="text-[11px] text-s-text3 mt-[2px]">
-              {tx.year} Week {tx.leg} · {formatDate(tx.created)}
+              {tx.year} Week {tx.leg} · {fmtDate(tx.created, 'long')}
             </div>
           </div>
           <button

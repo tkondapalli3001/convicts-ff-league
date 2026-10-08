@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Matchup } from '@/types'
 import { h2hVsAll } from '@/lib/stats'
+import { winPctColor } from '@/lib/utils'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import H2HModal from './H2HModal'
 
@@ -10,13 +11,6 @@ interface Props {
   ownerName: string
   allMatchups: Matchup[]
   allOwnerNames: string[]
-}
-
-/** Win% → Midnight Prime semantic colour (design 4a H2H cards). */
-function pctColor(pct: number): string {
-  if (pct >= 0.55) return '#E8CE8A'
-  if (pct >= 0.45) return '#9AA0AC'
-  return '#B4636B'
 }
 
 export default function H2HGrid({ ownerName, allMatchups, allOwnerNames }: Props) {
@@ -40,7 +34,7 @@ export default function H2HGrid({ ownerName, allMatchups, allOwnerNames }: Props
                 <OwnerAvatar name={opp} size="sm" />
                 <span className="truncate text-[11px] font-semibold text-s-text2">vs {opp}</span>
               </div>
-              <div className="font-display text-[26px] font-bold leading-none" style={{ color: pctColor(pct) }}>
+              <div className="font-display text-[26px] font-bold leading-none" style={{ color: winPctColor(pct) }}>
                 {w}–{l}
               </div>
               <div className="mt-1.5 text-[10px] uppercase tracking-[0.5px] text-s-text3">

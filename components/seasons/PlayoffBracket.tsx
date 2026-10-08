@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLeague } from '@/context/LeagueContext'
 import { getPlayersCache, playerDisplayName, type PlayerMetadata } from '@/lib/sources'
+import { playoffStartWeek } from '@/lib/data-processing'
 import { ownerColor } from '@/lib/utils'
 import type { BracketGame, SleeperMatchup } from '@/types'
 
@@ -334,7 +335,7 @@ export default function PlayoffBracket({ year }: Props) {
 
   const bracket = brackets[year]
   const rMap = rosterUserMaps[year] ?? {}
-  const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
+  const playoffStart = playoffStartWeek(leagues[year])
 
   if (!bracket) {
     return (

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ordinal } from '../stakes'
+import { ordinal } from '@/lib/utils'
 import { smackLines } from '../smack-talk'
 import type { SmackContext } from '../smack-talk'
 import { computeStandings } from '../build-preview'

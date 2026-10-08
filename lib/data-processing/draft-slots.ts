@@ -1,5 +1,51 @@
-import type { LeagueState } from '@/types'
+import type { DraftPick, LeagueState, SleeperDraft } from '@/types'
 import { resolveOwnerName } from './resolve-owner'
+
+/**
+ * Who owned each draft slot (slot → owner) — the pre-trade assignment, so a
+ * traded pick still belongs to its slot's original owner. The one answer for
+ * the draft boards and Slot Analysis. Most reliable source first:
+ *   1. slot_to_roster_id — Sleeper's slot → roster map, set before the draft
+ *   2. draft_order — user_id → slot, for any slot still open
+ *   3. the most common picker in rounds 2+ (later picks are rarely traded)
+ *   4. the round-1 picker, for any slot still open
+ */
+export function draftSlotOwners(
+  draft: SleeperDraft,
+  picks: DraftPick[],
+  rMap: Record<string, string>,
+): Record<number, string> {
+  const slotOwner: Record<number, string> = {}
+
+  for (const [slot, rosterId] of Object.entries(draft.slot_to_roster_id ?? {})) {
+    const owner = rMap[String(rosterId)]
+    if (owner) slotOwner[Number(slot)] = owner
+  }
+
+  for (const [userId, slot] of Object.entries(draft.draft_order ?? {})) {
+    const owner = resolveOwnerName(userId, '')
+    if (owner !== 'Unknown' && slotOwner[slot] === undefined) slotOwner[slot] = owner
+  }
+
+  const votes: Record<number, Record<string, number>> = {}
+  for (const pick of picks) {
+    if (pick.round < 2) continue
+    const owner = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
+    const v = (votes[pick.draft_slot] ??= {})
+    v[owner] = (v[owner] ?? 0) + 1
+  }
+  for (const [slot, counts] of Object.entries(votes)) {
+    if (slotOwner[Number(slot)] !== undefined) continue
+    slotOwner[Number(slot)] = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
+  }
+
+  for (const pick of picks) {
+    if (pick.round !== 1 || slotOwner[pick.draft_slot] !== undefined) continue
+    slotOwner[pick.draft_slot] = rMap[String(pick.roster_id)] ?? `Slot ${pick.draft_slot}`
+  }
+
+  return slotOwner
+}
 
 export interface DraftSlotRow {
   year: number
@@ -9,14 +55,7 @@ export interface DraftSlotRow {
   madePlayoffs: boolean
 }
 
-/**
- * One canonical draft slot per owner per year, joined with that season's
- * finish and playoff status. Three tiers handle pick trades correctly:
- *   Tier 1 — slot_to_roster_id: Sleeper's pre-trade assignment, most reliable
- *   Tier 2 — draft_order: user_id→slot map, catches gaps when rMap lookup fails
- *   Tier 3 — snake math on rounds 2+: finds managers whose round-1 pick was
- *            traded away (they have no round-1 entry at all)
- */
+/** Every owner's draft slot each completed season, joined with that season's finish and playoff status. */
 export function buildDraftSlotRows(
   state: Pick<LeagueState, 'draftData' | 'rosterUserMaps' | 'ownerSeasons' | 'years'>,
 ): DraftSlotRow[] {
@@ -25,68 +64,12 @@ export function buildDraftSlotRows(
   for (const year of [...years].sort((a, b) => b - a)) {
     const data = draftData[year]
     if (!data?.picks?.length) continue
-    const rMap = rosterUserMaps[year] ?? {}
-
-    const ownerSlot: Record<string, number> = {}
-    const draftAny = data.draft as unknown as {
-      slot_to_roster_id?: Record<string, number> | null
-      draft_order?: Record<string, number> | null
-    }
-    const isSnake = data.draft.type === 'snake'
-    const N = Math.max(...data.picks.map(p => p.draft_slot), 0) || 10
-
-    // Tier 1: slot_to_roster_id → look up roster_id in rMap
-    const s2r = draftAny.slot_to_roster_id
-    if (s2r && typeof s2r === 'object') {
-      for (const [slotStr, rosterId] of Object.entries(s2r)) {
-        const ownerName = rMap[String(rosterId)]
-        if (ownerName && !ownerName.startsWith('Team ')) {
-          ownerSlot[ownerName] = Number(slotStr)
-        }
-      }
-    }
-
-    // Tier 2: draft_order → resolve user_id directly (bypasses rMap issues)
-    const dOrder = draftAny.draft_order
-    if (dOrder && typeof dOrder === 'object') {
-      for (const [userId, slot] of Object.entries(dOrder)) {
-        const ownerName = resolveOwnerName(userId, '')
-        if (ownerName && ownerName !== 'Unknown' && !(ownerName in ownerSlot)) {
-          ownerSlot[ownerName] = Number(slot)
-        }
-      }
-    }
-
-    // Tier 3: infer slot from rounds 2+ via snake/linear math.
-    // A manager who traded away their round-1 pick has no round-1 entry but still
-    // picks in rounds 2–N at their original slot position. Vote across all rounds
-    // and take the mode so a single traded later-round pick can't corrupt the result.
-    const slotVotes: Record<string, Record<number, number>> = {}
-    for (const pick of data.picks) {
-      if (pick.round < 2) continue
-      const ownerName = rMap[String(pick.roster_id)]
-        ?? resolveOwnerName(pick.picked_by, '')
-      if (!ownerName || ownerName in ownerSlot) continue
-      const s = (isSnake && pick.round % 2 === 0)
-        ? pick.round * N - pick.pick_no + 1
-        : pick.pick_no - (pick.round - 1) * N
-      if (s >= 1 && s <= N) {
-        if (!slotVotes[ownerName]) slotVotes[ownerName] = {}
-        slotVotes[ownerName][s] = (slotVotes[ownerName][s] ?? 0) + 1
-      }
-    }
-    for (const [owner, freq] of Object.entries(slotVotes)) {
-      if (owner in ownerSlot) continue
-      const best = Object.entries(freq).sort((a, b) => b[1] - a[1])[0]
-      if (best) ownerSlot[owner] = Number(best[0])
-    }
-
-    for (const [owner, slot] of Object.entries(ownerSlot)) {
+    for (const [slot, owner] of Object.entries(draftSlotOwners(data.draft, data.picks, rosterUserMaps[year] ?? {}))) {
       const season = ownerSeasons[owner]?.find(s => s.year === year)
       out.push({
         year,
         owner,
-        slot,
+        slot: Number(slot),
         finish: season?.finish ?? null,
         madePlayoffs: season?.inPlayoffs ?? false,
       })

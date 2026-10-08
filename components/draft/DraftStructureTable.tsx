@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { DraftStructureEntry } from '@/lib/data-processing'
 import InfoTip from '@/components/shared/InfoTip'
+import { ordinal } from '@/lib/utils'
 
 const STRATEGY_DESCRIPTIONS: Record<string, string> = {
   'Zero-RB':  'No RBs in rounds 1–5. Loads up on WRs and TEs early, grabs RBs on the waiver wire.',
@@ -16,13 +17,6 @@ const STRATEGY_COLORS: Record<string, string> = {
   'Hero-RB':  'text-[#7FA886]',
   'RB-Heavy': 'text-[#f97316]',
   'Balanced': 'text-[#9AA0AC]',
-}
-
-function ordinal(n: number) {
-  if (n === 1) return 'st'
-  if (n === 2) return 'nd'
-  if (n === 3) return 'rd'
-  return 'th'
 }
 
 interface Props {
@@ -148,7 +142,7 @@ export default function DraftStructureTable({ data }: Props) {
                     <td className="py-1.5 pr-4 text-center font-bold text-s-text2">
                       {ex.finish === null ? '—'
                         : ex.finish === 1 ? '🏆 1st'
-                        : `${ex.finish}${ordinal(ex.finish)}`}
+                        : ordinal(ex.finish)}
                     </td>
                     <td className="py-1.5 text-center">
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${

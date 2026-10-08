@@ -32,6 +32,9 @@ export const DISPLAY_NAME_TO_OWNER: Record<string, string> = {
   'yanabana': 'Kerry',
 }
 
+// ─── Former owners — left out of career leaderboards and rivalry cards ────────
+export const INACTIVE_OWNERS = new Set(['Hamza', 'Sangram'])
+
 // ─── Full names (first → first + last) for avatar initials ────────────────────
 export const OWNER_FULL_NAMES: Record<string, string> = {
   'Armaan':   'Armaan Ahmed',

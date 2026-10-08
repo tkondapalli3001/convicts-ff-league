@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
-import { ownerColor, fullNameInitials } from '@/lib/utils'
+import { ownerColor, fullNameInitials, winPctColor } from '@/lib/utils'
 import { OWNER_FULL_NAMES } from '@/lib/league'
 import type { CareerStats } from '@/lib/stats'
 import type { PlayerStat } from '@/types'
@@ -13,7 +13,6 @@ export default function ManagerCard({ data, playerWinRates = [], onClose }: { da
   const { state } = useLeague()
   const [imgError, setImgError] = useState(false)
   const color = ownerColor(data.name)
-  const winpctColor = data.winpct >= 0.55 ? '#E8CE8A' : data.winpct >= 0.45 ? '#9AA0AC' : '#B4636B'
   const avatarUrl = state.ownerAvatarMap?.[data.name]
   const initials = fullNameInitials(data.name)
   const fullDisplayName = OWNER_FULL_NAMES[data.name] || data.name
@@ -98,7 +97,7 @@ export default function ManagerCard({ data, playerWinRates = [], onClose }: { da
           {/* Big win% */}
           <div className="hidden sm:block text-right flex-shrink-0">
             <div className="text-[9px] tracking-[3px] uppercase text-s-text3 mb-1">Win%</div>
-            <div className="text-[38px] font-black leading-none tabular-nums" style={{ color: winpctColor }}>
+            <div className="text-[38px] font-black leading-none tabular-nums" style={{ color: winPctColor(data.winpct) }}>
               {(data.winpct * 100).toFixed(1)}%
             </div>
           </div>

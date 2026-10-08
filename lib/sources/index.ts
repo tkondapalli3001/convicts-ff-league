@@ -4,9 +4,9 @@
 //   players.ts   → getPlayersCache() — player names: the index first, Sleeper's dump as a fallback
 export {
   sleepFetch, fetchLeague, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket,
-  fetchLosersBracket, fetchDrafts, fetchDraftPicks, fetchTransactions,
+  fetchLosersBracket, fetchDrafts, fetchDraftPicks, fetchTransactions, fetchTransactionWeeks,
 } from './sleeper'
-export { loadSnapshotManifest, loadSnapshotSeason, loadSnapshotTransactions, loadPlayerIndex, loadAllSnapshotSeasons } from './snapshot'
+export { loadSnapshotManifest, loadSnapshotTransactions, loadAllSnapshotSeasons } from './snapshot'
 export type { SnapshotSeason, SnapshotManifest, PlayerIndex } from './snapshot'
 export { getPlayersCache, playerDisplayName } from './players'
 export type { PlayerMetadata } from './players'

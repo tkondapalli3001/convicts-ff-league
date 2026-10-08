@@ -63,8 +63,22 @@ export function fetchDraftPicks(draftId: string): Promise<DraftPick[]> {
   return sleepFetch(`${SLEEPER_API}/draft/${draftId}/picks`)
 }
 
-// ─── Transaction fetcher ──────────────────────────────────────────────────────
+// ─── Transaction fetchers ─────────────────────────────────────────────────────
 
 export function fetchTransactions(leagueId: string, week: number): Promise<Transaction[]> {
   return sleepFetch(`${SLEEPER_API}/league/${leagueId}/transactions/${week}`)
+}
+
+/** Several weeks' moves at once (week → moves). A week Sleeper doesn't answer comes back empty and listed in `failed`. */
+export async function fetchTransactionWeeks(
+  leagueId: string,
+  weeks: number[],
+): Promise<{ byWeek: Record<number, Transaction[]>; failed: number[] }> {
+  const rows = await Promise.all(weeks.map(w =>
+    fetchTransactions(leagueId, w).then(txs => [w, txs, false] as const).catch(() => [w, [] as Transaction[], true] as const)
+  ))
+  return {
+    byWeek: Object.fromEntries(rows.map(([w, txs]) => [w, txs])),
+    failed: rows.filter(([, , failed]) => failed).map(([w]) => w),
+  }
 }

@@ -1,5 +1,6 @@
 import type { LeagueState, Matchup } from '@/types'
 import { EXCLUDED_GAME_SCORES } from '@/lib/league'
+import { playoffStartWeek } from '@/lib/data-processing'
 
 /** Canonical key for one game from one perspective: year|||week|||teamA|||teamB */
 export function gameKey(year: number, week: number, a: string, b: string): string {
@@ -19,7 +20,7 @@ export function buildConsolationGameKeys(state: BracketState): Set<string> {
   for (const [yearStr, bracket] of Object.entries(brackets)) {
     const year = Number(yearStr)
     const rMap = rosterUserMaps[year] ?? {}
-    const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
+    const playoffStart = playoffStartWeek(leagues[year])
 
     const addGame = (r: number, idA: number, idB: number) => {
       const week = playoffStart + (r - 1)
@@ -58,7 +59,7 @@ export function buildChampPathGameKeys(state: BracketState): Set<string> {
   for (const [yearStr, bracket] of Object.entries(brackets)) {
     const year = Number(yearStr)
     const rMap = rosterUserMaps[year] ?? {}
-    const playoffStart = leagues[year]?.settings?.playoff_week_start ?? 15
+    const playoffStart = playoffStartWeek(leagues[year])
     ;(bracket.winners ?? [])
       .filter(g => !g.p || g.p === 1)  // keep unplaced rounds + championship; exclude 3rd/5th
       .forEach(g => {

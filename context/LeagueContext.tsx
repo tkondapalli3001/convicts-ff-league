@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { SLEEPER_API, LEAGUE_ID } from '@/lib/league'
 import { sleepFetch, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket, fetchLosersBracket, fetchDrafts, fetchDraftPicks, loadAllSnapshotSeasons } from '@/lib/sources'
-import { resolveOwnerName, buildFlatMatchups, buildOwnerSeasons, isSeasonComplete } from '@/lib/data-processing'
+import { resolveOwnerName, buildFlatMatchups, buildOwnerSeasons, isSeasonComplete, playoffStartWeek } from '@/lib/data-processing'
 import type { LeagueState, LeagueChainEntry, SleeperLeague, SleeperUser, SleeperMatchup } from '@/types'
 
 // ─── Initial State ─────────────────────────────────────────────────────────────
@@ -15,7 +15,6 @@ const initialState: LeagueState = {
   rosterUserMaps: {},
   matchups: {},
   brackets: {},
-  ownerMap: {},
   ownerAvatarMap: {},
   ownerSeasons: {},
   allMatchups: [],
@@ -99,7 +98,6 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       const rosterUserMaps: LeagueState['rosterUserMaps'] = {}
       const matchups: LeagueState['matchups'] = {}
       const brackets: LeagueState['brackets'] = {}
-      const ownerMap: LeagueState['ownerMap'] = {}
       const ownerAvatarMap: LeagueState['ownerAvatarMap'] = {}
       const draftData: LeagueState['draftData'] = {}
 
@@ -127,12 +125,11 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         })
         rosterUserMaps[year] = rMap
 
-        // Update ownerMap + ownerAvatarMap. Seasons run oldest → newest, so each
+        // Update ownerAvatarMap. Seasons run oldest → newest, so each
         // owner ends up with their latest picture: the league team photo Sleeper
         // shows inside the league when they've set one, else the account avatar.
         fetchedUsers.forEach(u => {
           const name = resolveOwnerName(u.user_id, u.display_name)
-          ownerMap[name] = u.user_id
           const teamPic = u.metadata?.avatar?.startsWith('https://') ? u.metadata.avatar : null
           const pic = teamPic ?? (u.avatar ? `https://sleepercdn.com/avatars/${u.avatar}` : null)
           if (pic && name) ownerAvatarMap[name] = pic
@@ -140,7 +137,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
 
         // Matchups — same week-count logic for both sources
         const lgStatus = data.status || 'complete'
-        const regWeeks = data.settings?.playoff_week_start > 0 ? data.settings.playoff_week_start : 15
+        const regWeeks = playoffStartWeek(data)
         let totalWeeks = 0
         if (lgStatus !== 'pre_draft' && lgStatus !== 'drafting') {
           totalWeeks = data.settings?.leg > 0 ? data.settings.leg : 17
@@ -203,7 +200,6 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         rosterUserMaps,
         matchups,
         brackets,
-        ownerMap,
         ownerAvatarMap,
         ownerSeasons: {},
         allMatchups: [],

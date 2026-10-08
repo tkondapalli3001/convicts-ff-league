@@ -33,7 +33,6 @@ export type PlayerIndex = Record<string, [string, string, string | null]>
 // Module-level promise caches — LeagueContext and useTransactionsData share
 // the same loads instead of re-fetching the files.
 let _manifest: Promise<SnapshotManifest | null> | null = null
-const _seasons = new Map<number, Promise<SnapshotSeason | null>>()
 const _transactions = new Map<number, Promise<Record<string, Transaction[]> | null>>()
 let _players: Promise<PlayerIndex | null> | null = null
 
@@ -52,15 +51,6 @@ export function loadSnapshotManifest(): Promise<SnapshotManifest | null> {
   return _manifest
 }
 
-export function loadSnapshotSeason(year: number): Promise<SnapshotSeason | null> {
-  let p = _seasons.get(year)
-  if (!p) {
-    p = fetchJsonOrNull<SnapshotSeason>(`/data/season-${year}.json`)
-    _seasons.set(year, p)
-  }
-  return p
-}
-
 /**
  * One season's transactions, week → moves. Split out of the season file
  * because only Players → Transactions needs them — every other page skips
@@ -75,7 +65,7 @@ export function loadSnapshotTransactions(year: number): Promise<Record<string, T
   return p
 }
 
-/** Trimmed player-name index written by `npm run snapshot` (see lib/players-cache.ts). */
+/** Trimmed player-name index written by `npm run snapshot` (see ./players.ts). */
 export function loadPlayerIndex(): Promise<PlayerIndex | null> {
   _players ??= fetchJsonOrNull<{ players: PlayerIndex }>('/data/players.json').then(d => d?.players ?? null)
   return _players
@@ -85,6 +75,6 @@ export function loadPlayerIndex(): Promise<PlayerIndex | null> {
 export async function loadAllSnapshotSeasons(): Promise<SnapshotSeason[]> {
   const manifest = await loadSnapshotManifest()
   if (!manifest) return []
-  const seasons = await Promise.all(manifest.years.map(loadSnapshotSeason))
+  const seasons = await Promise.all(manifest.years.map(y => fetchJsonOrNull<SnapshotSeason>(`/data/season-${y}.json`)))
   return seasons.filter((s): s is SnapshotSeason => s !== null)
 }

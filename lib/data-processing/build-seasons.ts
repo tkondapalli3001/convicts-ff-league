@@ -1,15 +1,7 @@
-import type { LeagueState, OwnerSeason, SleeperLeague } from '@/types'
+import type { LeagueState, OwnerSeason } from '@/types'
 import { getFinishFromBracket } from './bracket-finish'
+import { isSeasonComplete, playoffStartWeek } from './season-settings'
 import { MANUAL_CHAMPS, MANUAL_SHAME, MANUAL_PLAYOFF_OVERRIDES } from '@/lib/league'
-
-/**
- * Historical stats only count completed seasons. A live season awards no
- * records, byes, finishes, or any other accolade until Sleeper marks it
- * complete — until then it exists only for live features (This Week, drafts).
- */
-export function isSeasonComplete(league: SleeperLeague | undefined): boolean {
-  return (league?.status ?? 'complete') === 'complete'
-}
 
 export function buildOwnerSeasons(state: LeagueState): Record<string, OwnerSeason[]> {
   // Collect all canonical names seen across completed years — an in-progress
@@ -64,7 +56,7 @@ export function buildOwnerSeasons(state: LeagueState): Record<string, OwnerSeaso
       const bracket = state.brackets[year]
       const lgSettings = state.leagues[year]?.settings || {}
       const totalRosters = lgSettings.num_teams || 10
-      const playoffStart = lgSettings.playoff_week_start || 15
+      const playoffStart = playoffStartWeek(state.leagues[year])
 
       let finish: number | null = null
       if (bracket) {

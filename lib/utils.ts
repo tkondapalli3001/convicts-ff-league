@@ -35,6 +35,32 @@ export function fmtMoney(n: number): string {
   return `${n > 0 ? '+' : '−'}$${Math.abs(n)}`
 }
 
+/** 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st. */
+export function ordinal(n: number): string {
+  const rem100 = n % 100
+  if (rem100 >= 11 && rem100 <= 13) return `${n}th`
+  switch (n % 10) {
+    case 1: return `${n}st`
+    case 2: return `${n}nd`
+    case 3: return `${n}rd`
+    default: return `${n}th`
+  }
+}
+
+/** A W–L record, with ties only when there are any: 7–3, 7–3–1. */
+export function fmtRecord(w: number, l: number, t = 0): string {
+  return t ? `${w}–${l}–${t}` : `${w}–${l}`
+}
+
+/**
+ * A calendar date, US style: "Sep 30, 2026" (short), "September 30, 2026" (long),
+ * "9/30/2026" (numeric). Takes epoch ms, or an ISO day ("2026-07-15") read as local midnight.
+ */
+export function fmtDate(date: number | string, month: 'short' | 'long' | 'numeric' = 'short'): string {
+  const d = typeof date === 'string' ? new Date(`${date}T00:00:00`) : new Date(date)
+  return d.toLocaleDateString('en-US', { month, day: 'numeric', year: 'numeric' })
+}
+
 /** Local calendar date as YYYY-MM-DD (comparable with Sleeper's game dates). */
 export function localDateKey(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, '0')
@@ -53,13 +79,13 @@ export function timeAgo(ms: number): string {
   return h < 24 ? `${h}h ago` : `${Math.floor(h / 24)}d ago`
 }
 
-// ─── Win% classification ──────────────────────────────────────────────────────
+// ─── Win% color ───────────────────────────────────────────────────────────────
 
-export function pctClass(pct: string | number): 'good' | 'mid' | 'bad' {
-  const p = parseFloat(String(pct))
-  if (p >= 55) return 'good'
-  if (p >= 45) return 'mid'
-  return 'bad'
+/** The win% color every table shares: ≥55% gold-bright, 45–55% neutral, <45% brick. Takes 0–1. */
+export function winPctColor(fraction: number): string {
+  if (fraction >= 0.55) return '#E8CE8A'
+  if (fraction >= 0.45) return '#9AA0AC'
+  return '#B4636B'
 }
 
 // ─── Champion / Shame lookups ─────────────────────────────────────────────────

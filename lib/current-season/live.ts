@@ -4,7 +4,7 @@
 // pure function downstream (previews, standings, power rankings, rosters)
 // runs unchanged on fresher data.
 
-import { isSeasonComplete } from '@/lib/data-processing'
+import { isSeasonComplete, playoffStartWeek } from '@/lib/data-processing'
 import { fetchLeague, fetchRosters, fetchMatchupsForWeek, fetchTransactions } from '@/lib/sources'
 import type { LeagueState, SleeperLeague, SleeperRoster, SleeperMatchup, Transaction } from '@/types'
 
@@ -95,7 +95,7 @@ export async function loadWeekPairings(leagueId: string, weeks: number[]): Promi
 export function withLiveSeason(state: LeagueState, year: number, live: LiveOverlay): LeagueState {
   const league = live.league ?? state.leagues[year]
   if (!league) return state
-  const regWeeks = league.settings?.playoff_week_start > 0 ? league.settings.playoff_week_start : 15
+  const regWeeks = playoffStartWeek(league)
 
   const weeks = { ...state.matchups[year] }
   for (const [w, rows] of Object.entries(live.matchups)) {

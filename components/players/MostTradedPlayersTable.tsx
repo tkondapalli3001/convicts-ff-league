@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
-import type { PlayerStat } from '@/types'
+import type { EnrichedTransaction, PlayerStat } from '@/types'
 
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/positions'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'

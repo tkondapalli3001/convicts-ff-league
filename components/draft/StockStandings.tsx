@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { StockPick } from '@/lib/league'
 import { MARKET_BENCHMARK_2026 } from '@/lib/league'
+import { fmtDate } from '@/lib/utils'
 
 interface Props {
   picks: StockPick[]
@@ -18,12 +19,6 @@ function fmtRoi(pct: number) {
 
 function fmtPrice(n: number) {
   return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-function fmtDate(iso: string) {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', {
-    month: 'numeric', day: 'numeric', year: 'numeric',
-  })
 }
 
 export default function StockStandings({ picks }: Props) {
@@ -61,8 +56,8 @@ export default function StockStandings({ picks }: Props) {
 
   const marketRoi = roi(MARKET_BENCHMARK_2026.endPrice, MARKET_BENCHMARK_2026.startPrice)
 
-  const startLabel = fmtDate(picks[0]?.startDate ?? MARKET_BENCHMARK_2026.startDate)
-  const endLabel   = fmtDate(picks[0]?.endDate ?? MARKET_BENCHMARK_2026.endDate)
+  const startLabel = fmtDate(picks[0]?.startDate ?? MARKET_BENCHMARK_2026.startDate, 'numeric')
+  const endLabel   = fmtDate(picks[0]?.endDate ?? MARKET_BENCHMARK_2026.endDate, 'numeric')
 
   const roiColor = (pct: number) => pct >= 0 ? 'text-s-green' : 'text-s-red'
 

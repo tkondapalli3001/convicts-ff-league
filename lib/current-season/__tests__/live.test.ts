@@ -50,7 +50,6 @@ function makeState(week3: SleeperMatchup[], lg: SleeperLeague = league()): Leagu
       },
     },
     brackets: {},
-    ownerMap: {},
     ownerAvatarMap: {},
     ownerSeasons: {},
     allMatchups: [],

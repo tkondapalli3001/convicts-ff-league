@@ -4,6 +4,8 @@
 
 import type { ScheduleGame } from './playoff-odds'
 import type { WeekStatus } from './live'
+import { playoffStartWeek } from '@/lib/data-processing'
+import { fmtRecord } from '@/lib/utils'
 import type { LeagueState, Matchup, SleeperMatchup } from '@/types'
 
 /** Regular-season pairings by week (owner names), from the loaded weeks plus any fetched separately. */
@@ -13,7 +15,7 @@ export function seasonSchedule(
   extra: Record<number, SleeperMatchup[]> = {},
 ): Record<number, ScheduleGame[]> {
   const rMap = state.rosterUserMaps[season] ?? {}
-  const regEnd = (state.leagues[season]?.settings?.playoff_week_start || 15) - 1
+  const regEnd = playoffStartWeek(state.leagues[season]) - 1
   const out: Record<number, ScheduleGame[]> = {}
   for (let week = 1; week <= regEnd; week++) {
     const rows = state.matchups[season]?.[week]?.matchups?.length ? state.matchups[season][week].matchups : extra[week]
@@ -29,7 +31,7 @@ export function seasonSchedule(
 
 /** Regular-season weeks the loaded state has no pairings for (the rest of a live season). */
 export function scheduleGaps(state: LeagueState, season: number): number[] {
-  const regEnd = (state.leagues[season]?.settings?.playoff_week_start || 15) - 1
+  const regEnd = playoffStartWeek(state.leagues[season]) - 1
   const gaps: number[] = []
   for (let week = 1; week <= regEnd; week++) {
     if (!state.matchups[season]?.[week]?.matchups?.length) gaps.push(week)
@@ -81,7 +83,7 @@ export function ownerSchedule(
       if (result === 'W') w++
       else if (result === 'L') l++
       else t++
-      record = t ? `${w}–${l}–${t}` : `${w}–${l}`
+      record = fmtRecord(w, l, t)
     }
     rows.push({ week, opponent, status, result, pts, oppPts, record, mark: null })
   }

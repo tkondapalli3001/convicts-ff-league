@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import TransactionFilters, { type TxTypeFilter } from '@/components/transactions/TransactionFilters'
 import TransactionTable from '@/components/transactions/TransactionTable'
 import TransactionDetailModal from '@/components/transactions/TransactionDetailModal'
-import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
+import type { EnrichedTransaction } from '@/types'
 import type { SeasonTransactions as Data } from '@/hooks/useSeasonTransactions'
 
 const NO_YEARS: number[] = []

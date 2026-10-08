@@ -1,7 +1,7 @@
 import type { LeagueState, DraftPick, PlayerStat, OwnerSeason } from '@/types'
 import type { PlayerMetadata } from '@/lib/sources'
 import { playerDisplayName } from '@/lib/sources'
-import { isSeasonComplete } from './build-seasons'
+import { isSeasonComplete } from './season-settings'
 
 // ─── Player Win Rates ─────────────────────────────────────────────────────────
 // Uses already-fetched starters[] / starters_points[] in LeagueState — zero new API calls.

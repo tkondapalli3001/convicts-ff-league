@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList,
 } from 'recharts'
-import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
+import type { EnrichedTransaction } from '@/types'
 
 interface Props {
   transactions: EnrichedTransaction[]

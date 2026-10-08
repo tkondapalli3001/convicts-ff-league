@@ -152,6 +152,10 @@ export interface SleeperDraft {
   type: 'snake' | 'auction' | string
   status: 'complete' | 'drafting' | 'pre_draft'
   settings?: { rounds?: number; [key: string]: unknown }
+  /** Slot → roster_id, when Sleeper sets it before the draft. */
+  slot_to_roster_id?: Record<string, number> | null
+  /** user_id → slot. */
+  draft_order?: Record<string, number> | null
 }
 
 export interface DraftPick {
@@ -209,6 +213,14 @@ export interface Transaction {
   settings?: { waiver_bid?: number }
 }
 
+/** A Transaction with its season and the owner and player names attached. */
+export interface EnrichedTransaction extends Transaction {
+  year: number
+  ownerNames: string[]
+  addedPlayers: { playerId: string; name: string; owner: string }[]
+  droppedPlayers: { playerId: string; name: string; owner: string }[]
+}
+
 // ─── Global State ─────────────────────────────────────────────────────────────
 
 export interface LeagueState {
@@ -219,8 +231,6 @@ export interface LeagueState {
   rosterUserMaps: Record<number, Record<string, string>>
   matchups: Record<number, Record<number, { matchups: SleeperMatchup[]; isPlayoff: boolean }>>
   brackets: Record<number, { winners: BracketGame[]; losers: BracketGame[] }>
-  /** canonical owner name → user_id */
-  ownerMap: Record<string, string>
   /** canonical owner name → Sleeper avatar thumb URL */
   ownerAvatarMap: Record<string, string>
   /** canonical owner name → array of per-season stats */

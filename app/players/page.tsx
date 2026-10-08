@@ -18,8 +18,7 @@ import TransactionDetailModal from '@/components/transactions/TransactionDetailM
 import TradesByYearChart from '@/components/players/TradesByYearChart'
 import MostTradedPlayersTable from '@/components/players/MostTradedPlayersTable'
 import { USER_ID_TO_OWNER } from '@/lib/league'
-import type { EnrichedTransaction } from '@/hooks/useTransactionsData'
-import type { PlayerStat } from '@/types'
+import type { EnrichedTransaction, PlayerStat } from '@/types'
 import type { TxTypeFilter } from '@/components/transactions/TransactionFilters'
 
 type Tab = 'winrate' | 'scoring' | 'ownership' | 'transactions'

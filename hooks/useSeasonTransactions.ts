@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { fetchTransactions } from '@/lib/sources'
+import { fetchTransactionWeeks } from '@/lib/sources'
+import { enrichTransaction, transactionWeeks } from '@/lib/data-processing'
 import { loadPlayerMeta, loadPlayerMetaFromIndex, playerLookup } from '@/lib/current-season'
 import type { ProjectedPlayer } from '@/lib/current-season'
-import { enrichTransaction, type EnrichedTransaction } from '@/hooks/useTransactionsData'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
-import type { Transaction } from '@/types'
+import type { EnrichedTransaction, Transaction } from '@/types'
 
 /** Above this many unknown players, skip one-off lookups and use the player index. */
 const MAX_LOOKUPS = 60
@@ -35,8 +35,11 @@ interface Fetched {
 export function useSeasonTransactions(live: LiveSeason, enabled: boolean): SeasonTransactions {
   const { state, season, projections, extraPlayers } = live
   const leagueId = season ? state.leagueChain.find(e => e.year === season)?.id : undefined
-  const leg = season ? state.leagues[season]?.settings?.leg ?? 0 : 0
-  const key = leagueId && leg ? `${leagueId}:${leg}` : ''
+  const league = season ? state.leagues[season] : undefined
+  const leg = league?.settings?.leg ?? 0
+  // A string, so the fresh league object each live sync brings doesn't refetch
+  const weeks = league && leg ? transactionWeeks(league).join(',') : ''
+  const key = leagueId && weeks ? `${leagueId}:${weeks}` : ''
 
   const [fetched, setFetched] = useState<Fetched | null>(null)
   const [names, setNames] = useState<Record<string, ProjectedPlayer>>({})
@@ -45,20 +48,11 @@ export function useSeasonTransactions(live: LiveSeason, enabled: boolean): Seaso
   useEffect(() => {
     if (!enabled || !key || !leagueId || fetched?.key === key) return
     let cancelled = false
-    // Through next week: waivers that run after this week's games are filed there
-    const weeks = Array.from({ length: leg + 1 }, (_, i) => i + 1)
-    Promise.all(weeks.map(w =>
-      fetchTransactions(leagueId, w).then(txs => [w, txs, false] as const).catch(() => [w, [] as Transaction[], true] as const)
-    )).then(rows => {
-      if (cancelled) return
-      setFetched({
-        key,
-        byWeek: Object.fromEntries(rows.map(([w, txs]) => [w, txs])),
-        failed: rows.filter(([, , failed]) => failed).map(([w]) => w),
-      })
+    fetchTransactionWeeks(leagueId, weeks.split(',').map(Number)).then(({ byWeek, failed }) => {
+      if (!cancelled) setFetched({ key, byWeek, failed })
     })
     return () => { cancelled = true }
-  }, [enabled, key, leagueId, leg, fetched?.key])
+  }, [enabled, key, leagueId, weeks, fetched?.key])
 
   const raw = useMemo(() => {
     const byWeek = { ...(fetched?.byWeek ?? {}) }
