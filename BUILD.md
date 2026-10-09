@@ -86,14 +86,17 @@ on an owner decision.
    `CURRENT_SEASON = 2027` (the tab moves to `/2027`; no folder rename). Run
    `npm run snapshot -- --players-only` so rookies have names. Check `/2027` at 375px.
 
-### M3 — In-browser degraded-mode checks
-Steps 1–2 **passed 2026-09-26** (Week 3, live): `/2026` renders previews, power
-rankings, and rosters; with `api.sleeper.com` blocked, matchups render without the
-projection row and rosters resolve every name via the player-name fallback, no errors.
-Remaining:
-3. Block `public/data/manifest.json`, reload `/` — the site must still fully load via
-   live Sleeper fetches (slower is fine, broken is not).
-4. Report findings; fix only crashes/blank states.
+### M3 — Degraded-mode check *(after any change to data loading; last passed 2026-10-09)*
+Block a request in the browser (Chrome DevTools → Network → Block request URL/domain)
+and reload. Block it; never delete the file — the footer and site description read
+`public/data/manifest.json` at build time, so the build needs it. Fix only crashes or
+blank states.
+1. **Projections down** (`api.sleeper.com`) — **passed 2026-09-26**: the season tab's
+   matchups render without the projection row; roster names come from the player index.
+2. **Snapshot down** (`/convicts-ff-league/data/manifest.json`) — **passed 2026-10-09**
+   on the production build: every page loads straight from Sleeper (~180 requests;
+   Players → Transactions reads every season live in ~12 s), and every archive page's
+   text matches the snapshot-backed site, 2021's 18th week of moves included.
 
 ### M4 — Deferred owner-decision findings *(no deadline)*
 Report-only; each is a deliberate design choice, so fixing it changes locked
@@ -266,5 +269,5 @@ affected pages' text. If the build fails on a page you didn't touch, you broke a
 module — revert and re-approach; do not patch the symptom.
 
 ### Execution order
-- **On their dates:** M1–M2 (§3); M3 whenever convenient; M4 items only on owner sign-off.
+- **On their dates:** M1–M2 (§3); M3 after any change to data loading; M4 items only on owner sign-off.
 - Anything not listed here that changes features or visuals: **ask the owner first.**
