@@ -186,7 +186,7 @@ export async function loadPlayerMeta(ids: string[]): Promise<Record<string, Proj
 
 /**
  * Last resort when the projections host is unreachable: names from the
- * site's player index (lib/players-cache.ts). No injury designations there.
+ * site's player index (lib/sources/players.ts). No injury designations there.
  */
 export async function loadPlayerMetaFromIndex(ids: string[]): Promise<Record<string, ProjectedPlayer>> {
   const players = await getPlayersCache()

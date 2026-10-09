@@ -55,8 +55,8 @@ Use e.g. `rgba(var(--gold-rgb),0.10)` for a default hairline.
 - Wordmark / small lockups: `linear-gradient(180deg,#F5D67B,#C9962E)` → `.text-metal`
 
 **Functional palettes — never theme-swap.** Owner identity colors live in
-`OWNER_COLORS`; NFL position colors in `POS_COLORS` / `POS_TEXT_CLASSES` /
-`POS_BADGE_CLASSES` — all in `lib/owner-map.ts`, exported via `@/lib/constants`.
+`OWNER_COLORS` (`lib/league/owners.ts`, via `@/lib/league`); NFL position colors in
+`POS_COLORS` / `POS_TEXT_CLASSES` / `POS_BADGE_CLASSES` (`lib/positions.ts`).
 These encode meaning (which owner, which position), not theme. Never redefine
 locally or fold into the gold palette.
 
@@ -93,10 +93,11 @@ locally or fold into the gold palette.
   item = white + 2px gold underline, `<GlobalSearch/>` at right.
 - **Mobile top bar** (`layout/MobileMenu.tsx`): 44px hamburger (gold-soft) + 44px
   search icon. Hamburger opens a portaled drawer. **No bottom tab bar.**
-- **Search strip** (`layout/SearchStrip.tsx`, home only): full-width gold-hairline
+- **Search strip** (`search/SearchStrip.tsx`, home only): full-width gold-hairline
   strip on `panel-2` with gold dash, placeholder, and `⌘K` hint; opens the search overlay.
 - **Footer** (`layout/Footer.tsx`, every page): centered gradient hairlines
-  flanking `CONVICTS FF · 7 SEASONS`.
+  flanking `CONVICTS FF – 7 SEASONS` (the count is the snapshotted seasons, read
+  from `public/data/manifest.json` at build time).
 
 ## Shared primitives (`components/shared/`)
 
@@ -131,7 +132,7 @@ context/LeagueContext.tsx          one load on mount → LeagueState
         ↓
 lib/data-processing/               raw shapes → Matchup[], OwnerSeason[], …
         ↓
-lib/stats/ · lib/preview/ · lib/search/   pure computation engines
+lib/stats/ · lib/current-season/ · lib/search/   pure computation engines
         ↓
 hooks/ (useMemo wrappers)          → pages render
 ```
@@ -140,8 +141,8 @@ hooks/ (useMemo wrappers)          → pages render
   zero Sleeper calls for history; only a non-snapshotted (live) season is
   fetched. If the snapshot files are missing, `LeagueContext` falls back to
   full live fetching — the snapshot is an accelerator, never a dependency.
-  Each season is two files: `season-<year>.json` (every visit, ~1.3 MB for all
-  seven) and `transactions-<year>.json` (loaded only by Players → Transactions).
+  Each season is two files: `season-<year>.json` (every visit, ~1.3 MB across
+  2019–2025) and `transactions-<year>.json` (loaded only by Players → Transactions).
   `players.json` (~40 KB) names every player the site shows, replacing Sleeper's
   ~15 MB player dump.
 - **Everything is client-side.** Static export (`output: 'export'`), no SSR,
@@ -153,8 +154,10 @@ Single source of truth for career records, championship counts (0.5 shared
 titles, `winner.includes(name)` matching), H2H records (ties count for the
 perspective owner), record-book extremes, power rankings, and the Luck Index
 (`luck.ts`: actual wins − weekly all-play expected wins, ties ½, regular season
-only — the one formula behind Seasons, Records, search, and the 2026 tab).
-Locked by vitest tests.
+only — the one formula behind Seasons, Records, search, and the season tab), the
+💦 Daddy rule (`h2h.ts` `daddyOf`: 75%+ of 5+ meetings — Records' Who's Your Daddy
+and the season tab's flair), and Records' Career Milestones (`careerMilestones`,
+computed from earnings, titles, and toilet bowls). Locked by vitest tests.
 
 ### Search (`lib/search/` + `components/search/`)
 
@@ -164,10 +167,12 @@ resolvers over the stat engine. No LLM, no API keys, by explicit decision.
 UI is a ⌘K overlay portaled to `document.body` (the navbar's backdrop-filter
 would trap a fixed overlay — don't move it back inside).
 
-### The season tab (`lib/preview/` + `app/2026/`)
+### The season tab (`lib/current-season/` + `components/current-season/`)
 
 The current season's hub, named for its year, with five sub-tabs (it lands on
-Power Rankings):
+Power Rankings). It lives at `/<CURRENT_SEASON>` (`/2026`): `app/[season]/page.tsx`
+generates that one static page from `CURRENT_SEASON` in `lib/league/config.ts`, and
+the nav label follows the same constant.
 
 - **Power Rankings** — the Power Index: the original Oberon Mt. power rating
   (`0.6 × avg + 0.2 × (high + low) + 0.2 × (win% × 200)`, the actual record's
@@ -188,7 +193,7 @@ Power Rankings):
   league history), shown entering the week and with a win vs a loss. Once the
   math allows, exact sentences replace guesswork — "clinches a playoff spot with
   a win and a Nathan loss", "is eliminated with a loss" — true in every outcome,
-  with ties in wins never counted (points for can't be known ahead). **Flair** (`lib/preview/flair.ts`, legend on the page): 💦 Daddy — wins
+  with ties in wins never counted (points for can't be known ahead). **Flair** (`lib/current-season/flair.ts`, legend on the page): 💦 Daddy — wins
   75%+ of 5+ all-time meetings vs this opponent; 🔥 3+ straight wins; 🧊 3+ straight
   losses; 👑 No. 1 power ranking; 🏆 defending champ; 🚽 last season's toilet bowl;
   🚑 starting a player listed out or doubtful. **Ammo** comes from ~25 true fact
@@ -219,7 +224,9 @@ every ten (Sleeper's own CDN cache windows) — pausing while the browser tab is
 hidden. The rest of the regular-season schedule (Sleeper publishes every week's
 pairings up front) loads once per visit for the playoff odds and roster schedules,
 and every player's season stats refresh with Sleeper's 10-minute feed. It overlays
-the global store rather than mutating it. A week counts as
+the global store rather than mutating it, flattens the season's games once per
+sync, and hands out the un-overlaid store too, so facts about past seasons skip
+the polls. A week counts as
 final only once Sleeper's `last_scored_leg` reaches it, so a Thursday game never
 makes a week look finished. **Projections use an undocumented Sleeper endpoint**
 — every failure path returns null and the UI renders without projections (names
@@ -229,13 +236,15 @@ fall back to the player index). Keep it that way.
 
 ## Yearly ritual
 
-1. **After the draft (new season created in Sleeper):** update `LEAGUE_ID`
-   in `lib/config.ts` to the new season's league id, then rename the season tab
-   for the new year: `git mv app/2026 app/2027` and update its `href`/`label` in
-   `components/layout/nav-items.ts`. Run `npm run snapshot -- --players-only`
+1. **After the draft (new season created in Sleeper):** in `lib/league/config.ts`,
+   set `LEAGUE_ID` to the new season's league id and `CURRENT_SEASON` to its year —
+   the season tab's label and URL follow. Run `npm run snapshot -- --players-only`
    so the new rookies have names. All live data follows automatically.
 2. **After the season ends** (status flips to `complete`): run
-   `npm run snapshot`, commit the new `public/data/` files. History is now
-   frozen and free.
+   `npm run snapshot`, commit the new `public/data/` files, and record the season
+   in `lib/league/history.ts` (champion, toilet bowl) and `lib/league/earnings.ts`
+   (each owner's net — totals compute themselves). History is now frozen and free.
+
+The full checklist, with the diff check for old seasons, is BUILD.md §3.
 
 Deploy is automatic: push to `main` → GitHub Actions → GitHub Pages.
