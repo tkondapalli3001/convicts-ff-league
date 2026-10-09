@@ -1,9 +1,9 @@
 1:"$Sreact.fragment"
-2:I[47257,["/convicts-ff-league/_next/static/chunks/1473ay2bgkip8.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js","/convicts-ff-league/_next/static/chunks/0l1h9r-ch_~om.js"],"ClientPageRoot"]
-3:I[20563,["/convicts-ff-league/_next/static/chunks/1473ay2bgkip8.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js","/convicts-ff-league/_next/static/chunks/0l1h9r-ch_~om.js","/convicts-ff-league/_next/static/chunks/08w-afhfct9w9.js"],"default"]
-6:I[97367,["/convicts-ff-league/_next/static/chunks/1473ay2bgkip8.js","/convicts-ff-league/_next/static/chunks/0w2x~-3f4_5s8.js","/convicts-ff-league/_next/static/chunks/0l1h9r-ch_~om.js"],"OutletBoundary"]
+2:I[47257,["/convicts-ff-league/_next/static/chunks/16eh7h2j2u79a.js","/convicts-ff-league/_next/static/chunks/0_4fkpp_sdp8o.js","/convicts-ff-league/_next/static/chunks/0osk3-0nuug~k.js"],"ClientPageRoot"]
+3:I[20563,["/convicts-ff-league/_next/static/chunks/16eh7h2j2u79a.js","/convicts-ff-league/_next/static/chunks/0_4fkpp_sdp8o.js","/convicts-ff-league/_next/static/chunks/0osk3-0nuug~k.js","/convicts-ff-league/_next/static/chunks/05aehs~rumyro.js"],"default"]
+6:I[97367,["/convicts-ff-league/_next/static/chunks/16eh7h2j2u79a.js","/convicts-ff-league/_next/static/chunks/0_4fkpp_sdp8o.js","/convicts-ff-league/_next/static/chunks/0osk3-0nuug~k.js"],"OutletBoundary"]
 7:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/convicts-ff-league/_next/static/chunks/08w-afhfct9w9.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"cqFUm8Rt8g07EajtyHyP3"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/convicts-ff-league/_next/static/chunks/05aehs~rumyro.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"3wUVUhWEK3L72ptp6hvMW"}
 4:{}
 5:"$0:rsc:props:children:0:props:serverProvidedParams:params"
 8:null
