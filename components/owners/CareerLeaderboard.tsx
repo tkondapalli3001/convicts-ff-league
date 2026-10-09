@@ -6,42 +6,23 @@ import { useLeague } from '@/context/LeagueContext'
 import { careerLeaderboard, type LeaderboardRow } from '@/lib/stats'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import SortHeader from '@/components/shared/SortHeader'
 
 type SortKey = keyof LeaderboardRow
-
-/** Header cell: gold while it's the sort column. Module-level so it isn't remounted on every render. */
-function LeaderboardTh({ k, label, sortKey, onSort, stickyFirst }: {
-  k: SortKey
-  label: string
-  sortKey: SortKey
-  onSort: (k: SortKey) => void
-  stickyFirst?: boolean
-}) {
-  return (
-    <th
-      onClick={() => onSort(k)}
-      className={stickyFirst ? 'cursor-pointer sticky left-0 z-10 border-r border-white/[0.06]' : 'cursor-pointer'}
-      style={{
-        color: sortKey === k ? '#C9A24B' : undefined,
-        background: stickyFirst ? '#0B0B0D' : undefined,
-      }}
-    >
-      {label}
-    </th>
-  )
-}
 
 export default function CareerLeaderboard() {
   const { state } = useLeague()
   const { ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues } = state
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
-  const [sortDir, setSortDir] = useState<1 | -1>(1)
+  // 1 = ascending (↑), -1 = descending (↓), like every SortHeader table
+  const [sortDir, setSortDir] = useState<1 | -1>(-1)
   const [playoffOnly, setPlayoffOnly] = useState(false)
   const router = useRouter()
 
   function handleSort(k: SortKey) {
     if (sortKey === k) setSortDir(d => (d === 1 ? -1 : 1))
-    else { setSortKey(k); setSortDir(1) }
+    // Names start A–Z; numbers start biggest first
+    else { setSortKey(k); setSortDir(k === 'name' ? 1 : -1) }
   }
 
   const data = useMemo(
@@ -51,14 +32,16 @@ export default function CareerLeaderboard() {
 
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {
-      let av = a[sortKey] as number | null
-      let bv = b[sortKey] as number | null
-      const fallback = sortDir < 0 ? -Infinity : Infinity
-      av = av ?? fallback
-      bv = bv ?? fallback
-      return (bv - av) * sortDir
+      const av = a[sortKey]
+      const bv = b[sortKey]
+      if (typeof av === 'string' && typeof bv === 'string') return av.localeCompare(bv) * sortDir
+      // A missing value (no finish, no earnings line) sorts last either way
+      if (av == null || bv == null) return av == null ? (bv == null ? 0 : 1) : -1
+      return ((av as number) - (bv as number)) * sortDir
     })
   }, [data, sortKey, sortDir])
+
+  const sort = { sortKey, sortDir, onSort: handleSort }
 
   return (
     <div className="gl p-[18px] relative overflow-hidden">
@@ -87,17 +70,18 @@ export default function CareerLeaderboard() {
             <thead>
               <tr>
                 <th className="w-8">#</th>
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="name"        label="Manager" stickyFirst />
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'} />
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="allW"        label="W" />
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="allL"        label="L" />
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="winpct"      label="Win%" />
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'PF/Season'} />
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="avgFinish"   label="Avg Fin" />
-                {!playoffOnly && <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="playoffApps" label="Playoffs" />}
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="champs"      label="🏆" />
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="shame"       label="🚽" />
-                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="earn"        label="Net $" />
+                <SortHeader {...sort} k="name" label="Manager"
+                  className="sticky left-0 z-10 border-r border-white/[0.06]" style={{ background: '#0B0B0D' }} />
+                <SortHeader {...sort} k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'} />
+                <SortHeader {...sort} k="allW"        label="W" />
+                <SortHeader {...sort} k="allL"        label="L" />
+                <SortHeader {...sort} k="winpct"      label="Win%" />
+                <SortHeader {...sort} k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'PF/Season'} />
+                <SortHeader {...sort} k="avgFinish"   label="Avg Fin" />
+                {!playoffOnly && <SortHeader {...sort} k="playoffApps" label="Playoffs" />}
+                <SortHeader {...sort} k="champs"      label="🏆" />
+                <SortHeader {...sort} k="shame"       label="🚽" />
+                <SortHeader {...sort} k="earn"        label="Net $" />
               </tr>
             </thead>
             <tbody>

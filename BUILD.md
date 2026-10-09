@@ -105,9 +105,6 @@ architecture or the Midnight Prime palette. **No action without owner sign-off.*
    or accept it.
 3. **Focus traps:** modals close on Escape and announce as dialogs, but Tab can reach the
    page behind. Full trap is a larger change; add only if the owner wants it.
-4. **Career Leaderboard sort headers** show no direction arrow, unlike every table on
-   `SortHeader`, and sorting by Manager keeps A–Z either way. Matching the other tables is
-   a visible change — owner call.
 
 ### Done
 - **2026-08-14 —** 2026 buy-in (`2026: 150`).
@@ -133,6 +130,9 @@ architecture or the Midnight Prime palette. **No action without owner sign-off.*
   - Owners page math moved into `lib/stats` (`careerLeaderboard`, `ownerProfile`) with
     tests; the leaderboard's header cell is module-level. Every leaderboard sort (both
     views) and all 12 profiles verified identical at desktop and 375px.
+- **2026-10-09 —** Career Leaderboard uses the shared `SortHeader` (owner-approved):
+  direction arrows like every other table, and sorting by Manager works (A–Z, then Z–A).
+  Every numeric sort keeps its order.
 
 ### Open risks
 
