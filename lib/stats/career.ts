@@ -1,6 +1,9 @@
 import type { LeagueState } from '@/types'
 import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA, USER_ID_TO_OWNER, INACTIVE_OWNERS } from '@/lib/league'
 import { fmtMoney } from '@/lib/utils'
+import { buildChampPathGameKeys, gameKey } from './game-filters'
+
+const average = (xs: number[]): number | null => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null)
 
 /**
  * Championship count for an owner. Substring match is intentional: shared
@@ -11,12 +14,12 @@ export function championshipCount(name: string): number {
     .reduce((sum, c) => sum + (c.half ? 0.5 : 1), 0)
 }
 
-export function shameCount(name: string): number {
+function shameCount(name: string): number {
   return MANUAL_SHAME.filter(s => s.loser === name).length
 }
 
 /** Canonical owner names that have season data, minus inactive owners. */
-export function activeOwnerNames(ownerSeasons: LeagueState['ownerSeasons']): string[] {
+function activeOwnerNames(ownerSeasons: LeagueState['ownerSeasons']): string[] {
   const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
   return canonicalNames.filter(n => ownerSeasons[n] && !INACTIVE_OWNERS.has(n))
 }
@@ -33,6 +36,8 @@ export interface CareerStats {
   champs: number
   shame: number
   numSeasons: number
+  /** Average final placement over seasons with a finish; null if none. */
+  avgFinish: number | null
   earn: number | null
   sparkData: number[]
   bestSeasonYear: number | null
@@ -66,6 +71,7 @@ export function buildCareerStats(
       const champs = championshipCount(name)
       const shame = shameCount(name)
       const earn = EARNINGS_DATA.find(e => e.owner === name)
+      const avgFinish = average(seasons.filter(s => s.finish != null).map(s => s.finish as number))
 
       const sparkData = [...seasons]
         .sort((a, b) => a.year - b.year)
@@ -117,6 +123,7 @@ export function buildCareerStats(
         champs,
         shame,
         numSeasons: seasons.length,
+        avgFinish,
         earn: earn?.total ?? null,
         sparkData,
         bestSeasonYear: bestSeason?.year ?? null,
@@ -133,6 +140,60 @@ export function buildCareerStats(
       const diff = b.winpct - a.winpct
       if (Math.abs(diff) > 0.0001) return diff
       return b.totalPF - a.totalPF
+    })
+}
+
+// ─── Owners → Career Leaderboard ──────────────────────────────────────────────
+
+export interface LeaderboardRow {
+  name: string
+  /** Seasons played — playoff appearances in the playoffs view. */
+  numSeasons: number
+  allW: number
+  allL: number
+  winpct: number
+  /** PF per season — per game in the playoffs view. */
+  avgPF: number
+  /** Average finish — of playoff seasons only in the playoffs view. */
+  avgFinish: number | null
+  playoffApps: number
+  champs: number
+  shame: number
+  earn: number | null
+}
+
+/**
+ * Owners → Career Leaderboard rows for the active owners, A–Z. The playoffs
+ * view counts championship-path playoff games only (no 3rd-place or
+ * toilet-bowl games).
+ */
+export function careerLeaderboard(
+  state: Pick<LeagueState, 'ownerSeasons' | 'allMatchups' | 'brackets' | 'rosterUserMaps' | 'leagues'>,
+  playoffs: boolean,
+): LeaderboardRow[] {
+  const champPath = playoffs ? buildChampPathGameKeys(state) : null
+  return buildCareerStats(state)
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+    .map(c => {
+      const row = { name: c.name, playoffApps: c.playoffApps, champs: c.champs, shame: c.shame, earn: c.earn }
+      if (!champPath) {
+        return { ...row, numSeasons: c.numSeasons, allW: c.allW, allL: c.allL, winpct: c.winpct, avgPF: c.avgPF, avgFinish: c.avgFinish }
+      }
+      const games = state.allMatchups.filter(g =>
+        g.type === 'P' && (g.team1 === c.name || g.team2 === c.name) &&
+        champPath.has(gameKey(g.year, g.week, g.team1, g.team2)))
+      const allW = games.filter(g => g.winner === c.name).length
+      const allL = games.filter(g => g.loser === c.name).length
+      const playoffSeasons = (state.ownerSeasons[c.name] ?? []).filter(s => s.inPlayoffs)
+      return {
+        ...row,
+        numSeasons: c.playoffApps,
+        allW,
+        allL,
+        winpct: allW / (allW + allL || 1),
+        avgPF: games.length ? games.reduce((sum, g) => sum + (g.team1 === c.name ? g.pts1 : g.pts2), 0) / games.length : 0,
+        avgFinish: average(playoffSeasons.filter(s => s.finish != null).map(s => s.finish as number)),
+      }
     })
 }
 

@@ -25,8 +25,8 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 137 unit tests pass (11 files); `npm run build` succeeds (23 static
-  pages); lint 0 errors (15 known `react-hooks`/`no-img-element` warnings); knip reports
+- **Health:** 148 unit tests pass (12 files); `npm run build` succeeds (23 static
+  pages); lint 0 errors (12 known `react-hooks`/`no-img-element` warnings); knip reports
   zero unused files, exports, or dependencies. Snapshots frozen for **2019–2025**
   (season + transactions files) + `players.json` + manifest.
 - **Live season:** `lib/league/config.ts` — `LEAGUE_ID = '1367670546694705152'` (the
@@ -105,10 +105,9 @@ architecture or the Midnight Prime palette. **No action without owner sign-off.*
    or accept it.
 3. **Focus traps:** modals close on Escape and announce as dialogs, but Tab can reach the
    page behind. Full trap is a larger change; add only if the owner wants it.
-4. **Owners page math:** `CareerLeaderboard` and `OwnerDetail` still compute some career
-   and playoff numbers inline (and `CareerLeaderboard` defines its sort header inside the
-   render). Moving them onto `lib/stats` and `SortHeader` is a refactor with regression
-   risk — worth doing only alongside an Owners-page change the owner asks for.
+4. **Career Leaderboard sort headers** show no direction arrow, unlike every table on
+   `SortHeader`, and sorting by Manager keeps A–Z either way. Matching the other tables is
+   a visible change — owner call.
 
 ### Done
 - **2026-08-14 —** 2026 buy-in (`2026: 150`).
@@ -131,6 +130,9 @@ architecture or the Midnight Prime palette. **No action without owner sign-off.*
     restored (2021 ran 18 weeks; the snapshot had stored 17); season counts, Career
     Milestones, and the pick-order year are derived; earnings stored per season with
     computed totals; the season tab's route comes from `CURRENT_SEASON`.
+  - Owners page math moved into `lib/stats` (`careerLeaderboard`, `ownerProfile`) with
+    tests; the leaderboard's header cell is module-level. Every leaderboard sort (both
+    views) and all 12 profiles verified identical at desktop and 375px.
 
 ### Open risks
 
@@ -198,8 +200,8 @@ playoffs", "most FAAB spent in 2025".
 3. **One global store** — `LeagueContext` loads once on mount, never refetches. The
    season tab's `useLiveSeason` polls and *overlays* a copy; it never writes back.
 4. **Stat math lives only in `lib/stats/`** — half-titles (0.5), shared-winner matching,
-   tie-as-win rules, the Daddy rule, and career milestones are centralized. Never
-   recompute in components.
+   tie-as-win rules, the Daddy rule, career milestones, the career leaderboard, and owner
+   profiles are centralized. Never recompute in components.
 5. **Name resolution via `resolveOwnerName()` / `rosterUserMaps[year]`** — canonical
    names; identity data lives in `lib/league/owners.ts`.
 6. **Search is local-only by explicit owner decision** — no LLM, no API keys. Extend via
@@ -254,7 +256,7 @@ For **any** model picking up a task:
 ### After coding (mandatory verification gate, every task)
 ```
 npm run build      # must succeed (static export, TypeScript strict)
-npm test           # all tests must pass (137 baseline)
+npm test           # all tests must pass (148 baseline)
 npm run lint       # 0 errors
 npm run knip       # zero findings
 npm run dev        # check the affected page(s), at 375px too

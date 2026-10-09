@@ -3,12 +3,33 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
-import { EARNINGS_DATA } from '@/lib/league'
-import { activeOwnerNames, championshipCount, shameCount, buildChampPathGameKeys, gameKey } from '@/lib/stats'
+import { careerLeaderboard, type LeaderboardRow } from '@/lib/stats'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 
-type SortKey = 'name' | 'numSeasons' | 'allW' | 'allL' | 'winpct' | 'avgPF' | 'avgFinish' | 'playoffApps' | 'champs' | 'shame' | 'earn'
+type SortKey = keyof LeaderboardRow
+
+/** Header cell: gold while it's the sort column. Module-level so it isn't remounted on every render. */
+function LeaderboardTh({ k, label, sortKey, onSort, stickyFirst }: {
+  k: SortKey
+  label: string
+  sortKey: SortKey
+  onSort: (k: SortKey) => void
+  stickyFirst?: boolean
+}) {
+  return (
+    <th
+      onClick={() => onSort(k)}
+      className={stickyFirst ? 'cursor-pointer sticky left-0 z-10 border-r border-white/[0.06]' : 'cursor-pointer'}
+      style={{
+        color: sortKey === k ? '#C9A24B' : undefined,
+        background: stickyFirst ? '#0B0B0D' : undefined,
+      }}
+    >
+      {label}
+    </th>
+  )
+}
 
 export default function CareerLeaderboard() {
   const { state } = useLeague()
@@ -18,62 +39,15 @@ export default function CareerLeaderboard() {
   const [playoffOnly, setPlayoffOnly] = useState(false)
   const router = useRouter()
 
-  // Championship-path game keys only (excludes 3rd/5th place games + losers bracket)
-  const winnersBracketGameKeys = useMemo(
-    () => buildChampPathGameKeys({ brackets, rosterUserMaps, leagues }),
-    [brackets, rosterUserMaps, leagues]
-  )
-
-  const names = activeOwnerNames(ownerSeasons).sort()
-
   function handleSort(k: SortKey) {
     if (sortKey === k) setSortDir(d => (d === 1 ? -1 : 1))
     else { setSortKey(k); setSortDir(1) }
   }
 
-  const data = useMemo(() => {
-    return names.map(name => {
-      const allSeasons = ownerSeasons[name] || []
-      const playoffApps = allSeasons.filter(s => s.inPlayoffs).length
-      const champs = championshipCount(name)
-      const shame = shameCount(name)
-      const earn = EARNINGS_DATA.find(e => e.owner === name)
-
-      let allW: number, allL: number, avgPF: number, numSeasons: number, avgFinish: number | null
-
-      if (playoffOnly) {
-        // Use actual playoff game records from allMatchups
-        const playoffGames = allMatchups.filter(
-          g => g.type === 'P' &&
-               (g.team1 === name || g.team2 === name) &&
-               winnersBracketGameKeys.has(gameKey(g.year, g.week, g.team1, g.team2))
-        )
-        allW = playoffGames.filter(g => g.winner === name).length
-        allL = playoffGames.filter(g => g.loser === name).length
-        avgPF = playoffGames.length
-          ? playoffGames.reduce((sum, g) => sum + (g.team1 === name ? g.pts1 : g.pts2), 0) / playoffGames.length
-          : 0
-        numSeasons = playoffApps
-        const playoffFinishes = allSeasons.filter(s => s.inPlayoffs && s.finish != null).map(s => s.finish as number)
-        avgFinish = playoffFinishes.length ? playoffFinishes.reduce((a, b) => a + b, 0) / playoffFinishes.length : null
-      } else {
-        allW = allSeasons.reduce((a, s) => a + s.wins, 0)
-        allL = allSeasons.reduce((a, s) => a + s.losses, 0)
-        avgPF = allSeasons.length ? allSeasons.reduce((a, s) => a + s.pf, 0) / allSeasons.length : 0
-        numSeasons = allSeasons.length
-        const finishes = allSeasons.filter(s => s.finish != null).map(s => s.finish as number)
-        avgFinish = finishes.length ? finishes.reduce((a, b) => a + b, 0) / finishes.length : null
-      }
-
-      return {
-        name, numSeasons, allW, allL,
-        winpct: allW / (allW + allL || 1),
-        avgPF, playoffApps, champs, shame,
-        earn: earn ? earn.total : null,
-        avgFinish,
-      }
-    })
-  }, [names.join(','), ownerSeasons, allMatchups, winnersBracketGameKeys, playoffOnly])
+  const data = useMemo(
+    () => careerLeaderboard({ ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues }, playoffOnly),
+    [ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, playoffOnly],
+  )
 
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {
@@ -85,22 +59,6 @@ export default function CareerLeaderboard() {
       return (bv - av) * sortDir
     })
   }, [data, sortKey, sortDir])
-
-  const SortTh = ({ k, label, hideOnMobile, stickyFirst }: { k: SortKey; label: string; hideOnMobile?: boolean; stickyFirst?: boolean }) => (
-    <th
-      onClick={() => handleSort(k)}
-      className={[
-        hideOnMobile ? 'hidden md:table-cell cursor-pointer' : 'cursor-pointer',
-        stickyFirst ? 'sticky left-0 z-10 border-r border-white/[0.06]' : '',
-      ].filter(Boolean).join(' ')}
-      style={{
-        color: sortKey === k ? '#C9A24B' : undefined,
-        background: stickyFirst ? '#0B0B0D' : undefined,
-      }}
-    >
-      {label}
-    </th>
-  )
 
   return (
     <div className="gl p-[18px] relative overflow-hidden">
@@ -129,17 +87,17 @@ export default function CareerLeaderboard() {
             <thead>
               <tr>
                 <th className="w-8">#</th>
-                <SortTh k="name"        label="Manager" stickyFirst />
-                <SortTh k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'} />
-                <SortTh k="allW"        label="W" />
-                <SortTh k="allL"        label="L" />
-                <SortTh k="winpct"      label="Win%" />
-                <SortTh k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'PF/Season'} />
-                <SortTh k="avgFinish"   label="Avg Fin" />
-                {!playoffOnly && <SortTh k="playoffApps" label="Playoffs" />}
-                <SortTh k="champs"      label="🏆" />
-                <SortTh k="shame"       label="🚽" />
-                <SortTh k="earn"        label="Net $" />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="name"        label="Manager" stickyFirst />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="numSeasons"  label={playoffOnly ? 'Apps' : 'Seasons'} />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="allW"        label="W" />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="allL"        label="L" />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="winpct"      label="Win%" />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="avgPF"       label={playoffOnly ? 'Avg PF/Gm' : 'PF/Season'} />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="avgFinish"   label="Avg Fin" />
+                {!playoffOnly && <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="playoffApps" label="Playoffs" />}
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="champs"      label="🏆" />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="shame"       label="🚽" />
+                <LeaderboardTh sortKey={sortKey} onSort={handleSort} k="earn"        label="Net $" />
               </tr>
             </thead>
             <tbody>

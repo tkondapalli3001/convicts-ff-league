@@ -4,9 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
 import { fmtPts, fmtMoney, ownerColor, fullNameInitials } from '@/lib/utils'
-import { MANUAL_CHAMPS, MANUAL_SHAME, EARNINGS_DATA } from '@/lib/league'
-import { buildConsolationGameKeys, excludeManualGames, gameKey, playoffByeYears } from '@/lib/stats'
-import { isSeasonComplete } from '@/lib/data-processing'
+import { ownerProfile } from '@/lib/stats'
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import H2HGrid from './H2HGrid'
@@ -21,157 +19,15 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const [tab, setTab] = useState<Tab>('seasons')
 
   // Must be before early returns (React hook rules)
-  const ownerGames = useMemo(
-    () => allMatchups.filter(g => g.team1 === ownerName || g.team2 === ownerName),
-    [allMatchups, ownerName]
+  const profile = useMemo(
+    () => ownerProfile({ ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, draftData, matchups }, ownerName),
+    [ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, draftData, matchups, ownerName],
   )
-
-  const consolationGameKeys = useMemo(
-    () => buildConsolationGameKeys({ brackets, rosterUserMaps, leagues }),
-    [brackets, rosterUserMaps, leagues]
-  )
-
-  const nonConsolationGames = useMemo(
-    () => excludeManualGames(ownerGames).filter(g =>
-      g.type === 'R' || !consolationGameKeys.has(gameKey(g.year, g.week, g.team1, g.team2))
-    ),
-    [ownerGames, consolationGameKeys]
-  )
-
-  const allMatchupsFiltered = useMemo(
-    () => excludeManualGames(allMatchups).filter(g =>
-      g.type === 'R' || !consolationGameKeys.has(gameKey(g.year, g.week, g.team1, g.team2))
-    ),
-    [allMatchups, consolationGameKeys]
-  )
-
-  const funStats = useMemo(() => {
-    const scores = nonConsolationGames.map(g => ({
-      pts: g.team1 === ownerName ? g.pts1 : g.pts2,
-      opp: g.team1 === ownerName ? g.team2 : g.team1,
-      year: g.year,
-      week: g.week,
-    })).filter(s => s.pts > 0)
-
-    const bestGame  = scores.length ? scores.reduce((m, s) => s.pts > m.pts ? s : m, scores[0]) : null
-    const worstGame = scores.length ? scores.reduce((m, s) => s.pts < m.pts ? s : m, scores[0]) : null
-
-    // Top rival = opponent who has defeated this owner the most
-    const rivalLossCount: Record<string, number> = {}
-    nonConsolationGames.forEach(g => {
-      const opp    = g.team1 === ownerName ? g.team2 : g.team1
-      const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
-      const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
-      if (oppPts > myPts) rivalLossCount[opp] = (rivalLossCount[opp] || 0) + 1
-    })
-    const topRivalName = Object.entries(rivalLossCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
-    let rivalW = 0, rivalL = 0
-    if (topRivalName) {
-      nonConsolationGames.forEach(g => {
-        const opp = g.team1 === ownerName ? g.team2 : g.team1
-        if (opp !== topRivalName) return
-        const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
-        const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
-        if (myPts >= oppPts) rivalW++; else rivalL++
-      })
-    }
-
-    // Longest win streak (regular season + championship path only)
-    const sorted = [...nonConsolationGames].sort((a, b) => a.year - b.year || a.week - b.week)
-    let maxStreak = 0, curStreak = 0
-    let streakStart = sorted.length > 0 ? sorted[0] : null
-    let streakEnd   = sorted.length > 0 ? sorted[0] : null
-    let tmpStart    = sorted.length > 0 ? sorted[0] : null
-    sorted.forEach(g => {
-      const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
-      const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
-      if (myPts >= oppPts) {
-        if (curStreak === 0) tmpStart = g
-        curStreak++
-        if (curStreak > maxStreak) { maxStreak = curStreak; streakStart = tmpStart; streakEnd = g }
-      } else {
-        curStreak = 0
-      }
-    })
-
-    // Top scorers — players with most total points started for this owner, excluding DEF
-    // Build name + position lookup from all draft picks
-    const playerNameMap: Record<string, string> = {}
-    const playerPosMap: Record<string, string> = {}
-    Object.values(draftData).forEach(({ picks }) => {
-      picks.forEach(p => {
-        if (!playerNameMap[p.player_id])
-          playerNameMap[p.player_id] = [p.metadata.first_name, p.metadata.last_name].filter(Boolean).join(' ')
-        if (!playerPosMap[p.player_id])
-          playerPosMap[p.player_id] = p.metadata.position ?? ''
-      })
-    })
-
-    // Find this owner's roster_id for each year
-    const ownerRosterIds: Record<number, number> = {}
-    Object.entries(rosterUserMaps).forEach(([yearStr, rMap]) => {
-      const year = Number(yearStr)
-      const entry = Object.entries(rMap).find(([, name]) => name === ownerName)
-      if (entry) ownerRosterIds[year] = Number(entry[0])
-    })
-
-    // Accumulate starter points per player across all weeks/years
-    const playerPts: Record<string, { name: string; pos: string; pts: number }> = {}
-    Object.entries(matchups).forEach(([yearStr, weeks]) => {
-      const year = Number(yearStr)
-      if (!isSeasonComplete(leagues[year])) return
-      const rId = ownerRosterIds[year]
-      if (rId == null) return
-      Object.values(weeks).forEach(({ matchups: weekMatchups }) => {
-        const myMatchup = weekMatchups.find(m => m.roster_id === rId)
-        if (!myMatchup?.starters?.length || !myMatchup.starters_points?.length) return
-        myMatchup.starters.forEach((playerId, i) => {
-          const pos = playerPosMap[playerId] ?? ''
-          // Exclude defenses by position or by team-abbreviation ID (Sleeper uses e.g. "NE", "KC")
-          if (pos === 'DEF' || /^[A-Z]{2,3}$/.test(playerId)) return
-          const pts = myMatchup.starters_points![i] ?? 0
-          if (pts <= 0) return
-          if (!playerPts[playerId])
-            playerPts[playerId] = { name: playerNameMap[playerId] || playerId, pos, pts: 0 }
-          playerPts[playerId].pts += pts
-        })
-      })
-    })
-    const topScorers = Object.values(playerPts).sort((a, b) => b.pts - a.pts).slice(0, 5)
-
-    return { bestGame, worstGame, topRivalName, rivalW, rivalL, maxStreak, streakStart, streakEnd, topScorers }
-  }, [nonConsolationGames, ownerName, draftData, rosterUserMaps, matchups, leagues])
-
-  const playoffStats = useMemo(() => {
-    let finalsW = 0
-    let finalsL = 0
-
-    for (const [yearStr, bracket] of Object.entries(brackets)) {
-      const year = Number(yearStr)
-      // Finals results only count once the season is complete
-      if (!isSeasonComplete(leagues[year])) continue
-      const rMap = rosterUserMaps[year] ?? {}
-      const ownerEntry = Object.entries(rMap).find(([, name]) => name === ownerName)
-      if (!ownerEntry) continue
-      const rId = Number(ownerEntry[0])
-
-      const champGame = bracket.winners?.find(g => g.p === 1)
-      if (champGame) {
-        if (champGame.w === rId) finalsW++
-        else if (champGame.l === rId) finalsL++
-      }
-    }
-
-    const byes = playoffByeYears({ brackets, rosterUserMaps, leagues })[ownerName]?.length ?? 0
-
-    return { finalsW, finalsL, byes }
-  }, [brackets, rosterUserMaps, leagues, ownerName])
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />
 
-  const seasons = ownerSeasons[ownerName]
-  if (!seasons?.length) {
+  if (!profile) {
     return (
       <div className="text-center py-16 text-s-text3">
         <div className="text-[48px] mb-4">🤷</div>
@@ -181,47 +37,32 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     )
   }
 
-  const totalW = seasons.reduce((a, s) => a + s.wins, 0)
-  const totalL = seasons.reduce((a, s) => a + s.losses, 0)
-  const pct = (totalW / (totalW + totalL || 1) * 100).toFixed(1)
-  const avgPF = seasons.reduce((a, s) => a + s.pf, 0) / seasons.length
-  const avgPA = seasons.reduce((a, s) => a + s.pa, 0) / seasons.length
-
-  const best  = seasons.reduce((b, s) => (s.wins / (s.wins + s.losses || 1)) > (b.wins / (b.wins + b.losses || 1)) ? s : b, seasons[0])
-  const worst = seasons.reduce((b, s) => (s.wins / (s.wins + s.losses || 1)) < (b.wins / (b.wins + b.losses || 1)) ? s : b, seasons[0])
-
-  const champs = MANUAL_CHAMPS.filter(c => c.winner?.includes(ownerName))
-  const shame  = MANUAL_SHAME.filter(s => s.loser === ownerName)
-  const earn   = EARNINGS_DATA.find(e => e.owner === ownerName)
-
-  const allOwnerNames = [...new Set(allMatchupsFiltered.flatMap(g => [g.team1, g.team2]))]
+  const { seasons, finals, bestSeason, worstSeason, topRival, bestGame, worstGame, winStreak, earnings } = profile
+  const pct = (profile.winpct * 100).toFixed(1)
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'seasons', label: 'Season Log' },
     { id: 'h2h',     label: 'H2H Records' },
-    { id: 'gamelog', label: `Game Log (${nonConsolationGames.length})` },
+    { id: 'gamelog', label: `Game Log (${profile.games.length})` },
   ]
 
   // ── Owner stat grid (design 4a) — 12 cells, semantically coloured Barlow values ──────
-  const games  = seasons.reduce((a, s) => a + s.wins + s.losses, 0)
-  const avgPFg = (seasons.reduce((a, s) => a + s.pf, 0) / Math.max(1, games)).toFixed(1)
-  const avgPAg = (seasons.reduce((a, s) => a + s.pa, 0) / Math.max(1, games)).toFixed(1)
   const SAGE = '#7FA886', BRICK = '#B4636B', GOLD = '#C9A24B'
-  const finalsGames = playoffStats.finalsW + playoffStats.finalsL
+  const finalsGames = finals.wins + finals.losses
 
   const statCells: { label: string; value: string; sub?: string; color?: string }[] = [
-    { label: 'Career Record', value: `${totalW}–${totalL}`, sub: `${pct}% win rate` },
-    { label: 'Avg PF / Game', value: avgPFg, sub: `${avgPF.toFixed(0)} pts/season` },
-    { label: 'Avg PA / Game', value: avgPAg, sub: `${avgPA.toFixed(0)} allowed/season`, color: BRICK },
-    { label: 'Net Earnings', value: earn ? fmtMoney(earn.total) : 'N/A', color: earn ? (earn.total >= 0 ? SAGE : BRICK) : undefined },
-    { label: 'Finals Record', value: finalsGames > 0 ? `${playoffStats.finalsW}–${playoffStats.finalsL}` : '—', sub: finalsGames > 0 ? `${finalsGames} Finals appearance${finalsGames !== 1 ? 's' : ''}` : 'Never reached Finals', color: playoffStats.finalsW > 0 ? GOLD : undefined },
-    { label: 'Playoff Byes', value: playoffStats.byes > 0 ? String(playoffStats.byes) : '—', sub: playoffStats.byes > 0 ? `first-round bye${playoffStats.byes !== 1 ? 's' : ''}` : 'No byes earned', color: playoffStats.byes > 0 ? GOLD : undefined },
-    { label: 'Best Season', value: String(best.year), sub: `${best.wins}–${best.losses} record`, color: SAGE },
-    { label: 'Worst Season', value: String(worst.year), sub: `${worst.wins}–${worst.losses} record`, color: BRICK },
-    { label: 'Top Rival', value: funStats.topRivalName ?? '—', sub: funStats.topRivalName ? `${funStats.rivalW}–${funStats.rivalL} vs them` : undefined },
-    { label: 'Best Game', value: funStats.bestGame ? fmtPts(funStats.bestGame.pts) : '—', sub: funStats.bestGame ? `${funStats.bestGame.year} W${funStats.bestGame.week} vs ${funStats.bestGame.opp}` : undefined, color: SAGE },
-    { label: 'Worst Game', value: funStats.worstGame ? fmtPts(funStats.worstGame.pts) : '—', sub: funStats.worstGame ? `${funStats.worstGame.year} W${funStats.worstGame.week} vs ${funStats.worstGame.opp}` : undefined, color: BRICK },
-    { label: 'Longest Win Streak', value: funStats.maxStreak > 0 ? `${funStats.maxStreak}W` : '—', sub: funStats.maxStreak > 0 && funStats.streakStart && funStats.streakEnd ? `${funStats.streakStart.year} W${funStats.streakStart.week}–W${funStats.streakEnd.week}` : undefined, color: GOLD },
+    { label: 'Career Record', value: `${profile.wins}–${profile.losses}`, sub: `${pct}% win rate` },
+    { label: 'Avg PF / Game', value: profile.pfPerGame.toFixed(1), sub: `${profile.pfPerSeason.toFixed(0)} pts/season` },
+    { label: 'Avg PA / Game', value: profile.paPerGame.toFixed(1), sub: `${profile.paPerSeason.toFixed(0)} allowed/season`, color: BRICK },
+    { label: 'Net Earnings', value: earnings != null ? fmtMoney(earnings) : 'N/A', color: earnings != null ? (earnings >= 0 ? SAGE : BRICK) : undefined },
+    { label: 'Finals Record', value: finalsGames > 0 ? `${finals.wins}–${finals.losses}` : '—', sub: finalsGames > 0 ? `${finalsGames} Finals appearance${finalsGames !== 1 ? 's' : ''}` : 'Never reached Finals', color: finals.wins > 0 ? GOLD : undefined },
+    { label: 'Playoff Byes', value: profile.byes > 0 ? String(profile.byes) : '—', sub: profile.byes > 0 ? `first-round bye${profile.byes !== 1 ? 's' : ''}` : 'No byes earned', color: profile.byes > 0 ? GOLD : undefined },
+    { label: 'Best Season', value: String(bestSeason.year), sub: `${bestSeason.wins}–${bestSeason.losses} record`, color: SAGE },
+    { label: 'Worst Season', value: String(worstSeason.year), sub: `${worstSeason.wins}–${worstSeason.losses} record`, color: BRICK },
+    { label: 'Top Rival', value: topRival?.name ?? '—', sub: topRival ? `${topRival.wins}–${topRival.losses} vs them` : undefined },
+    { label: 'Best Game', value: bestGame ? fmtPts(bestGame.pts) : '—', sub: bestGame ? `${bestGame.year} W${bestGame.week} vs ${bestGame.opp}` : undefined, color: SAGE },
+    { label: 'Worst Game', value: worstGame ? fmtPts(worstGame.pts) : '—', sub: worstGame ? `${worstGame.year} W${worstGame.week} vs ${worstGame.opp}` : undefined, color: BRICK },
+    { label: 'Longest Win Streak', value: winStreak.length > 0 ? `${winStreak.length}W` : '—', sub: winStreak.length > 0 && winStreak.start && winStreak.end ? `${winStreak.start.year} W${winStreak.start.week}–W${winStreak.end.week}` : undefined, color: GOLD },
   ]
 
   return (
@@ -263,26 +104,26 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 {ownerName}
               </h1>
               <div className="mt-2.5 text-[11px] font-medium uppercase tracking-[1.5px] text-s-text2">
-                {seasons.length} Seasons · {totalW}W–{totalL}L · {pct}% Win Rate
+                {seasons.length} Seasons · {profile.wins}W–{profile.losses}L · {pct}% Win Rate
               </div>
             </div>
           </div>
 
           {/* Badge chips */}
           <div className="flex flex-wrap gap-2.5 sm:justify-end">
-            {champs.map(c => (
+            {profile.titles.map(c => (
               <span key={c.year} className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px] text-gold-soft" style={{ borderColor: 'rgba(var(--gold-rgb), 0.35)' }}>
                 {c.year}{c.half ? ' ½' : ''} Champ
               </span>
             ))}
-            {shame.map(s => (
+            {profile.toiletBowls.map(s => (
               <span key={s.year} className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px] text-loss" style={{ borderColor: 'rgba(180,90,90,0.35)' }}>
                 {s.year} Shame
               </span>
             ))}
-            {earn && (
-              <span className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px]" style={{ color: earn.total >= 0 ? '#7FA886' : '#B4636B', borderColor: earn.total >= 0 ? 'rgba(127,168,134,0.35)' : 'rgba(180,90,90,0.35)' }}>
-                {fmtMoney(earn.total)} Net
+            {earnings != null && (
+              <span className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px]" style={{ color: earnings >= 0 ? '#7FA886' : '#B4636B', borderColor: earnings >= 0 ? 'rgba(127,168,134,0.35)' : 'rgba(180,90,90,0.35)' }}>
+                {fmtMoney(earnings)} Net
               </span>
             )}
           </div>
@@ -307,14 +148,14 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       </div>
 
       {/* ── Top scorers band ─────────────────────────────────────────── */}
-      {funStats.topScorers.length > 0 && (
+      {profile.topScorers.length > 0 && (
         <div className="-mx-4 flex flex-wrap items-center gap-4 border-b bg-panel-2 px-4 py-[18px] sm:px-8" style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}>
           <div className="flex flex-shrink-0 items-center gap-2.5">
             <span className="h-px w-4 bg-gold" />
             <span className="text-[10px] font-bold uppercase tracking-[3px] text-gold-soft">Top Scorers</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {funStats.topScorers.map(p => (
+            {profile.topScorers.map(p => (
               <span
                 key={p.name}
                 className="inline-flex items-center gap-2 border px-3.5 py-1.5 text-[11px]"
@@ -356,7 +197,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
               </tr>
             </thead>
             <tbody>
-              {[...seasons].sort((a, b) => a.year - b.year).map(s => {
+              {seasons.map(s => {
                 const margin = s.pf - s.pa
                 const spct = (s.wins / (s.wins + s.losses || 1) * 100).toFixed(1)
                 return (
@@ -386,7 +227,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
       {/* H2H Records */}
       {tab === 'h2h' && (
-        <H2HGrid ownerName={ownerName} allMatchups={allMatchupsFiltered} allOwnerNames={allOwnerNames} />
+        <H2HGrid ownerName={ownerName} allMatchups={profile.h2hGames} allOwnerNames={profile.h2hOwners} />
       )}
 
       {/* Game Log */}
@@ -395,7 +236,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
           className="max-h-[500px] overflow-y-auto rounded-[6px]"
           style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
         >
-          {nonConsolationGames.map(g => {
+          {profile.games.map(g => {
             const myPts  = g.team1 === ownerName ? g.pts1 : g.pts2
             const oppPts = g.team1 === ownerName ? g.pts2 : g.pts1
             const opp    = g.team1 === ownerName ? g.team2 : g.team1

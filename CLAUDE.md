@@ -119,8 +119,12 @@ lib/
     transactions.ts         enrichTransaction() — owner + player names on a move
   stats/                    The stat engine — pure functions, single source of truth (@/lib/stats)
     game-filters.ts         gameKey(), consolation/champ-path key sets, manual exclusions
-    career.ts               buildCareerStats(), championshipCount(), shameCount(),
-                            activeOwnerNames(), careerMilestones() (Records → Career Milestones)
+    career.ts               buildCareerStats(), championshipCount(), careerLeaderboard()
+                            (Owners → Career Leaderboard), careerMilestones() (Records → Career
+                            Milestones)
+    owner-profile.ts        ownerProfile() — everything on an owner's profile page: career line,
+                            finals, byes, best/worst season and game, top rival, win streak,
+                            top scorers, and the Game Log/H2H games
     h2h.ts                  h2hRecord(), h2hVsAll(), daddyOf() + DADDY_WIN_RATE/DADDY_MIN_GAMES
     records.ts              computeRecords() — record-book extremes and streaks
     byes.ts                 playoffByeYears()
@@ -207,7 +211,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **Name resolution is the linchpin.** Sleeper usernames change; canonical owner first names don't. Always use `resolveOwnerName()` or the `rosterUserMaps[year]` lookup. The mappings live in `lib/league/owners.ts`.
 - **Manual overrides exist for a reason.** `MANUAL_CHAMPS`, `MANUAL_SHAME`, and `MANUAL_PLAYOFF_OVERRIDES` in `lib/league/history.ts` correct Sleeper bracket data that is incomplete or wrong for specific seasons. Do not remove them.
 - **Import from barrels, not sub-files.** `@/lib/league`, `@/lib/sources`, `@/lib/data-processing`, `@/lib/stats`, `@/lib/current-season`, `@/lib/search`, plus the single-file modules `@/lib/positions` and `@/lib/utils`. Files inside a folder import their siblings directly (`./season-settings`). A barrel lists only what the rest of the app imports — knip flags anything else.
-- **Stat math lives in `lib/stats/`.** Career records, championship counts, H2H records, the Daddy rule, record-book extremes, and career milestones have one implementation each. Never recompute them inline in a component — half-titles (0.5), shared-winner substring matching, and tie-as-win rules are easy to get subtly wrong.
+- **Stat math lives in `lib/stats/`.** Career records, championship counts, H2H records, the Daddy rule, record-book extremes, career milestones, the career leaderboard, and owner profiles have one implementation each. Never recompute them inline in a component — half-titles (0.5), shared-winner substring matching, and tie-as-win rules are easy to get subtly wrong.
 - **One version of each rule.** Playoff start week → `playoffStartWeek()`; which weeks hold a season's moves → `transactionWeeks()` (the site and the snapshot script both use it); who owned a draft slot → `draftSlotOwners()`; inactive owners → `INACTIVE_OWNERS`; ordinals, W–L records, dates, signed dollars, and win-% colors → `lib/utils`. Reuse them; don't re-derive.
 - **Never hand-type what the data knows.** Season counts come from the snapshot manifest (footer, site description) or `state.years`; Career Milestones from `careerMilestones()`; the pick-order year from the stock-pick window; the season tab's year from `CURRENT_SEASON`. Hand-typed numbers go stale.
 - **The snapshot is an accelerator, never a dependency.** If `public/data/manifest.json` fails to load, `LeagueContext` must fall back to full live fetching. Don't break that path. Never edit `public/data/` by hand — regenerate with `npm run snapshot`, and diff old seasons before committing.

@@ -156,8 +156,10 @@ perspective owner), record-book extremes, power rankings, and the Luck Index
 (`luck.ts`: actual wins − weekly all-play expected wins, ties ½, regular season
 only — the one formula behind Seasons, Records, search, and the season tab), the
 💦 Daddy rule (`h2h.ts` `daddyOf`: 75%+ of 5+ meetings — Records' Who's Your Daddy
-and the season tab's flair), and Records' Career Milestones (`careerMilestones`,
-computed from earnings, titles, and toilet bowls). Locked by vitest tests.
+and the season tab's flair), Records' Career Milestones (`careerMilestones`,
+computed from earnings, titles, and toilet bowls), the Owners leaderboard
+(`careerLeaderboard`, with its championship-path playoffs view), and each owner's
+profile page (`owner-profile.ts`). Locked by vitest tests.
 
 ### Search (`lib/search/` + `components/search/`)
 
