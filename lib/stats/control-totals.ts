@@ -3,8 +3,8 @@
 //  - season totals: the site's record, points for and against, and potential
 //    points (best possible lineup) against the totals Sleeper stores on every
 //    roster;
-//  - player points: Sleeper's weekly player scores against the NFL's box
-//    scores (nflverse), rescored with the league's own settings.
+//  - player and team-defense points: Sleeper's weekly scores against the
+//    NFL's box scores (nflverse), rescored with the league's own settings.
 // Every difference must be listed below with its cause, or the tests fail.
 
 import type { LeagueState } from '@/types'
@@ -32,10 +32,11 @@ const CENT = 0.015
 
 // ── Why totals differ ─────────────────────────────────────────────────────────
 const STALE_2019 =
-  "Sleeper's 2019 season totals don't add up from its own weekly scores. Offense and kicker scores match " +
-  "the NFL's box scores (two Sleeper kicker errors aside), and what's left is mostly whole numbers (2, 4, 6, " +
-  '8, 10), the size of team-defense scoring tiers. Likely a defense scoring change made after those weeks ' +
-  "were totaled; unconfirmed until defenses are rescored."
+  "Sleeper's stored 2019 totals match the NFL's box scores; its weekly 2019 scores today don't. They differ " +
+  'in the team-defense weeks in KNOWN_DEFENSE_GAPS (mostly special-teams recoveries and return touchdowns ' +
+  'Sleeper now scores differently) and in its two 2019 kicker errors (5.6 points each). Those account for ' +
+  "every 2019 gap but a few tenths of a point and three larger leftovers: Daniyaal's points against (2.00), " +
+  "Teja's points against (2.70) and Armaan's potential points (2.90)."
 const STALE_BENCH =
   'Points for and against tie, so every starter is right; Sleeper totaled potential points before a ' +
   "bench player's weekly score changed. Today's offense and kicker scores match the NFL's box scores."
@@ -169,9 +170,67 @@ export const KNOWN_PLAYER_GAPS: Record<string, { diff: number; cause: string }> 
   '2025 6 11560': { diff: 0.5, cause: 'The sources differ on his rushing yards (nflverse +3, Sleeper -2): 5 yards is 0.5 points.' }, // Caleb Williams
 }
 
+// ── Why a team defense's points differ ────────────────────────────────────────
+const ST_RECOVERY =
+  "Sleeper credits special-teams fumble recoveries the NFL's box score doesn't count: a muffed punt or " +
+  "kick (either team's), a team falling on its own returner's fumble, or one recovery counted twice."
+const OWN_RECOVERY = 'Sleeper credits Cleveland for recovering its own fumble on an interception return.'
+const RETURN_TD_2019 =
+  "2019: Sleeper left the opponent's kick or punt return touchdown out of points allowed. Since 2020 it " +
+  'nearly always counts one against the D/ST, as the rescore does.'
+const DEFENSIVE_TD_2019 =
+  "2019: Sleeper counted the opponent's interception or fumble return touchdown as points allowed. From " +
+  '2020 on it never does, and the rescore leaves them out.'
+const BLOCKED_PUNT_TD = "Sleeper credits New England's blocked punt but not the touchdown scored on it."
+const BLOCKED_FG = "The play-by-play shows a blocked field goal that Sleeper doesn't credit."
+const BOTCHED_PUNT =
+  "Ashton Dulin, a receiver, scored on the Rams' botched punt. Sleeper treats it as a defensive touchdown " +
+  "and leaves it out of points allowed; the rescore credits fumble-return touchdowns to defenders only."
+const YARDS_350 =
+  'Chicago allowed 351 yards by the box score and the play-by-play, 348 by Sleeper: either side of the ' +
+  '350-yard tier line.'
+const SUSPENDED =
+  "Bills-Bengals was suspended after Damar Hamlin's collapse, so the NFL has no box score; Sleeper kept " +
+  "Buffalo's first-quarter points."
+
+/** Every rostered team-defense week whose rescored points differ from Sleeper's, "season week team": nflverse minus Sleeper, and why. */
+export const KNOWN_DEFENSE_GAPS: Record<string, { diff: number; cause: string }> = Object.fromEntries([
+  ...([
+    ['2019 1 BAL', -2], ['2019 1 SEA', -2], ['2019 2 CAR', -4], ['2019 2 MIN', -2], ['2019 3 JAX', -2],
+    ['2019 3 MIN', -2], ['2019 4 IND', -2], ['2019 5 NO', -2], ['2019 5 SF', -2], ['2019 5 TEN', -2],
+    ['2019 6 CAR', -2], ['2019 7 LAR', -2], ['2019 7 NE', -2], ['2019 8 BUF', -2], ['2019 8 CAR', -2],
+    ['2019 9 IND', -2], ['2019 9 MIN', -4], ['2019 9 NE', -2], ['2019 9 PHI', -2], ['2019 9 PIT', -2],
+    ['2019 10 CLE', -2], ['2019 10 PIT', -2], ['2019 11 BAL', -2], ['2019 11 JAX', -2], ['2019 11 MIN', -4],
+    ['2019 12 BUF', -2], ['2019 12 NO', -2], ['2019 12 TEN', -2], ['2019 14 CHI', -2], ['2019 15 NE', -2],
+    ['2019 15 SF', -2], ['2020 1 NE', -2], ['2020 1 PHI', -2], ['2020 3 NO', -2], ['2020 5 ARI', -2],
+    ['2023 2 PHI', -2],
+  ] as const).map(([k, diff]) => [k, { diff, cause: ST_RECOVERY }]),
+  ['2019 3 SEA', { diff: -2, cause: ST_RECOVERY }], // SEA vs NO: also leaves New Orleans's punt-return TD out of points allowed, in the same tier
+  ['2019 4 NE', { diff: 6, cause: BLOCKED_PUNT_TD }], // NE vs BUF
+  ['2019 6 BAL', { diff: -2, cause: RETURN_TD_2019 }], // BAL vs CIN: Cincinnati's kickoff return
+  ['2019 6 NE', { diff: 6, cause: BLOCKED_PUNT_TD }], // NE vs NYG
+  ['2019 7 NO', { diff: -1, cause: RETURN_TD_2019 }], // NO vs CHI: Chicago's kickoff return
+  ['2019 11 CAR', { diff: -1, cause: RETURN_TD_2019 }], // CAR vs ATL: Atlanta's punt return
+  ['2019 13 SEA', { diff: -1, cause: `${DEFENSIVE_TD_2019} ${ST_RECOVERY}` }], // SEA vs MIN: Minnesota's pick-six
+  ['2019 14 HOU', { diff: 4, cause: DEFENSIVE_TD_2019 }], // HOU vs DEN: Denver's fumble return
+  ['2019 14 LAR', { diff: 1, cause: DEFENSIVE_TD_2019 }], // LAR vs SEA: Seattle's pick-six
+  ['2019 15 LAC', { diff: 4, cause: DEFENSIVE_TD_2019 }], // LAC vs MIN: Minnesota's fumble return
+  ['2020 3 CLE', { diff: -2, cause: OWN_RECOVERY }], // CLE vs WAS
+  ['2021 2 CLE', { diff: 2, cause: BLOCKED_FG }], // CLE vs HOU
+  ['2021 2 LAR', { diff: -1, cause: BOTCHED_PUNT }], // LAR vs IND
+  ['2021 4 CHI', { diff: -1, cause: YARDS_350 }], // CHI vs DET
+  ['2021 17 TEN', { diff: 2, cause: BLOCKED_FG }], // TEN vs MIA
+  ['2022 17 BUF', { diff: -8, cause: SUSPENDED }], // BUF vs CIN
+])
+
 export const playerGapKey = (season: number, week: number, playerId: string) => `${season} ${week} ${playerId}`
 
 /** Why a player-week's rescored points differ from Sleeper's; null when it isn't documented. */
 export function playerGapCause(season: number, week: number, playerId: string): string | null {
   return KNOWN_PLAYER_GAPS[playerGapKey(season, week, playerId)]?.cause ?? null
+}
+
+/** Why a team defense's rescored week differs from Sleeper's; null when it isn't documented. */
+export function defenseGapCause(season: number, week: number, team: string): string | null {
+  return KNOWN_DEFENSE_GAPS[playerGapKey(season, week, team)]?.cause ?? null
 }

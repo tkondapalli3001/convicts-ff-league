@@ -118,14 +118,16 @@ lib/
                             buildDraftSlotRows() for Slot Analysis
     draft-board.ts          buildDraftBoard() — rounds × slots grid
     transactions.ts         enrichTransaction() — owner + player names on a move
-    nflverse.ts             nflverseStatLine() — an nflverse box-score row as a Sleeper stat line
+    nflverse.ts             nflverseStatLine(), nflverseDefenseStatLine() — nflverse box scores (a
+                            player's, a team defense's) as Sleeper stat lines
   stats/                    The stat engine — pure functions, single source of truth (@/lib/stats)
     scoring.ts              scoreStats() — a stat line × the league's scoring_settings (projections,
                             season stats, and the nflverse tie-out all score through it)
     lineups.ts              bestLineup(), startingSlots() — the exact best possible lineup; its
                             season totals tie to Sleeper's potential points (ppts)
-    control-totals.ts       seasonControlTotals() + KNOWN_GAPS / KNOWN_PLAYER_GAPS — the tie-outs
-                            and every documented difference with its cause
+    control-totals.ts       seasonControlTotals() + KNOWN_GAPS / KNOWN_PLAYER_GAPS /
+                            KNOWN_DEFENSE_GAPS — the tie-outs and every documented difference
+                            with its cause
     game-filters.ts         gameKey(), consolation/champ-path key sets, manual exclusions
     career.ts               buildCareerStats(), championshipCount(), careerLeaderboard()
                             (Owners → Career Leaderboard), careerMilestones() (Records → Career
@@ -173,7 +175,8 @@ types/index.ts              Every shared interface — Sleeper API shapes + proc
 data/                       Tidy history tables (CSV), written by npm run dataset, committed, not
                             deployed: players, owner_weeks, lineups, transactions (failed claims
                             too), draft_picks (with ADP), projections (with kickoff times),
-                            player_weeks (nflverse box scores, rescored), control_totals.
+                            player_weeks and defense_weeks (nflverse box scores, rescored),
+                            control_totals.
                             data/README.md is the data dictionary
 
 public/
@@ -232,7 +235,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **Stat math lives in `lib/stats/`.** Career records, championship counts, H2H records, the Daddy rule, record-book extremes, career milestones, the career leaderboard, and owner profiles have one implementation each. Never recompute them inline in a component — half-titles (0.5), shared-winner substring matching, and tie-as-win rules are easy to get subtly wrong.
 - **One version of each rule.** Playoff start week → `playoffStartWeek()`; which weeks hold a season's moves → `transactionWeeks()` (the site and the snapshot script both use it); who owned a draft slot → `draftSlotOwners()`; inactive owners → `INACTIVE_OWNERS`; ordinals, W–L records, dates, signed dollars, and win-% colors → `lib/utils`. Reuse them; don't re-derive.
 - **Never hand-type what the data knows.** Season counts come from the snapshot manifest (footer, site description) or `state.years`; Career Milestones from `careerMilestones()`; the pick-order year from the stock-pick window; the season tab's year from `CURRENT_SEASON`. Hand-typed numbers go stale.
-- **Every number ties out, or its gap is documented.** On every deploy, the control-totals test recomputes each owner-season's record, points for/against and potential points with the site's code and ties them to the totals Sleeper stores on the roster, and ties Sleeper's weekly player points to the NFL's box scores (nflverse) rescored with the league's settings. A difference that isn't in `KNOWN_GAPS` / `KNOWN_PLAYER_GAPS` (`lib/stats/control-totals.ts`), with its cause, fails the build. Find the cause before adding an entry; never loosen the tolerance to make a test pass.
+- **Every number ties out, or its gap is documented.** On every deploy, the control-totals test recomputes each owner-season's record, points for/against and potential points with the site's code and ties them to the totals Sleeper stores on the roster, and ties Sleeper's weekly player and team-defense points to the NFL's box scores (nflverse) rescored with the league's settings. A difference that isn't in `KNOWN_GAPS` / `KNOWN_PLAYER_GAPS` / `KNOWN_DEFENSE_GAPS` (`lib/stats/control-totals.ts`), with its cause, fails the build. Find the cause before adding an entry; never loosen the tolerance to make a test pass.
 - **The snapshot is an accelerator, never a dependency.** If `public/data/manifest.json` fails to load, `LeagueContext` must fall back to full live fetching. Don't break that path (BUILD.md M3 tests it). The footer and site description read the manifest at build time, so the file must exist to build — test the fallback by blocking the request, never by deleting the file. Never edit `public/data/` by hand — regenerate with `npm run snapshot`, and diff old seasons before committing.
 - **Projections degrade gracefully.** `lib/current-season/projections.ts` and `season-stats.ts` hit undocumented Sleeper endpoints; every failure returns null and the season tab renders without projections or season stats (dashes; roster names fall back to the player index). Never let either break the page. Season FPTS are Sleeper's season totals × the league's `scoring_settings` — that matches the points Sleeper credits rostered players to the cent, so don't swap in Sleeper's preset `pts_half_ppr`.
 - **Flair and ammo are true stats, never invented.** Every badge, ammo line, and Matchup of the Week reason comes from `lib/current-season/facts.ts`, the stat engine, or the stakes engine. Only championship-path games (`buildChampPathGameKeys`) count as playoff eliminations — a consolation or toilet-bowl game is never billed as one. 💦 Daddy is `daddyOf()` (75%+ over 5+ meetings) — the same rule as Records → Who's Your Daddy.

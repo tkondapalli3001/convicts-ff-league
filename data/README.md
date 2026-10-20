@@ -5,11 +5,12 @@ site never reads this folder (it isn't deployed). Two things do:
 
 - `npm run dataset` writes it, from the committed snapshots in `public/data/`,
   Sleeper's player list, projections and ADP, Fantasy Football Calculator's ADP,
-  nflverse's weekly box scores and schedule, and the DynastyProcess player-ID
-  crosswalk, through the site's own code. Add `-- --cache <dir>` to keep and reuse
+  nflverse's weekly player and team box scores and schedule, and the DynastyProcess
+  player-ID crosswalk, through the site's own code. Add `-- --cache <dir>` to keep and reuse
   the downloads.
 - The control-totals test (`lib/stats/__tests__/control-totals.test.ts`) reads
-  `players.csv`, `player_weeks.csv`, and `draft_picks.csv` on every deploy.
+  `players.csv`, `player_weeks.csv`, `defense_weeks.csv`, and `draft_picks.csv` on
+  every deploy.
 
 Rebuild it whenever `public/data/` changes, then commit both.
 
@@ -84,6 +85,18 @@ nflverse's own. A blank stat means 0. `points` is that line scored with the seas
 `scoring_settings`. For a player on a league roster that week, `rostered_by`,
 `sleeper_points`, and `diff` (points minus Sleeper's) are filled in.
 
+**defense_weeks.csv**, one row per team defense per regular-season week, 2019-2025,
+all 32 teams. The columns are nflverse's team box score (`def_interceptions` through
+`def_pat_blocks`), the same columns from the opponent's row (`opponent_`), the
+opponent's final score from the schedule, and `fumble_return_tds`: fumble-recovery
+touchdowns scored by a defender, from the player box scores. A blank means 0.
+`points_allowed` and `yards_allowed` follow Sleeper's definitions. Points allowed is
+the opponent's score less its defense's touchdowns and safeties; a kick or punt return
+touchdown still counts against the D/ST. Yards allowed is the opponent's total net
+yards. `points` is the week scored with the season's settings. For a defense on a
+league roster, `rostered_by`, `sleeper_points`, `diff`, and `cause` are filled in.
+`team` uses Sleeper's ids: LAR for the Rams, OAK for the 2019 Raiders.
+
 **control_totals.csv**, four rows per owner-season: `record`, `pf`, `pa`, and `ppts`
 (potential points, Sleeper's best-lineup total).
 `ours` comes from the site's code and `sleeper` from the totals Sleeper stores on the
@@ -97,7 +110,10 @@ roster. `cause` explains every row that doesn't tie.
   unexplained.
   - 2019-2021 have documented gaps where Sleeper's frozen season totals don't add up
     from its own weekly scores.
-  - In 2019 the leftover pattern points at a defense scoring change.
+  - 2019's are explained. Sleeper's stored totals match the NFL's box scores; its
+    weekly 2019 scores were changed after the season, in team-defense weeks and two
+    kicker errors. What's left is a few tenths of a point and three totals off by
+    2 to 3 points.
 - **Weekly player points:** 14,684 of 14,691 rostered player-weeks (offense and
   kickers) match the rescored NFL box scores to the cent. The other seven are
   documented, including two Sleeper kicker errors in 2019.
@@ -105,7 +121,12 @@ roster. `cause` explains every row that doesn't tie.
   priced by Sleeper agrees with FFC. The tests fail if a season prices under 90%,
   or if a Sleeper season looks like a ranking (mostly whole numbers) or its rank
   correlation with FFC drops under 0.9.
-- **Not yet checked:** team defenses (they need team-level box scores).
+- **Weekly team-defense points:** 1,747 of 1,798 rostered defense-weeks match the
+  rescored box scores. The other 51, and the suspended 2022 Bills-Bengals game, are
+  documented. Most (37) are special-teams fumble recoveries Sleeper credits and the
+  NFL's box score doesn't count, such as muffed punts. 41 of the 52 are from
+  2019.
 
-Every difference and its cause lives in `KNOWN_GAPS` and `KNOWN_PLAYER_GAPS` in
-`lib/stats/control-totals.ts`. A new difference fails the tests.
+Every difference and its cause lives in `KNOWN_GAPS`, `KNOWN_PLAYER_GAPS`, and
+`KNOWN_DEFENSE_GAPS` in `lib/stats/control-totals.ts`. A new difference fails the
+tests.

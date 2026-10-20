@@ -15,6 +15,8 @@ export { computeLuckIndex } from './luck'
 export { scoreStats } from './scoring'
 export { bestLineup, startingSlots } from './lineups'
 export type { LineupCandidate, BestLineup } from './lineups'
-export { seasonControlTotals, gapCause, gapKey, KNOWN_GAPS, playerGapCause, playerGapKey, KNOWN_PLAYER_GAPS } from './control-totals'
+export {
+  seasonControlTotals, gapCause, gapKey, KNOWN_GAPS, playerGapCause, playerGapKey, KNOWN_PLAYER_GAPS, defenseGapCause, KNOWN_DEFENSE_GAPS,
+} from './control-totals'
 export type { ControlTotal, ControlMetric } from './control-totals'
 export type { AllPlayRecord, LuckEntry } from './luck'

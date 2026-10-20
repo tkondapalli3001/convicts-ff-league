@@ -25,7 +25,7 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 163 tests pass (14 files), the control-total tie-outs included, and the
+- **Health:** 165 tests pass (14 files), the control-total tie-outs included, and the
   deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
   errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
   files, exports, or dependencies. Snapshots frozen for **2019–2025**
@@ -132,8 +132,11 @@ skill versus luck, with every number proven against a source neither of us contr
        Fantasy Football Calculator's for 2019-2020, where Sleeper's is unusable. The two
        rank picks alike (0.94-0.98) but differ by 3-10 picks per player, and neither
        comes from draft day. The tests catch a broken season.
+     - Team defenses rescored from nflverse's team box scores (`data/defense_weeks.csv`):
+       1,747 of 1,798 rostered defense-weeks tie, and all 52 gaps are documented. That
+       solved 2019. Sleeper's stored totals match the box scores, and its weekly 2019
+       scores were changed after the season.
    - **Open:**
-     - Rescoring team defenses, the likely cause of 2019's gaps.
      - A scheduled GitHub Action that commits a weekly snapshot before kickoff. It's the
        only way to get true pre-kickoff projections. Waiting on the owner's OK, since it
        runs unattended and commits to main.

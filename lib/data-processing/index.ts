@@ -3,7 +3,9 @@ export { buildFlatMatchups, flattenSeasonMatchups } from './build-matchups'
 export { buildOwnerSeasons } from './build-seasons'
 export { isSeasonComplete, playoffStartWeek, transactionWeeks } from './season-settings'
 export { enrichTransaction } from './transactions'
-export { nflverseStatLine, NFLVERSE_SCORING_COLUMNS } from './nflverse'
+export {
+  nflverseStatLine, NFLVERSE_SCORING_COLUMNS, nflverseDefenseStatLine, NFLVERSE_DEFENSE_COLUMNS, defensePointsAllowed, defenseYardsAllowed,
+} from './nflverse'
 export type { NflverseRow } from './nflverse'
 export { computePlayerWinRates, computeDraftOwnership, computeDraftStructure, computePlayerScores } from './build-draft-stats'
 export type { OwnershipEntry, DraftStructureEntry, DraftStrategy, PlayerScoreStat } from './build-draft-stats'

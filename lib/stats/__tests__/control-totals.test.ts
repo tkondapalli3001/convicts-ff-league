@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { csvRecords, type SnapshotSeason } from '@/lib/sources'
-import { nflverseStatLine } from '@/lib/data-processing'
-import { KNOWN_GAPS, KNOWN_PLAYER_GAPS, gapKey, playerGapKey, scoreStats, seasonControlTotals } from '@/lib/stats'
+import { nflverseDefenseStatLine, nflverseStatLine } from '@/lib/data-processing'
+import { KNOWN_DEFENSE_GAPS, KNOWN_GAPS, KNOWN_PLAYER_GAPS, gapKey, playerGapKey, scoreStats, seasonControlTotals } from '@/lib/stats'
 
 // The tie-outs (lib/stats/control-totals.ts) over every committed season.
 // Everything is recomputed here with the site's own code: the snapshots in
@@ -94,6 +94,37 @@ describe("Sleeper's weekly player points tie out to the NFL's box scores", () =>
     expect(diffs.filter(d => !KNOWN_PLAYER_GAPS[d.key]).map(d => `${d.key} ${d.diff}`)).toEqual([])
     expect(diffs.filter(d => Math.abs(d.diff - KNOWN_PLAYER_GAPS[d.key].diff) > 0.005).map(d => d.key)).toEqual([])
     expect(Object.keys(KNOWN_PLAYER_GAPS).filter(k => !diffs.some(d => d.key === k))).toEqual([])
+  })
+})
+
+describe("Sleeper's weekly team-defense points tie out to the NFL's box scores", () => {
+  const rows = new Map(csvRecords(readFileSync(join(ROOT, 'data/defense_weeks.csv'), 'utf8')).map(r => [`${r.season} ${r.week} ${r.team}`, r]))
+  const diffs: { key: string; diff: number }[] = []
+  let compared = 0
+  for (const s of seasons) {
+    for (const [week, ms] of Object.entries(s.matchupsByWeek)) {
+      for (const m of ms) {
+        for (const [id, pts] of Object.entries(m.players_points ?? {})) {
+          if (!/^[A-Z]{2,3}$/.test(id)) continue
+          const row = rows.get(`${s.year} ${week} ${id}`)
+          // No box score: a bye, or a game that never finished
+          const ours = row ? scoreStats(nflverseDefenseStatLine(row), s.league.scoring_settings ?? {}) : 0
+          compared++
+          const diff = Math.round((ours - pts) * 100) / 100
+          if (diff !== 0) diffs.push({ key: playerGapKey(s.year, Number(week), id), diff })
+        }
+      }
+    }
+  }
+
+  it('compares every rostered team defense, byes included', () => {
+    expect(compared).toBeGreaterThan(1_850)
+  })
+
+  it('has no differences beyond the documented ones', () => {
+    expect(diffs.filter(d => !KNOWN_DEFENSE_GAPS[d.key]).map(d => `${d.key} ${d.diff}`)).toEqual([])
+    expect(diffs.filter(d => Math.abs(d.diff - KNOWN_DEFENSE_GAPS[d.key].diff) > 0.005).map(d => d.key)).toEqual([])
+    expect(Object.keys(KNOWN_DEFENSE_GAPS).filter(k => !diffs.some(d => d.key === k))).toEqual([])
   })
 })
 

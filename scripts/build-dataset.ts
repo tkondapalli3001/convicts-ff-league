@@ -1,9 +1,10 @@
 // npm run dataset — the league's history as tidy tables in data/ (CSV: one
 // fact per row, opens in Excel, queries in DuckDB or pandas). Built from the
 // committed snapshots in public/data/, Sleeper's player list, projections and
-// ADP, Fantasy Football Calculator's ADP, nflverse's weekly box scores and
-// game schedule, and the DynastyProcess player-ID crosswalk, through the
-// site's own functions, so every number matches what the site computes.
+// ADP, Fantasy Football Calculator's ADP, nflverse's weekly player and team
+// box scores and game schedule, and the DynastyProcess player-ID crosswalk,
+// through the site's own functions, so every number matches what the site
+// computes.
 // See data/README.md for the tables. The site itself never reads data/.
 //
 //   npm run dataset                      download every source
@@ -16,8 +17,9 @@ import { csvRecords, type SnapshotSeason } from '@/lib/sources'
 import type { Transaction } from '@/types'
 import {
   draftSlotOwners, playoffStartWeek, resolveOwnerName, nflverseStatLine, NFLVERSE_SCORING_COLUMNS, type NflverseRow,
+  nflverseDefenseStatLine, NFLVERSE_DEFENSE_COLUMNS, defensePointsAllowed, defenseYardsAllowed,
 } from '@/lib/data-processing'
-import { bestLineup, gapCause, playerGapCause, scoreStats, seasonControlTotals, startingSlots } from '@/lib/stats'
+import { bestLineup, defenseGapCause, gapCause, playerGapCause, scoreStats, seasonControlTotals, startingSlots } from '@/lib/stats'
 
 const ROOT = join(__dirname, '..')
 const SNAP = join(ROOT, 'public', 'data')
@@ -129,17 +131,32 @@ async function main() {
     }
   }
   const nflverse: Record<number, NflverseRow[]> = {}
+  const teamBoxScores: Record<number, NflverseRow[]> = {}
   for (const y of years) {
     const gz = await download(`https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_${y}.csv.gz`, `stats_player_week_${y}.csv.gz`)
     nflverse[y] = csvRecords(gunzipSync(gz).toString('utf8')).filter(r => r.season_type === 'REG')
+    const team = await download(`https://github.com/nflverse/nflverse-data/releases/download/stats_team/stats_team_week_${y}.csv.gz`, `stats_team_week_${y}.csv.gz`)
+    teamBoxScores[y] = csvRecords(gunzipSync(team).toString('utf8')).filter(r => r.season_type === 'REG')
   }
-  // Every kickoff, by season, week, and team
+  // Every kickoff and final score, by season, week, and team
   const kickoff = new Map<string, number>()
+  const finalScore = new Map<string, { opponent: string; opponentPoints: string }>()
+  // The schedule names each team as it was that season (OAK for the 2019 Raiders), as Sleeper's defense ids do
+  const scheduleName = new Map<string, string>()
   for (const g of csvRecords((await download('https://github.com/nflverse/nfldata/raw/master/data/games.csv', 'games.csv')).toString('utf8'))) {
-    if (g.game_type !== 'REG' || !g.gameday || !g.gametime) continue
-    const at = easternToUtc(g.gameday, g.gametime)
-    kickoff.set(`${g.season}:${g.week}:${g.away_team}`, at)
-    kickoff.set(`${g.season}:${g.week}:${g.home_team}`, at)
+    if (g.game_type !== 'REG') continue
+    if (g.gameday && g.gametime) {
+      const at = easternToUtc(g.gameday, g.gametime)
+      kickoff.set(`${g.season}:${g.week}:${g.away_team}`, at)
+      kickoff.set(`${g.season}:${g.week}:${g.home_team}`, at)
+    }
+    if (g.home_score === '' || g.home_score === 'NA') continue
+    // nflverse's box scores call the 2019 Raiders LV; its schedule still says OAK
+    const home = g.home_team === 'OAK' ? 'LV' : g.home_team, away = g.away_team === 'OAK' ? 'LV' : g.away_team
+    finalScore.set(`${g.season}:${g.week}:${home}`, { opponent: away, opponentPoints: g.away_score })
+    finalScore.set(`${g.season}:${g.week}:${away}`, { opponent: home, opponentPoints: g.home_score })
+    scheduleName.set(`${g.season}:${home}`, g.home_team)
+    scheduleName.set(`${g.season}:${away}`, g.away_team)
   }
   const qs = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'].map(pos => `position[]=${pos}`).join('&')
   // Each pick's market price, half-PPR ADP: Sleeper's (its season-long projection
@@ -205,6 +222,7 @@ async function main() {
   const picks: (string | number | boolean | null)[][] = []
   const control: (string | number | boolean | null)[][] = []
   const playerWeeks: (string | number | null)[][] = []
+  const defenseWeeks: (string | number | null)[][] = []
   const projected: (string | number | boolean | null)[][] = []
 
   for (const s of seasons) {
@@ -297,6 +315,38 @@ async function main() {
         diff ? playerGapCause(year, week, sid) ?? 'NEW - not on KNOWN_PLAYER_GAPS' : ''])
     }
 
+    // ── defense_weeks: nflverse team box scores, rescored with this season's rules ─
+    // A fumble-recovery touchdown is the defense's when a defender scores it
+    // (one who picked up a teammate's fumble or took a lateral included)
+    const fumbleReturnTds = new Map<string, number>()
+    for (const r of nflverse[year]) {
+      if (!['DL', 'LB', 'DB'].includes(r.position_group) || !(Number(r.fumble_recovery_tds) > 0)) continue
+      fumbleReturnTds.set(`${r.week}:${r.team}`, (fumbleReturnTds.get(`${r.week}:${r.team}`) ?? 0) + Number(r.fumble_recovery_tds))
+    }
+    const teamWeek = new Map(teamBoxScores[year].map(r => [`${r.week}:${r.team}`, r]))
+    const sleeperDef = (team: string) => {
+      const named = scheduleName.get(`${year}:${team}`) ?? team
+      return named === 'LA' ? 'LAR' : named
+    }
+    for (const t of teamBoxScores[year]) {
+      const game = finalScore.get(`${year}:${t.week}:${t.team}`)
+      const o = game ? teamWeek.get(`${t.week}:${game.opponent}`) : undefined
+      if (!game || !o) continue
+      const value = (c: string) =>
+        c === 'opponent_points' ? game.opponentPoints
+          : c === 'fumble_return_tds' ? String(fumbleReturnTds.get(`${t.week}:${t.team}`) ?? 0)
+            : c === 'opponent_fumble_return_tds' ? String(fumbleReturnTds.get(`${t.week}:${o.team}`) ?? 0)
+              : c.startsWith('opponent_') ? o[c.slice('opponent_'.length)] : t[c]
+      const row: NflverseRow = Object.fromEntries(NFLVERSE_DEFENSE_COLUMNS.map(c => [c, value(c)]))
+      const id = sleeperDef(t.team), week = Number(t.week)
+      const points = scoreStats(nflverseDefenseStatLine(row), s.league.scoring_settings ?? {})
+      const onRoster = rostered.get(`${week}:${id}`)
+      const diff = onRoster ? round2(points - onRoster.points) : null
+      defenseWeeks.push([year, week, id, sleeperDef(game.opponent), ...NFLVERSE_DEFENSE_COLUMNS.map(c => (row[c] === '0' || row[c] === 'NA' ? '' : row[c])),
+        defensePointsAllowed(row), defenseYardsAllowed(row), points, onRoster?.owner ?? '', onRoster ? round2(onRoster.points) : '', diff ?? '',
+        diff ? defenseGapCause(year, week, id) ?? 'NEW - not on KNOWN_DEFENSE_GAPS' : ''])
+    }
+
     // ── projections: Sleeper's projected points for every rostered player ───
     for (const [wk, rows] of Object.entries(s.matchupsByWeek)) {
       const byPlayer = new Map((projections[`${year}:${wk}`] ?? []).map(r => [r.player_id, r]))
@@ -328,6 +378,8 @@ async function main() {
     'projection_updated_utc', 'kickoff_utc', 'before_kickoff'], projected)
   writeCsv('player_weeks.csv', ['season', 'week', 'gsis_id', 'player_id', 'player', 'position', 'nfl_team', 'opponent',
     ...NFLVERSE_SCORING_COLUMNS, 'targets', 'carries', 'pass_attempts', 'points', 'rostered_by', 'sleeper_points', 'diff', 'cause'], playerWeeks)
+  writeCsv('defense_weeks.csv', ['season', 'week', 'team', 'opponent', ...NFLVERSE_DEFENSE_COLUMNS, 'points_allowed', 'yards_allowed',
+    'points', 'rostered_by', 'sleeper_points', 'diff', 'cause'], defenseWeeks)
 }
 
 main().catch(err => {
