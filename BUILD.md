@@ -124,12 +124,16 @@ skill versus luck, with every number proven against a source neither of us contr
      - Rescored NFL box scores: 14,684 of 14,691 rostered player-weeks tie to the cent.
      - Each of the 44 remaining differences is documented with its cause, including two
        Sleeper kicker errors in 2019.
+     - Sleeper's weekly projections for 2019-2025 (`data/projections.csv`), with kickoff
+       times. None is provably pre-kickoff: 2019-2022 rows carry no update time, and
+       2023-2025 rows mostly changed after kickoff. Grades built on them must say
+       "Sleeper's final projection".
    - **Open:**
-     - Sleeper weekly projections for 2019-2025, which the endpoint still serves.
      - A draft-day ADP for every pick.
      - Rescoring team defenses, the likely cause of 2019's gaps.
-     - A scheduled GitHub Action that commits a weekly snapshot before kickoff. Waiting
-       on the owner's OK, since it runs unattended and commits to main.
+     - A scheduled GitHub Action that commits a weekly snapshot before kickoff. It's the
+       only way to get true pre-kickoff projections. Waiting on the owner's OK, since it
+       runs unattended and commits to main.
 2. **Phase 1, decision grading:** points above replacement by draft, waivers, trades and
    lineup calls. Lineup calls are graded against projections at kickoff, then converted
    to wins and shown as a wins bridge on each owner's profile.

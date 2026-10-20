@@ -4,8 +4,8 @@ One fact per row, plain CSV: it opens in Excel and queries in DuckDB or pandas. 
 site never reads this folder (it isn't deployed). Two things do:
 
 - `npm run dataset` writes it, from the committed snapshots in `public/data/`,
-  Sleeper's player list, nflverse's weekly box scores, and the DynastyProcess
-  player-ID crosswalk, through the site's own code. Add `-- --cache <dir>` to keep
+  Sleeper's player list and weekly projections, nflverse's weekly box scores and
+  schedule, and the DynastyProcess player-ID crosswalk, through the site's own code. Add `-- --cache <dir>` to keep
   and reuse the downloads.
 - The control-totals test (`lib/stats/__tests__/control-totals.test.ts`) reads
   `players.csv` and `player_weeks.csv` on every deploy.
@@ -41,6 +41,14 @@ move was placed and `processed_utc` when it went through.
 `slot_owner` is the slot's pre-trade owner (`draftSlotOwners`), `picked_by` whoever
 made the pick, and `traded_pick` marks the two differing.
 
+**projections.csv**, one row per rostered player per week: Sleeper's projection,
+scored with the season's settings. `kickoff_utc` is the player's game (nflverse
+schedule). `before_kickoff` compares it with `projection_updated_utc`, Sleeper's
+last-change time. Caution: no past projection is provably what managers saw before
+kickoff. 2019-2022 rows carry no update time at all, and where 2023-2025 rows do,
+it's after kickoff (about 90% of 2024-2025). Treat these as Sleeper's final
+projection for the week. True pre-kickoff projections need the weekly archive.
+
 **player_weeks.csv**, one row per NFL player per regular-season week, 2019-2025:
 every QB, RB, WR, TE, FB, and K with a box score, rostered or not. Columns are
 nflverse's own. A blank stat means 0. `points` is that line scored with the season's
@@ -64,8 +72,7 @@ roster. `cause` explains every row that doesn't tie.
 - **Weekly player points:** 14,684 of 14,691 rostered player-weeks (offense and
   kickers) match the rescored NFL box scores to the cent. The other seven are
   documented, including two Sleeper kicker errors in 2019.
-- **Not yet checked:** team defenses (they need team-level box scores) and
-  projections (not in the snapshots yet).
+- **Not yet checked:** team defenses (they need team-level box scores).
 
 Every difference and its cause lives in `KNOWN_GAPS` and `KNOWN_PLAYER_GAPS` in
 `lib/stats/control-totals.ts`. A new difference fails the tests.

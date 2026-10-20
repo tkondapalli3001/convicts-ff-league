@@ -1,8 +1,9 @@
 // npm run dataset — the league's history as tidy tables in data/ (CSV: one
 // fact per row, opens in Excel, queries in DuckDB or pandas). Built from the
-// committed snapshots in public/data/, Sleeper's player list, nflverse's
-// weekly box scores, and the DynastyProcess player-ID crosswalk, through the
-// site's own functions, so every number matches what the site computes.
+// committed snapshots in public/data/, Sleeper's player list and weekly
+// projections, nflverse's weekly box scores and game schedule, and the
+// DynastyProcess player-ID crosswalk, through the site's own functions, so
+// every number matches what the site computes.
 // See data/README.md for the tables. The site itself never reads data/.
 //
 //   npm run dataset                      download every source
@@ -21,6 +22,27 @@ import { bestLineup, gapCause, playerGapCause, scoreStats, seasonControlTotals, 
 const ROOT = join(__dirname, '..')
 const SNAP = join(ROOT, 'public', 'data')
 const OUT = join(ROOT, 'data')
+
+interface SleeperProjection {
+  player_id: string
+  /** The player's NFL team that week (Sleeper's abbreviation). */
+  team?: string | null
+  stats?: Record<string, number> | null
+  /** When Sleeper last changed this projection (epoch ms). */
+  updated_at?: number | null
+}
+
+/** Sleeper's team abbreviations where nflverse's differ. */
+const NFLVERSE_TEAM: Record<string, string> = { LAR: 'LA', JAC: 'JAX', WSH: 'WAS', LVR: 'LV' }
+
+/** nflverse lists kickoffs in US Eastern time: EDT until the first Sunday of November, EST after. */
+function easternToUtc(day: string, time: string): number {
+  const [y, m, d] = day.split('-').map(Number)
+  const firstSundayOfNov = 1 + ((7 - new Date(Date.UTC(y, 10, 1)).getUTCDay()) % 7)
+  const daylight = m < 11 ? m > 2 : m === 11 && d < firstSundayOfNov
+  const [hh, mm] = time.split(':').map(Number)
+  return Date.UTC(y, m - 1, d, hh + (daylight ? 4 : 5), mm)
+}
 
 interface SleeperPlayer {
   full_name?: string
@@ -88,6 +110,23 @@ async function main() {
     const gz = await download(`https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_${y}.csv.gz`, `stats_player_week_${y}.csv.gz`)
     nflverse[y] = csvRecords(gunzipSync(gz).toString('utf8')).filter(r => r.season_type === 'REG')
   }
+  // Every kickoff, by season, week, and team
+  const kickoff = new Map<string, number>()
+  for (const g of csvRecords((await download('https://github.com/nflverse/nfldata/raw/master/data/games.csv', 'games.csv')).toString('utf8'))) {
+    if (g.game_type !== 'REG' || !g.gameday || !g.gametime) continue
+    const at = easternToUtc(g.gameday, g.gametime)
+    kickoff.set(`${g.season}:${g.week}:${g.away_team}`, at)
+    kickoff.set(`${g.season}:${g.week}:${g.home_team}`, at)
+  }
+  // Sleeper's weekly projections (the same undocumented endpoint the season tab uses)
+  const qs = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'].map(pos => `position[]=${pos}`).join('&')
+  const projections: Record<string, SleeperProjection[]> = {}
+  for (const season of seasons) {
+    for (const week of Object.keys(season.matchupsByWeek)) {
+      const url = `https://api.sleeper.com/projections/nfl/${season.year}/${week}?season_type=regular&${qs}`
+      projections[`${season.year}:${week}`] = JSON.parse((await download(url, `projections-${season.year}-${week}.json`)).toString('utf8'))
+    }
+  }
 
   // ── players: everyone who appears anywhere in league history ──────────────
   const ids = new Set<string>()
@@ -122,6 +161,7 @@ async function main() {
   const picks: (string | number | boolean | null)[][] = []
   const control: (string | number | boolean | null)[][] = []
   const playerWeeks: (string | number | null)[][] = []
+  const projected: (string | number | boolean | null)[][] = []
 
   for (const s of seasons) {
     const year = s.year
@@ -205,6 +245,21 @@ async function main() {
         diff ? playerGapCause(year, week, sid) ?? 'NEW - not on KNOWN_PLAYER_GAPS' : ''])
     }
 
+    // ── projections: Sleeper's projected points for every rostered player ───
+    for (const [wk, rows] of Object.entries(s.matchupsByWeek)) {
+      const byPlayer = new Map((projections[`${year}:${wk}`] ?? []).map(r => [r.player_id, r]))
+      for (const m of rows) {
+        for (const id of m.players ?? []) {
+          const proj = byPlayer.get(id)
+          const team = isTeam(id) ? id : proj?.team ?? ''
+          const kick = team ? kickoff.get(`${year}:${wk}:${NFLVERSE_TEAM[team] ?? team}`) : undefined
+          projected.push([year, Number(wk), m.roster_id, ownerOf[m.roster_id], id, player(id).name, team,
+            proj?.stats ? scoreStats(proj.stats, s.league.scoring_settings ?? {}) : '', iso(proj?.updated_at), iso(kick),
+            kick && proj?.updated_at ? proj.updated_at <= kick : ''])
+        }
+      }
+    }
+
     // ── control totals: our season numbers against Sleeper's ────────────────
     for (const t of seasonControlTotals(s, positions)) {
       control.push([t.season, t.owner, t.rosterId, t.metric, t.ours, t.sleeper, t.diff == null ? '' : round2(t.diff), t.ties, gapCause(t) ?? (t.ties ? '' : 'NEW — not on KNOWN_GAPS')])
@@ -216,6 +271,8 @@ async function main() {
   writeCsv('transactions.csv', ['season', 'week', 'transaction_id', 'type', 'status', 'created_utc', 'processed_utc', 'owner', 'move', 'player_id', 'player', 'faab_bid', 'owners_involved'], txRows)
   writeCsv('draft_picks.csv', ['season', 'round', 'pick_no', 'draft_slot', 'slot_owner', 'picked_by', 'traded_pick', 'player_id', 'player', 'position', 'nfl_team', 'keeper'], picks)
   writeCsv('control_totals.csv', ['season', 'owner', 'roster_id', 'metric', 'ours', 'sleeper', 'diff', 'ties', 'cause'], control)
+  writeCsv('projections.csv', ['season', 'week', 'roster_id', 'owner', 'player_id', 'player', 'nfl_team', 'projected_points',
+    'projection_updated_utc', 'kickoff_utc', 'before_kickoff'], projected)
   writeCsv('player_weeks.csv', ['season', 'week', 'gsis_id', 'player_id', 'player', 'position', 'nfl_team', 'opponent',
     ...NFLVERSE_SCORING_COLUMNS, 'targets', 'carries', 'pass_attempts', 'points', 'rostered_by', 'sleeper_points', 'diff', 'cause'], playerWeeks)
 }
