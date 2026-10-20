@@ -6,7 +6,8 @@
 // CAUTION: like the projections, this endpoint is UNDOCUMENTED. Every failure
 // returns null and the table shows dashes; it never breaks the page.
 
-import { scoreStats, type ProjectedPlayer } from './projections'
+import { scoreStats } from '@/lib/stats'
+import type { ProjectedPlayer } from './projections'
 import type { LeagueState } from '@/types'
 
 export interface PlayerSeason {

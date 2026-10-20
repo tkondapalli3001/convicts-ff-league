@@ -7,6 +7,7 @@
 // break a preview card or a roster.
 
 import { getPlayersCache, playerDisplayName } from '@/lib/sources'
+import { scoreStats } from '@/lib/stats'
 import type { LeagueState, SleeperMatchup } from '@/types'
 
 export interface ProjectedPlayer {
@@ -48,15 +49,6 @@ interface CacheEntry {
 }
 const _cache = new Map<string, CacheEntry>()
 
-/** Fantasy points for one stat line: every scored stat × the league's multiplier. */
-export function scoreStats(stats: Record<string, number>, scoring: Record<string, number>): number {
-  let total = 0
-  for (const [key, mult] of Object.entries(scoring)) {
-    const v = stats[key]
-    if (typeof v === 'number' && typeof mult === 'number') total += v * mult
-  }
-  return Math.round(total * 100) / 100
-}
 
 /** Fallback when the league's scoring settings are unavailable: Sleeper's preset totals. */
 function presetPoints(stats: Record<string, number>, recPts: number): number | null {

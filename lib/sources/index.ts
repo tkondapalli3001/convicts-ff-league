@@ -9,4 +9,5 @@ export {
 export { loadSnapshotManifest, loadSnapshotTransactions, loadAllSnapshotSeasons } from './snapshot'
 export type { SnapshotSeason, SnapshotManifest, PlayerIndex } from './snapshot'
 export { getPlayersCache, playerDisplayName } from './players'
+export { csvRecords } from './csv'
 export type { PlayerMetadata } from './players'

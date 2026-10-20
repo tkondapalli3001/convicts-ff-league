@@ -1,0 +1,77 @@
+import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { csvRecords, type SnapshotSeason } from '@/lib/sources'
+import { nflverseStatLine } from '@/lib/data-processing'
+import { KNOWN_GAPS, KNOWN_PLAYER_GAPS, gapKey, playerGapKey, scoreStats, seasonControlTotals } from '@/lib/stats'
+
+// The tie-outs (lib/stats/control-totals.ts) over every committed season.
+// Everything is recomputed here with the site's own code: the snapshots in
+// public/data/ are the source, and data/ supplies only raw inputs (each
+// player's positions and nflverse's box-score columns). A new difference, or
+// a documented one that stops happening, fails the run.
+
+const ROOT = join(__dirname, '..', '..', '..')
+const years: number[] = JSON.parse(readFileSync(join(ROOT, 'public/data/manifest.json'), 'utf8')).years
+const seasons = years.map(y => JSON.parse(readFileSync(join(ROOT, `public/data/season-${y}.json`), 'utf8')) as SnapshotSeason)
+const players = csvRecords(readFileSync(join(ROOT, 'data/players.csv'), 'utf8'))
+const positions = Object.fromEntries(players.map(p => [p.player_id, p.fantasy_positions.split('|').filter(Boolean)]))
+
+describe('season totals tie out to Sleeper', () => {
+  const totals = seasons.flatMap(s => seasonControlTotals(s, positions))
+
+  it('covers every owner-season', () => {
+    expect(totals.length).toBe(seasons.reduce((n, s) => n + s.rosters.length, 0) * 4)
+  })
+
+  it('ties every record, the 2024 median games included', () => {
+    expect(totals.filter(t => t.metric === 'record' && !t.ties).map(gapKey)).toEqual([])
+  })
+
+  it('has no differences beyond the documented ones', () => {
+    const gaps = totals.filter(t => !t.ties)
+    const undocumented = gaps.filter(t => !KNOWN_GAPS[gapKey(t)]).map(t => `${gapKey(t)} ${t.diff?.toFixed(2)}`)
+    expect(undocumented).toEqual([])
+    const changed = gaps.filter(t => Math.abs((t.diff ?? 0) - KNOWN_GAPS[gapKey(t)].diff) > 0.005).map(gapKey)
+    expect(changed).toEqual([])
+  })
+
+  it('still sees every documented difference', () => {
+    const seen = new Set(totals.filter(t => !t.ties).map(gapKey))
+    expect(Object.keys(KNOWN_GAPS).filter(k => !seen.has(k))).toEqual([])
+  })
+
+  it('finds no commissioner-edited scores', () => {
+    const edited = seasons.flatMap(s => Object.values(s.matchupsByWeek).flat().filter(m => m.custom_points != null))
+    expect(edited).toEqual([])
+  })
+})
+
+describe("Sleeper's weekly player points tie out to the NFL's box scores", () => {
+  const rows = csvRecords(readFileSync(join(ROOT, 'data/player_weeks.csv'), 'utf8'))
+  const sleeperPoints = new Map<string, number>()
+  for (const s of seasons) {
+    for (const [week, ms] of Object.entries(s.matchupsByWeek)) {
+      for (const m of ms) for (const [id, pts] of Object.entries(m.players_points ?? {})) sleeperPoints.set(`${s.year} ${week} ${id}`, pts)
+    }
+  }
+  const scoring = Object.fromEntries(seasons.map(s => [s.year, s.league.scoring_settings ?? {}]))
+  const compared = rows.filter(r => r.player_id && sleeperPoints.has(`${r.season} ${r.week} ${r.player_id}`))
+  const diffs = compared
+    .map(r => {
+      const ours = scoreStats(nflverseStatLine(r), scoring[Number(r.season)])
+      const theirs = sleeperPoints.get(`${r.season} ${r.week} ${r.player_id}`)!
+      return { key: playerGapKey(Number(r.season), Number(r.week), r.player_id), diff: Math.round((ours - theirs) * 100) / 100 }
+    })
+    .filter(d => d.diff !== 0)
+
+  it('compares the rostered offense and kickers of every season', () => {
+    expect(compared.length).toBeGreaterThan(14_000)
+  })
+
+  it('has no differences beyond the documented ones', () => {
+    expect(diffs.filter(d => !KNOWN_PLAYER_GAPS[d.key]).map(d => `${d.key} ${d.diff}`)).toEqual([])
+    expect(diffs.filter(d => Math.abs(d.diff - KNOWN_PLAYER_GAPS[d.key].diff) > 0.005).map(d => d.key)).toEqual([])
+    expect(Object.keys(KNOWN_PLAYER_GAPS).filter(k => !diffs.some(d => d.key === k))).toEqual([])
+  })
+})

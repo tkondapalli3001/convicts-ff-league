@@ -15,6 +15,8 @@ export interface SleeperLeague {
     num_teams: number
     playoff_teams?: number
     playoff_round_type?: number
+    /** 1 when every team also plays the league median each week (2024): two results a week. */
+    league_average_match?: number
   }
   /** Lineup slots in order, e.g. ['QB','RB','RB',…,'BN','BN']. */
   roster_positions?: string[]
@@ -57,6 +59,8 @@ export interface SleeperMatchup {
   matchup_id: number
   roster_id: number
   points: number
+  /** Set only when the commissioner overrode the week's score. */
+  custom_points?: number | null
   /** Every player on the roster that week, starters included. */
   players?: string[]
   starters?: string[]

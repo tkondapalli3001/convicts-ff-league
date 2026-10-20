@@ -25,9 +25,10 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 148 unit tests pass (12 files); `npm run build` succeeds (23 static
-  pages); lint 0 errors (12 known `react-hooks`/`no-img-element` warnings); knip reports
-  zero unused files, exports, or dependencies. Snapshots frozen for **2019–2025**
+- **Health:** 161 tests pass (14 files), the control-total tie-outs included, and the
+  deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
+  errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
+  files, exports, or dependencies. Snapshots frozen for **2019–2025**
   (season + transactions files) + `players.json` + manifest.
 - **Live season:** `lib/league/config.ts` — `LEAGUE_ID = '1367670546694705152'` (the
   2026 league, "Misc Convicts", `in_season`, 10 teams, every user_id mapped) and
@@ -50,6 +51,7 @@ Prime) · Recharts · React Context · Vitest · knip.
 | `npm test` | Unit tests (`lib/**/__tests__/**/*.test.ts`) |
 | `npm run lint` | ESLint 9 flat config |
 | `npm run knip` | Unused files, exports, and dependencies — must report nothing |
+| `npm run dataset` | Rebuild the tidy history tables in `data/` (`-- --cache <dir>` reuses downloads) |
 | `npm run snapshot` | Freeze completed seasons into `public/data/` (post-season ritual) |
 | `npm run snapshot -- --players-only` | Rebuild only `players.json` (after each draft) |
 | `node scripts/luck-index.mjs <leagueId>` | Any league's Luck Index via `lib/stats/luck.ts` |
@@ -62,7 +64,7 @@ Every item ends with the standard **verification gate** (§6). Each fires on its
 on an owner decision.
 
 ### M1 — Post-season ritual *(~Jan 2027, once Sleeper marks 2026 `complete`)*
-1. `npm run snapshot`.
+1. `npm run snapshot`, then `npm run dataset`.
 2. `git diff --stat public/data/` — expect **only** `season-2026.json` and
    `transactions-2026.json` added, `players.json` and `manifest.json` updated; any change
    to 2019–2025 files is a red flag: stop and diff before committing.
@@ -72,9 +74,10 @@ on an owner decision.
 4. The Trash Talk cards (`lib/league/trash-talk.ts`) are hand-written prose that quote
    career numbers through 2025 ("7 seasons", "−$410 all-time") — ask the owner whether
    to refresh them.
-5. Verification gate + visual check that 2026 renders from the snapshot with network
-   blocked to `api.sleeper.app`.
-6. Commit `public/data/` and the history/earnings lines.
+5. Verification gate. 2026 must tie out: any new difference needs its cause found and
+   written into `KNOWN_GAPS` before the tests pass. Then a visual check that 2026 renders
+   from the snapshot with network blocked to `api.sleeper.app`.
+6. Commit `public/data/`, `data/`, and the history/earnings lines.
 
 ### M2 — Pre-draft and draft *(Jul–Aug 2027)*
 1. **Stock-pick window closes Jul 15:** set `STOCK_PICKS` and `MARKET_BENCHMARK` in
@@ -108,6 +111,34 @@ architecture or the Midnight Prime palette. **No action without owner sign-off.*
    or accept it.
 3. **Focus traps:** modals close on Escape and announce as dialogs, but Tab can reach the
    page behind. Full trap is a larger change; add only if the owner wants it.
+
+### D — The deeper version *(owner-approved 2026-10-20)*
+The goal: answer who in this league is actually good, and how much of each result was
+skill versus luck, with every number proven against a source neither of us controls.
+1. **Phase 0, foundation (no visible change).**
+   - **Done 2026-10-20:**
+     - `data/`, the tidy history tables (`npm run dataset`, dictionary in `data/README.md`).
+     - The exact best-lineup function (`lib/stats/lineups.ts`).
+     - The tie-outs, run on every deploy: all 70 records tie; points and potential points
+       tie for 2022-2025 except one documented 2024 gap.
+     - Rescored NFL box scores: 14,684 of 14,691 rostered player-weeks tie to the cent.
+     - Each of the 44 remaining differences is documented with its cause, including two
+       Sleeper kicker errors in 2019.
+   - **Open:**
+     - Sleeper weekly projections for 2019-2025, which the endpoint still serves.
+     - A draft-day ADP for every pick.
+     - Rescoring team defenses, the likely cause of 2019's gaps.
+     - A scheduled GitHub Action that commits a weekly snapshot before kickoff. Waiting
+       on the owner's OK, since it runs unattended and commits to main.
+2. **Phase 1, decision grading:** points above replacement by draft, waivers, trades and
+   lineup calls. Lineup calls are graded against projections at kickoff, then converted
+   to wins and shown as a wins bridge on each owner's profile.
+3. **Phase 2, track record:** replay 2019-2025 week by week. Score the playoff odds and
+   Oberon with Brier score, log loss and calibration against naive baselines, and check
+   the simulator against ffsimulator.
+4. **Phase 3, uncertainty:** sample sizes, ranges, shrinkage and repeatability for
+   existing stats, plus a list of which are mostly noise. Nothing gets removed without
+   the owner's approval.
 
 ### Done
 - **2026-08-14 —** 2026 buy-in (`2026: 150`).

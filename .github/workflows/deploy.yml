@@ -23,6 +23,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Includes the control-total tie-outs: a number that stops tying to
+      # Sleeper or the NFL's box scores blocks the deploy
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
 
