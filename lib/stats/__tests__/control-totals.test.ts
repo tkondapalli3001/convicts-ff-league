@@ -9,13 +9,34 @@ import { KNOWN_GAPS, KNOWN_PLAYER_GAPS, gapKey, playerGapKey, scoreStats, season
 // Everything is recomputed here with the site's own code: the snapshots in
 // public/data/ are the source, and data/ supplies only raw inputs (each
 // player's positions and nflverse's box-score columns). A new difference, or
-// a documented one that stops happening, fails the run.
+// a documented one that stops happening, fails the run. The last block checks
+// each draft pick's market price in data/draft_picks.csv against a second market.
 
 const ROOT = join(__dirname, '..', '..', '..')
 const years: number[] = JSON.parse(readFileSync(join(ROOT, 'public/data/manifest.json'), 'utf8')).years
 const seasons = years.map(y => JSON.parse(readFileSync(join(ROOT, `public/data/season-${y}.json`), 'utf8')) as SnapshotSeason)
 const players = csvRecords(readFileSync(join(ROOT, 'data/players.csv'), 'utf8'))
 const positions = Object.fromEntries(players.map(p => [p.player_id, p.fantasy_positions.split('|').filter(Boolean)]))
+
+/** Spearman's rank correlation; tied values share their average rank. */
+function spearman(xs: number[], ys: number[]): number {
+  const ranks = (v: number[]) => {
+    const order = v.map((x, i) => ({ x, i })).sort((a, b) => a.x - b.x)
+    const r: number[] = []
+    for (let k = 0; k < order.length;) {
+      let j = k
+      while (j + 1 < order.length && order[j + 1].x === order[k].x) j++
+      for (let t = k; t <= j; t++) r[order[t].i] = (k + j) / 2
+      k = j + 1
+    }
+    return r
+  }
+  const rx = ranks(xs), ry = ranks(ys)
+  const mx = rx.reduce((a, b) => a + b, 0) / rx.length, my = ry.reduce((a, b) => a + b, 0) / ry.length
+  let cov = 0, vx = 0, vy = 0
+  rx.forEach((r, i) => { cov += (r - mx) * (ry[i] - my); vx += (r - mx) ** 2; vy += (ry[i] - my) ** 2 })
+  return cov / Math.sqrt(vx * vy)
+}
 
 describe('season totals tie out to Sleeper', () => {
   const totals = seasons.flatMap(s => seasonControlTotals(s, positions))
@@ -73,5 +94,29 @@ describe("Sleeper's weekly player points tie out to the NFL's box scores", () =>
     expect(diffs.filter(d => !KNOWN_PLAYER_GAPS[d.key]).map(d => `${d.key} ${d.diff}`)).toEqual([])
     expect(diffs.filter(d => Math.abs(d.diff - KNOWN_PLAYER_GAPS[d.key].diff) > 0.005).map(d => d.key)).toEqual([])
     expect(Object.keys(KNOWN_PLAYER_GAPS).filter(k => !diffs.some(d => d.key === k))).toEqual([])
+  })
+})
+
+describe("every draft pick's market price holds up", () => {
+  // A keeper is placed in a round, not drafted, so it says nothing about the market
+  const picks = csvRecords(readFileSync(join(ROOT, 'data/draft_picks.csv'), 'utf8')).filter(p => p.keeper !== 'true')
+
+  it('prices at least 90% of every season', () => {
+    const thin = years.filter(y => {
+      const season = picks.filter(p => Number(p.season) === y)
+      return season.filter(p => p.adp).length < 0.9 * season.length
+    })
+    expect(thin).toEqual([])
+  })
+
+  it("uses Sleeper's ADP only where it averages real drafts and agrees with FFC's mocks", () => {
+    for (const y of years) {
+      const sleeper = picks.filter(p => Number(p.season) === y && p.adp_source === 'sleeper')
+      if (!sleeper.length) continue
+      // An average over thousands of drafts is rarely a whole number; a ranking always is
+      expect(sleeper.filter(p => Number.isInteger(Number(p.adp))).length, `${y} whole-number ADPs`).toBeLessThan(sleeper.length / 2)
+      const both = sleeper.filter(p => p.adp_ffc)
+      expect(spearman(both.map(p => Number(p.adp)), both.map(p => Number(p.adp_ffc))), `${y} rank agreement with FFC`).toBeGreaterThan(0.9)
+    }
   })
 })

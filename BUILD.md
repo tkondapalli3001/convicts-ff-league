@@ -25,7 +25,7 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 161 tests pass (14 files), the control-total tie-outs included, and the
+- **Health:** 163 tests pass (14 files), the control-total tie-outs included, and the
   deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
   errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
   files, exports, or dependencies. Snapshots frozen for **2019–2025**
@@ -128,15 +128,19 @@ skill versus luck, with every number proven against a source neither of us contr
        times. None is provably pre-kickoff: 2019-2022 rows carry no update time, and
        2023-2025 rows mostly changed after kickoff. Grades built on them must say
        "Sleeper's final projection".
+     - Each pick's market price (`data/draft_picks.csv`): Sleeper's ADP for 2021-2025,
+       Fantasy Football Calculator's for 2019-2020, where Sleeper's is unusable. The two
+       rank picks alike (0.94-0.98) but differ by 3-10 picks per player, and neither
+       comes from draft day. The tests catch a broken season.
    - **Open:**
-     - A draft-day ADP for every pick.
      - Rescoring team defenses, the likely cause of 2019's gaps.
      - A scheduled GitHub Action that commits a weekly snapshot before kickoff. It's the
        only way to get true pre-kickoff projections. Waiting on the owner's OK, since it
        runs unattended and commits to main.
 2. **Phase 1, decision grading:** points above replacement by draft, waivers, trades and
-   lineup calls. Lineup calls are graded against projections at kickoff, then converted
-   to wins and shown as a wins bridge on each owner's profile.
+   lineup calls. Draft picks are graded against ADP counted without the keepers. Lineup
+   calls are graded against projections at kickoff, then converted to wins and shown as
+   a wins bridge on each owner's profile.
 3. **Phase 2, track record:** replay 2019-2025 week by week. Score the playoff odds and
    Oberon with Brier score, log loss and calibration against naive baselines, and check
    the simulator against ffsimulator.

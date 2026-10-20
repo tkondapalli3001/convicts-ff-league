@@ -4,11 +4,12 @@ One fact per row, plain CSV: it opens in Excel and queries in DuckDB or pandas. 
 site never reads this folder (it isn't deployed). Two things do:
 
 - `npm run dataset` writes it, from the committed snapshots in `public/data/`,
-  Sleeper's player list and weekly projections, nflverse's weekly box scores and
-  schedule, and the DynastyProcess player-ID crosswalk, through the site's own code. Add `-- --cache <dir>` to keep
-  and reuse the downloads.
+  Sleeper's player list, projections and ADP, Fantasy Football Calculator's ADP,
+  nflverse's weekly box scores and schedule, and the DynastyProcess player-ID
+  crosswalk, through the site's own code. Add `-- --cache <dir>` to keep and reuse
+  the downloads.
 - The control-totals test (`lib/stats/__tests__/control-totals.test.ts`) reads
-  `players.csv` and `player_weeks.csv` on every deploy.
+  `players.csv`, `player_weeks.csv`, and `draft_picks.csv` on every deploy.
 
 Rebuild it whenever `public/data/` changes, then commit both.
 
@@ -39,7 +40,35 @@ move was placed and `processed_utc` when it went through.
 
 **draft_picks.csv**, one row per pick.
 `slot_owner` is the slot's pre-trade owner (`draftSlotOwners`), `picked_by` whoever
-made the pick, and `traded_pick` marks the two differing.
+made the pick, and `traded_pick` marks the two differing. `keeper` marks a player
+kept and placed in that round (nine each in 2024 and 2025).
+
+Each pick's market price is its half-PPR ADP (average draft position), in `adp`.
+`adp_source` names the market:
+
+- `sleeper` (2021-2025): Sleeper's ADP across its users' real drafts.
+- `ffc` (2019-2020): Fantasy Football Calculator's 12-team mock drafts. Sleeper's
+  ADP for those seasons can't be used. 2019's is all placeholders, and 2020's is a
+  whole-number ranking that puts McCaffrey, the consensus first pick, at 999.
+
+`adp_ffc` is FFC's price in every season, kept as a cross-check. For 2021-2025 the
+two markets rank the league's picks almost alike (rank correlation 0.94-0.98), but a
+typical player's two prices sit 3-10 picks apart, so treat any one ADP as good to
+about a round. `picks_after_adp` is `pick_no` minus `adp`: positive means the player
+went later than his price, negative earlier. A blank `adp` means the market rarely
+or never drafted him (six picks in all).
+
+Cautions:
+
+- Neither price comes from the league's draft day. Sleeper's is one preseason number
+  per season. FFC's covers only the last two to four days before each season, about
+  two weeks after the 2019 and 2020 drafts. That's why Andrew Luck, who retired
+  within a week of the 2019 draft, has no price. The 2024 draft (July 27) came a
+  month before the others.
+- Keepers come off the board first. For a keeper, `picks_after_adp` is the keeper's
+  discount, not a draft call. They shift everyone else too: in 2024 and 2025 the
+  median pick runs about 7 picks ahead of ADP. Counting only the non-keepers priced
+  ahead of each player brings that back to about 1, so grade picks on that count.
 
 **projections.csv**, one row per rostered player per week: Sleeper's projection,
 scored with the season's settings. `kickoff_utc` is the player's game (nflverse
@@ -72,6 +101,10 @@ roster. `cause` explains every row that doesn't tie.
 - **Weekly player points:** 14,684 of 14,691 rostered player-weeks (offense and
   kickers) match the rescored NFL box scores to the cent. The other seven are
   documented, including two Sleeper kicker errors in 2019.
+- **Draft prices:** every season prices at least 97% of its picks, and every season
+  priced by Sleeper agrees with FFC. The tests fail if a season prices under 90%,
+  or if a Sleeper season looks like a ranking (mostly whole numbers) or its rank
+  correlation with FFC drops under 0.9.
 - **Not yet checked:** team defenses (they need team-level box scores).
 
 Every difference and its cause lives in `KNOWN_GAPS` and `KNOWN_PLAYER_GAPS` in

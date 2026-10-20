@@ -1,9 +1,9 @@
 // npm run dataset — the league's history as tidy tables in data/ (CSV: one
 // fact per row, opens in Excel, queries in DuckDB or pandas). Built from the
-// committed snapshots in public/data/, Sleeper's player list and weekly
-// projections, nflverse's weekly box scores and game schedule, and the
-// DynastyProcess player-ID crosswalk, through the site's own functions, so
-// every number matches what the site computes.
+// committed snapshots in public/data/, Sleeper's player list, projections and
+// ADP, Fantasy Football Calculator's ADP, nflverse's weekly box scores and
+// game schedule, and the DynastyProcess player-ID crosswalk, through the
+// site's own functions, so every number matches what the site computes.
 // See data/README.md for the tables. The site itself never reads data/.
 //
 //   npm run dataset                      download every source
@@ -30,6 +30,29 @@ interface SleeperProjection {
   stats?: Record<string, number> | null
   /** When Sleeper last changed this projection (epoch ms). */
   updated_at?: number | null
+}
+
+/**
+ * Seasons whose Sleeper ADP can't be used, and why. Their picks take Fantasy
+ * Football Calculator's price instead. Every other season uses Sleeper's, and
+ * the tie-out tests check it against FFC's.
+ */
+const SLEEPER_ADP_UNUSABLE: Record<number, string> = {
+  2019: 'every value is a 999 placeholder',
+  2020: 'a ranking, not draft results: whole numbers, with McCaffrey, the consensus first pick, at 999',
+}
+
+/** FFC's names for players Sleeper lists differently (as nameKey writes them). */
+const FFC_NAMES: Record<string, string> = { 'will fuller': 'william fuller', 'hollywood brown': 'marquise brown', 'nyheim hines': 'nyheim miller hines' }
+
+/** A player's name for matching across sources: lowercase, no punctuation or suffix. */
+const nameKey = (name: string) =>
+  name.toLowerCase().replace(/[.']/g, '').replace(/-/g, ' ').replace(/\b(jr|sr|ii|iii|iv|v)\b/g, '').split(/\s+/).filter(Boolean).join(' ')
+
+/** Fantasy Football Calculator's ADP for one season. */
+interface FfcAdp {
+  meta: { total_drafts: number; start_date: string; end_date: string }
+  players: { name: string; position: string; team: string; adp: number }[]
 }
 
 /** Sleeper's team abbreviations where nflverse's differ. */
@@ -118,8 +141,29 @@ async function main() {
     kickoff.set(`${g.season}:${g.week}:${g.away_team}`, at)
     kickoff.set(`${g.season}:${g.week}:${g.home_team}`, at)
   }
-  // Sleeper's weekly projections (the same undocumented endpoint the season tab uses)
   const qs = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'].map(pos => `position[]=${pos}`).join('&')
+  // Each pick's market price, half-PPR ADP: Sleeper's (its season-long projection
+  // rows carry it) and Fantasy Football Calculator's mock drafts
+  const sleeperAdp: Record<number, Map<string, number>> = {}
+  const ffcAdp: Record<number, Map<string, number>> = {}
+  const ffcMeta: Record<number, FfcAdp['meta']> = {}
+  for (const y of years) {
+    if (!SLEEPER_ADP_UNUSABLE[y]) {
+      const rows: SleeperProjection[] = JSON.parse((await download(`https://api.sleeper.com/projections/nfl/${y}?season_type=regular&${qs}`, `projections-${y}-season.json`)).toString('utf8'))
+      // 999 is Sleeper's placeholder for a player too rarely drafted to have an ADP
+      sleeperAdp[y] = new Map(rows.filter(r => r.stats?.adp_half_ppr != null && r.stats.adp_half_ppr < 999).map(r => [r.player_id, r.stats!.adp_half_ppr]))
+    }
+    // Past seasons come as 12-team mocks only, whatever team count is asked for
+    const ffc: FfcAdp = JSON.parse((await download(`https://fantasyfootballcalculator.com/api/v1/adp/half-ppr?teams=12&year=${y}&position=all`, `ffc-adp-${y}.json`)).toString('utf8'))
+    ffcMeta[y] = ffc.meta
+    ffcAdp[y] = new Map()
+    for (const p of ffc.players) {
+      const key = p.position === 'DEF' ? p.team : `${FFC_NAMES[nameKey(p.name)] ?? nameKey(p.name)}|${p.position === 'PK' ? 'K' : p.position}`
+      if (ffcAdp[y].has(key)) console.warn(`  FFC ${y}: more than one player matches ${key}; keeping the first`)
+      else ffcAdp[y].set(key, p.adp)
+    }
+  }
+  // Sleeper's weekly projections (the same undocumented endpoint the season tab uses)
   const projections: Record<string, SleeperProjection[]> = {}
   for (const season of seasons) {
     for (const week of Object.keys(season.matchupsByWeek)) {
@@ -216,15 +260,23 @@ async function main() {
         txRows.push([...base, ownerOf[rid] ?? `Team ${rid}`, 'drop', id, player(id).name, '', owners.join('|')])
     }
 
-    // ── draft picks, with each slot's pre-trade owner ───────────────────────
+    // ── draft picks, with each slot's pre-trade owner and the market price ──
     if (s.draft) {
       const slotOwner = draftSlotOwners(s.draft.draft, s.draft.picks, rMap)
+      const source = sleeperAdp[year] ? 'sleeper' : 'ffc'
+      let priced = 0
       for (const p of [...s.draft.picks].sort((a, b) => a.pick_no - b.pick_no)) {
         const by = ownerOf[p.roster_id] ?? `Team ${p.roster_id}`
         const owner = slotOwner[p.draft_slot] ?? ''
-        picks.push([year, p.round, p.pick_no, p.draft_slot, owner, by, owner !== by, p.player_id, player(p.player_id).name,
-          p.metadata?.position ?? '', p.metadata?.team ?? '', !!p.is_keeper])
+        const position = p.metadata?.position ?? ''
+        const ffc = ffcAdp[year]?.get(position === 'DEF' ? p.player_id : `${nameKey(player(p.player_id).name)}|${position}`)
+        const market = source === 'sleeper' ? sleeperAdp[year]?.get(p.player_id) : ffc
+        if (market != null) priced++
+        picks.push([year, p.round, p.pick_no, p.draft_slot, owner, by, owner !== by, p.player_id, player(p.player_id).name, position,
+          p.metadata?.team ?? '', !!p.is_keeper, market ?? '', market != null ? source : '', market != null ? round2(p.pick_no - market) : '', ffc ?? ''])
       }
+      const m = ffcMeta[year]
+      console.log(`  ADP ${year}: ${source === 'sleeper' ? 'Sleeper' : `FFC, ${m.total_drafts} mocks ${m.start_date} to ${m.end_date}; Sleeper's unusable: ${SLEEPER_ADP_UNUSABLE[year]}`}, ${priced} of ${s.draft.picks.length} picks priced`)
     }
 
     // ── player_weeks: nflverse box scores, rescored with this season's rules ─
@@ -269,7 +321,8 @@ async function main() {
   writeCsv('owner_weeks.csv', ['season', 'week', 'game', 'roster_id', 'owner', 'opponent', 'points', 'opponent_points', 'result', 'median_result', 'best_lineup_points', 'bench_points_left', 'custom_points'], ownerWeeks)
   writeCsv('lineups.csv', ['season', 'week', 'roster_id', 'owner', 'player_id', 'player', 'positions', 'slot', 'points', 'best_lineup_slot'], lineups)
   writeCsv('transactions.csv', ['season', 'week', 'transaction_id', 'type', 'status', 'created_utc', 'processed_utc', 'owner', 'move', 'player_id', 'player', 'faab_bid', 'owners_involved'], txRows)
-  writeCsv('draft_picks.csv', ['season', 'round', 'pick_no', 'draft_slot', 'slot_owner', 'picked_by', 'traded_pick', 'player_id', 'player', 'position', 'nfl_team', 'keeper'], picks)
+  writeCsv('draft_picks.csv', ['season', 'round', 'pick_no', 'draft_slot', 'slot_owner', 'picked_by', 'traded_pick', 'player_id', 'player',
+    'position', 'nfl_team', 'keeper', 'adp', 'adp_source', 'picks_after_adp', 'adp_ffc'], picks)
   writeCsv('control_totals.csv', ['season', 'owner', 'roster_id', 'metric', 'ours', 'sleeper', 'diff', 'ties', 'cause'], control)
   writeCsv('projections.csv', ['season', 'week', 'roster_id', 'owner', 'player_id', 'player', 'nfl_team', 'projected_points',
     'projection_updated_utc', 'kickoff_utc', 'before_kickoff'], projected)
