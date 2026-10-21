@@ -136,14 +136,13 @@ skill versus luck, with every number proven against a source neither of us contr
        1,747 of 1,798 rostered defense-weeks tie, and all 52 gaps are documented. That
        solved 2019. Sleeper's stored totals match the box scores, and its weekly 2019
        scores were changed after the season.
-   - **Open:**
-     - A scheduled GitHub Action that commits a weekly snapshot before kickoff. It's the
-       only way to get true pre-kickoff projections. Waiting on the owner's OK, since it
-       runs unattended and commits to main.
+   - **Not now (owner, 2026-10-21):** a scheduled GitHub Action that commits a weekly
+     snapshot before kickoff, the only way to get true pre-kickoff projections.
 2. **Phase 1, decision grading:** points above replacement by draft, waivers, trades and
    lineup calls. Draft picks are graded against ADP counted without the keepers. Lineup
-   calls are graded against projections at kickoff, then converted to wins and shown as
-   a wins bridge on each owner's profile.
+   calls are graded against Sleeper's final projections, labeled that way, since no
+   pre-kickoff snapshot exists. Then everything converts to wins, shown as a wins bridge
+   on each owner's profile.
 3. **Phase 2, track record:** replay 2019-2025 week by week. Score the playoff odds and
    Oberon with Brier score, log loss and calibration against naive baselines, and check
    the simulator against ffsimulator.
