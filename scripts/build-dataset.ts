@@ -348,12 +348,26 @@ async function main() {
     }
 
     // ── projections: Sleeper's projected points for every rostered player ───
+    // A player's team that week comes from nflverse (the nearest week he played),
+    // since Sleeper's projection rows can carry a later team (2019's even list 2020 teams)
+    const nflTeams = new Map<string, { week: number; team: string }[]>()
+    for (const r of nflverse[year]) {
+      const sid = sleeperOfGsis[r.player_id]
+      if (sid) (nflTeams.get(sid) ?? nflTeams.set(sid, []).get(sid)!).push({ week: Number(r.week), team: r.team })
+    }
+    const teamThatWeek = (id: string, week: number): string | undefined => {
+      const games = nflTeams.get(id)
+      if (!games?.length) return undefined
+      const nearest = games.reduce((a, b) => (Math.abs(b.week - week) < Math.abs(a.week - week) || (Math.abs(b.week - week) === Math.abs(a.week - week) && b.week < a.week) ? b : a))
+      const named = scheduleName.get(`${year}:${nearest.team}`) ?? nearest.team
+      return named === 'LA' ? 'LAR' : named
+    }
     for (const [wk, rows] of Object.entries(s.matchupsByWeek)) {
       const byPlayer = new Map((projections[`${year}:${wk}`] ?? []).map(r => [r.player_id, r]))
       for (const m of rows) {
         for (const id of m.players ?? []) {
           const proj = byPlayer.get(id)
-          const team = isTeam(id) ? id : proj?.team ?? ''
+          const team = isTeam(id) ? id : teamThatWeek(id, Number(wk)) ?? proj?.team ?? ''
           const kick = team ? kickoff.get(`${year}:${wk}:${NFLVERSE_TEAM[team] ?? team}`) : undefined
           projected.push([year, Number(wk), m.roster_id, ownerOf[m.roster_id], id, player(id).name, team,
             proj?.stats ? scoreStats(proj.stats, s.league.scoring_settings ?? {}) : '', iso(proj?.updated_at), iso(kick),

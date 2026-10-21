@@ -72,8 +72,11 @@ Cautions:
   ahead of each player brings that back to about 1, so grade picks on that count.
 
 **projections.csv**, one row per rostered player per week: Sleeper's projection,
-scored with the season's settings. `kickoff_utc` is the player's game (nflverse
-schedule). `before_kickoff` compares it with `projection_updated_utc`, Sleeper's
+scored with the season's settings. `nfl_team` is the player's team that week by
+nflverse's box scores (the nearest week he played). Sleeper's own label can be the
+team he plays for today, even on a 2019 row, so it's used only for the few players
+nflverse never lists that season. `kickoff_utc` is that team's game (nflverse
+schedule), blank on a bye. `before_kickoff` compares it with `projection_updated_utc`, Sleeper's
 last-change time. Caution: no past projection is provably what managers saw before
 kickoff. 2019-2022 rows carry no update time at all, and where 2023-2025 rows do,
 it's after kickoff (about 90% of 2024-2025). Treat these as Sleeper's final
