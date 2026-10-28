@@ -8,8 +8,15 @@ import InfoTip from '@/components/shared/InfoTip'
 import FlairBadges from '@/components/current-season/FlairBadges'
 import FlairLegend from '@/components/current-season/FlairLegend'
 import { fmtRecord, ordinal } from '@/lib/utils'
-import type { Badge } from '@/lib/current-season'
+import type { Badge, TrackRecord } from '@/lib/current-season'
+import trackRecord from '@/public/data/track-record.json'
 import type { PowerRankingRow } from '@/lib/stats'
+
+// How often the higher-rated team won its next game, every week of every finished season replayed (npm run dataset)
+const TRACK = trackRecord as TrackRecord
+const PICKS = TRACK.picks
+const SEASONS = `${TRACK.seasons[0]}–${TRACK.seasons[TRACK.seasons.length - 1]}`
+const pct = (r: number) => `${(r * 100).toFixed(1)}%`
 
 function Movement({ n }: { n: number | null }) {
   if (n == null) return <span className="w-6" />
@@ -67,7 +74,11 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
                   Power Index
                   <InfoTip term="Power Index">
                     0.6 × PF/Gm + 0.2 × (High + Low) + 0.2 × (Win% × 200) — the Oberon Mt. formula:
-                    60% scoring average, 20% best + worst game, 20% win %.
+                    60% scoring average, 20% best + worst game, 20% win %. Replayed over {SEASONS}, the
+                    higher-rated team won its next game {pct(PICKS.oberon.rate)} of the time ({PICKS.oberon.n} games),
+                    about as often as picking by scoring average ({pct(PICKS.average.rate)}) or record
+                    ({pct(PICKS.record.rate)}). Weekly games are close to coin flips, so the index describes
+                    the season so far rather than predicting next week.
                   </InfoTip>
                 </th>
                 <th className={TH}>Record</th>

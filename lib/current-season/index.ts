@@ -28,4 +28,6 @@ export type { SeasonHonors, PowerRankPoint, ScoreMark, InjuryReport, WeekMoves, 
 export { standingBadges, matchupBadges } from './flair'
 export type { Badge } from './flair'
 export { pickMatchupOfTheWeek } from './matchup-of-the-week'
+export { replaySeason, summarizeTrackRecord } from './track-record'
+export type { TrackRecord, OddsForecast, GamePick } from './track-record'
 export type { MotwCandidate, MotwContext, MatchupOfTheWeek } from './matchup-of-the-week'

@@ -108,6 +108,16 @@ the luck index, and `actual` the head-to-head record (ties ½). The same data, w
 row behind each step, is `public/data/bridges.json`, which owner profiles read. Method:
 `lib/stats/bridge.ts`.
 
+**forecasts.csv**, one row per team per regular-season week: its playoff chances
+entering that week, replayed with only the weeks before it and earlier seasons. `odds` is
+the season tab's simulator with the same seed it uses live; `record_only` gives every team
+the same strength; `points_only` swaps each record for the wins its points deserved
+(all-play); `base_rate` is the share of teams that make it. `made` is whether the team
+did. **game_picks.csv**, one row per regular-season game from week 2: whether the higher
+Oberon rating, the better record, or the higher scoring average entering the week picked
+the winner (1 right, 0 wrong, ½ a toss-up or tied game). The summary the site quotes is
+`public/data/track-record.json`; method in `lib/current-season/track-record.ts`.
+
 **control_totals.csv**, four rows per owner-season: `record`, `pf`, `pa`, and `ppts`
 (potential points, Sleeper's best-lineup total).
 `ours` comes from the site's code and `sleeper` from the totals Sleeper stores on the

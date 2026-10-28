@@ -11,8 +11,15 @@ import InfoTip from '@/components/shared/InfoTip'
 import { useModalClose } from '@/hooks/useModalClose'
 import { ownerColor, fmtPts, ordinal } from '@/lib/utils'
 import { formatOdds } from '@/lib/current-season'
-import type { Badge, TeamPreview, TeamStakes } from '@/lib/current-season'
+import type { Badge, TeamPreview, TeamStakes, TrackRecord } from '@/lib/current-season'
+import trackRecord from '@/public/data/track-record.json'
 import type { EnrichedPreview } from '@/hooks/usePreviewData'
+
+// The odds' track record: every week of every finished season, replayed (npm run dataset)
+const TRACK = trackRecord as TrackRecord
+const ODDS = TRACK.odds.all
+const SEASONS = `${TRACK.seasons[0]}–${TRACK.seasons[TRACK.seasons.length - 1]}`
+const CALIBRATED_WITHIN = Math.round(Math.max(...TRACK.calibration.filter(b => b.n >= 30).map(b => Math.abs(b.forecast - b.observed))) * 100)
 
 /** Ammo lines shown at once; the reroll button steps to the next batch. */
 const AMMO_PER_ROLL = 3
@@ -212,7 +219,10 @@ export default function MatchupModal({ p, onClose }: { p: EnrichedPreview; onClo
                 how often a team makes the playoffs in 10,000 simulations of the rest of the regular season,
                 as of the start of this week. Scores come from each team’s average so far, pulled toward
                 the league average early in the year. Clinch and elimination lines aren’t estimates — they
-                hold whatever else happens.
+                hold whatever else happens. Replayed over {SEASONS} ({ODDS.odds.n} forecasts), the odds scored a
+                Brier score of {ODDS.odds.brier.toFixed(3)} (0 is perfect), against {ODDS.baseRate.brier.toFixed(3)} for
+                the same chance for everyone and {ODDS.recordOnly.brier.toFixed(3)} for records and schedules alone.
+                Every 10-point band of forecasts came true within {CALIBRATED_WITHIN} points of its forecast.
               </InfoTip>
             </SectionLabel>
             <div className="grid grid-cols-2 gap-4 sm:gap-6">

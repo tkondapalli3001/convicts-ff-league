@@ -16,9 +16,10 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { gunzipSync } from 'node:zlib'
 import { csvRecords, type SnapshotSeason } from '@/lib/sources'
-import type { Transaction } from '@/types'
+import type { LeagueState, Transaction } from '@/types'
+import { replaySeason, summarizeTrackRecord, type GamePick, type OddsForecast } from '@/lib/current-season'
 import {
-  draftSlotOwners, playoffStartWeek, resolveOwnerName, nflverseStatLine, NFLVERSE_SCORING_COLUMNS, type NflverseRow,
+  buildOwnerSeasons, draftSlotOwners, playoffStartWeek, resolveOwnerName, nflverseStatLine, NFLVERSE_SCORING_COLUMNS, type NflverseRow,
   nflverseDefenseStatLine, NFLVERSE_DEFENSE_COLUMNS, defensePointsAllowed, defenseYardsAllowed,
 } from '@/lib/data-processing'
 import {
@@ -232,6 +233,11 @@ async function main() {
   const defenseWeeks: (string | number | null)[][] = []
   const projected: (string | number | boolean | null)[][] = []
   const bridges: OwnerSeasonBridge[] = []
+  const forecasts: OddsForecast[] = []
+  const gamePicks: GamePick[] = []
+  const pastScores: { season: number; team: string; pts: number }[] = []
+  const medianSeasons = new Set<number>()
+  const lastRegularWeek: Record<number, number> = {}
   const replacementBySeason: BridgeFile['replacement'] = {}
 
   for (const s of seasons) {
@@ -479,6 +485,28 @@ async function main() {
       bridges.push({ season: year, owner, ...totals, ...o.detail, leagueAverage, players: [...o.played.values()].sort((a, b) => b.par - a.par) })
     }
 
+    // ── track record: replay the season tab's playoff odds and power rankings ─
+    {
+      const weeks = Object.keys(s.matchupsByWeek).map(Number).sort((a, b) => a - b)
+      const state = {
+        leagues: { [year]: s.league }, rosterUserMaps: { [year]: rMap },
+        matchups: { [year]: Object.fromEntries(weeks.map(w => [w, { matchups: s.matchupsByWeek[w], isPlayoff: w >= playoffStart }])) },
+        brackets: { [year]: { winners: s.winnersBracket, losers: s.losersBracket } },
+      } as unknown as LeagueState
+      const made = new Set(Object.entries(buildOwnerSeasons(state)).filter(([, ss]) => ss.find(x => x.year === year)?.inPlayoffs).map(([owner]) => owner))
+      const games = weeks.filter(w => w < playoffStart).flatMap(w => {
+        const pairs: Record<number, (typeof s.matchupsByWeek)[string]> = {}
+        for (const m of s.matchupsByWeek[w]) if (m.matchup_id != null) (pairs[m.matchup_id] ??= []).push(m)
+        return Object.values(pairs).filter(p => p.length === 2).map(([a, b]) => ({ week: w, a: ownerOf[a.roster_id], b: ownerOf[b.roster_id], ptsA: a.points, ptsB: b.points }))
+      })
+      const replay = replaySeason({ season: year, games, history: [...pastScores], playoffSpots: s.league.settings.playoff_teams ?? 6, made })
+      forecasts.push(...replay.odds)
+      gamePicks.push(...replay.picks)
+      if (s.league.settings.league_average_match) medianSeasons.add(year)
+      lastRegularWeek[year] = playoffStart - 1
+      for (const g of games) pastScores.push({ season: year, team: g.a, pts: g.ptsA }, { season: year, team: g.b, pts: g.ptsB })
+    }
+
     // ── control totals: our season numbers against Sleeper's ────────────────
     for (const t of seasonControlTotals(s, positions)) {
       control.push([t.season, t.owner, t.rosterId, t.metric, t.ours, t.sleeper, t.diff == null ? '' : round2(t.diff), t.ties, gapCause(t) ?? (t.ties ? '' : 'NEW — not on KNOWN_GAPS')])
@@ -495,6 +523,12 @@ async function main() {
     'projection_updated_utc', 'kickoff_utc', 'before_kickoff'], projected)
   writeCsv('player_weeks.csv', ['season', 'week', 'gsis_id', 'player_id', 'player', 'position', 'nfl_team', 'opponent',
     ...NFLVERSE_SCORING_COLUMNS, 'targets', 'carries', 'pass_attempts', 'points', 'rostered_by', 'sleeper_points', 'diff', 'cause'], playerWeeks)
+  writeCsv('forecasts.csv', ['season', 'week', 'team', 'odds', 'record_only', 'points_only', 'base_rate', 'made'],
+    forecasts.map(f => [f.season, f.week, f.team, round3(f.odds), round3(f.recordOnly), round3(f.pointsOnly), round3(f.baseRate), f.made]))
+  writeCsv('game_picks.csv', ['season', 'week', 'team_a', 'team_b', 'oberon', 'record', 'average'], gamePicks.map(g => [g.season, g.week, g.a, g.b, g.oberon, g.record, g.average]))
+  const trackRecord = summarizeTrackRecord(forecasts, gamePicks, medianSeasons, lastRegularWeek)
+  writeFileSync(join(SNAP, 'track-record.json'), JSON.stringify(trackRecord, (_, v) => (typeof v === 'number' ? round3(v) : v), 1) + '\n')
+  console.log(`  ${'../public/data/track-record.json'.padEnd(20)} ${String(forecasts.length).padStart(6)} forecasts`)
   writeCsv('bridges.csv', ['season', 'owner', 'weeks', 'average_team', ...BRIDGE_PARTS.flatMap(k => [k, `${k}_se`]), 'expected', 'luck', 'actual'],
     bridges.map(b => [b.season, b.owner, b.weeks, round3(b.baseline), ...BRIDGE_PARTS.flatMap(k => [round3(b.parts[k].wins), round3(b.parts[k].se)]),
       round3(b.expected), round3(b.luck), b.actual]))

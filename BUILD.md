@@ -25,7 +25,7 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 176 tests pass (15 files), the control-total tie-outs included, and the
+- **Health:** 183 tests pass (16 files), the control-total tie-outs included, and the
   deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
   errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
   files, exports, or dependencies. Snapshots frozen for **2019–2025**
@@ -148,9 +148,17 @@ skill versus luck, with every number proven against a source neither of us contr
      does a draft grade against keeper-adjusted ADP (+0.06). Managers trail Sleeper's
      projected lineups by 0.3 points a week. So the tab carries no "skill" wording.
    - 2026 joins at the January ritual (`npm run dataset` after `npm run snapshot`).
-3. **Phase 2, track record:** replay 2019-2025 week by week. Score the playoff odds and
-   Oberon with Brier score, log loss and calibration against naive baselines, and check
-   the simulator against ffsimulator.
+3. **Phase 2, track record.** *Done 2026-10-28.* Every regular-season week of 2019-2025
+   replayed with only what was known then (`lib/current-season/track-record.ts`), quoted
+   behind the playoff odds and Power Index ?s.
+   - Playoff odds, 940 forecasts: Brier 0.147, log loss 0.441, against 0.240 for 60% for
+     everyone, 0.175 for points without records, and 0.149 for records and schedules
+     alone. So the odds are well calibrated (every 10-point band within 6 points), but
+     team strength adds almost nothing over the record. 2024's median games aren't
+     simulated (2026 has none); it scored 0.149, in line with the rest.
+   - Oberon picks the next game's winner 52.9% of the time (435 games), record 50.7%,
+     scoring average 53.8%: none is clearly better than a coin flip.
+   - Not done: the ffsimulator cross-check. It needs R, which isn't installed here.
 4. **Phase 3, uncertainty:** sample sizes, ranges, shrinkage and repeatability for
    existing stats, plus a list of which are mostly noise. Nothing gets removed without
    the owner's approval.
