@@ -5,7 +5,9 @@
 // box scores and game schedule, and the DynastyProcess player-ID crosswalk,
 // through the site's own functions, so every number matches what the site
 // computes.
-// See data/README.md for the tables. The site itself never reads data/.
+// See data/README.md for the tables. The site itself never reads data/; the
+// one file written for it is public/data/bridges.json, each owner-season's
+// wins bridge (lib/stats/bridge.ts).
 //
 //   npm run dataset                      download every source
 //   npm run dataset -- --cache <dir>     keep downloads in <dir> and reuse them
@@ -19,7 +21,11 @@ import {
   draftSlotOwners, playoffStartWeek, resolveOwnerName, nflverseStatLine, NFLVERSE_SCORING_COLUMNS, type NflverseRow,
   nflverseDefenseStatLine, NFLVERSE_DEFENSE_COLUMNS, defensePointsAllowed, defenseYardsAllowed,
 } from '@/lib/data-processing'
-import { bestLineup, defenseGapCause, gapCause, playerGapCause, scoreStats, seasonControlTotals, startingSlots } from '@/lib/stats'
+import {
+  bestLineup, defenseGapCause, gapCause, playerGapCause, scoreStats, seasonControlTotals, startingSlots,
+  BRIDGE_PARTS, partRepeatability, replacementLevels, seasonTotals, splitTeamWeek, weekBridges,
+  type BridgeFile, type BridgePlayer, type Channel, type OwnerSeasonBridge, type WeekTeam,
+} from '@/lib/stats'
 
 const ROOT = join(__dirname, '..')
 const SNAP = join(ROOT, 'public', 'data')
@@ -83,6 +89,7 @@ const readJson = <T>(file: string): T => JSON.parse(readFileSync(file, 'utf8')) 
 const isTeam = (id: string) => /^[A-Z]{2,3}$/.test(id)
 const iso = (ms: number | undefined | null) => (ms ? new Date(ms).toISOString() : '')
 const round2 = (n: number) => Math.round(n * 100) / 100
+const round3 = (n: number) => Math.round(n * 1000) / 1000
 
 /** Minimal CSV: quote a field only when it needs it. */
 function writeCsv(name: string, header: string[], rows: (string | number | boolean | null | undefined)[][]) {
@@ -224,6 +231,8 @@ async function main() {
   const playerWeeks: (string | number | null)[][] = []
   const defenseWeeks: (string | number | null)[][] = []
   const projected: (string | number | boolean | null)[][] = []
+  const bridges: OwnerSeasonBridge[] = []
+  const replacementBySeason: BridgeFile['replacement'] = {}
 
   for (const s of seasons) {
     const year = s.year
@@ -324,6 +333,7 @@ async function main() {
       fumbleReturnTds.set(`${r.week}:${r.team}`, (fumbleReturnTds.get(`${r.week}:${r.team}`) ?? 0) + Number(r.fumble_recovery_tds))
     }
     const teamWeek = new Map(teamBoxScores[year].map(r => [`${r.week}:${r.team}`, r]))
+    const defenseScores: { week: number; team: string; points: number }[] = []
     const sleeperDef = (team: string) => {
       const named = scheduleName.get(`${year}:${team}`) ?? team
       return named === 'LA' ? 'LAR' : named
@@ -340,6 +350,7 @@ async function main() {
       const row: NflverseRow = Object.fromEntries(NFLVERSE_DEFENSE_COLUMNS.map(c => [c, value(c)]))
       const id = sleeperDef(t.team), week = Number(t.week)
       const points = scoreStats(nflverseDefenseStatLine(row), s.league.scoring_settings ?? {})
+      defenseScores.push({ week, team: id, points })
       const onRoster = rostered.get(`${week}:${id}`)
       const diff = onRoster ? round2(points - onRoster.points) : null
       defenseWeeks.push([year, week, id, sleeperDef(game.opponent), ...NFLVERSE_DEFENSE_COLUMNS.map(c => (row[c] === '0' || row[c] === 'NA' ? '' : row[c])),
@@ -376,6 +387,98 @@ async function main() {
       }
     }
 
+    // ── wins bridge: where each owner-season's wins came from ────────────────
+    const scoring = s.league.scoring_settings ?? {}
+    const regularWeeks = Object.keys(s.matchupsByWeek).map(Number).filter(w => w < playoffStart).sort((a, b) => a - b)
+    // How a player reached a roster: its latest completed add on or before the week, else the draft
+    const addedBy = new Map<string, { week: number; trade: boolean }[]>()
+    for (const t of moves[year]) {
+      if (t.status !== 'complete') continue
+      for (const [id, rid] of Object.entries(t.adds ?? {})) {
+        const k = `${rid}:${id}`
+        ;(addedBy.get(k) ?? addedBy.set(k, []).get(k)!).push({ week: t.leg, trade: t.type === 'trade' })
+      }
+    }
+    const draftedBy = new Set((s.draft?.picks ?? []).map(p => `${p.roster_id}:${p.player_id}`))
+    const channelOf = (rosterId: number, id: string, week: number): Channel => {
+      const last = (addedBy.get(`${rosterId}:${id}`) ?? []).filter(a => a.week <= week).sort((a, b) => b.week - a.week)[0]
+      if (last) return last.trade ? 'trades' : 'pickups'
+      return draftedBy.has(`${rosterId}:${id}`) ? 'draft' : 'pickups'
+    }
+    // Replacement level, from every NFL player's regular-season weeks
+    const seasonLines: Record<string, Map<string, { total: number; games: number }>> = Object.fromEntries(['QB', 'RB', 'WR', 'TE', 'K', 'DEF'].map(pos => [pos, new Map()]))
+    const addLine = (pos: string, id: string, pts: number) => {
+      const lines = seasonLines[pos]
+      if (!lines) return
+      const l = lines.get(id) ?? { total: 0, games: 0 }
+      l.total += pts
+      l.games++
+      lines.set(id, l)
+    }
+    for (const r of nflverse[year]) if (regularWeeks.includes(Number(r.week))) addLine(r.position === 'FB' ? 'RB' : r.position, r.player_id, scoreStats(nflverseStatLine(r), scoring))
+    for (const d of defenseScores) if (regularWeeks.includes(d.week)) addLine('DEF', d.team, d.points)
+    const flexStarts: Record<string, number> = {}
+    for (const w of regularWeeks) for (const m of s.matchupsByWeek[w] ?? []) {
+      ;(m.starters ?? []).forEach((id, i) => { if (slots[i] === 'FLEX' && id !== '0') flexStarts[player(id).position] = (flexStarts[player(id).position] ?? 0) + 1 })
+    }
+    const replacement = replacementLevels(slots, s.rosters.length, flexStarts, Object.fromEntries(Object.entries(seasonLines).map(([pos, m]) => [pos, [...m.values()]])))
+    replacementBySeason[year] = replacement
+
+    interface OwnerWeeks {
+      weeks: ReturnType<typeof weekBridges>
+      played: Map<string, OwnerSeasonBridge['players'][number]>
+      detail: Pick<OwnerSeasonBridge, 'players' | 'raw' | 'lineupWeeks' | 'luckWeeks'>
+    }
+    const byOwner = new Map<string, OwnerWeeks>()
+    const fresh = (): OwnerWeeks => ({ weeks: [], played: new Map(), detail: { players: [], raw: { draft: 0, pickups: 0, trades: 0, lineup: 0 }, lineupWeeks: [], luckWeeks: [] } })
+    for (const w of regularWeeks) {
+      const proj = new Map((projections[`${year}:${w}`] ?? []).map(r => [r.player_id, r.stats ? scoreStats(r.stats, scoring) : 0]))
+      const rows = s.matchupsByWeek[w] ?? []
+      const opponent = (m: (typeof rows)[number]) => (m.matchup_id != null ? rows.find(x => x.matchup_id === m.matchup_id && x.roster_id !== m.roster_id) : undefined)
+      const teams: (WeekTeam & { rosterId: number; roster: BridgePlayer[]; starters: string[] })[] = rows.map(m => {
+        const opp = opponent(m)
+        const roster: BridgePlayer[] = (m.players ?? []).map(id => ({
+          id, positions: positions[id] ?? [], projected: proj.get(id) ?? 0, actual: m.players_points?.[id] ?? 0, channel: channelOf(m.roster_id, id, w),
+        }))
+        return {
+          owner: ownerOf[m.roster_id], points: m.points, rosterId: m.roster_id, roster, starters: (m.starters ?? []).filter(id => id !== '0'),
+          result: !opp ? '' : m.points > opp.points ? 'W' : m.points < opp.points ? 'L' : 'T',
+          split: splitTeamWeek(slots, roster, m.points, replacement),
+        }
+      })
+      const week = weekBridges(teams)
+      for (const t of teams) {
+        const wb = week.find(b => b.owner === t.owner)
+        if (!wb) continue
+        const o = byOwner.get(t.owner) ?? fresh()
+        o.weeks.push(wb)
+        for (const ch of ['draft', 'pickups', 'trades'] as const) o.detail.raw[ch] += t.split.par[ch]
+        o.detail.raw.lineup += t.split.lineup
+        const byId = new Map(t.roster.map(p => [p.id, p]))
+        for (const slot of t.split.plan) {
+          if (!slot.playerId) continue
+          const p = byId.get(slot.playerId)!
+          const key = `${p.id}:${p.channel}`
+          const row = o.played.get(key) ?? { name: player(p.id).name, position: player(p.id).position, channel: p.channel, starts: 0, par: 0 }
+          row.starts++
+          row.par += slot.par
+          o.played.set(key, row)
+        }
+        const planned = new Set(t.split.plan.flatMap(x => (x.playerId ? [x.playerId] : [])))
+        const started = t.starters.filter(id => !planned.has(id)), benched = [...planned].filter(id => !t.starters.includes(id))
+        if (started.length || benched.length) {
+          o.detail.lineupWeeks.push({ week: w, points: t.points, planned: t.points - t.split.lineup, started: started.map(id => player(id).name), benched: benched.map(id => player(id).name) })
+        }
+        o.detail.luckWeeks.push({ week: w, result: t.result, expected: wb.expected })
+        byOwner.set(t.owner, o)
+      }
+    }
+    for (const [owner, o] of byOwner) {
+      const totals = seasonTotals(o.weeks)
+      const leagueAverage = Object.fromEntries(BRIDGE_PARTS.map(k => [k, o.detail.raw[k] - totals.parts[k].points])) as OwnerSeasonBridge['leagueAverage']
+      bridges.push({ season: year, owner, ...totals, ...o.detail, leagueAverage, players: [...o.played.values()].sort((a, b) => b.par - a.par) })
+    }
+
     // ── control totals: our season numbers against Sleeper's ────────────────
     for (const t of seasonControlTotals(s, positions)) {
       control.push([t.season, t.owner, t.rosterId, t.metric, t.ours, t.sleeper, t.diff == null ? '' : round2(t.diff), t.ties, gapCause(t) ?? (t.ties ? '' : 'NEW — not on KNOWN_GAPS')])
@@ -392,6 +495,16 @@ async function main() {
     'projection_updated_utc', 'kickoff_utc', 'before_kickoff'], projected)
   writeCsv('player_weeks.csv', ['season', 'week', 'gsis_id', 'player_id', 'player', 'position', 'nfl_team', 'opponent',
     ...NFLVERSE_SCORING_COLUMNS, 'targets', 'carries', 'pass_attempts', 'points', 'rostered_by', 'sleeper_points', 'diff', 'cause'], playerWeeks)
+  writeCsv('bridges.csv', ['season', 'owner', 'weeks', 'average_team', ...BRIDGE_PARTS.flatMap(k => [k, `${k}_se`]), 'expected', 'luck', 'actual'],
+    bridges.map(b => [b.season, b.owner, b.weeks, round3(b.baseline), ...BRIDGE_PARTS.flatMap(k => [round3(b.parts[k].wins), round3(b.parts[k].se)]),
+      round3(b.expected), round3(b.luck), b.actual]))
+  const bridgeFile: BridgeFile = {
+    replacement: replacementBySeason,
+    repeatability: partRepeatability(bridges.map(b => ({ owner: b.owner, season: b.season, totals: b }))),
+    bridges,
+  }
+  writeFileSync(join(SNAP, 'bridges.json'), JSON.stringify(bridgeFile, (_, v) => (typeof v === 'number' ? round3(v) : v)))
+  console.log(`  ${'../public/data/bridges.json'.padEnd(20)} ${String(bridges.length).padStart(6)} owner-seasons`)
   writeCsv('defense_weeks.csv', ['season', 'week', 'team', 'opponent', ...NFLVERSE_DEFENSE_COLUMNS, 'points_allowed', 'yards_allowed',
     'points', 'rostered_by', 'sleeper_points', 'diff', 'cause'], defenseWeeks)
 }

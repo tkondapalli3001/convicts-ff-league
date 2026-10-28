@@ -25,7 +25,7 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 165 tests pass (14 files), the control-total tie-outs included, and the
+- **Health:** 176 tests pass (15 files), the control-total tie-outs included, and the
   deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
   errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
   files, exports, or dependencies. Snapshots frozen for **2019–2025**
@@ -138,11 +138,16 @@ skill versus luck, with every number proven against a source neither of us contr
        scores were changed after the season.
    - **Not now (owner, 2026-10-21):** a scheduled GitHub Action that commits a weekly
      snapshot before kickoff, the only way to get true pre-kickoff projections.
-2. **Phase 1, decision grading:** points above replacement by draft, waivers, trades and
-   lineup calls. Draft picks are graded against ADP counted without the keepers. Lineup
-   calls are graded against Sleeper's final projections, labeled that way, since no
-   pre-kickoff snapshot exists. Then everything converts to wins, shown as a wins bridge
-   on each owner's profile.
+2. **Phase 1, the wins bridge.** *Done 2026-10-28 (owner chose the season account).*
+   Owner profile → Wins Bridge, per season and career: average team → draft → pickups →
+   trades → lineup calls → expected wins → luck → actual wins, each step with an 80%
+   range and a drill-down to its rows. Lineup calls are graded on Sleeper's final
+   projections. Every bridge sums exactly and ties to the luck index (tests).
+   - The evidence says describe, not judge: no part repeats season to season (draft
+     +0.17, pickups -0.30, trades -0.02, lineup calls -0.18 over 58 pairs), and neither
+     does a draft grade against keeper-adjusted ADP (+0.06). Managers trail Sleeper's
+     projected lineups by 0.3 points a week. So the tab carries no "skill" wording.
+   - 2026 joins at the January ritual (`npm run dataset` after `npm run snapshot`).
 3. **Phase 2, track record:** replay 2019-2025 week by week. Score the playoff odds and
    Oberon with Brier score, log loss and calibration against naive baselines, and check
    the simulator against ffsimulator.
@@ -264,7 +269,8 @@ playoffs", "most FAAB spent in 2025".
 12. **League-size and calendar numbers come from Sleeper `settings`** (via
     `lib/data-processing/season-settings.ts`), never literals; values the data knows are
     derived, never hand-typed.
-13. **Never edit `public/data/` by hand** — `npm run snapshot` generates it. A one-off
+13. **Never edit `public/data/` by hand** — `npm run snapshot` generates it
+    (`bridges.json`: `npm run dataset`). A one-off
     repair must reproduce exactly what the script would write and leave every existing
     byte unchanged (as with 2021's week 18 on 2026-10-08).
 14. No CSS modules/styled-components; no abstractions not demanded by a task; never

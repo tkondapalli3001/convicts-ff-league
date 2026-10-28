@@ -2,8 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { csvRecords, type SnapshotSeason } from '@/lib/sources'
-import { nflverseDefenseStatLine, nflverseStatLine } from '@/lib/data-processing'
-import { KNOWN_DEFENSE_GAPS, KNOWN_GAPS, KNOWN_PLAYER_GAPS, gapKey, playerGapKey, scoreStats, seasonControlTotals } from '@/lib/stats'
+import type { LeagueState } from '@/types'
+import { nflverseDefenseStatLine, nflverseStatLine, playoffStartWeek, resolveOwnerName } from '@/lib/data-processing'
+import {
+  KNOWN_DEFENSE_GAPS, KNOWN_GAPS, KNOWN_PLAYER_GAPS, computeLuckIndex, gapKey, playerGapKey, scoreStats, seasonControlTotals, BRIDGE_PARTS,
+  type BridgeFile,
+} from '@/lib/stats'
 
 // The tie-outs (lib/stats/control-totals.ts) over every committed season.
 // Everything is recomputed here with the site's own code: the snapshots in
@@ -125,6 +129,41 @@ describe("Sleeper's weekly team-defense points tie out to the NFL's box scores",
     expect(diffs.filter(d => !KNOWN_DEFENSE_GAPS[d.key]).map(d => `${d.key} ${d.diff}`)).toEqual([])
     expect(diffs.filter(d => Math.abs(d.diff - KNOWN_DEFENSE_GAPS[d.key].diff) > 0.005).map(d => d.key)).toEqual([])
     expect(Object.keys(KNOWN_DEFENSE_GAPS).filter(k => !diffs.some(d => d.key === k))).toEqual([])
+  })
+})
+
+describe('every wins bridge ties out to the record and the luck index', () => {
+  const file: BridgeFile = JSON.parse(readFileSync(join(ROOT, 'public/data/bridges.json'), 'utf8'))
+  const ownerSeasons = seasons.reduce((n, s) => n + s.rosters.length, 0)
+
+  it('covers every owner-season', () => {
+    expect(file.bridges.length).toBe(ownerSeasons)
+  })
+
+  it('sums each bridge exactly: average team + parts = expected wins, + luck = the record', () => {
+    const off = file.bridges.filter(b => {
+      const parts = BRIDGE_PARTS.reduce((a, k) => a + b.parts[k].wins, 0)
+      return Math.abs(b.baseline + parts - b.expected) > 0.01 || Math.abs(b.expected + b.luck - b.actual) > 0.002
+    })
+    expect(off.map(b => `${b.season} ${b.owner}`)).toEqual([])
+  })
+
+  it("matches the site's luck index: the same expected and actual wins", () => {
+    const off: string[] = []
+    for (const s of seasons) {
+      const users = new Map(s.users.map(u => [u.user_id, u]))
+      const rMap = Object.fromEntries(s.rosters.map(r => {
+        const u = users.get(r.owner_id)
+        return [String(r.roster_id), u ? resolveOwnerName(u.user_id, u.display_name) : `Team ${r.roster_id}`]
+      }))
+      const start = playoffStartWeek(s.league)
+      const matchups = { [s.year]: Object.fromEntries(Object.entries(s.matchupsByWeek).map(([w, rows]) => [w, { matchups: rows, isPlayoff: Number(w) >= start }])) }
+      for (const l of computeLuckIndex(matchups as unknown as LeagueState['matchups'], { [s.year]: rMap })) {
+        const b = file.bridges.find(x => x.season === s.year && x.owner === l.owner)
+        if (!b || Math.abs(b.expected - l.expectedWins) > 0.006 || b.actual !== l.actualWins) off.push(`${s.year} ${l.owner}`)
+      }
+    }
+    expect(off).toEqual([])
   })
 })
 

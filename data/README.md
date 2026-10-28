@@ -100,6 +100,14 @@ yards. `points` is the week scored with the season's settings. For a defense on 
 league roster, `rostered_by`, `sleeper_points`, `diff`, and `cause` are filled in.
 `team` uses Sleeper's ids: LAR for the Rams, OAK for the 2019 Raiders.
 
+**bridges.csv**, one row per owner-season: the wins bridge in numbers. `average_team`
+is the all-play wins of a team scoring the league average every week; `draft`,
+`pickups`, `trades`, and `lineup` are each part's wins, with `_se` its standard error
+(the profile's 80% range is ± 1.28 × se); `expected` is all-play expected wins, `luck`
+the luck index, and `actual` the head-to-head record (ties ½). The same data, with every
+row behind each step, is `public/data/bridges.json`, which owner profiles read. Method:
+`lib/stats/bridge.ts`.
+
 **control_totals.csv**, four rows per owner-season: `record`, `pf`, `pa`, and `ppts`
 (potential points, Sleeper's best-lineup total).
 `ours` comes from the site's code and `sleeper` from the totals Sleeper stores on the

@@ -16,6 +16,10 @@ export { scoreStats } from './scoring'
 export { bestLineup, startingSlots } from './lineups'
 export type { LineupCandidate, BestLineup } from './lineups'
 export {
+  BRIDGE_PARTS, splitTeamWeek, replacementLevels, weekBridges, seasonTotals, careerTotals, stepRange, partRepeatability,
+} from './bridge'
+export type { BridgePart, Channel, BridgePlayer, BridgeTotals, BridgeStep, OwnerSeasonBridge, BridgeFile, WeekTeam } from './bridge'
+export {
   seasonControlTotals, gapCause, gapKey, KNOWN_GAPS, playerGapCause, playerGapKey, KNOWN_PLAYER_GAPS, defenseGapCause, KNOWN_DEFENSE_GAPS,
 } from './control-totals'
 export type { ControlTotal, ControlMetric } from './control-totals'

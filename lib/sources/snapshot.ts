@@ -6,6 +6,7 @@
 // dependency. Callers must fall back to live fetching when it's missing.
 
 import { BASE_PATH } from '@/lib/league'
+import type { BridgeFile } from '@/lib/stats'
 import type {
   SleeperLeague, SleeperUser, SleeperRoster, SleeperMatchup,
   BracketGame, SleeperDraft, DraftPick, Transaction,
@@ -35,6 +36,7 @@ export type PlayerIndex = Record<string, [string, string, string | null]>
 let _manifest: Promise<SnapshotManifest | null> | null = null
 const _transactions = new Map<number, Promise<Record<string, Transaction[]> | null>>()
 let _players: Promise<PlayerIndex | null> | null = null
+let _bridges: Promise<BridgeFile | null> | null = null
 
 async function fetchJsonOrNull<T>(path: string): Promise<T | null> {
   try {
@@ -69,6 +71,15 @@ export function loadSnapshotTransactions(year: number): Promise<Record<string, T
 export function loadPlayerIndex(): Promise<PlayerIndex | null> {
   _players ??= fetchJsonOrNull<{ players: PlayerIndex }>('/data/players.json').then(d => d?.players ?? null)
   return _players
+}
+
+/**
+ * Every completed owner-season's wins bridge, written by `npm run dataset`
+ * (lib/stats/bridge.ts). Only an owner profile's Wins Bridge tab loads it.
+ */
+export function loadBridges(): Promise<BridgeFile | null> {
+  _bridges ??= fetchJsonOrNull<BridgeFile>('/data/bridges.json')
+  return _bridges
 }
 
 /** All snapshot seasons listed in the manifest, skipping any that fail to load. */

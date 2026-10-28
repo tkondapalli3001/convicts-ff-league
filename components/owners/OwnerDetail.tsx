@@ -8,10 +8,11 @@ import { ownerProfile } from '@/lib/stats'
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import H2HGrid from './H2HGrid'
+import WinsBridge from './WinsBridge'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 
-type Tab = 'seasons' | 'h2h' | 'gamelog'
+type Tab = 'seasons' | 'bridge' | 'h2h' | 'gamelog'
 
 export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const { state } = useLeague()
@@ -42,6 +43,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'seasons', label: 'Season Log' },
+    { id: 'bridge',  label: 'Wins Bridge' },
     { id: 'h2h',     label: 'H2H Records' },
     { id: 'gamelog', label: `Game Log (${profile.games.length})` },
   ]
@@ -224,6 +226,9 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
           </table>
         </div>
       )}
+
+      {/* Wins Bridge (loads its own file on first open) */}
+      {tab === 'bridge' && <WinsBridge ownerName={ownerName} />}
 
       {/* H2H Records */}
       {tab === 'h2h' && (

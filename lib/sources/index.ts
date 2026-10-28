@@ -1,12 +1,12 @@
 // Barrel — where the data comes from:
 //   sleeper.ts   → Sleeper API fetchers (sleepFetch + one per endpoint)
-//   snapshot.ts  → public/data/ season snapshots, lazy transactions, player index
+//   snapshot.ts  → public/data/ season snapshots, lazy transactions, player index, wins bridges
 //   players.ts   → getPlayersCache() — player names: the index first, Sleeper's dump as a fallback
 export {
   sleepFetch, fetchLeague, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket,
   fetchLosersBracket, fetchDrafts, fetchDraftPicks, fetchTransactions, fetchTransactionWeeks,
 } from './sleeper'
-export { loadSnapshotManifest, loadSnapshotTransactions, loadAllSnapshotSeasons } from './snapshot'
+export { loadSnapshotManifest, loadSnapshotTransactions, loadAllSnapshotSeasons, loadBridges } from './snapshot'
 export type { SnapshotSeason, SnapshotManifest, PlayerIndex } from './snapshot'
 export { getPlayersCache, playerDisplayName } from './players'
 export { csvRecords } from './csv'
