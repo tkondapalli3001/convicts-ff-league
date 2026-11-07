@@ -5,6 +5,7 @@ import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import SectionCard from '@/components/shared/SectionCard'
 import { POS_COLORS } from '@/lib/positions'
 import { buildDraftBoard } from '@/lib/data-processing'
+import { useMyColumn } from '@/hooks/useMyColumn'
 import type { DraftPick, SleeperDraft } from '@/types'
 
 const POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
@@ -24,6 +25,7 @@ export default function SeasonDraftBoard({ year, draft, picks, rMap }: {
     return out
   }, [picks])
   const teams = board.slots.length
+  const { me, scroller } = useMyColumn()
 
   return (
     <SectionCard
@@ -46,7 +48,7 @@ export default function SeasonDraftBoard({ year, draft, picks, rMap }: {
       </div>
 
       {/* The board scrolls inside its own frame so the owners and rounds stay pinned */}
-      <div className="max-h-[78vh] overflow-auto border-t" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
+      <div ref={scroller} className="max-h-[78vh] overflow-auto border-t" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>
         <table className="w-full border-separate border-spacing-0" style={{ minWidth: teams * 104 + 36 }}>
           <thead>
             <tr>
@@ -59,12 +61,13 @@ export default function SeasonDraftBoard({ year, draft, picks, rMap }: {
               {board.slots.map(({ slot, owner }) => (
                 <th
                   key={slot}
+                  data-me={owner === me ? '' : undefined}
                   className="sticky top-0 z-20 cursor-default px-1 py-2 text-center hover:text-s-text3"
                   style={{ background: '#0B0B0D' }}
                 >
                   <div className="flex flex-col items-center gap-1">
                     <OwnerAvatar name={owner} size="sm" />
-                    <span className="max-w-[96px] truncate text-[11px] normal-case tracking-[0.5px] text-s-text">{owner}</span>
+                    <span className={`max-w-[96px] truncate text-[11px] normal-case tracking-[0.5px] ${owner === me ? 'font-bold text-gold-soft' : 'text-s-text'}`}>{owner}</span>
                   </div>
                 </th>
               ))}

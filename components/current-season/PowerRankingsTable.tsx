@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import SectionCard from '@/components/shared/SectionCard'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import InfoTip from '@/components/shared/InfoTip'
+import StatRows, { type StatField } from '@/components/shared/StatRows'
 import FlairBadges from '@/components/current-season/FlairBadges'
 import FlairLegend from '@/components/current-season/FlairLegend'
 import { fmtRecord, ordinal } from '@/lib/utils'
@@ -41,6 +42,30 @@ function pct3(p: number): string {
   return p >= 1 ? '1.000' : p.toFixed(3).replace(/^0/, '')
 }
 
+const POWER_TIP = (
+  <>
+    0.6 × PF/Gm + 0.2 × (High + Low) + 0.2 × (Win% × 200) — the Oberon Mt. formula:
+    60% scoring average, 20% best + worst game, 20% win %. Replayed over {SEASONS}, the
+    higher-rated team won its next game {pct(PICKS.oberon.rate)} of the time ({PICKS.oberon.n} games),
+    about as often as picking by scoring average ({pct(PICKS.average.rate)}) or record
+    ({pct(PICKS.record.rate)}). Weekly games are close to coin flips, so the index describes
+    the season so far rather than predicting next week.
+  </>
+)
+const ALL_PLAY_TIP = 'a team’s record if it had played every other team every week.'
+
+/** Phones: Power Index, PF per game and all-play up front (the owner's three); the rest a tap away. */
+const PHONE_FIELDS: StatField<PowerRankingRow>[] = [
+  { label: 'Power', tip: { term: 'Power Index', text: POWER_TIP }, value: r => <span className="font-bold" style={{ color: '#E8CE8A' }}>{r.score.toFixed(1)}</span> },
+  { label: 'PF/Gm', value: r => r.avg.toFixed(1) },
+  { label: 'All-Play', tip: { term: 'All-Play', text: ALL_PLAY_TIP }, value: r => fmtRecord(r.allPlayWins, r.allPlayLosses, r.allPlayTies) },
+  { label: 'Record', value: r => <span className="font-bold text-s-text">{fmtRecord(r.wins, r.losses, r.ties)}</span> },
+  { label: 'Standing', value: r => ordinal(r.standing) },
+  { label: 'All-Play %', value: r => pct3(r.allPlayPct) },
+  { label: 'High', value: r => <span style={{ color: '#7FA886' }}>{r.high.toFixed(1)}</span> },
+  { label: 'Low', value: r => <span style={{ color: '#B4636B' }}>{r.low.toFixed(1)}</span> },
+]
+
 /** Power Rankings tab: Oberon Mt. power ratings with week-over-week movement and streak flair. */
 export default function PowerRankingsTable({ rows, throughWeek, badges }: {
   rows: PowerRankingRow[]
@@ -64,7 +89,30 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
 
   return (
     <SectionCard title="Power Rankings" action={<span className="text-[10px] font-bold uppercase tracking-[2px] text-s-text3">Through Week {throughWeek}</span>}>
-      <div className="relative">
+      <StatRows
+        rows={rows}
+        rowKey={r => r.name}
+        owner={r => r.name}
+        fields={PHONE_FIELDS}
+        leadLabel="Rank · Manager"
+        lead={r => (
+          <span className="flex items-center gap-1.5">
+            <span
+              className="w-[18px] flex-shrink-0 text-right font-display text-[20px] font-bold leading-none"
+              style={{ color: r.rank === 1 ? '#E8CE8A' : '#9AA0AC' }}
+            >
+              {r.rank}
+            </span>
+            <Movement n={r.movement} />
+            <span className="min-w-0">
+              <span className="block break-words text-[13px] font-bold leading-tight text-s-text">{r.name}</span>
+              <FlairBadges badges={badges[r.name] ?? []} className="mt-0.5 text-[13px]" />
+            </span>
+          </span>
+        )}
+      />
+
+      <div className="relative hidden sm:block">
         <div className="ss-table overflow-x-auto scrollbar-hide">
           <table className="w-full min-w-[640px] border-collapse">
             <thead>
@@ -72,14 +120,7 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
                 <th className={`sticky left-0 z-10 border-r border-white/[0.06] ${TH}`} style={{ background: '#0B0B0D' }}>Rank · Manager</th>
                 <th className={TH}>
                   Power Index
-                  <InfoTip term="Power Index">
-                    0.6 × PF/Gm + 0.2 × (High + Low) + 0.2 × (Win% × 200) — the Oberon Mt. formula:
-                    60% scoring average, 20% best + worst game, 20% win %. Replayed over {SEASONS}, the
-                    higher-rated team won its next game {pct(PICKS.oberon.rate)} of the time ({PICKS.oberon.n} games),
-                    about as often as picking by scoring average ({pct(PICKS.average.rate)}) or record
-                    ({pct(PICKS.record.rate)}). Weekly games are close to coin flips, so the index describes
-                    the season so far rather than predicting next week.
-                  </InfoTip>
+                  <InfoTip term="Power Index">{POWER_TIP}</InfoTip>
                 </th>
                 <th className={TH}>Record</th>
                 <th className={TH}>Standing</th>
@@ -88,7 +129,7 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
                 <th className={TH}>Low</th>
                 <th className={TH}>
                   All-Play
-                  <InfoTip term="All-Play">a team&apos;s record if it had played every other team every week.</InfoTip>
+                  <InfoTip term="All-Play">{ALL_PLAY_TIP}</InfoTip>
                 </th>
               </tr>
             </thead>
@@ -132,8 +173,6 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
             </tbody>
           </table>
         </div>
-        {/* Right-edge fade — signals more columns on narrow screens */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-r from-transparent to-[rgba(11,14,17,0.85)] sm:hidden" />
       </div>
 
       <div className="border-t px-5 pb-4" style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}>

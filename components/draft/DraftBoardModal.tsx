@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import type { DraftPick, SleeperDraft } from '@/types'
 
 import { useModalClose } from '@/hooks/useModalClose'
+import { useMyColumn } from '@/hooks/useMyColumn'
 import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/positions'
 import { buildDraftBoard } from '@/lib/data-processing'
 
@@ -17,6 +18,7 @@ interface Props {
 
 export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: Props) {
   useModalClose(onClose)
+  const { me, scroller } = useMyColumn()
   const board = buildDraftBoard(draft, picks, rMap)
   const numSlots = board.slots.length
   const numRounds = board.rounds
@@ -50,7 +52,7 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
         </div>
 
         {/* Board — scrolls in both axes inside its own frame */}
-        <div className="gl flex-1 min-h-0 overflow-auto rounded-[6px]">
+        <div ref={scroller} className="gl flex-1 min-h-0 overflow-auto rounded-[6px]">
           <table className="border-collapse" style={{ minWidth: `${numSlots * 120 + 60}px`, width: '100%' }}>
             <thead>
               <tr>
@@ -60,7 +62,8 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
                 {board.slots.map(({ slot, owner }) => (
                   <th
                     key={slot}
-                    className="sticky top-0 z-10 text-center px-2 py-3 text-[11px] font-bold text-s-text border-b border-s-border border-l border-s-border/40 bg-s-bg4"
+                    data-me={owner === me ? '' : undefined}
+                    className={`sticky top-0 z-10 text-center px-2 py-3 text-[11px] font-bold border-b border-s-border border-l border-s-border/40 bg-s-bg4 ${owner === me ? 'text-gold-soft' : 'text-s-text'}`}
                     style={{ minWidth: 110 }}
                   >
                     <div className="text-[9px] text-s-text3 font-semibold mb-0.5">Slot {slot}</div>

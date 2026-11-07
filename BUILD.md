@@ -201,8 +201,8 @@ From a 375px walk of every page. Phones only; desktop keeps its tables and navba
 1. **Done:** quick fixes: shorter headers, Game Log names, Finish Tracker, Trash Talk chips, "Tap" wording, Players opens on Scoring.
 2. **Done:** links: tabs, weeks, years, argument-settling filters and open matchups live in the URL; Back closes popups; share button; a preview card per section and owner.
 3. **Done:** "you": pick who you are (device only), your matchup above Power Rankings and on Home, and the bottom bar (Home · season · Me · Owners · More), replacing the hamburger.
-4. **Next, after the owner's real-phone test:** rows instead of wide tables, tap for the rest. Power Rankings: Power Index, PF per game, all-play. Career Leaderboard: record, Win%, titles. Then Standings, Earnings, Home standings; the draft board jumps to your column.
-5. Filters behind one button and a bottom sheet; no inner scroll boxes on phones; Players → Transactions starts on the latest season with "load more" (22,000 elements today). Sync and copy buttons reach 28px.
+4. **Done:** rows instead of wide tables, tap for the rest. Power Rankings: Power Index, PF per game, all-play. Career tables: record, Win%, titles. Standings: record, PF per game, luck. Earnings: total and the last two paid seasons. Draft boards open on your column.
+5. **Next:** filters behind one button and a bottom sheet; no inner scroll boxes on phones; Players → Transactions starts on the latest season with "load more" (22,000 elements today). Sync and copy buttons reach 28px.
 6. Owner profile: four key stats up front, the rest behind "All stats", so the tabs and Wins Bridge sit near the top. A more compact Rosters header.
 7. Charts the league can't get elsewhere: playoff odds week by week, your record against 10,000 shuffled schedules, scoring strength by owner with ranges. Scoring Trend gets company.
 

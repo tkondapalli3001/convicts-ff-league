@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
-import { ownerColor, fullNameInitials, winPctColor } from '@/lib/utils'
+import StatRows, { type StatField } from '@/components/shared/StatRows'
+import { ownerColor, fullNameInitials, winPctColor, fmtMoney, fmtRecord } from '@/lib/utils'
 import type { CareerStats } from '@/lib/stats'
 
 type SortKey = 'wins' | 'winpct' | 'avgPPG' | 'champs' | 'earn'
@@ -39,6 +40,22 @@ function CareerAvatar({ name, isChamp, url, size }: { name: string; isChamp: boo
 function fmtChamps(n: number): string {
   return n % 1 === 0 ? String(n) : n.toFixed(1)
 }
+
+const PHONE_FIELDS: StatField<CareerStats, SortKey>[] = [
+  { label: 'W–L', sortKey: 'wins', value: d => <span className="font-bold text-s-text">{fmtRecord(d.allW, d.allL)}</span> },
+  { label: 'Win%', sortKey: 'winpct', value: d => <span className="font-bold" style={{ color: winPctColor(d.winpct) }}>{(d.winpct * 100).toFixed(1)}%</span> },
+  { label: 'Titles', sortKey: 'champs', value: d => (d.champs > 0 ? <span className="font-bold text-gold-soft">{fmtChamps(d.champs)}×</span> : <span className="text-[#3A4150]">—</span>) },
+  { label: 'Avg PPG', sortKey: 'avgPPG', value: d => d.avgPFperGame.toFixed(1) },
+  { label: 'Net', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>{fmtMoney(d.earn)}</span> : <span className="text-[#3A4150]">—</span>) },
+  { label: 'Seasons', value: d => d.numSeasons },
+]
+const PHONE_SORTS: { key: SortKey; label: string }[] = [
+  { key: 'winpct', label: 'Win%' },
+  { key: 'wins', label: 'Wins' },
+  { key: 'champs', label: 'Titles' },
+  { key: 'avgPPG', label: 'Avg PPG' },
+  { key: 'earn', label: 'Net' },
+]
 
 export default function CareerStandingsTable({ data }: { data: CareerStats[] }) {
   const { state } = useLeague()
@@ -98,8 +115,25 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
         </div>
       </div>
 
-      {/* ── TABLE (horizontally scrollable on mobile) ─────────────── */}
-      <div className="relative">
+      <StatRows
+        rows={displayData}
+        rowKey={d => d.name}
+        owner={d => d.name}
+        fields={PHONE_FIELDS}
+        sort={{ key: sortKey, dir: sortDir === 'asc' ? 1 : -1, onSort: toggleSort, options: PHONE_SORTS }}
+        lead={(d, i) => (
+          <span className="flex items-center gap-1.5">
+            <span className="w-4 flex-shrink-0 text-center font-display text-[15px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#5C6270' }}>
+              {i + 1}
+            </span>
+            <CareerAvatar name={d.name} isChamp={d.champs > 0} url={state.ownerAvatarMap?.[d.name]} size={24} />
+            <span className="min-w-0 break-words text-[13px] font-bold leading-tight text-s-text">{d.name}</span>
+          </span>
+        )}
+      />
+
+      {/* ── TABLE (wider screens) ─────────────── */}
+      <div className="relative hidden sm:block">
       <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
         <table className="w-full min-w-[560px] border-collapse">
           <thead>
@@ -172,8 +206,6 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
           </tbody>
         </table>
       </div>
-        {/* Right-edge gradient fade — signals scrollable content */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[rgba(11,11,13,0.85)] z-10 sm:hidden" />
       </div>
     </div>
   )

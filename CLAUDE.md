@@ -88,7 +88,7 @@ components/                 UI, one folder per page plus shared/layout/search
   shared/                   Reusable primitives: PageHeader, PillTabs, SectionCard, StatChip,
                             RecordItem, OwnerAvatar, PlayerHeadshot, FinishBadge, WinPctBadge,
                             SortHeader, InfoTip, LoadingSpinner, ErrorState, ShareButton,
-                            PickYourself
+                            PickYourself, StatRows
 
 context/
   LeagueContext.tsx         Global store — loads the snapshot, walks the live league chain,
@@ -112,6 +112,7 @@ hooks/
   useSeasonTransactions.ts  Season tab → Transactions (past weeks once, current week via the sync)
   useModalClose.ts          Escape, Back button, and body scroll lock shared by every modal
   useMe.ts                  "Pick who you are": no login, remembered on the device
+  useMyColumn.ts            Draft boards open on your column
   useUrlParam.ts            useUrlParam(), useUrlModal() — tabs, weeks, years and open matchups
                             live in the URL, so links open exactly what was shared
 
@@ -308,6 +309,7 @@ rounded corners.** Full spec + canonical patterns live in `DESIGN.md`.
 - **Typography:** `Barlow Condensed` (display/numerals — all big numbers, names, titles, table numerals; uppercase, tight leading) + `Archivo` (UI/body; tiny uppercase tracked labels). Loaded via `next/font` in `layout.tsx` as `--font-barlow` / `--font-archivo`; use `font-display` for Barlow. **Inter is gone.**
 - **Shape tokens:** cards `6px` radius via `.gl` / `.bento-card` (onyx + 1px gold hairline, no blur), chips/badges square or `2px`, pills `rounded-full`, avatars `50%`. Depth comes from borders + background steps, not shadows.
 - **Shared primitives:** `PageHeader` (gold-dash kicker + hero-gradient title), `PillTabs` (gold-underline tabs), `SectionCard` (onyx card + gold/brick dash header), `StatChip` (hairline stat-band cell), `RecordItem`, `OwnerAvatar` (gold-ring for champions), `PlayerHeadshot`, `FinishBadge` (square chip), `WinPctBadge`, `SortHeader` (sortable `<th>` — never define header components inside a table's render; its `tip` adds a definition), `InfoTip` (? icon whose definition pops up on hover/tap; portaled so table scrollers can't clip it). Use these instead of re-rolling the markup.
+- **Wide tables become rows on phones.** `StatRows` sits next to the table (`hidden sm:block`): a few numbers up front, the rest a tap away, every sort still there. The owner chose the numbers: Power Rankings shows Power Index, PF/Gm, all-play; the career tables show record, Win%, titles. Don't add columns without asking.
 - **Mobile first — most of the league is on phones.** No text under 9px; tap targets ≥ ~28px (`InfoTip` pads its 13px icon, schedule rows are whole-row buttons); form fields 16px on phones (iOS zooms into anything smaller); let names and context lines wrap instead of truncating when they carry the information. Check every page at 375px.
 - **Definitions go behind a ?, legends stay footnotes.** Any text that defines a term or a stat (a column, a card's criteria, a formula) is an `InfoTip` beside the term — never a footnote or caption. Emoji legends (`FlairLegend`) stay as visible footnotes; instructions ("Tap a matchup…") stay as text.
 - **No HTML entities in multi-line JSX text.** SWC drops the leading space of a line-ending text run that contains one (`all {n} teams … doesn&apos;t count` rendered "all 9teams"). Write a literal ’ or end the run on the same line.

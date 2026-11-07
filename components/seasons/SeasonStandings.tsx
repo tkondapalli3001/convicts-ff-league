@@ -13,6 +13,8 @@ import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import SortHeader from '@/components/shared/SortHeader'
+import StatRows, { type StatField } from '@/components/shared/StatRows'
+import { fmtRecord } from '@/lib/utils'
 
 const scheduleLuck = uncertaintyData as UncertaintySummary
 
@@ -31,6 +33,56 @@ interface Row {
   playoffs: boolean
   luck: number
 }
+
+const LUCK_TIP = 'actual wins minus expected wins. Expected wins add up, week by week, the share of the league you outscored — as if you played everyone (ties count half). Positive = more wins than your scoring deserved; negative = unlucky.'
+
+function perGame(total: number, r: Row): string {
+  return r.wins + r.losses > 0 ? (total / (r.wins + r.losses)).toFixed(1) : '—'
+}
+
+function signed(n: number) {
+  return <span className="font-bold" style={{ color: n >= 0 ? '#7FA886' : '#B4636B' }}>{n >= 0 ? '+' : ''}{n.toFixed(1)}</span>
+}
+
+function luckNote(r: Row) {
+  const luck = scheduleLuck.luck[r.year]?.[r.manager]
+  return luck ? <InfoTip term={`${r.manager}’s ${r.year} luck`}>{scheduleLuckNote(luck, scheduleLuck.sims)}</InfoTip> : null
+}
+
+function PlayoffChip({ playoffs }: { playoffs: boolean }) {
+  return playoffs ? (
+    <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[rgba(127,168,134,0.12)] text-s-green border border-[rgba(127,168,134,0.3)]" style={{ boxShadow: '0 0 8px #7FA88630' }}>
+      ● Clinched
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[rgba(180,99,107,0.12)] text-s-red border border-[rgba(180,99,107,0.3)]">
+      ✕ Eliminated
+    </span>
+  )
+}
+
+/** Phones: record, scoring and luck up front; finish sits by the name. The rest is a tap away. */
+const PHONE_FIELDS: StatField<Row, SortKey>[] = [
+  { label: 'Record', sortKey: 'wins', covers: ['losses', 'winpct'], value: r => <span className="font-bold text-s-text">{fmtRecord(r.wins, r.losses)}</span> },
+  { label: 'PF/Gm', sortKey: 'pf', value: r => perGame(r.pf, r) },
+  { label: 'Luck', sortKey: 'luck', tip: { term: 'Luck Index', text: LUCK_TIP }, value: r => signed(r.luck), rowTip: luckNote },
+  { label: 'Win%', value: r => <WinPctBadge pct={(r.winpct * 100).toFixed(1)} /> },
+  { label: 'PA/Gm', sortKey: 'pa', value: r => <span style={{ color: '#B4636B' }}>{perGame(r.pa, r)}</span> },
+  { label: '+/−/Gm', sortKey: 'margin', value: r => signed(r.margin) },
+  { label: 'Playoffs', value: r => <PlayoffChip playoffs={r.playoffs} /> },
+]
+const PHONE_SORTS: { key: SortKey; label: string }[] = [
+  { key: 'winpct', label: 'Win%' },
+  { key: 'wins', label: 'Wins' },
+  { key: 'losses', label: 'Losses' },
+  { key: 'finish', label: 'Finish' },
+  { key: 'pf', label: 'PF/Gm' },
+  { key: 'pa', label: 'PA/Gm' },
+  { key: 'margin', label: '+/−/Gm' },
+  { key: 'luck', label: 'Luck' },
+  { key: 'year', label: 'Year' },
+  { key: 'manager', label: 'Manager' },
+]
 
 interface Props {
   onYearChange?: (year: number | null) => void
@@ -59,7 +111,8 @@ export default function SeasonStandings({ onYearChange }: Props) {
 
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => (d === 1 ? -1 : 1))
-    else { setSortKey(key); setSortDir(1) }
+    // Names A–Z and finishes 1st-first; other numbers start biggest first, like the Career Leaderboard
+    else { setSortKey(key); setSortDir(key === 'manager' || key === 'finish' ? 1 : -1) }
   }
 
   function toggleYear(y: number) {
@@ -111,9 +164,9 @@ export default function SeasonStandings({ onYearChange }: Props) {
   const sort = { sortKey, sortDir, onSort: handleSort }
 
   return (
-    <div className="gl p-[18px]">
+    <div className="gl p-3 sm:p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-[14px]">
-        Season Standings — Tap a year to isolate · Tap a manager for their profile
+        Season Standings — Tap a year to isolate · Tap a manager for <span className="sm:hidden">more</span><span className="hidden sm:inline">their profile</span>
       </div>
 
       {/* Year filters */}
@@ -134,8 +187,29 @@ export default function SeasonStandings({ onYearChange }: Props) {
         ))}
       </div>
 
+      <StatRows
+        className="-mx-3 -mb-3"
+        rows={rows}
+        rowKey={r => `${r.manager}-${r.year}`}
+        owner={r => r.manager}
+        fields={PHONE_FIELDS}
+        sort={{ key: sortKey, dir: sortDir, onSort: handleSort, options: PHONE_SORTS }}
+        lead={r => (
+          <span className="flex items-center gap-2">
+            <OwnerAvatar name={r.manager} size="xs" />
+            <span className="min-w-0">
+              <span className="block break-words text-[13px] font-bold leading-tight text-s-text">{r.manager}</span>
+              <span className="mt-1 flex flex-wrap items-center gap-1.5">
+                <FinishBadge finish={r.finish} />
+                {activeYears.size > 1 && <span className="font-display text-[13px] font-bold text-s-text3">{r.year}</span>}
+              </span>
+            </span>
+          </span>
+        )}
+      />
+
       {/* Table */}
-      <div className="relative">
+      <div className="relative hidden sm:block">
         <div className="overflow-x-auto scrollbar-hide ss-table" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="w-full border-collapse min-w-[640px]">
             <thead>
@@ -154,10 +228,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
                   {...sort}
                   k="luck"
                   label="Luck"
-                  tip={{
-                    term: 'Luck Index',
-                    text: 'actual wins minus expected wins. Expected wins add up, week by week, the share of the league you outscored — as if you played everyone (ties count half). Positive = more wins than your scoring deserved; negative = unlucky.',
-                  }}
+                  tip={{ term: 'Luck Index', text: LUCK_TIP }}
                 />
                 <th>Playoffs</th>
               </tr>
@@ -193,21 +264,9 @@ export default function SeasonStandings({ onYearChange }: Props) {
                   </td>
                   <td className="font-display text-[17px] font-bold num" style={{ color: r.luck >= 0 ? '#7FA886' : '#B4636B' }}>
                     {r.luck >= 0 ? '+' : ''}{r.luck.toFixed(1)}
-                    {scheduleLuck.luck[r.year]?.[r.manager] && (
-                      <InfoTip term={`${r.manager}’s ${r.year} luck`}>{scheduleLuckNote(scheduleLuck.luck[r.year][r.manager], scheduleLuck.sims)}</InfoTip>
-                    )}
+                    {luckNote(r)}
                   </td>
-                  <td>
-                    {r.playoffs ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[rgba(127,168,134,0.12)] text-s-green border border-[rgba(127,168,134,0.3)]" style={{ boxShadow: '0 0 8px #7FA88630' }}>
-                        ● Clinched
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] font-bold bg-[rgba(180,99,107,0.12)] text-s-red border border-[rgba(180,99,107,0.3)]">
-                        ✕ Eliminated
-                      </span>
-                    )}
-                  </td>
+                  <td><PlayoffChip playoffs={r.playoffs} /></td>
                 </tr>
               )
             })}

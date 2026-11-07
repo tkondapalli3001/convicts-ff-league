@@ -7,8 +7,43 @@ import { careerLeaderboard, type LeaderboardRow } from '@/lib/stats'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import SortHeader from '@/components/shared/SortHeader'
+import StatRows, { type StatField } from '@/components/shared/StatRows'
+import { fmtMoney, fmtRecord, winPctColor } from '@/lib/utils'
 
 type SortKey = keyof LeaderboardRow
+
+const muted = <span className="text-[#3A4150]">—</span>
+
+/** Phones: a clear, objective leaderboard — record, Win%, titles. The rest is a tap away. */
+function phoneFields(playoffOnly: boolean): StatField<LeaderboardRow, SortKey>[] {
+  return [
+    { label: 'Record', sortKey: 'allW', covers: ['allL'], value: d => <span className="font-bold text-s-text">{fmtRecord(d.allW, d.allL)}</span> },
+    { label: 'Win%', sortKey: 'winpct', value: d => <span className="font-bold" style={{ color: winPctColor(d.winpct) }}>{(d.winpct * 100).toFixed(1)}%</span> },
+    { label: 'Titles', sortKey: 'champs', value: d => (d.champs > 0 ? <span className="font-bold text-gold-soft">{d.champs}×</span> : muted) },
+    { label: playoffOnly ? 'Apps' : 'Seasons', sortKey: 'numSeasons', value: d => d.numSeasons },
+    { label: playoffOnly ? 'Avg PF/Gm' : 'PF/Season', sortKey: 'avgPF', value: d => d.avgPF.toFixed(1) },
+    { label: 'Avg Fin', sortKey: 'avgFinish', value: d => (d.avgFinish != null ? d.avgFinish.toFixed(1) : '—') },
+    ...(playoffOnly ? [] : [{ label: 'Playoffs', sortKey: 'playoffApps' as const, value: (d: LeaderboardRow) => `${d.playoffApps}/${d.numSeasons}` }]),
+    { label: '🚽 Shame', sortKey: 'shame', value: d => (d.shame > 0 ? <span className="font-bold text-loss">{d.shame}×</span> : muted) },
+    { label: 'Net $', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>{fmtMoney(d.earn)}</span> : muted) },
+  ]
+}
+
+function phoneSorts(playoffOnly: boolean): { key: SortKey; label: string }[] {
+  return [
+    { key: 'winpct', label: 'Win%' },
+    { key: 'allW', label: 'Wins' },
+    { key: 'allL', label: 'Losses' },
+    { key: 'champs', label: 'Titles' },
+    { key: 'numSeasons', label: playoffOnly ? 'Apps' : 'Seasons' },
+    { key: 'avgPF', label: playoffOnly ? 'Avg PF/Gm' : 'PF/Season' },
+    { key: 'avgFinish', label: 'Avg Finish' },
+    ...(playoffOnly ? [] : [{ key: 'playoffApps' as const, label: 'Playoffs' }]),
+    { key: 'shame', label: '🚽 Shame' },
+    { key: 'earn', label: 'Net $' },
+    { key: 'name', label: 'Manager' },
+  ]
+}
 
 export default function CareerLeaderboard() {
   const { state } = useLeague()
@@ -44,7 +79,7 @@ export default function CareerLeaderboard() {
   const sort = { sortKey, sortDir, onSort: handleSort }
 
   return (
-    <div className="gl p-[18px] relative overflow-hidden">
+    <div className="gl p-3 sm:p-[18px] relative overflow-hidden">
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2 relative z-10">
         <div className="flex items-center gap-2.5">
           <span className="h-px w-5 bg-gold" />
@@ -64,7 +99,25 @@ export default function CareerLeaderboard() {
         </button>
       </div>
 
-      <div className="relative">
+      <StatRows
+        className="-mx-3 -mb-3"
+        rows={sorted}
+        rowKey={d => d.name}
+        owner={d => d.name}
+        fields={phoneFields(playoffOnly)}
+        sort={{ key: sortKey, dir: sortDir, onSort: handleSort, options: phoneSorts(playoffOnly) }}
+        lead={(d, i) => (
+          <span className="flex items-center gap-1.5">
+            <span className="w-4 flex-shrink-0 text-center font-display text-[15px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#5C6270' }}>
+              {i + 1}
+            </span>
+            <OwnerAvatar name={d.name} size="xs" />
+            <span className="min-w-0 break-words text-[13px] font-bold leading-tight text-s-text">{d.name}</span>
+          </span>
+        )}
+      />
+
+      <div className="relative hidden sm:block">
         <div className="overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="w-full border-collapse min-w-[700px] ss-table">
             <thead>
