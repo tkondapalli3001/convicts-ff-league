@@ -32,7 +32,7 @@ export default function FinishTracker() {
   ]
 
   return (
-    <div className="gl relative overflow-hidden p-[18px] mb-4">
+    <div className="gl relative overflow-hidden p-3 mb-4 sm:p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-3 relative z-10">
         Finish Position by Year — 1=Champion · Last=Toilet Bowl
       </div>
@@ -54,7 +54,7 @@ export default function FinishTracker() {
       <div className="relative z-10 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div className="min-w-max">
           {/* Year headers */}
-          <div className="flex items-center mb-1" style={{ paddingLeft: 78 }}>
+          <div className="flex items-center mb-1 pl-[70px] sm:pl-[78px]">
             {years.map(y => (
               <span key={y} className="w-[34px] text-[10px] text-s-text3 text-center flex-shrink-0">{y}</span>
             ))}
@@ -67,7 +67,7 @@ export default function FinishTracker() {
             return (
               <div key={name} className="flex items-center gap-1 my-1">
                 <div
-                  className="sticky left-0 z-10 w-[70px] text-[11px] text-s-text font-semibold flex-shrink-0 text-right pr-2"
+                  className="sticky left-0 z-10 w-[62px] text-[11px] sm:w-[70px] text-s-text font-semibold flex-shrink-0 text-right pr-2"
                   style={{ background: '#0B0B0D' }}
                 >
                   {name}

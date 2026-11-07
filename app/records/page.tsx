@@ -109,11 +109,26 @@ export default function RecordsPage() {
 
       {/* ── TRASH TALK TAB ───────────────────────────────────────── */}
       {activeTab === 'trashtalk' && (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {TRASH_TALK.map(t => (
-            <TrashTalkCard key={t.owner} {...t} />
-          ))}
-        </div>
+        <>
+          <div className="mb-4 flex flex-wrap gap-2 md:hidden">
+            {TRASH_TALK.map(t => (
+              <button
+                key={t.owner}
+                type="button"
+                onClick={() => document.getElementById(`talk-${t.owner}`)?.scrollIntoView({ behavior: 'smooth' })}
+                className="min-h-[32px] border px-3 text-[10px] font-bold uppercase tracking-[1.5px] text-s-text2"
+                style={{ borderColor: 'rgba(var(--gold-rgb), 0.16)' }}
+              >
+                {t.owner}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {TRASH_TALK.map(t => (
+              <TrashTalkCard key={t.owner} {...t} />
+            ))}
+          </div>
+        </>
       )}
 
       {/* ── FUN FACTS TAB ────────────────────────────────────────── */}

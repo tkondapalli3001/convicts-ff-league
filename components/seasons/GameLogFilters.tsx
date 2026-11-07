@@ -31,7 +31,7 @@ export default function GameLogFilters({ years, ownerNames, activeYears, activeO
         ))}
       </div>
 
-      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-2">Filter by Owner — click to isolate, click again to reset</div>
+      <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-2">Filter by Owner — tap to isolate, tap again to reset</div>
       <div className="flex gap-[6px] flex-wrap">
         {ownerNames.map(name => (
           <button

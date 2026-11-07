@@ -272,11 +272,11 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 style={{ borderColor: 'rgba(255,255,255,0.04)' }}
               >
                 <span className="w-[54px] flex-shrink-0 text-[10px] uppercase tracking-[0.5px] text-s-text3">{g.year} W{g.week}</span>
-                <span className="w-[70px] flex-shrink-0 truncate font-bold text-s-text">{ownerName}</span>
-                <span className="w-[52px] flex-shrink-0 font-display text-[16px] font-bold text-gold-bright">{fmtPts(myPts)}</span>
-                <span className="flex-shrink-0 text-[10px] text-s-text3">vs</span>
-                <span className="w-[70px] flex-shrink-0 truncate font-bold text-s-text2">{opp}</span>
-                <span className="w-[52px] flex-shrink-0 font-display text-[16px] font-semibold text-s-text3">{fmtPts(oppPts)}</span>
+                <span className="hidden w-[70px] flex-shrink-0 truncate font-bold text-s-text sm:inline">{ownerName}</span>
+                <span className="w-[44px] flex-shrink-0 font-display text-[15px] font-bold text-gold-bright sm:w-[52px] sm:text-[16px]">{fmtPts(myPts)}</span>
+                <span className="hidden flex-shrink-0 text-[10px] text-s-text3 sm:inline">vs</span>
+                <span className="min-w-0 flex-1 truncate font-bold text-s-text2 sm:w-[70px] sm:flex-none sm:flex-shrink-0">{opp}</span>
+                <span className="w-[44px] flex-shrink-0 font-display text-[15px] font-semibold text-s-text3 sm:w-[52px] sm:text-[16px]">{fmtPts(oppPts)}</span>
                 <span
                   className="flex-shrink-0 rounded-[2px] px-[6px] py-[1px] text-[10px] font-extrabold"
                   style={won ? { color: '#7FA886', background: 'rgba(127,168,134,0.12)' } : { color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}
@@ -284,7 +284,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                   {won ? 'W' : 'L'}
                 </span>
                 <span
-                  className="flex-shrink-0 rounded-[2px] border px-2 py-[1px] text-[9px] font-bold uppercase tracking-[1px] text-s-text3"
+                  className="hidden flex-shrink-0 rounded-[2px] border px-2 py-[1px] text-[9px] font-bold uppercase tracking-[1px] text-s-text3 sm:inline"
                   style={{ borderColor: 'rgba(var(--gold-rgb), 0.14)' }}
                 >
                   {g.type === 'R' ? 'REG' : 'PLY'}

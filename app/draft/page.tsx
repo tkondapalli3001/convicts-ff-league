@@ -65,7 +65,7 @@ export default function DraftPage() {
       {activeTab === 'slots' && (
         <>
           <p className="text-[11px] text-s-text3 mb-3">
-            Click any slot to see historical managers, finishes, and playoff rates.
+            Tap any slot to see historical managers, finishes, and playoff rates.
           </p>
           <DraftSlotAnalysis />
         </>

@@ -15,7 +15,7 @@ interface Props {
 export default function PageHeader({ title, subtitle, kicker }: Props) {
   return (
     <div
-      className="-mx-4 -mt-6 mb-6 overflow-hidden border-b px-4 pb-8 pt-10 sm:px-8 sm:pb-9 sm:pt-12"
+      className="-mx-4 -mt-6 mb-3 overflow-hidden border-b px-4 pb-4 pt-5 sm:mb-6 sm:px-8 sm:pb-9 sm:pt-12"
       style={{
         borderColor: 'rgba(var(--gold-rgb), 0.12)',
         background:
@@ -23,7 +23,7 @@ export default function PageHeader({ title, subtitle, kicker }: Props) {
       }}
     >
       {kicker && (
-        <div className="mb-3 flex items-center gap-3 sm:mb-4 sm:gap-4">
+        <div className="mb-2 flex items-center gap-3 sm:mb-4 sm:gap-4">
           <span
             className="h-px w-8 sm:w-12"
             style={{ background: 'linear-gradient(to right, transparent, #C9962E)' }}
@@ -33,10 +33,10 @@ export default function PageHeader({ title, subtitle, kicker }: Props) {
           </span>
         </div>
       )}
-      <h1 className="text-hero-gold font-display text-[40px] font-extrabold uppercase leading-[0.95] tracking-[1px] sm:text-[56px] sm:tracking-[2px] lg:text-[64px]">
+      <h1 className="text-hero-gold font-display text-[32px] font-extrabold uppercase leading-[0.95] tracking-[1px] sm:text-[56px] sm:tracking-[2px] lg:text-[64px]">
         {title}
       </h1>
-      <p className="mt-3 text-[11px] font-medium uppercase tracking-[1.5px] text-s-text2 sm:text-[12px]">
+      <p className="mt-3 hidden text-[12px] font-medium uppercase tracking-[1.5px] text-s-text2 sm:block">
         {subtitle}
       </p>
     </div>

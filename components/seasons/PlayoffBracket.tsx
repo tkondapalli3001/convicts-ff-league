@@ -234,7 +234,7 @@ function MatchupCard({
         ${isChampionship ? 'bg-[rgba(201,150,46,0.08)] border-[rgba(230,190,90,0.25)] hover:border-[rgba(230,190,90,0.4)]' : 'hover:bg-[rgba(201,150,46,0.05)]'}`}
       style={!isChampionship ? { background: '#0B0B0D', borderColor: 'rgba(var(--gold-rgb), 0.10)' } : undefined}
       onClick={onClick}
-      title="Click to view game details"
+      title="Tap to view game details"
     >
       {isChampionship && (
         <div className="text-[9px] font-bold uppercase tracking-[1.5px] text-s-gold mb-[6px]">🏆 Championship</div>
@@ -371,7 +371,7 @@ export default function PlayoffBracket({ year }: Props) {
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-gold-soft mb-1">
           {year} Playoff Bracket
         </div>
-        <div className="text-[9px] text-s-text3/50 mb-4">Click any matchup to view game details</div>
+        <div className="text-[9px] text-s-text3/50 mb-4">Tap any matchup to view game details</div>
 
         <div className="overflow-x-auto">
           <div style={{ minWidth: rounds.length * 170 + (rounds.length - 1) * 32 }}>

@@ -113,7 +113,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
   return (
     <div className="gl p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-gold-soft mb-[14px]">
-        Season Standings — Click year to isolate · Tap a manager to view their profile
+        Season Standings — Tap a year to isolate · Tap a manager for their profile
       </div>
 
       {/* Year filters */}

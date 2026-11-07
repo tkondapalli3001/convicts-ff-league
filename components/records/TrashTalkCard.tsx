@@ -17,7 +17,8 @@ interface Props {
 export default function TrashTalkCard({ owner, title, body }: Props) {
   return (
     <div
-      className="overflow-hidden rounded-[6px] animate-fade-in"
+      id={`talk-${owner}`}
+      className="scroll-mt-16 overflow-hidden rounded-[6px] animate-fade-in"
       style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
     >
       <div className="flex items-start gap-4 p-5">

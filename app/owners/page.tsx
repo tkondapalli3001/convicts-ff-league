@@ -31,7 +31,7 @@ export default function OwnersPage() {
       <PageHeader
         kicker="The Managers"
         title="Owner Profiles"
-        subtitle="Click any row to drill into career stats, H2H records & game log"
+        subtitle="Tap any row to drill into career stats, H2H records & game log"
       />
 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />

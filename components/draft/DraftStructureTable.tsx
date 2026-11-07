@@ -61,7 +61,7 @@ export default function DraftStructureTable({ data }: Props) {
           Hero-RB: a first-round running back and at most one more. Balanced: everything else.
         </InfoTip>
       </div>
-      <div className="text-[11px] text-s-text3 mb-4">Click a strategy to see instances</div>
+      <div className="text-[11px] text-s-text3 mb-4">Tap a strategy to see instances</div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {data.map(entry => {

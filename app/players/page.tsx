@@ -24,8 +24,8 @@ import type { TxTypeFilter } from '@/components/transactions/TransactionFilters'
 type Tab = 'winrate' | 'scoring' | 'ownership' | 'transactions'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'winrate',      label: 'Win Rate'        },
   { id: 'scoring',      label: 'Scoring'         },
+  { id: 'winrate',      label: 'Win Rate'        },
   { id: 'ownership',   label: 'Draft Ownership'  },
   { id: 'transactions', label: 'Transactions'    },
 ]
@@ -34,7 +34,7 @@ export default function PlayersPage() {
   const { state } = useLeague()
   const { loaded, error, years, ownerSeasons } = state
   const { playerWinRates, ownership, playerScores, loading, loadingText, error: dataError } = usePlayersData()
-  const [activeTab, setActiveTab] = useState<Tab>('winrate')
+  const [activeTab, setActiveTab] = useState<Tab>('scoring')
   // Transactions download only once their tab is opened (then stay cached)
   const { transactions, years: txYears, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData(activeTab === 'transactions')
 
