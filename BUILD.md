@@ -25,7 +25,7 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 183 tests pass (16 files), the control-total tie-outs included, and the
+- **Health:** 198 tests pass (17 files), the control-total tie-outs included, and the
   deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
   errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
   files, exports, or dependencies. Snapshots frozen for **2019–2025**
@@ -52,6 +52,7 @@ Prime) · Recharts · React Context · Vitest · knip.
 | `npm run lint` | ESLint 9 flat config |
 | `npm run knip` | Unused files, exports, and dependencies — must report nothing |
 | `npm run dataset` | Rebuild the tidy history tables in `data/` (`-- --cache <dir>` reuses downloads) |
+| `npm run uncertainty` | Rebuild the noise tables in `data/` from committed files; prints the summary |
 | `npm run snapshot` | Freeze completed seasons into `public/data/` (post-season ritual) |
 | `npm run snapshot -- --players-only` | Rebuild only `players.json` (after each draft) |
 | `node scripts/luck-index.mjs <leagueId>` | Any league's Luck Index via `lib/stats/luck.ts` |
@@ -64,7 +65,7 @@ Every item ends with the standard **verification gate** (§6). Each fires on its
 on an owner decision.
 
 ### M1 — Post-season ritual *(~Jan 2027, once Sleeper marks 2026 `complete`)*
-1. `npm run snapshot`, then `npm run dataset`.
+1. `npm run snapshot`, then `npm run dataset`, then `npm run uncertainty`.
 2. `git diff --stat public/data/` — expect **only** `season-2026.json` and
    `transactions-2026.json` added, `players.json` and `manifest.json` updated; any change
    to 2019–2025 files is a red flag: stop and diff before committing.
@@ -159,9 +160,37 @@ skill versus luck, with every number proven against a source neither of us contr
    - Oberon picks the next game's winner 52.9% of the time (435 games), record 50.7%,
      scoring average 53.8%: none is clearly better than a coin flip.
    - Not done: the ffsimulator cross-check. It needs R, which isn't installed here.
-4. **Phase 3, uncertainty:** sample sizes, ranges, shrinkage and repeatability for
-   existing stats, plus a list of which are mostly noise. Nothing gets removed without
-   the owner's approval.
+4. **Phase 3, uncertainty.** *Analysis done 2026-11-07; nothing on the site changed.*
+   `lib/stats/uncertainty.ts` + `npm run uncertainty` (tables in `data/`). Season-centered,
+   with significance from shuffling owners within seasons; "sticks" needs p < 0.01 on the
+   owner's share, since 23 stats were tested. Findings:
+   - **Sticks:** points for per game (next-season r +0.29, odd/even weeks +0.42), all-play
+     (+0.29), potential points (+0.26). 140+ games goes with them. Pickups made (+0.60) and
+     trades made (+0.32) stick as habits, but neither clearly leads to next year's wins.
+   - **Correction:** Phases 1-2 were summed up as "team strength barely carries". Wrong:
+     scoring does carry, about 28% of its spread belongs to the owner. Win rate is what
+     doesn't (-0.03), because luck swamps it.
+   - **Weak:** Oberon rating (+0.16), bridge draft (+0.18), lowest game (+0.24).
+   - **No evidence it sticks:** win rate, finish, making the playoffs, net earnings, luck
+     (as it should be), highest game, sub-80 games, boom-bust, lineup efficiency, draft value
+     against ADP, and the bridge's pickups, trades and lineup calls. Win rate sticks about as
+     much as points against, the negative control. Each range on r still allows a small effect.
+   - **H2H:** shrinkage is worth 22 games at 50%, so a 4-1 series is really about 56%.
+     Coin flips alone would make 7.5 of today's 15 Daddies; Daddies won the next meeting
+     57.4% (39 of 68, range 46-68).
+   - **Streaks:** Heater teams won next 59.6%, below the 63.2% their points had earned; Ice
+     cold teams won 48.9%, above their 38.4%. No momentum. Defending champs 55.2% next
+     season; last place 47.1%; neither range excludes 50%.
+   - **Playoffs:** the better regular-season team won 18 of 35 title-path games (51.4%).
+     Draft slot has no link to wins (r -0.02).
+   - **Player win rates:** noise. Shrinkage is worth 5,024 games; odd against even starts
+     r +0.04; beyond the team's own rate, 5 of 278 clear the bar where chance predicts 14.
+   - **Luck:** career percentiles across 10,000 schedules per season, from Teja 9.9 to
+     Daniyaal 96.3. Single seasons: 1 of 70 under 5%, 1 over 95%.
+   - **Waiting on the owner:** whether to show any of this on the site. Nothing gets removed
+     without approval.
+   - **Still open from the plan's "done means":** payment records against the earnings
+     table, the ffsimulator check (needs R), and each owner signing off on their bridge.
 
 ### Done
 - **2026-08-14 —** 2026 buy-in (`2026: 150`).

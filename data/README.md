@@ -118,6 +118,28 @@ Oberon rating, the better record, or the higher scoring average entering the wee
 the winner (1 right, 0 wrong, ½ a toss-up or tied game). The summary the site quotes is
 `public/data/track-record.json`; method in `lib/current-season/track-record.ts`.
 
+**The noise tables**, from `npm run uncertainty` (method: `lib/stats/uncertainty.ts`).
+Values are centered within each season, so a high-scoring year can't look like a good owner.
+
+- **stat_repeatability.csv**, one row per stat. `next_season_r` is the correlation with the
+  same owner's next season, with its 95% range and `next_season_p` from shuffling owners
+  within seasons. `owner_share` is the part of a season's spread that belongs to the owner.
+  `odd_even_r` compares odd and even weeks inside a season. `same_season_win_r` and
+  `next_season_win_r` show whether the stat goes with winning. `verdict` is `sticks` (owner
+  share at p < 0.01), `weak` (either test under 0.05) or `no evidence`, which isn't proof of
+  nothing.
+- **career_ranges.csv**, one row per owner: career win rate, its 95% range, the rate after
+  shrinkage toward 50%, and the chance the true rate is above 50%.
+- **h2h_ranges.csv**, one row per pair that has met, every game counted the site's way (a tie
+  goes to the listed team). The same columns, plus `daddy`.
+- **player_win_rates.csv**, one row per player with 10+ starts, the Win Rate tab's rule: raw and
+  shrunk rates, and `team_season_rate`, what his teams won those seasons anyway.
+- **schedule_luck.csv**, one row per owner-season plus `career` rows: wins under 10,000 schedules
+  (the real pairings and scores, teams randomly reassigned to slots). `percentile` 4 means worse
+  in only 4% of schedules.
+- **badge_tests.csv**, one row per badge: decided only from earlier games, did it call the next
+  one? `team_earned_share` is the all-play share the team had earned so far, for the streaks.
+
 **control_totals.csv**, four rows per owner-season: `record`, `pf`, `pa`, and `ppts`
 (potential points, Sleeper's best-lineup total).
 `ours` comes from the site's code and `sleeper` from the totals Sleeper stores on the

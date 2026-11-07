@@ -1,0 +1,8 @@
+badge,shown_on,wins,games,win_rate,low_95,high_95,team_earned_share,what_it_tests
+💦 Daddy (75%+ over 5+ meetings),"Season tab, Fun Facts",39,68,0.574,0.455,0.684,,Did the Daddy win the next meeting?
+Series leader (3+ meetings),H2H grids,173,328,0.527,0.473,0.581,,Did whoever led the series win the next meeting?
+🔥 Heater (3+ straight wins),Season tab,59,99,0.596,0.497,0.687,0.632,"Next game, against the all-play share the team had earned so far"
+🧊 Ice cold (3+ straight losses),Season tab,45,92,0.489,0.389,0.59,0.384,"Next game, against the all-play share the team had earned so far"
+🏆 Defending champ,Season tab,53,96,0.552,0.453,0.648,,"The champion's next regular season, game by game"
+🚽 Last-place finish,Season tab,33,70,0.471,0.359,0.587,,"The last-place team's next regular season, game by game"
+Better regular-season team in a playoff game,"Brackets, titles",18,35,0.514,0.356,0.67,,Title-path games: did the team with more all-play wins advance?

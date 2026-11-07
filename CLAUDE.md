@@ -145,6 +145,9 @@ lib/
     bridge.ts               The wins bridge: average team → draft → pickups → trades → lineup
                             calls → expected wins → luck → record (Shapley over all-play wins);
                             npm run dataset writes it, profiles read it
+    uncertainty.ts          wilsonRange(), fitShrinkage()/shrinkRate(), scheduleSamples(),
+                            repeatability(), splitHalf(), stickVerdict() — how sure each number
+                            can be (npm run uncertainty)
   current-season/           The season tab's engine (barrel: @/lib/current-season)
     build-preview.ts        buildWeekPreviews(), computeStandings(), season/week selection
     live.ts                 syncLiveSeason() polling pass, withLiveSeason() overlay,
@@ -182,7 +185,9 @@ data/                       Tidy history tables (CSV), written by npm run datase
                             deployed: players, owner_weeks, lineups, transactions (failed claims
                             too), draft_picks (with ADP), projections (with kickoff times),
                             player_weeks and defense_weeks (nflverse box scores, rescored),
-                            control_totals, bridges, forecasts and game_picks (the replays).
+                            control_totals, bridges, forecasts and game_picks (the replays), and
+                            npm run uncertainty's stat_repeatability, career_ranges, h2h_ranges,
+                            player_win_rates, schedule_luck, badge_tests.
                             data/README.md is the data dictionary
 
 public/
@@ -199,6 +204,8 @@ scripts/
                             projections and ADP, Fantasy Football Calculator's ADP, nflverse box
                             scores and schedule, and the DynastyProcess ID crosswalk, through the
                             site's own functions (`-- --cache <dir>` reuses downloads)
+  uncertainty-report.ts     npm run uncertainty — reads only committed files, writes the noise tables
+                            into data/ and prints the summary; seeded, needs no downloads
   snapshot-history.mjs      npm run snapshot — freezes completed seasons to public/data/;
                             `-- --players-only` rebuilds just players.json. Reads the week
                             rule from lib/data-processing/season-settings.ts (type stripping)
@@ -231,7 +238,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 
 **Yearly ritual** (full checklist in BUILD.md §3):
 - **After the draft:** in `lib/league/config.ts`, point `LEAGUE_ID` at the new season and set `CURRENT_SEASON` to its year — the tab's label and URL follow. Run `npm run snapshot -- --players-only` so rookies have names.
-- **After the title game:** run `npm run snapshot`, then `npm run dataset`, and commit `public/data/` and `data/`; add the season to `MANUAL_CHAMPS`/`MANUAL_SHAME` (`lib/league/history.ts`) and each owner's net to `lib/league/earnings.ts` (totals compute themselves). The new season must tie out (see below).
+- **After the title game:** run `npm run snapshot`, then `npm run dataset`, then `npm run uncertainty`, and commit `public/data/` and `data/`; add the season to `MANUAL_CHAMPS`/`MANUAL_SHAME` (`lib/league/history.ts`) and each owner's net to `lib/league/earnings.ts` (totals compute themselves). The new season must tie out (see below).
 
 ---
 
@@ -246,7 +253,8 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **Every number ties out, or its gap is documented.** On every deploy, the control-totals test recomputes each owner-season's record, points for/against and potential points with the site's code and ties them to the totals Sleeper stores on the roster, and ties Sleeper's weekly player and team-defense points to the NFL's box scores (nflverse) rescored with the league's settings. A difference that isn't in `KNOWN_GAPS` / `KNOWN_PLAYER_GAPS` / `KNOWN_DEFENSE_GAPS` (`lib/stats/control-totals.ts`), with its cause, fails the build. Find the cause before adding an entry; never loosen the tolerance to make a test pass.
 - **The snapshot is an accelerator, never a dependency.** If `public/data/manifest.json` fails to load, `LeagueContext` must fall back to full live fetching. Don't break that path (BUILD.md M3 tests it). The footer and site description read the manifest at build time, so the file must exist to build — test the fallback by blocking the request, never by deleting the file. Never edit `public/data/` by hand — regenerate with `npm run snapshot` (`bridges.json`, `track-record.json`: `npm run dataset`), and diff old seasons before committing.
 - **Forecasts publish their track record.** The playoff odds and Power Index ?s quote the replayed scores in `public/data/track-record.json`; never hand-type them. A change to the simulator or the Oberon formula means rerunning `npm run dataset` so the quoted record matches what's live. The replay must never peek: a week's forecast uses only earlier weeks and earlier seasons (a test enforces it).
-- **The wins bridge describes; it never claims skill.** Its parts add exactly to the record (tests tie each one to the luck index), but none repeats from one season to the next in this league (`repeatability` in `bridges.json`). Keep "skill" wording off it unless a part starts to repeat. Lineup calls are graded on Sleeper's final projections and say so.
+- **Say "skill" only where the evidence sticks.** `data/stat_repeatability.csv` is the test: scoring (points for, all-play, potential points) sticks to the owner; win rate, finish, earnings and the rest show no evidence of it. No verdict claims zero, since seven seasons can hide a small effect. Points against is the negative control: if it ever "sticks", the test is broken.
+- **The wins bridge describes; it never claims skill.** Its parts add exactly to the record (tests tie each one to the luck index), but none clearly repeats from one season to the next in this league (`repeatability` in `bridges.json`; the draft comes closest). Keep "skill" wording off it unless a part starts to repeat. Lineup calls are graded on Sleeper's final projections and say so.
 - **Projections degrade gracefully.** `lib/current-season/projections.ts` and `season-stats.ts` hit undocumented Sleeper endpoints; every failure returns null and the season tab renders without projections or season stats (dashes; roster names fall back to the player index). Never let either break the page. Season FPTS are Sleeper's season totals × the league's `scoring_settings` — that matches the points Sleeper credits rostered players to the cent, so don't swap in Sleeper's preset `pts_half_ppr`.
 - **Flair and ammo are true stats, never invented.** Every badge, ammo line, and Matchup of the Week reason comes from `lib/current-season/facts.ts`, the stat engine, or the stakes engine. Only championship-path games (`buildChampPathGameKeys`) count as playoff eliminations — a consolation or toilet-bowl game is never billed as one. 💦 Daddy is `daddyOf()` (75%+ over 5+ meetings) — the same rule as Records → Who's Your Daddy.
 - **Stakes account for every other game.** Never claim a result "climbs to 3rd" or "clinches" from one game alone. Playoff odds are simulations and always labeled as odds (`lib/current-season/playoff-odds.ts`); clinch/elimination sentences are exact (`playoff-scenarios.ts`) — true in every outcome, with a tie in wins never counted for or against a team (points for can't be known ahead). If any remaining week's pairings are missing, show no stakes rather than simulate a partial schedule.

@@ -11,13 +11,17 @@ export type { RecordsData } from './records'
 export { playoffByeYears } from './byes'
 export { computePowerRankings, seasonRanks } from './power-rankings'
 export type { PowerRankingRow, SeasonRanks } from './power-rankings'
-export { computeLuckIndex } from './luck'
+export { allPlayRecords, computeLuckIndex } from './luck'
 export { scoreStats } from './scoring'
 export { bestLineup, startingSlots } from './lineups'
 export type { LineupCandidate, BestLineup } from './lineups'
 export {
   BRIDGE_PARTS, splitTeamWeek, replacementLevels, weekBridges, seasonTotals, careerTotals, stepRange, partRepeatability,
 } from './bridge'
+export {
+  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, linkToWins, pearson, percentileOf, repeatability, scheduleSamples, shrinkRate, splitHalf, stickVerdict, wilsonRange,
+} from './uncertainty'
+export type { Repeatability, ScheduleGame as LuckGame, SeasonValue, ShrunkRate, WinLink } from './uncertainty'
 export type { BridgePart, Channel, BridgePlayer, BridgeTotals, BridgeStep, OwnerSeasonBridge, BridgeFile, WeekTeam } from './bridge'
 export {
   seasonControlTotals, gapCause, gapKey, KNOWN_GAPS, playerGapCause, playerGapKey, KNOWN_PLAYER_GAPS, defenseGapCause, KNOWN_DEFENSE_GAPS,

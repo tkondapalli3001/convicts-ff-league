@@ -90,7 +90,7 @@ export function fitScoringModel(
 }
 
 /** mulberry32 — small, fast, seedable. */
-function rng(seed: number): () => number {
+export function rng(seed: number): () => number {
   let s = seed >>> 0
   return () => {
     s = (s + 0x6D2B79F5) >>> 0

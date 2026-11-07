@@ -9,7 +9,8 @@
     "test": "vitest run",
     "knip": "knip",
     "snapshot": "node scripts/snapshot-history.mjs",
-    "dataset": "tsx scripts/build-dataset.ts"
+    "dataset": "tsx scripts/build-dataset.ts",
+    "uncertainty": "tsx scripts/uncertainty-report.ts"
   },
   "dependencies": {
     "lucide-react": "^0.447.0",

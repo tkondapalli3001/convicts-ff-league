@@ -11,10 +11,12 @@
 // exactly. Luck closes the gap to the actual record: the same all-play and
 // luck math as ./luck.ts, which the tie-out tests check.
 //
-// The parts describe what happened. None of them repeats from one season to
-// the next in this league (see partRepeatability), so none is called skill.
+// The parts describe what happened. None clearly repeats from one season to
+// the next in this league (see partRepeatability and npm run uncertainty; the
+// draft comes closest), so none is called skill.
 
 import { bestLineup } from './lineups'
+import { pearson } from './uncertainty'
 
 export const BRIDGE_PARTS = ['draft', 'pickups', 'trades', 'lineup'] as const
 export type BridgePart = (typeof BRIDGE_PARTS)[number]
@@ -225,15 +227,6 @@ export function partRepeatability(seasons: { owner: string; season: number; tota
     })
     return [k, { r: pearson(pairs.map(p => p[0]), pairs.map(p => p[1])), pairs: pairs.length }]
   })) as Record<BridgePart | 'luck', { r: number; pairs: number }>
-}
-
-function pearson(xs: number[], ys: number[]): number {
-  const n = xs.length
-  if (n < 3) return 0
-  const mx = xs.reduce((a, b) => a + b, 0) / n, my = ys.reduce((a, b) => a + b, 0) / n
-  let cov = 0, vx = 0, vy = 0
-  for (let i = 0; i < n; i++) { cov += (xs[i] - mx) * (ys[i] - my); vx += (xs[i] - mx) ** 2; vy += (ys[i] - my) ** 2 }
-  return vx && vy ? cov / Math.sqrt(vx * vy) : 0
 }
 
 // ── The published file (public/data/bridges.json) ─────────────────────────────

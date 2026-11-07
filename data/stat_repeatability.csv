@@ -1,0 +1,24 @@
+stat,shown_on,verdict,next_season_r,r_low_95,r_high_95,pairs,next_season_p,owner_share,owner_share_p,odd_even_r,odd_even_p,same_season_win_r,next_season_win_r
+Win rate,"Career leaderboard, Season standings",no evidence,-0.027,-0.283,0.233,58,0.581,0.107,0.16,0.161,0.102,1,-0.027
+Points for per game,"Career leaderboard, Season standings",sticks,0.289,0.033,0.509,58,0.02,0.275,0.006,0.418,0,0.767,0.114
+Points against per game,"Owner profile, Season standings",no evidence,0.069,-0.193,0.321,58,0.294,0.11,0.108,-0.064,0.676,-0.569,0.195
+All-play win rate,Power Rankings,sticks,0.293,0.038,0.513,58,0.021,0.257,0.008,0.368,0.002,0.782,0.141
+Luck Index,"Season standings, Fun Facts",no evidence,-0.019,-0.276,0.24,58,0.567,0.108,0.125,-0.148,0.891,0.586,-0.225
+Oberon power rating,Power Rankings,weak,0.159,-0.103,0.401,58,0.118,0.191,0.037,,,0.884,0.08
+Season finish,"Finish Tracker, Season Log",no evidence,0.091,-0.171,0.341,58,0.246,0.082,0.193,,,0.719,0.122
+Made the playoffs,Season Log,no evidence,0.02,-0.24,0.277,58,0.446,0.047,0.323,,,0.735,0.098
+Highest game,Records,no evidence,0.08,-0.182,0.331,58,0.283,0.033,0.419,,,0.507,0.14
+Lowest game,Records,weak,0.243,-0.017,0.472,58,0.037,0.159,0.053,,,0.504,0.117
+140+ games,Records,sticks,0.169,-0.093,0.41,58,0.111,0.279,0.006,,,0.616,0.143
+Sub-80 games,Records,no evidence,-0.06,-0.314,0.201,58,0.656,0,0.791,,,-0.411,0.057
+Boom-bust (weekly swing),Fun Facts,no evidence,0.062,-0.2,0.315,58,0.331,0,0.652,,,0.153,0.035
+Potential points per game,"best lineup, Rosters",sticks,0.256,-0.003,0.482,58,0.039,0.279,0.003,,,0.806,0.06
+Lineup efficiency (points / potential),"Lineup regrets, ammo",no evidence,0.113,-0.15,0.36,58,0.193,0.097,0.16,,,0.199,0.189
+Bridge: draft,Wins Bridge,weak,0.182,-0.08,0.421,58,0.096,0.186,0.027,,,0.629,0.119
+Bridge: pickups,Wins Bridge,no evidence,-0.307,-0.524,-0.053,58,0.986,0,0.81,,,0.223,-0.006
+Bridge: trades,Wins Bridge,no evidence,-0.008,-0.265,0.251,58,0.528,0.112,0.181,,,0.251,-0.007
+Bridge: lineup calls,Wins Bridge,no evidence,-0.178,-0.417,0.084,58,0.869,0,0.874,,,-0.026,0.106
+Pickups made,Transactions,sticks,0.601,0.406,0.744,58,0,0.601,0,,,0.263,0.1
+Trades made,"Transactions, Trades by Year",sticks,0.319,0.066,0.534,58,0.027,0.306,0.008,,,-0.073,-0.175
+Draft value vs ADP,"Steals & Busts, Past Drafts",no evidence,0.073,-0.189,0.325,58,0.285,0.098,0.218,,,0.177,-0.09
+Net earnings,Earnings Ledger,no evidence,-0.107,-0.356,0.155,58,0.657,0,0.84,,,0.361,0.107
