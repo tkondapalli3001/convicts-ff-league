@@ -46,10 +46,6 @@ const config: Config = {
           from: { opacity: '0', transform: 'translateY(14px)' },
           to:   { opacity: '1', transform: 'translateY(0)' },
         },
-        slideInLeft: {
-          from: { opacity: '0', transform: 'translateX(-24px)' },
-          to:   { opacity: '1', transform: 'translateX(0)' },
-        },
         goldPulse: {
           '0%, 100%': { opacity: '0.55' },
           '50%':      { opacity: '1' },
@@ -63,7 +59,6 @@ const config: Config = {
         'fade-in-4':  'fadeInUp 0.5s 0.24s ease both',
         'fade-in-5':  'fadeInUp 0.5s 0.30s ease both',
         'fade-in-6':  'fadeInUp 0.5s 0.36s ease both',
-        'slide-in-left': 'slideInLeft 0.22s ease-out both',
         'gold-pulse': 'goldPulse 5s ease-in-out infinite',
       },
     },

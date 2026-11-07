@@ -4,7 +4,7 @@ import {
 } from 'lucide-react'
 import { CURRENT_SEASON } from '@/lib/league'
 
-/** Single source for site navigation — used by the desktop navbar and the mobile drawer. */
+/** Single source for site navigation — used by the desktop navbar and the phone's bottom bar. */
 export const NAV_ITEMS = [
   { href: '/',          label: 'Home',      icon: Home          },
   { href: `/${CURRENT_SEASON}`, label: String(CURRENT_SEASON), icon: Swords },

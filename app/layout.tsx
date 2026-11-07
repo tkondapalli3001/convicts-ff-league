@@ -3,6 +3,7 @@ import { Archivo, Barlow_Condensed } from 'next/font/google'
 import './globals.css'
 import { LeagueProvider } from '@/context/LeagueContext'
 import Navbar from '@/components/layout/Navbar'
+import BottomBar from '@/components/layout/BottomBar'
 import Footer from '@/components/layout/Footer'
 import { SITE_URL } from '@/lib/league'
 import snapshot from '@/public/data/manifest.json'
@@ -53,18 +54,20 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#050506',
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${archivo.variable} ${barlow.variable}`}>
-      <body className="bg-s-bg text-s-text min-h-screen font-sans antialiased">
+      <body className="bg-s-bg text-s-text min-h-screen font-sans antialiased pb-[calc(53px+env(safe-area-inset-bottom))] sm:pb-0">
         <LeagueProvider>
           <Navbar />
           <main className="max-w-[1200px] mx-auto px-4 pb-16 pt-6">
             {children}
           </main>
           <Footer />
+          <BottomBar />
         </LeagueProvider>
       </body>
     </html>

@@ -4,7 +4,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLeague } from '@/context/LeagueContext'
 import { useLiveSeason } from '@/hooks/useLiveSeason'
 import { useUrlModal, useUrlParam } from '@/hooks/useUrlParam'
-import { usePreviewData } from '@/hooks/usePreviewData'
+import { usePreviewData, yourMatchup } from '@/hooks/usePreviewData'
+import { useMe } from '@/hooks/useMe'
 import { usePowerRankings } from '@/hooks/usePowerRankings'
 import { useTeamRosters } from '@/hooks/useTeamRosters'
 import { useSeasonTransactions } from '@/hooks/useSeasonTransactions'
@@ -21,6 +22,8 @@ import RosterView from '@/components/current-season/RosterView'
 import SeasonTransactions from '@/components/current-season/SeasonTransactions'
 import SeasonDraftBoard from '@/components/current-season/SeasonDraftBoard'
 import SyncStatus from '@/components/current-season/SyncStatus'
+import YourMatchupCard from '@/components/current-season/YourMatchupCard'
+import { PickYourselfPrompt } from '@/components/shared/PickYourself'
 
 type Tab = 'rankings' | 'matchups' | 'rosters' | 'transactions' | 'draft'
 
@@ -48,6 +51,7 @@ export default function SeasonPage() {
   const [rosterWeekParam, setRosterWeekParam] = useUrlParam('rosterWeek', '')
   const rosterWeek = asWeek(rosterWeekParam)
   const { weeks, week, previews, motw } = usePreviewData(live, selectedWeek)
+  const { me } = useMe()
   const rankings = usePowerRankings(live)
   const rosters = useTeamRosters(live, rosterWeek, rankings.rows)
   const moves = useSeasonTransactions(live, tab === 'transactions')
@@ -70,6 +74,7 @@ export default function SeasonPage() {
   // completed season. Say so, or the page reads as if a finished playoff game
   // were this week's matchup.
   const preseason = Number.isFinite(latestSeason) && latestSeason > season
+  const mine = me && live.live ? yourMatchup(previews, me) : null
 
   return (
     <div className="animate-fade-in">
@@ -104,6 +109,20 @@ export default function SeasonPage() {
           stale={live.stale}
           onRefresh={live.refresh}
         />
+      )}
+
+      {/* Your game first, above the rankings the league argues about */}
+      {live.live && (tab === 'rankings' || tab === 'matchups') && (
+        <>
+          <PickYourselfPrompt className="mb-4 sm:hidden" />
+          {mine && (
+            <YourMatchupCard
+              m={mine}
+              onOpen={() => openMatchup(mine.you, { tab: 'matchups', week: String(mine.week) })}
+              className="mb-4"
+            />
+          )}
+        </>
       )}
 
       {/* ── MATCHUPS ─────────────────────────────────────────────── */}

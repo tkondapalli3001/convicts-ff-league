@@ -42,6 +42,37 @@ export interface PreviewData {
   motw: (MatchupOfTheWeek & { ammo: string | null }) | null
 }
 
+export interface YourMatchup {
+  week: number
+  status: EnrichedPreview['status']
+  you: string
+  opp: string
+  ptsYou: number
+  ptsOpp: number
+  projYou: number | null
+  projOpp: number | null
+  /** Your playoff odds; null in the playoffs. */
+  stakes: TeamStakes | null
+}
+
+/** This owner's game among the week's matchups, from their side; null if they aren't playing. */
+export function yourMatchup(previews: EnrichedPreview[], me: string): YourMatchup | null {
+  const p = previews.find(x => x.teamA.name === me || x.teamB.name === me)
+  if (!p) return null
+  const isA = p.teamA.name === me
+  return {
+    week: p.week,
+    status: p.status,
+    you: me,
+    opp: isA ? p.teamB.name : p.teamA.name,
+    ptsYou: isA ? p.ptsA : p.ptsB,
+    ptsOpp: isA ? p.ptsB : p.ptsA,
+    projYou: isA ? p.projA : p.projB,
+    projOpp: isA ? p.projB : p.projA,
+    stakes: isA ? p.stakesA : p.stakesB,
+  }
+}
+
 /** Matchups on the season tab. `selectedWeek` null = the current week. */
 export function usePreviewData(live: LiveSeason, selectedWeek: number | null): PreviewData {
   const { state, base, season, games, projections, extraPlayers, transactions } = live

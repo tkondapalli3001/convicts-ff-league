@@ -9,6 +9,7 @@ import ErrorState from '@/components/shared/ErrorState'
 import StatChip from '@/components/shared/StatChip'
 import HeroSection from '@/components/home/HeroSection'
 import SearchStrip from '@/components/search/SearchStrip'
+import HomeYourMatchup from '@/components/home/HomeYourMatchup'
 import CareerStandingsTable from '@/components/home/CareerStandingsTable'
 import HallOfFameCard from '@/components/home/HallOfFameCard'
 import WallOfShameCard from '@/components/home/WallOfShameCard'
@@ -67,6 +68,11 @@ export default function HomePage() {
       className="-mx-4 -mt-6 overflow-hidden border-x border-b"
       style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}
     >
+      {/* Your game comes first, on phones */}
+      <div className="sm:hidden">
+        <HomeYourMatchup />
+      </div>
+
       {/* Search strip */}
       <div className="animate-fade-in">
         <SearchStrip />

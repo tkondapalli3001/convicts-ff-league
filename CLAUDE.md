@@ -21,6 +21,8 @@ A data-heavy archive and live-season companion for a Sleeper Fantasy Football le
 - A feature can be cut if the league doesn't care about it, but only when the owner says so, one at a time.
 - One product: the League App for other leagues stays on the waitlist (BUILD.md §4), even though another league asking for this site counts as a win.
 
+**Stat placement (owner):** Power Index and all-play are in-season stats only. The Career Leaderboard stays a clear, objective leaderboard: no career Power Index, no career all-play. Word of mouth is the feedback loop; the site carries no visit counter.
+
 **What winning looks like a year from now:** everyone checks it weekly without being sent a link; it's the first place people look for stats; other leagues ask for it.
 
 ---
@@ -64,8 +66,10 @@ app/                        Next.js App Router pages (thin render shells only)
 components/                 UI, one folder per page plus shared/layout/search
   current-season/           The season tab: SeasonPage (the tab itself), PowerRankingsTable,
                             MatchupOfTheWeek, MatchupRow + MatchupModal, FlairBadges + FlairLegend,
-                            SmackLine, RosterView, SeasonTransactions, SeasonDraftBoard, SyncStatus
-  home/                     HeroSection, CareerStandingsTable, HallOfFameCard, WallOfShameCard
+                            SmackLine, RosterView, SeasonTransactions, SeasonDraftBoard, SyncStatus,
+                            YourMatchupCard
+  home/                     HeroSection, CareerStandingsTable, HallOfFameCard, WallOfShameCard,
+                            HomeYourMatchup
   seasons/                  SeasonStandings, PlayoffBracket, GameLog (+ Filters, Table,
                             GameDetailModal box score), FinishTracker, AvgScoreChart
   owners/                   OwnerDetail, CareerLeaderboard, AnnualBreakdown (earnings),
@@ -79,10 +83,12 @@ components/                 UI, one folder per page plus shared/layout/search
                             (Players → Transactions and the season tab's Transactions)
   search/                   GlobalSearch (⌘K trigger), SearchOverlay, SearchStrip (home),
                             AnswerCard, ManagerCard, PlayerCard
-  layout/                   Navbar, MobileMenu (hamburger drawer), Brand, Footer, nav-items.ts
+  layout/                   Navbar, BottomBar (phones: Home · season · Me · Owners · More), Brand,
+                            Footer, nav-items.ts
   shared/                   Reusable primitives: PageHeader, PillTabs, SectionCard, StatChip,
                             RecordItem, OwnerAvatar, PlayerHeadshot, FinishBadge, WinPctBadge,
-                            SortHeader, InfoTip, LoadingSpinner, ErrorState
+                            SortHeader, InfoTip, LoadingSpinner, ErrorState, ShareButton,
+                            PickYourself
 
 context/
   LeagueContext.tsx         Global store — loads the snapshot, walks the live league chain,
@@ -105,6 +111,7 @@ hooks/
   useSeasonSchedule.ts      The season's full regular-season schedule (unplayed weeks load once)
   useSeasonTransactions.ts  Season tab → Transactions (past weeks once, current week via the sync)
   useModalClose.ts          Escape, Back button, and body scroll lock shared by every modal
+  useMe.ts                  "Pick who you are": no login, remembered on the device
   useUrlParam.ts            useUrlParam(), useUrlModal() — tabs, weeks, years and open matchups
                             live in the URL, so links open exactly what was shared
 
@@ -283,7 +290,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **Stakes account for every other game.** Never claim a result "climbs to 3rd" or "clinches" from one game alone. Playoff odds are simulations and always labeled as odds (`lib/current-season/playoff-odds.ts`); clinch/elimination sentences are exact (`playoff-scenarios.ts`) — true in every outcome, with a tie in wins never counted for or against a team (points for can't be known ahead). If any remaining week's pairings are missing, show no stakes rather than simulate a partial schedule.
 - **One luck formula.** Luck Index = actual wins (ties ½) − Σ weekly all-play expected wins ((teams outscored + ½ tied) / (teams that played − 1)), regular season only. It lives only in `lib/stats/luck.ts` — never recompute luck or all-play inline.
 - **The power rating is the original Oberon Mt. formula.** `0.6 × avg + 0.2 × (high + low) + 0.2 × (win% × 200)` with the actual record's win%. The league tried all-play win% in its place and went back (2026-10-01) — keep the original unless the owner asks again. All-play stays a display column.
-- **Live data overlays; it never mutates.** Only the season tab polls, via `useLiveSeason`, which layers fresh league/roster/matchup data over a copy of the global state (`withLiveSeason`) and flattens the season's games once per sync. Facts about past seasons (champ path, honors, career wins) memoize on `live.base`, which polls never change. The global store still loads once. A week is final only once `settings.last_scored_leg` reaches it — never infer "final" from points on the board (a Thursday game puts points up for the whole week).
+- **Live data overlays; it never mutates.** Only the season tab and Home's your-matchup card (for someone who has picked who they are) poll, via `useLiveSeason`, which layers fresh league/roster/matchup data over a copy of the global state (`withLiveSeason`) and flattens the season's games once per sync. Facts about past seasons (champ path, honors, career wins) memoize on `live.base`, which polls never change. The global store still loads once. A week is final only once `settings.last_scored_leg` reaches it — never infer "final" from points on the board (a Thursday game puts points up for the whole week).
 - **The search overlay is portaled to `document.body`.** The navbar's `backdrop-filter` makes it the containing block for fixed descendants — rendering the overlay inside the nav clips it. Don't move it back. Every `fixed inset-0` modal portals the same way.
 - **What you're looking at lives in the URL.** People arrive from group-chat links, so tabs, weeks, years, filters that settle arguments, and open matchups go through `useUrlParam` / `useUrlModal`, never plain `useState`. Tabs and filters replace the URL entry; popups add a stop, so Back closes them. Each section's preview card is its `layout.tsx` metadata (`app/page-meta.ts`); pages are client components, so it can't live on the page.
 - **Pages are thin shells.** Computation belongs in `hooks/` or `lib/`. Pages should only call hooks, destructure results, and render JSX.

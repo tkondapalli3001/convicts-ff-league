@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import GlobalSearch from '@/components/search/GlobalSearch'
-import MobileMenu from './MobileMenu'
 import Brand from './Brand'
 import { NAV_ITEMS } from './nav-items'
 
@@ -20,12 +19,9 @@ export default function Navbar() {
   return (
     <nav
       className="sticky top-0 z-50 bg-s-bg2 border-b"
-      style={{ borderColor: 'rgba(var(--gold-rgb), 0.14)' }}
+      style={{ borderColor: 'rgba(var(--gold-rgb), 0.14)', paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="max-w-[1200px] mx-auto flex items-center px-3 sm:px-0 sm:overflow-x-auto scrollbar-none">
-
-        {/* Mobile menu trigger */}
-        <MobileMenu />
 
         {/* Brand */}
         <Link
@@ -36,7 +32,7 @@ export default function Navbar() {
           <Brand />
         </Link>
 
-        {/* Nav links — desktop only; mobile uses the drawer */}
+        {/* Nav links — desktop only; phones use the bottom bar */}
         <div className="hidden sm:flex">
           {NAV_ITEMS.map(item => {
             const isActive =

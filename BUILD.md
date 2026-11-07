@@ -26,7 +26,7 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 203 tests pass (18 files), the control-total tie-outs included, and the
+- **Health:** 206 tests pass (19 files), the control-total tie-outs included, and the
   deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
   errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
   files, exports, or dependencies. Snapshots frozen for **2019–2025**
@@ -195,6 +195,18 @@ skill versus luck, with every number proven against a source neither of us contr
      anything?" on the flair legend; "none clearly repeats" on the Wins Bridge.
    - **Still open from the plan's "done means":** payment records against the earnings
      table, the ffsimulator check (needs R), and each owner signing off on their bridge.
+
+### E — The mobile overhaul *(owner-approved 2026-11-07)*
+From a 375px walk of every page. Phones only; desktop keeps its tables and navbar. No page or URL goes away, and nothing is cut.
+1. **Done:** quick fixes: shorter headers, Game Log names, Finish Tracker, Trash Talk chips, "Tap" wording, Players opens on Scoring.
+2. **Done:** links: tabs, weeks, years, argument-settling filters and open matchups live in the URL; Back closes popups; share button; a preview card per section and owner.
+3. **Done:** "you": pick who you are (device only), your matchup above Power Rankings and on Home, and the bottom bar (Home · season · Me · Owners · More), replacing the hamburger.
+4. **Next, after the owner's real-phone test:** rows instead of wide tables, tap for the rest. Power Rankings: Power Index, PF per game, all-play. Career Leaderboard: record, Win%, titles. Then Standings, Earnings, Home standings; the draft board jumps to your column.
+5. Filters behind one button and a bottom sheet; no inner scroll boxes on phones; Players → Transactions starts on the latest season with "load more" (22,000 elements today). Sync and copy buttons reach 28px.
+6. Owner profile: four key stats up front, the rest behind "All stats", so the tabs and Wins Bridge sit near the top. A more compact Rosters header.
+7. Charts the league can't get elsewhere: playoff odds week by week, your record against 10,000 shuffled schedules, scoring strength by owner with ranges. Scoring Trend gets company.
+
+Ruled out: a backend, accounts, push notifications, a visit counter, and preview cards with live scores (they'd need a scheduled rebuild).
 
 ### Done
 - **2026-08-14 —** 2026 buy-in (`2026: 150`).
