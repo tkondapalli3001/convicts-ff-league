@@ -10,6 +10,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import SeasonStandings from '@/components/seasons/SeasonStandings'
 import PlayoffBracket from '@/components/seasons/PlayoffBracket'
 import AvgScoreChart from '@/components/seasons/AvgScoreChart'
+import ScoringStrengthChart from '@/components/seasons/ScoringStrengthChart'
 import FinishTracker from '@/components/seasons/FinishTracker'
 import GameLog from '@/components/seasons/GameLog'
 
@@ -61,7 +62,12 @@ export default function SeasonsPage() {
       {activeTab === 'finish' && <FinishTracker />}
 
       {/* ── AVG SCORE TAB ─────────────────────────────────────────── */}
-      {activeTab === 'avgscore' && <AvgScoreChart />}
+      {activeTab === 'avgscore' && (
+        <>
+          <AvgScoreChart />
+          <ScoringStrengthChart />
+        </>
+      )}
     </div>
   )
 }

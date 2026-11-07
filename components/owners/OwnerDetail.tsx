@@ -13,6 +13,7 @@ import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import H2HGrid from './H2HGrid'
 import WinsBridge from './WinsBridge'
+import ScheduleLuckChart from './ScheduleLuckChart'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 
@@ -225,41 +226,44 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
 
       {/* Season Log */}
       {tab === 'seasons' && (
-        <div className="overflow-x-auto gl">
-          <table className="w-full border-collapse min-w-[500px]">
-            <thead>
-              <tr>
-                <th>Year</th><th>Finish</th><th>W</th><th>L</th><th>Win%</th>
-                <th>PF/Gm</th><th>PA/Gm</th><th>+/−</th><th>Playoffs</th>
-              </tr>
-            </thead>
-            <tbody>
-              {seasons.map(s => {
-                const margin = s.pf - s.pa
-                const spct = (s.wins / (s.wins + s.losses || 1) * 100).toFixed(1)
-                return (
-                  <tr key={s.year}>
-                    <td className="font-display text-[17px] font-bold text-s-text2">{s.year}</td>
-                    <td><FinishBadge finish={s.finish} /></td>
-                    <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{s.wins}</td>
-                    <td className="font-display text-[17px] font-bold" style={{ color: '#B4636B' }}>{s.losses}</td>
-                    <td><WinPctBadge pct={spct} /></td>
-                    <td className="text-right font-display text-[17px] font-semibold text-s-text2 num">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
-                    <td className="text-right font-display text-[17px] font-semibold num" style={{ color: '#B4636B' }}>{s.wins + s.losses > 0 ? (s.pa / (s.wins + s.losses)).toFixed(1) : '—'}</td>
-                    <td className="text-right font-display text-[17px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#B4636B' }}>
-                      {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
-                    </td>
-                    <td className="text-right">
-                      {s.inPlayoffs
-                        ? <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#7FA886', background: 'rgba(127,168,134,0.12)' }}>● Clinched</span>
-                        : <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}>✕ Elim.</span>}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <div className="overflow-x-auto gl">
+            <table className="w-full border-collapse min-w-[500px]">
+              <thead>
+                <tr>
+                  <th>Year</th><th>Finish</th><th>W</th><th>L</th><th>Win%</th>
+                  <th>PF/Gm</th><th>PA/Gm</th><th>+/−</th><th>Playoffs</th>
+                </tr>
+              </thead>
+              <tbody>
+                {seasons.map(s => {
+                  const margin = s.pf - s.pa
+                  const spct = (s.wins / (s.wins + s.losses || 1) * 100).toFixed(1)
+                  return (
+                    <tr key={s.year}>
+                      <td className="font-display text-[17px] font-bold text-s-text2">{s.year}</td>
+                      <td><FinishBadge finish={s.finish} /></td>
+                      <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{s.wins}</td>
+                      <td className="font-display text-[17px] font-bold" style={{ color: '#B4636B' }}>{s.losses}</td>
+                      <td><WinPctBadge pct={spct} /></td>
+                      <td className="text-right font-display text-[17px] font-semibold text-s-text2 num">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
+                      <td className="text-right font-display text-[17px] font-semibold num" style={{ color: '#B4636B' }}>{s.wins + s.losses > 0 ? (s.pa / (s.wins + s.losses)).toFixed(1) : '—'}</td>
+                      <td className="text-right font-display text-[17px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#B4636B' }}>
+                        {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
+                      </td>
+                      <td className="text-right">
+                        {s.inPlayoffs
+                          ? <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#7FA886', background: 'rgba(127,168,134,0.12)' }}>● Clinched</span>
+                          : <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}>✕ Elim.</span>}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <ScheduleLuckChart ownerName={ownerName} />
+        </>
       )}
 
       {/* Wins Bridge (loads its own file on first open) */}

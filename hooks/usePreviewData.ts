@@ -5,14 +5,14 @@ import { computeLuckIndex, buildChampPathGameKeys, daddyOf, type DaddyStatus } f
 import { playoffStartWeek } from '@/lib/data-processing'
 import { localDateKey } from '@/lib/utils'
 import {
-  getSeasonWeeks, buildWeekPreviews, computeStandings,
+  getSeasonWeeks, buildWeekPreviews,
   smackFacts, projectTeam, startersByRoster, lastFinalWeek, playerLookup,
   seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore,
   injuryReport, weeklyMoves, matchupBadges, pickMatchupOfTheWeek,
-  fitScoringModel, weekStakes,
+  stakesEntering, oddsByWeek,
 } from '@/lib/current-season'
 import type {
-  MatchupPreview, TeamStakes, TeamResults, Badge, PowerRankPoint, MatchupOfTheWeek,
+  MatchupPreview, TeamStakes, WeekOdds, Badge, PowerRankPoint, MatchupOfTheWeek,
 } from '@/lib/current-season'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
 import { useSeasonSchedule } from '@/hooks/useSeasonSchedule'
@@ -40,6 +40,8 @@ export interface PreviewData {
   previews: EnrichedPreview[]
   /** The week's featured matchup — `index` points into `previews`; `ammo` avoids its reasons' topics. */
   motw: (MatchupOfTheWeek & { ammo: string | null }) | null
+  /** Everyone's playoff odds entering each week of the regular season so far. */
+  oddsHistory: WeekOdds[]
 }
 
 export interface YourMatchup {
@@ -126,26 +128,11 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
     const playoffSpots = settings?.playoff_teams ?? 6
     const playoffStart = playoffStartWeek(state.leagues[season])
 
-    const standings = computeStandings(priorGames)
-    const stakes = !cards.length || cards[0].isPlayoff ? {} : (() => {
-      const remaining = Object.values(schedule).flat().filter(g => g.week >= week)
-      const regEnd = playoffStart - 1
-      // Only with the whole remaining schedule — a partial one would understate every race
-      for (let w = week; w <= regEnd; w++) if (!schedule[w]?.length) return {}
-      const scores: Record<string, number[]> = {}
-      for (const g of priorGames) {
-        if (g.type !== 'R') continue
-        ;(scores[g.team1] ??= []).push(g.pts1)
-        ;(scores[g.team2] ??= []).push(g.pts2)
-      }
-      const names = new Set([...Object.values(state.rosterUserMaps[season] ?? {}), ...remaining.flatMap(g => [g.a, g.b])])
-      const teams: TeamResults[] = [...names].map(name => {
-        const row = standings.find(r => r.name === name)
-        return { name, wins: row?.wins ?? 0, pf: row?.pf ?? 0, scores: scores[name] ?? [] }
-      })
-      const model = fitScoringModel(history, Object.values(scores).flat())
-      return weekStakes({ teams, schedule: remaining, week, playoffSpots, model, seedKey: `${season}-${week}` })
-    })()
+    const stakes = !cards.length || cards[0].isPlayoff ? {} : stakesEntering({
+      season, week, finalGames, schedule, history, playoffSpots,
+      regEnd: playoffStart - 1,
+      teamNames: Object.values(state.rosterUserMaps[season] ?? {}),
+    })
     const ranks = powerRanksThrough(finalGames, Math.min(week - 1, lastFinal, playoffStart - 1))
     const { high, low } = seasonExtremes(priorGames)
     const careerWins: Record<string, number> = {}
@@ -207,5 +194,22 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
     return { previews: enriched, motw }
   }, [state, season, games, week, live.week, luck, champPath, honors, careerBefore, projections, extraPlayers, transactions, dayKey, schedule, history])
 
-  return { weeks, week, previews, motw }
+  // Everyone's odds entering each week so far: the same calculation, so the last point is today's odds.
+  // Each week's simulation is cached, so polling doesn't rerun them.
+  const oddsHistory = useMemo<WeekOdds[]>(() => {
+    if (!season) return []
+    const lastFinal = lastFinalWeek(state, season)
+    return oddsByWeek({
+      season,
+      finalGames: games.filter(m => m.week <= lastFinal),
+      schedule,
+      history,
+      playoffSpots: state.leagues[season]?.settings?.playoff_teams ?? 6,
+      regEnd: playoffStartWeek(state.leagues[season]) - 1,
+      teamNames: Object.values(state.rosterUserMaps[season] ?? {}),
+      throughWeek: live.week ?? lastFinal + 1,
+    })
+  }, [state, season, games, schedule, history, live.week])
+
+  return { weeks, week, previews, motw, oddsHistory }
 }

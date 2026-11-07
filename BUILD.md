@@ -26,7 +26,7 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 206 tests pass (19 files), the control-total tie-outs included, and the
+- **Health:** 213 tests pass (20 files), the control-total tie-outs included, and the
   deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
   errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
   files, exports, or dependencies. Snapshots frozen for **2019–2025**
@@ -204,7 +204,7 @@ From a 375px walk of every page. Phones only; desktop keeps its tables and navba
 4. **Done:** rows instead of wide tables, tap for the rest. Power Rankings: Power Index, PF per game, all-play. Career tables: record, Win%, titles. Standings: record, PF per game, luck. Earnings: total and the last two paid seasons. Draft boards open on your column.
 5. **Done:** filters behind one button and a bottom sheet (Game Log, both Transactions views, Players → Scoring and Draft Ownership); no inner scroll boxes on phones; long lists show a hundred rows at a time; Players → Transactions opens on the latest season with an All chip (909 elements, down from 22,000). Chips, sync and copy buttons reach 28px+.
 6. **Done:** owner profile: four stats up front on phones (record, PF per game, finals, top rival), the other eight and the top scorers behind "All stats", so the tabs and Wins Bridge sit near the top. The Rosters header shows its numbers as a row of five cells on phones.
-7. **Next:** Charts the league can't get elsewhere: playoff odds week by week, your record against 10,000 shuffled schedules, scoring strength by owner with ranges. Scoring Trend gets company.
+7. **Done:** charts the league can't get elsewhere. Playoff odds by week under Power Rankings (one team in gold, any team a tap away; the last point is today's odds). Record vs. every shuffled schedule on each profile's Season Log (career or any season). Scoring strength with 95% ranges beside Scoring Trend.
 
 Ruled out: a backend, accounts, push notifications, a visit counter, and preview cards with live scores (they'd need a scheduled rebuild).
 

@@ -67,13 +67,15 @@ components/                 UI, one folder per page plus shared/layout/search
   current-season/           The season tab: SeasonPage (the tab itself), PowerRankingsTable,
                             MatchupOfTheWeek, MatchupRow + MatchupModal, FlairBadges + FlairLegend,
                             SmackLine, RosterView, SeasonTransactions, SeasonDraftBoard, SyncStatus,
-                            YourMatchupCard
+                            YourMatchupCard, OddsByWeekChart (under Power Rankings)
   home/                     HeroSection, CareerStandingsTable, HallOfFameCard, WallOfShameCard,
                             HomeYourMatchup
   seasons/                  SeasonStandings, PlayoffBracket, GameLog (+ Filters, Table,
-                            GameDetailModal box score), FinishTracker, AvgScoreChart
+                            GameDetailModal box score), FinishTracker, AvgScoreChart,
+                            ScoringStrengthChart (Scoring Trend tab)
   owners/                   OwnerDetail, CareerLeaderboard, AnnualBreakdown (earnings),
-                            H2HGrid, H2HModal, RivalryCalc, SeriesEdgeTip, WinsBridge (profile tab)
+                            H2HGrid, H2HModal, RivalryCalc, SeriesEdgeTip, WinsBridge (profile tab),
+                            ScheduleLuckChart (profile Season Log: record vs every shuffled schedule)
   draft/                    DraftCountdown, StockStandings, PastDrafts, DraftBoardModal,
                             DraftSlotAnalysis, StealsBusts, DraftStructureTable
   records/                  ScoreLeaderboard, StreakList, FunFacts, TrashTalkCard
@@ -173,7 +175,11 @@ lib/
     bridge.ts               The wins bridge: average team → draft → pickups → trades → lineup
                             calls → expected wins → luck → record (Shapley over all-play wins);
                             npm run dataset writes it, profiles read it
+    scoring-strength.ts     scoringStrength() — points per game above each week's league average,
+                            with a 95% range (Seasons → Scoring Trend)
     uncertainty.ts          wilsonRange(), fitShrinkage()/shrinkRate(), scheduleSamples(),
+                            scheduleWeeks()/scheduleSeedKey() (the script and the profile chart
+                            draw the same shuffles),
                             repeatability(), splitHalf(), stickVerdict() — how sure each number
                             can be (npm run uncertainty)
   current-season/           The season tab's engine (barrel: @/lib/current-season)
@@ -183,6 +189,8 @@ lib/
                             loadWeekPairings() for the rest of the schedule
     stakes.ts               weekStakes() — playoff odds (win/loss) + exact clinch/elimination
                             sentences; formatOdds()
+    odds-by-week.ts         stakesEntering() — the tab's odds entering any week (the matchup
+                            cards and the chart both call it); oddsByWeek() — the season's line
     playoff-odds.ts         simulatePlayoffOdds() — seeded 10,000-season simulation;
                             fitScoringModel() learns weekly swing + regression from history
     playoff-scenarios.ts    playoffScenarios() — exact conditions (every outcome enumerated
@@ -282,6 +290,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **Never hand-type what the data knows.** Season counts come from the snapshot manifest (footer, site description) or `state.years`; Career Milestones from `careerMilestones()`; the pick-order year from the stock-pick window; the season tab's year from `CURRENT_SEASON`. Hand-typed numbers go stale.
 - **Every number ties out, or its gap is documented.** On every deploy, the control-totals test recomputes each owner-season's record, points for/against and potential points with the site's code and ties them to the totals Sleeper stores on the roster, and ties Sleeper's weekly player and team-defense points to the NFL's box scores (nflverse) rescored with the league's settings. A difference that isn't in `KNOWN_GAPS` / `KNOWN_PLAYER_GAPS` / `KNOWN_DEFENSE_GAPS` (`lib/stats/control-totals.ts`), with its cause, fails the build. Find the cause before adding an entry; never loosen the tolerance to make a test pass.
 - **The snapshot is an accelerator, never a dependency.** If `public/data/manifest.json` fails to load, `LeagueContext` must fall back to full live fetching. Don't break that path (BUILD.md M3 tests it). The footer and site description read the manifest at build time, so the file must exist to build — test the fallback by blocking the request, never by deleting the file. Never edit `public/data/` by hand — regenerate with `npm run snapshot` (`bridges.json`, `track-record.json`: `npm run dataset`; `uncertainty.json`: `npm run uncertainty`), and diff old seasons before committing.
+- **Charts redraw what the notes quote.** The odds chart's points come from `stakesEntering()`, so its last point is the odds on the matchup cards; the profile's schedule chart reruns `npm run uncertainty`'s seeded shuffles (a test holds every season's percentile equal to `uncertainty.json`). Don't fork either calculation for a chart.
 - **Forecasts publish their track record.** The playoff odds and Power Index ?s quote the replayed scores in `public/data/track-record.json`; never hand-type them. A change to the simulator or the Oberon formula means rerunning `npm run dataset` so the quoted record matches what's live. The replay must never peek: a week's forecast uses only earlier weeks and earlier seasons (a test enforces it).
 - **Noise notes quote the data.** The ?s on career records, H2H, Daddy, luck, player win rates and the flair legend read `public/data/uncertainty.json`; never hand-type them.
 - **Say "skill" only where the evidence sticks.** `data/stat_repeatability.csv` is the test: scoring (points for, all-play, potential points) sticks to the owner; win rate, finish, earnings and the rest show no evidence of it. No verdict claims zero, since seven seasons can hide a small effect. Points against is the negative control: if it ever "sticks", the test is broken.

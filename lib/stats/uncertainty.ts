@@ -197,6 +197,15 @@ export function scheduleSamples(weeks: ScheduleGame[][], sims: number, rand: Ran
   return Object.fromEntries(teams.map((t, i) => [t, out[i]]))
 }
 
+/** A season's regular-season games as `scheduleSamples` takes them: week by week, in week order. */
+export function scheduleWeeks(games: { week: number; team1: string; team2: string; pts1: number; pts2: number }[]): ScheduleGame[][] {
+  return [...new Set(games.map(g => g.week))].sort((a, b) => a - b)
+    .map(w => games.filter(g => g.week === w).map(g => ({ a: g.team1, b: g.team2, ptsA: g.pts1, ptsB: g.pts2 })))
+}
+
+/** The seed key for a season's shuffles, so the profile chart draws the exact schedules the ? notes quote. */
+export const scheduleSeedKey = (year: number) => `uncertainty-schedule-${year}`
+
 /** Share of samples below `value`, equal ones counting half: 4 means worse in only 4% of schedules. */
 export function percentileOf(samples: Float64Array, value: number): number {
   let below = 0

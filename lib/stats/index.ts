@@ -19,7 +19,7 @@ export {
   BRIDGE_PARTS, splitTeamWeek, replacementLevels, weekBridges, seasonTotals, careerTotals, stepRange, partRepeatability,
 } from './bridge'
 export {
-  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, linkToWins, pearson, percentileOf, repeatability, scheduleSamples, scheduleLuckNote, shrinkRate, splitHalf, stickVerdict, wilsonRange,
+  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, linkToWins, pearson, percentileOf, repeatability, scheduleSamples, scheduleSeedKey, scheduleWeeks, scheduleLuckNote, shrinkRate, splitHalf, stickVerdict, wilsonRange,
 } from './uncertainty'
 export type { Repeatability, ScheduleGame as LuckGame, ScheduleLuck, SeasonValue, ShrunkRate, UncertaintySummary, WinLink } from './uncertainty'
 export type { BridgePart, Channel, BridgePlayer, BridgeTotals, BridgeStep, OwnerSeasonBridge, BridgeFile, WeekTeam } from './bridge'
@@ -28,3 +28,5 @@ export {
 } from './control-totals'
 export type { ControlTotal, ControlMetric } from './control-totals'
 export type { AllPlayRecord, LuckEntry } from './luck'
+export { scoringStrength } from './scoring-strength'
+export type { ScoringStrength } from './scoring-strength'

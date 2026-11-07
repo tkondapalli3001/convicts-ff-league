@@ -18,6 +18,7 @@ import MatchupModal from '@/components/current-season/MatchupModal'
 import MatchupOfTheWeek from '@/components/current-season/MatchupOfTheWeek'
 import FlairLegend from '@/components/current-season/FlairLegend'
 import PowerRankingsTable from '@/components/current-season/PowerRankingsTable'
+import OddsByWeekChart from '@/components/current-season/OddsByWeekChart'
 import RosterView from '@/components/current-season/RosterView'
 import SeasonTransactions from '@/components/current-season/SeasonTransactions'
 import SeasonDraftBoard from '@/components/current-season/SeasonDraftBoard'
@@ -50,7 +51,7 @@ export default function SeasonPage() {
   const [openOwner, openMatchup, closeMatchup] = useUrlModal('matchup')
   const [rosterWeekParam, setRosterWeekParam] = useUrlParam('rosterWeek', '')
   const rosterWeek = asWeek(rosterWeekParam)
-  const { weeks, week, previews, motw } = usePreviewData(live, selectedWeek)
+  const { weeks, week, previews, motw, oddsHistory } = usePreviewData(live, selectedWeek)
   const { me } = useMe()
   const rankings = usePowerRankings(live)
   const rosters = useTeamRosters(live, rosterWeek, rankings.rows)
@@ -204,7 +205,10 @@ export default function SeasonPage() {
 
       {/* ── POWER RANKINGS ───────────────────────────────────────── */}
       {tab === 'rankings' && (
-        <PowerRankingsTable rows={rankings.rows} throughWeek={rankings.throughWeek} badges={rankings.badges} />
+        <>
+          <PowerRankingsTable rows={rankings.rows} throughWeek={rankings.throughWeek} badges={rankings.badges} />
+          <OddsByWeekChart data={oddsHistory} />
+        </>
       )}
 
       {/* ── ROSTERS ──────────────────────────────────────────────── */}

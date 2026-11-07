@@ -12,8 +12,8 @@ import { buildFlatMatchups, buildOwnerSeasons, playoffStartWeek, resolveOwnerNam
 import { hashSeed, rng } from '@/lib/current-season'
 import {
   DADDY_MIN_GAMES, DADDY_WIN_RATE, allPlayRecords, buildChampPathGameKeys, chanceOfLopsidedSeries, computeLuckIndex, computePowerRankings, daddyOf, fitShrinkage, gameKey, h2hRecord,
-  linkToWins, NO_SIGNAL_STRENGTH, pearson, percentileOf, repeatability, scheduleSamples, shrinkRate, splitHalf, stickVerdict, wilsonRange,
-  type BridgeFile, type LuckGame, type ScheduleLuck, type SeasonValue, type UncertaintySummary,
+  linkToWins, NO_SIGNAL_STRENGTH, pearson, percentileOf, repeatability, scheduleSamples, scheduleSeedKey, scheduleWeeks, shrinkRate, splitHalf, stickVerdict, wilsonRange,
+  type BridgeFile, type ScheduleLuck, type SeasonValue, type UncertaintySummary,
 } from '@/lib/stats'
 
 const ROOT = join(__dirname, '..')
@@ -348,9 +348,7 @@ const luckRows: (string | number)[][] = []
 const luckSummary: Record<string, Record<string, ScheduleLuck>> = {}
 for (const year of years) {
   const reg = regular(year)
-  const weeks: LuckGame[][] = [...new Set(reg.map(g => g.week))].sort((a, b) => a - b)
-    .map(w => reg.filter(g => g.week === w).map(g => ({ a: g.team1, b: g.team2, ptsA: g.pts1, ptsB: g.pts2 })))
-  const samples = scheduleSamples(weeks, SIMS, seedFor(`schedule-${year}`))
+  const samples = scheduleSamples(scheduleWeeks(reg), SIMS, rng(hashSeed(scheduleSeedKey(year))))
   const luck = new Map(computeLuckIndex({ [year]: state.matchups[year] }, state.rosterUserMaps, year).map(e => [e.owner, e]))
   for (const [owner, sample] of Object.entries(samples)) {
     const e = luck.get(owner)!

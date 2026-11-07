@@ -1,16 +1,16 @@
 // Barrel — import from '@/lib/current-season', not the individual files.
 export {
   getPreviewSeason, getSeasonWeeks, getDefaultWeek,
-  buildWeekPreviews, computeStandings,
+  buildWeekPreviews,
 } from './build-preview'
 export type { MatchupPreview, TeamPreview } from './build-preview'
-export { formatOdds, weekStakes } from './stakes'
+export { formatOdds } from './stakes'
 export type { TeamStakes } from './stakes'
 export { seasonSchedule, scheduleGaps, ownerSchedule } from './schedule'
 export type { ScheduleRow } from './schedule'
 export { loadSeasonStats } from './season-stats'
 export type { SeasonStats, PlayerSeason } from './season-stats'
-export { fitScoringModel, hashSeed, rng } from './playoff-odds'
+export { DEFAULT_SIMS, hashSeed, rng } from './playoff-odds'
 export type { ScheduleGame, TeamResults, ScoringModel, PlayoffOdds } from './playoff-odds'
 export type { PlayoffStatus, NeededResult, WeekScenario, TeamScenarios } from './playoff-scenarios'
 export { smackFacts } from './smack-talk'
@@ -29,5 +29,7 @@ export { standingBadges, matchupBadges } from './flair'
 export type { Badge } from './flair'
 export { pickMatchupOfTheWeek } from './matchup-of-the-week'
 export { replaySeason, summarizeTrackRecord } from './track-record'
+export { oddsByWeek, stakesEntering } from './odds-by-week'
+export type { WeekOdds } from './odds-by-week'
 export type { TrackRecord, OddsForecast, GamePick } from './track-record'
 export type { MotwCandidate, MotwContext, MatchupOfTheWeek } from './matchup-of-the-week'

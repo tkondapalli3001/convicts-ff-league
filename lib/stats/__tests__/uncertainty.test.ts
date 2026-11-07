@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { csvRecords } from '@/lib/sources'
+import { csvRecords, type SnapshotSeason } from '@/lib/sources'
+import { buildFlatMatchups, playoffStartWeek, resolveOwnerName } from '@/lib/data-processing'
+import type { LeagueState, Matchup } from '@/types'
 import { hashSeed, rng } from '@/lib/current-season'
 import {
-  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, percentileOf, repeatability, scheduleLuckNote, scheduleSamples, shrinkRate, stickVerdict, wilsonRange,
+  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, percentileOf, repeatability, scheduleLuckNote, scheduleSamples, scheduleSeedKey, scheduleWeeks, scoringStrength, shrinkRate, stickVerdict, wilsonRange,
   type SeasonValue, type UncertaintySummary,
 } from '@/lib/stats'
 import { betaCdf } from '../uncertainty'
@@ -141,6 +143,32 @@ describe('the published tables', () => {
     expect(summary.players.count).toBe(table('player_win_rates.csv').length)
   })
 
+  it('lets the profile chart redraw the exact schedules the notes quote', () => {
+    const summary: UncertaintySummary = JSON.parse(readFileSync(join(ROOT, 'public/data/uncertainty.json'), 'utf8'))
+    const years: number[] = JSON.parse(readFileSync(join(ROOT, 'public/data/manifest.json'), 'utf8')).years
+    const state = { leagues: {}, rosterUserMaps: {}, matchups: {}, brackets: {} } as unknown as LeagueState
+    for (const y of years) {
+      const s = JSON.parse(readFileSync(join(ROOT, `public/data/season-${y}.json`), 'utf8')) as SnapshotSeason
+      const users = new Map(s.users.map(u => [u.user_id, u]))
+      const start = playoffStartWeek(s.league)
+      state.leagues[y] = s.league
+      state.rosterUserMaps[y] = Object.fromEntries(s.rosters.map(r => {
+        const u = users.get(r.owner_id)
+        return [String(r.roster_id), u ? resolveOwnerName(u.user_id, u.display_name) : `Team ${r.roster_id}`]
+      }))
+      state.matchups[y] = Object.fromEntries(Object.keys(s.matchupsByWeek).map(w => [Number(w), { matchups: s.matchupsByWeek[w], isPlayoff: Number(w) >= start }]))
+      state.brackets[y] = { winners: s.winnersBracket, losers: s.losersBracket }
+    }
+    const games: Matchup[] = buildFlatMatchups(state)
+    for (const y of years) {
+      const samples = scheduleSamples(scheduleWeeks(games.filter(g => g.year === y && g.type === 'R')), summary.sims, rng(hashSeed(scheduleSeedKey(y))))
+      for (const [owner, sample] of Object.entries(samples)) {
+        const quoted = summary.luck[y][owner]
+        expect(Math.round(percentileOf(sample, quoted.actual) * 10) / 10, `${y} ${owner}`).toBe(quoted.pct)
+      }
+    }
+  })
+
   it('writes the luck sentence', () => {
     expect(scheduleLuckNote({ actual: 6, avg: 8.55, pct: 3 }, 10000)).toBe('Reshuffling who played whom 10,000 times, with the same scores, averages 8.6 wins. The actual 6 beats 3% of those schedules.')
   })
@@ -151,5 +179,26 @@ describe('the published tables', () => {
     expect(pa.verdict).not.toBe('sticks')
     expect(Number(pa.odd_even_r)).toBeLessThan(0.2)
     expect(stats.find(s => s.stat === 'Luck Index')!.verdict).not.toBe('sticks')
+  })
+})
+
+describe('scoringStrength', () => {
+  const game = (year: number, week: number, team1: string, pts1: number, team2: string, pts2: number) =>
+    ({ year, week, team1, team2, pts1, pts2, type: 'R', winner: pts1 > pts2 ? team1 : team2, loser: pts1 > pts2 ? team2 : team1, margin: Math.abs(pts1 - pts2), roster1: 0, roster2: 0 }) as Matchup
+
+  it('measures each score against its own week, so a high-scoring season flatters no one', () => {
+    const rows = scoringStrength([
+      game(2020, 1, 'Ann', 110, 'Bo', 90), game(2020, 2, 'Ann', 110, 'Bo', 90),
+      game(2021, 1, 'Ann', 160, 'Bo', 140), game(2021, 2, 'Ann', 160, 'Bo', 140),
+    ])
+    expect(rows.map(r => [r.owner, r.avg, r.games])).toEqual([['Ann', 10, 4], ['Bo', -10, 4]])
+    // Every game the same margin: no doubt about the average
+    expect(rows[0].low).toBe(10)
+    expect(rows[0].high).toBe(10)
+  })
+
+  it('leaves out playoff games', () => {
+    const playoff = { ...game(2020, 15, 'Ann', 200, 'Bo', 50), type: 'P' } as Matchup
+    expect(scoringStrength([game(2020, 1, 'Ann', 100, 'Bo', 100), playoff]).map(r => r.avg)).toEqual([0, 0])
   })
 })

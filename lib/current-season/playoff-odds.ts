@@ -38,7 +38,7 @@ export interface PlayoffOdds {
 /** Fallbacks when there's no completed season to learn from. */
 const DEFAULT_SIGMA = 23
 const DEFAULT_PRIOR_GAMES = 9
-const DEFAULT_SIMS = 10_000
+export const DEFAULT_SIMS = 10_000
 
 /**
  * Fit the simulation's scoring model to completed regular seasons: `sigma` is
