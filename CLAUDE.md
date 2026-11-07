@@ -7,6 +7,22 @@ A data-heavy archive and live-season companion for a Sleeper Fantasy Football le
 
 **Never remove features or change the visual theme unless explicitly directed.** See `DESIGN.md` for the full Midnight Prime design system and architecture reference, and `BUILD.md` for project state, the maintenance calendar, and the future waitlist.
 
+## Purpose, Scope & Goals (owner, 2026-11-07)
+
+**Purpose, in order:** (1) the league's weekly companion, (2) the place to settle arguments, (3) the trophy-room archive, (4) ammo for the group chat. When two of these compete for a screen, the higher one wins.
+
+**Who it's for:** a league that loves stats, graphs, and nerding out on fantasy football. A few superfans open it most today; the target is all ten. People arrive from links in the group chat and browser bookmarks, on phones first, and use it across the whole year. League feedback so far is all positive, with no complaints.
+
+**How it treats the truth:** fun first, with the truth on tap. Favorite stats stay up front even when they're mostly noise; the evidence sits behind a ?.
+
+**Scope:**
+- Stays free and static. No backend, no real accounts, no push notifications (GitHub Pages can't send them).
+- Personal views are in scope with no login: "pick who you are," remembered on the device. Anyone can pick anyone, and that's accepted.
+- A feature can be cut if the league doesn't care about it, but only when the owner says so, one at a time.
+- One product: the League App for other leagues stays on the waitlist (BUILD.md §4), even though another league asking for this site counts as a win.
+
+**What winning looks like a year from now:** everyone checks it weekly without being sent a link; it's the first place people look for stats; other leagues ask for it.
+
 ---
 
 ## Tech Stack

@@ -2,7 +2,7 @@
 
 > **Single source of truth for continuing development.** Read this file, then `CLAUDE.md`
 > (rules + directory map), then `DESIGN.md` (visual system) before writing any code.
-> Last updated: **2026-10-08**.
+> Last updated: **2026-11-07**.
 
 ---
 
@@ -11,7 +11,8 @@
 One product: the **Convicts FF League** site — the league's archive since 2019 plus a
 live hub for the season in progress. New features and visual changes happen when the
 owner asks for them; otherwise the work is the maintenance calendar (§3), tied to the
-league's yearly rhythm.
+league's yearly rhythm. Its purpose, audience, limits and goals are in `CLAUDE.md`
+(Purpose, Scope & Goals).
 
 The **League App** (the site for any Sleeper league) and **Search 2.0** are on the
 future waitlist (§4) by owner decision (2026-10-08): not goals, and nothing is built
