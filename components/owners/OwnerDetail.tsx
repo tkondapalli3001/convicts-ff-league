@@ -1,8 +1,9 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useUrlParam } from '@/hooks/useUrlParam'
 import Link from 'next/link'
+import { ChevronDown } from 'lucide-react'
 import { useLeague } from '@/context/LeagueContext'
 import { fmtPts, fmtMoney, ownerColor, fullNameInitials } from '@/lib/utils'
 import { ownerProfile, shrinkRate, wilsonRange, type UncertaintySummary } from '@/lib/stats'
@@ -22,6 +23,8 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const { state } = useLeague()
   const { loaded, error, ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, draftData, matchups } = state
   const [tab, setTab] = useUrlParam<Tab>('tab', 'seasons', TAB_IDS)
+  // Phones show four stats until asked for the rest, so the tabs sit near the top
+  const [allStats, setAllStats] = useState(false)
 
   // Must be before early returns (React hook rules)
   const profile = useMemo(
@@ -63,8 +66,9 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const trueRate = shrinkRate(careerWins, careerGames, (uncertainty as UncertaintySummary).careerK)
   const whole = (x: number) => Math.round(x * 100)
 
-  const statCells: { label: string; value: string; sub?: string; color?: string; tip?: React.ReactNode }[] = [
+  const statCells: { label: string; value: string; sub?: string; color?: string; tip?: React.ReactNode; key?: true }[] = [
     {
+      key: true,
       label: 'Career Record', value: `${profile.wins}–${profile.losses}`, sub: `${pct}% win rate`,
       tip: (
         <InfoTip term="Career record">
@@ -74,14 +78,14 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         </InfoTip>
       ),
     },
-    { label: 'Avg PF / Game', value: profile.pfPerGame.toFixed(1), sub: `${profile.pfPerSeason.toFixed(0)} pts/season` },
+    { key: true, label: 'Avg PF / Game', value: profile.pfPerGame.toFixed(1), sub: `${profile.pfPerSeason.toFixed(0)} pts/season` },
     { label: 'Avg PA / Game', value: profile.paPerGame.toFixed(1), sub: `${profile.paPerSeason.toFixed(0)} allowed/season`, color: BRICK },
     { label: 'Net Earnings', value: earnings != null ? fmtMoney(earnings) : 'N/A', color: earnings != null ? (earnings >= 0 ? SAGE : BRICK) : undefined },
-    { label: 'Finals Record', value: finalsGames > 0 ? `${finals.wins}–${finals.losses}` : '—', sub: finalsGames > 0 ? `${finalsGames} Finals appearance${finalsGames !== 1 ? 's' : ''}` : 'Never reached Finals', color: finals.wins > 0 ? GOLD : undefined },
+    { key: true, label: 'Finals Record', value: finalsGames > 0 ? `${finals.wins}–${finals.losses}` : '—', sub: finalsGames > 0 ? `${finalsGames} Finals appearance${finalsGames !== 1 ? 's' : ''}` : 'Never reached Finals', color: finals.wins > 0 ? GOLD : undefined },
     { label: 'Playoff Byes', value: profile.byes > 0 ? String(profile.byes) : '—', sub: profile.byes > 0 ? `first-round bye${profile.byes !== 1 ? 's' : ''}` : 'No byes earned', color: profile.byes > 0 ? GOLD : undefined },
     { label: 'Best Season', value: String(bestSeason.year), sub: `${bestSeason.wins}–${bestSeason.losses} record`, color: SAGE },
     { label: 'Worst Season', value: String(worstSeason.year), sub: `${worstSeason.wins}–${worstSeason.losses} record`, color: BRICK },
-    { label: 'Top Rival', value: topRival?.name ?? '—', sub: topRival ? `${topRival.wins}–${topRival.losses} vs them` : undefined },
+    { key: true, label: 'Top Rival', value: topRival?.name ?? '—', sub: topRival ? `${topRival.wins}–${topRival.losses} vs them` : undefined },
     { label: 'Best Game', value: bestGame ? fmtPts(bestGame.pts) : '—', sub: bestGame ? `${bestGame.year} W${bestGame.week} vs ${bestGame.opp}` : undefined, color: SAGE },
     { label: 'Worst Game', value: worstGame ? fmtPts(worstGame.pts) : '—', sub: worstGame ? `${worstGame.year} W${worstGame.week} vs ${worstGame.opp}` : undefined, color: BRICK },
     { label: 'Longest Win Streak', value: winStreak.length > 0 ? `${winStreak.length}W` : '—', sub: winStreak.length > 0 && winStreak.start && winStreak.end ? `${winStreak.start.year} W${winStreak.start.week}–W${winStreak.end.week}` : undefined, color: GOLD },
@@ -91,7 +95,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
     <div className="animate-fade-in">
       {/* ── Profile header band (design 4a) ─────────────────────────── */}
       <div
-        className="-mx-4 -mt-6 overflow-hidden border-b px-4 pb-8 pt-8 sm:px-8"
+        className="-mx-4 -mt-6 overflow-hidden border-b px-4 pb-5 pt-5 sm:px-8 sm:pb-8 sm:pt-8"
         style={{
           borderColor: 'rgba(var(--gold-rgb), 0.12)',
           background:
@@ -100,16 +104,16 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       >
         <Link
           href="/owners"
-          className="mb-6 inline-flex items-center gap-2 border px-3.5 py-[7px] text-[9px] font-bold uppercase tracking-[2px] text-s-text2 transition-colors hover:text-gold-soft"
+          className="mb-4 inline-flex items-center gap-2 border px-3.5 py-[7px] sm:mb-6 text-[9px] font-bold uppercase tracking-[2px] text-s-text2 transition-colors hover:text-gold-soft"
           style={{ borderColor: 'rgba(var(--gold-rgb), 0.20)' }}
         >
           ← All Owners
         </Link>
 
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-center gap-5 sm:gap-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-6">
             <div
-              className="flex h-[76px] w-[76px] flex-shrink-0 items-center justify-center rounded-full font-display text-[28px] font-extrabold text-white"
+              className="flex h-[60px] w-[60px] flex-shrink-0 items-center justify-center rounded-full font-display text-[22px] font-extrabold text-white sm:h-[76px] sm:w-[76px] sm:text-[28px]"
               style={{
                 background: ownerColor(ownerName),
                 boxShadow: '0 0 0 2px #050506, 0 0 0 3.5px #C9962E, 0 0 24px rgba(201,150,46,0.35)',
@@ -122,7 +126,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 <span className="h-px w-8" style={{ background: 'linear-gradient(to right, transparent, #C9962E)' }} />
                 <span className="text-[9px] font-bold uppercase tracking-[5px] text-gold-soft">Manager Profile</span>
               </div>
-              <h1 className="text-hero-gold font-display text-[44px] font-extrabold uppercase leading-[0.95] tracking-[1px] sm:text-[64px] sm:tracking-[2px]">
+              <h1 className="text-hero-gold font-display text-[38px] font-extrabold uppercase leading-[0.95] tracking-[1px] sm:text-[64px] sm:tracking-[2px]">
                 {ownerName}
               </h1>
               <div className="mt-2.5 text-[11px] font-medium uppercase tracking-[1.5px] text-s-text2">
@@ -132,19 +136,19 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
           </div>
 
           {/* Badge chips */}
-          <div className="flex flex-wrap gap-2.5 sm:justify-end">
+          <div className="flex flex-wrap gap-2 sm:justify-end sm:gap-2.5">
             {profile.titles.map(c => (
-              <span key={c.year} className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px] text-gold-soft" style={{ borderColor: 'rgba(var(--gold-rgb), 0.35)' }}>
+              <span key={c.year} className="border px-3 py-1.5 text-[10px] sm:px-4 sm:py-2 font-bold uppercase tracking-[2px] text-gold-soft" style={{ borderColor: 'rgba(var(--gold-rgb), 0.35)' }}>
                 {c.year}{c.half ? ' ½' : ''} Champ
               </span>
             ))}
             {profile.toiletBowls.map(s => (
-              <span key={s.year} className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px] text-loss" style={{ borderColor: 'rgba(180,90,90,0.35)' }}>
+              <span key={s.year} className="border px-3 py-1.5 text-[10px] sm:px-4 sm:py-2 font-bold uppercase tracking-[2px] text-loss" style={{ borderColor: 'rgba(180,90,90,0.35)' }}>
                 {s.year} Shame
               </span>
             ))}
             {earnings != null && (
-              <span className="border px-4 py-2 text-[10px] font-bold uppercase tracking-[2px]" style={{ color: earnings >= 0 ? '#7FA886' : '#B4636B', borderColor: earnings >= 0 ? 'rgba(127,168,134,0.35)' : 'rgba(180,90,90,0.35)' }}>
+              <span className="border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[2px] sm:px-4 sm:py-2" style={{ color: earnings >= 0 ? '#7FA886' : '#B4636B', borderColor: earnings >= 0 ? 'rgba(127,168,134,0.35)' : 'rgba(180,90,90,0.35)' }}>
                 {fmtMoney(earnings)} Net
               </span>
             )}
@@ -152,12 +156,12 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         </div>
       </div>
 
-      {/* ── Stat grid — 12 hairline cells (4-col desktop / 2-col mobile) ─── */}
+      {/* ── Stat grid — 12 hairline cells (4-col desktop / 2-col phones, four until "All stats") ─── */}
       <div className="-mx-4 grid grid-cols-2 sm:grid-cols-4">
         {statCells.map((c, i) => (
           <div
             key={i}
-            className="flex flex-col gap-1.5 border-b border-r px-5 py-[22px] transition-colors hover:bg-[rgba(201,150,46,0.04)] sm:px-8"
+            className={`${c.key || allStats ? 'flex' : 'hidden sm:flex'} flex-col gap-1.5 border-b border-r px-5 py-4 transition-colors hover:bg-[rgba(201,150,46,0.04)] sm:px-8 sm:py-[22px]`}
             style={{ borderColor: 'rgba(var(--gold-rgb), 0.08)' }}
           >
             <div className="text-[9px] font-bold uppercase tracking-[3px] text-s-text3">{c.label}{c.tip}</div>
@@ -169,9 +173,20 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         ))}
       </div>
 
+      <button
+        type="button"
+        onClick={() => setAllStats(a => !a)}
+        aria-expanded={allStats}
+        className="-mx-4 flex min-h-[44px] w-[calc(100%+2rem)] items-center justify-center gap-1.5 border-b text-[10px] font-bold uppercase tracking-[2px] text-gold-soft sm:hidden"
+        style={{ borderColor: 'rgba(var(--gold-rgb), 0.08)' }}
+      >
+        {allStats ? 'Fewer stats' : `All ${statCells.length} stats${profile.topScorers.length ? ' · top scorers' : ''}`}
+        <ChevronDown size={13} aria-hidden className={allStats ? 'rotate-180' : ''} />
+      </button>
+
       {/* ── Top scorers band ─────────────────────────────────────────── */}
       {profile.topScorers.length > 0 && (
-        <div className="-mx-4 flex flex-wrap items-center gap-4 border-b bg-panel-2 px-4 py-[18px] sm:px-8" style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}>
+        <div className={`-mx-4 flex-wrap items-center gap-4 border-b bg-panel-2 px-4 py-[18px] sm:flex sm:px-8 ${allStats ? 'flex' : 'hidden'}`} style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}>
           <div className="flex flex-shrink-0 items-center gap-2.5">
             <span className="h-px w-4 bg-gold" />
             <span className="text-[10px] font-bold uppercase tracking-[3px] text-gold-soft">Top Scorers</span>

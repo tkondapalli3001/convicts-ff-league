@@ -91,6 +91,28 @@ function StatLine({ owner, h, showName }: { owner: string; h: OwnerHeader | unde
   )
 }
 
+/** Phones: the same numbers as a row of five cells instead of a line that wraps three times. */
+function PhoneStats({ h }: { h: OwnerHeader | undefined }) {
+  const cells: { label: string; value: string; rank?: number }[] = [
+    { label: 'PR', value: h?.powerRank ? ordinal(h.powerRank) : '—' },
+    { label: 'Record', value: h ? fmtRecord(h.wins, h.losses, h.ties) : '—' },
+    { label: 'All-Play', value: h?.allPlay ? fmtRecord(h.allPlay.wins, h.allPlay.losses, h.allPlay.ties) : '—', rank: h?.allPlay?.rank },
+    { label: 'PF', value: h?.pf ? h.pf.value.toFixed(2) : '—', rank: h?.pf?.rank },
+    { label: 'PA', value: h?.pa ? h.pa.value.toFixed(2) : '—', rank: h?.pa?.rank },
+  ]
+  return (
+    <div className="grid w-full grid-cols-5 gap-1 sm:hidden">
+      {cells.map(c => (
+        <div key={c.label} className="min-w-0">
+          <div className="text-[9px] font-bold uppercase tracking-[1px] text-s-text3">{c.label}</div>
+          <div className="font-display text-[15px] font-bold leading-tight text-s-text num">{c.value}</div>
+          {c.rank != null && <div className="text-[9px] font-bold uppercase text-s-text3">{ordinal(c.rank)}</div>}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function WeekPicker({ week, weeks, status, onWeek }: {
   week: number
   weeks: number[]
@@ -100,13 +122,14 @@ function WeekPicker({ week, weeks, status, onWeek }: {
   const idx = weeks.indexOf(week)
   const arrow = 'rounded-full border border-white/[0.07] bg-white/[0.04] p-2 text-s-text3 transition-all hover:border-white/20 hover:text-s-text active:scale-[0.98] disabled:pointer-events-none disabled:opacity-30'
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
       <button onClick={() => onWeek(weeks[idx - 1])} disabled={idx <= 0} className={arrow} aria-label="Previous week">
         <ChevronLeft size={16} />
       </button>
-      <div className="min-w-[92px] text-center">
+      {/* One line on phones, two from sm up */}
+      <div className="flex min-w-[92px] items-baseline justify-center gap-2 text-center sm:block">
         <div className="font-display text-[20px] font-bold uppercase leading-none tracking-[1px] text-s-text sm:text-[22px]">Week {week}</div>
-        <div className="mt-1 text-[9px] font-bold uppercase tracking-[1.5px] text-s-text3 sm:text-[10px]">{STATUS_LABEL[status]}</div>
+        <div className="text-[9px] font-bold uppercase tracking-[1.5px] text-s-text3 sm:mt-1 sm:text-[10px]">{STATUS_LABEL[status]}</div>
       </div>
       <button onClick={() => onWeek(weeks[idx + 1])} disabled={idx < 0 || idx >= weeks.length - 1} className={arrow} aria-label="Next week">
         <ChevronRight size={16} />
@@ -429,17 +452,24 @@ export default function RosterView({ data, liveWeek, matchupWeeks, onWeek, onOpe
           style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.14)' }}
         >
           <div
-            className="flex flex-wrap items-center justify-between gap-4 border-b px-4 py-4 sm:px-6 sm:py-5"
+            className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:gap-4 sm:px-6 sm:py-5"
             style={{ borderColor: 'rgba(var(--gold-rgb), 0.16)' }}
           >
-            <div className="flex min-w-[240px] flex-1 items-center gap-3 sm:gap-4">
-              <OwnerAvatar name={team.owner} size="lg" />
-              <div className="min-w-0">
-                <div className="break-words font-display text-[24px] font-bold uppercase leading-[0.95] tracking-[0.5px] text-s-text sm:text-[32px]">
+            <div className="flex min-w-[240px] flex-1 flex-wrap items-center gap-3 sm:flex-nowrap sm:gap-4">
+              <span className="sm:hidden"><OwnerAvatar name={team.owner} size="sm" /></span>
+              <span className="hidden sm:block"><OwnerAvatar name={team.owner} size="lg" /></span>
+              <div className="min-w-0 flex-1">
+                <div className="break-words font-display text-[22px] font-bold uppercase leading-[0.95] tracking-[0.5px] text-s-text sm:text-[32px]">
                   {h?.teamName ?? team.owner}
                 </div>
-                <StatLine owner={team.owner} h={h} showName={!!h?.teamName} />
+                {h?.teamName && (
+                  <Link href={`/owners/${encodeURIComponent(team.owner)}`} className="mt-0.5 inline-block text-[11px] font-semibold text-s-text2 sm:hidden">
+                    {team.owner}
+                  </Link>
+                )}
+                <div className="hidden sm:block"><StatLine owner={team.owner} h={h} showName={!!h?.teamName} /></div>
               </div>
+              <PhoneStats h={h} />
             </div>
             <WeekPicker week={week} weeks={weeks} status={status} onWeek={onWeek} />
           </div>
