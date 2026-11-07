@@ -1,13 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { MoreHorizontal, User, X } from 'lucide-react'
+import { MoreHorizontal, User } from 'lucide-react'
 import { useLeague } from '@/context/LeagueContext'
 import { useMe } from '@/hooks/useMe'
-import { useModalClose } from '@/hooks/useModalClose'
+import BottomSheet from '@/components/shared/BottomSheet'
 import { OwnerPicker } from '@/components/shared/PickYourself'
 import { CURRENT_SEASON } from '@/lib/league'
 import { NAV_ITEMS } from './nav-items'
@@ -106,31 +105,12 @@ function BarSheet({ mode, me, onChangeMe, onClose, onPicked }: {
 }) {
   const pathname = usePathname()
   const { state } = useLeague()
-  useModalClose(onClose)
 
   const { loaded, years, loadingText } = state
   const statusText = loaded && years.length > 0 ? `${years[0]}–${years[years.length - 1]} · ${years.length} seasons` : loadingText
 
-  return createPortal(
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={mode === 'pick' ? 'Which one are you?' : 'More'}
-      className="fixed inset-0 z-[100] flex items-end sm:hidden"
-      style={{ background: 'rgba(3,3,4,0.7)' }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div
-        className="max-h-[85vh] w-full overflow-y-auto border-t animate-fade-in"
-        style={{ background: '#0B0B0D', borderColor: 'rgba(var(--gold-rgb), 0.24)', paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        <div className="flex items-center justify-between border-b px-5 py-3" style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}>
-          <span className="text-[11px] font-bold uppercase tracking-[2.5px] text-gold-soft">{mode === 'pick' ? 'Which one are you?' : 'More'}</span>
-          <button type="button" onClick={onClose} aria-label="Close" className="-mr-2 p-2 text-s-text3 hover:text-gold-soft">
-            <X size={17} />
-          </button>
-        </div>
-
+  return (
+    <BottomSheet title={mode === 'pick' ? 'Which one are you?' : 'More'} onClose={onClose}>
         {mode === 'pick' ? (
           <div className="p-4">
             <p className="mb-4 text-[12px] leading-snug text-s-text2">Your matchup comes first from here on. It’s only remembered on this device.</p>
@@ -164,8 +144,6 @@ function BarSheet({ mode, me, onChangeMe, onClose, onPicked }: {
             </div>
           </>
         )}
-      </div>
-    </div>,
-    document.body,
+    </BottomSheet>
   )
 }

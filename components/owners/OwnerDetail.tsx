@@ -258,7 +258,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       {/* Game Log */}
       {tab === 'gamelog' && (
         <div
-          className="max-h-[500px] overflow-y-auto rounded-[6px]"
+          className="rounded-[6px] sm:max-h-[500px] sm:overflow-y-auto"
           style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
         >
           {profile.games.map(g => {

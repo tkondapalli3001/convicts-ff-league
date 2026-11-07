@@ -57,6 +57,7 @@ export default function SeasonTransactions({ data }: { data: Data }) {
         onToggleYear={() => {}}
         onToggleOwner={toggleOwner}
         onToggleType={toggleType}
+        shown={filtered.length}
       />
 
       {loading && !transactions.length ? (

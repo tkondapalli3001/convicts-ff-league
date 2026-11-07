@@ -29,7 +29,7 @@ export default function SmackLine({ line }: { line: string }) {
       <span className="flex-1 text-[13px] leading-snug text-s-text2 sm:text-[15px]">{line}</span>
       <button
         onClick={copy}
-        className="flex-shrink-0 rounded-[4px] p-1.5 text-s-text3 transition-colors hover:text-gold-soft active:scale-[0.98]"
+        className="-my-1 flex-shrink-0 rounded-[4px] p-2 text-s-text3 transition-colors hover:text-gold-soft active:scale-[0.98]"
         aria-label="Copy to clipboard"
         title="Copy for the group chat"
       >

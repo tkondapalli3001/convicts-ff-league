@@ -1,5 +1,6 @@
 'use client'
 
+import FilterSheet from '@/components/shared/FilterSheet'
 import { useState, useMemo } from 'react'
 import type { OwnershipEntry } from '@/lib/data-processing'
 import { USER_ID_TO_OWNER } from '@/lib/league'
@@ -95,7 +96,7 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
             key={pos}
             onClick={() => setPosFilter(pos)}
             className={[
-              'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+              'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
               posFilter === pos
                 ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
                 : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
@@ -107,13 +108,14 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
       </div>
 
       {/* Owner filter */}
+      <FilterSheet summary={ownerFilter === 'ALL' ? 'All owners' : ownerFilter}>
       <div className="flex gap-[6px] flex-wrap mb-4">
         {owners.map(owner => (
           <button
             key={owner}
             onClick={() => setOwnerFilter(owner)}
             className={[
-              'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+              'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
               ownerFilter === owner
                 ? 'bg-[#1a3020] border-s-green text-[#86efac]'
                 : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
@@ -123,6 +125,7 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
           </button>
         ))}
       </div>
+      </FilterSheet>
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-[12px] min-w-[520px]">

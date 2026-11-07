@@ -62,6 +62,7 @@ export default function GameLog() {
         activeOwners={activeOwners}
         onToggleYear={toggleYear}
         onToggleOwner={toggleOwner}
+        shown={filtered.length}
       />
       <div className="mb-2 text-[10px] text-s-text3">{filtered.length} matchups shown</div>
       <GameLogTable matchups={filtered} onClick={setSelectedGame} />

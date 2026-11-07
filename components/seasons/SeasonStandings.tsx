@@ -176,7 +176,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
             key={y}
             onClick={() => toggleYear(y)}
             className={[
-              'px-3 py-[5px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150 whitespace-nowrap',
+              'min-h-[32px] sm:min-h-0 px-3 py-[5px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150 whitespace-nowrap',
               activeYears.has(y)
                 ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
                 : 'border-[rgba(230,190,90,0.14)] text-s-text3 hover:text-gold-soft',

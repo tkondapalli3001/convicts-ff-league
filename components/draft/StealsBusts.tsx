@@ -105,7 +105,7 @@ export default function StealsBusts() {
         <button
           onClick={() => setSelectedYear(null)}
           className={[
-            'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+            'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
             selectedYear === null
               ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
               : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
@@ -118,7 +118,7 @@ export default function StealsBusts() {
             key={y}
             onClick={() => setSelectedYear(y === selectedYear ? null : y)}
             className={[
-              'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+              'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
               selectedYear === y
                 ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
                 : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',

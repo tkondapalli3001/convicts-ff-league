@@ -202,8 +202,8 @@ From a 375px walk of every page. Phones only; desktop keeps its tables and navba
 2. **Done:** links: tabs, weeks, years, argument-settling filters and open matchups live in the URL; Back closes popups; share button; a preview card per section and owner.
 3. **Done:** "you": pick who you are (device only), your matchup above Power Rankings and on Home, and the bottom bar (Home · season · Me · Owners · More), replacing the hamburger.
 4. **Done:** rows instead of wide tables, tap for the rest. Power Rankings: Power Index, PF per game, all-play. Career tables: record, Win%, titles. Standings: record, PF per game, luck. Earnings: total and the last two paid seasons. Draft boards open on your column.
-5. **Next:** filters behind one button and a bottom sheet; no inner scroll boxes on phones; Players → Transactions starts on the latest season with "load more" (22,000 elements today). Sync and copy buttons reach 28px.
-6. Owner profile: four key stats up front, the rest behind "All stats", so the tabs and Wins Bridge sit near the top. A more compact Rosters header.
+5. **Done:** filters behind one button and a bottom sheet (Game Log, both Transactions views, Players → Scoring and Draft Ownership); no inner scroll boxes on phones; long lists show a hundred rows at a time; Players → Transactions opens on the latest season with an All chip (909 elements, down from 22,000). Chips, sync and copy buttons reach 28px+.
+6. **Next:** owner profile: four key stats up front, the rest behind "All stats", so the tabs and Wins Bridge sit near the top. A more compact Rosters header.
 7. Charts the league can't get elsewhere: playoff odds week by week, your record against 10,000 shuffled schedules, scoring strength by owner with ranges. Scoring Trend gets company.
 
 Ruled out: a backend, accounts, push notifications, a visit counter, and preview cards with live scores (they'd need a scheduled rebuild).

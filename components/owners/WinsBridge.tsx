@@ -174,7 +174,7 @@ function Detail({ step, seasons, career, totals, replacement }: {
 }) {
   const sum = (f: (s: OwnerSeasonBridge) => number) => seasons.reduce((a, s) => a + f(s), 0)
   const shell = 'border-t px-5 pb-4 pt-3 text-[12px] text-s-text2'
-  const list = 'mt-3 max-h-[320px] overflow-y-auto'
+  const list = 'mt-3 sm:max-h-[320px] sm:overflow-y-auto'
   const row = 'flex items-baseline gap-3 border-b py-1.5 last:border-b-0'
 
   if (step === 'luck') {

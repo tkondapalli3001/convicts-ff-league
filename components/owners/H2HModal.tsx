@@ -55,7 +55,7 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
         </div>
 
         {/* Game rows */}
-        <div className="max-h-[400px] overflow-y-auto overflow-x-auto rounded-[10px] bg-s-bg2 border border-s-border" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="overflow-x-auto sm:max-h-[400px] sm:overflow-y-auto rounded-[10px] bg-s-bg2 border border-s-border" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="min-w-[420px]">
           {rows.map(({ g, p1Pts, p2Pts, p1Won, margin }) => (
             <div

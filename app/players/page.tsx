@@ -49,8 +49,9 @@ export default function PlayersPage() {
   const [activeTypes, setActiveTypes]   = useState<Set<TxTypeFilter>>(new Set(['trade', 'waivers']))
   const [selectedTx, setSelectedTx]     = useState<EnrichedTransaction | null>(null)
 
+  // Opens on the latest season, like Standings and the Game Log; one tap shows every year
   useEffect(() => {
-    if (txYears.length) setActiveYears(new Set(txYears))
+    if (txYears.length) setActiveYears(new Set([txYears[txYears.length - 1]]))
   }, [txYears.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredTx = useMemo(() => {
@@ -162,6 +163,8 @@ export default function PlayersPage() {
             onToggleYear={toggleYear}
             onToggleOwner={toggleOwner}
             onToggleType={toggleType}
+            onAllYears={() => setActiveYears(new Set(txYears))}
+            shown={filteredTx.length}
           />
           {!txLoading && (
             <TradesByYearChart

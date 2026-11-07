@@ -41,11 +41,11 @@ export default function SyncStatus({ label, syncedAt, syncing, stale, onRefresh 
       <button
         onClick={onRefresh}
         disabled={syncing}
-        className="flex-shrink-0 rounded-full p-1.5 transition-colors hover:text-gold-soft disabled:opacity-60"
+        className="-my-1.5 flex-shrink-0 rounded-full p-2 transition-colors hover:text-gold-soft disabled:opacity-60"
         aria-label="Sync with Sleeper now"
         title="Sync now"
       >
-        <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
+        <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
       </button>
     </div>
   )

@@ -168,7 +168,7 @@ export default function RivalryCalc() {
           })()}
 
           {/* Game log */}
-          <div className="max-h-[220px] overflow-y-auto">
+          <div className="sm:max-h-[220px] sm:overflow-y-auto">
             <div className="text-[9px] text-s-text3 uppercase tracking-[1.5px] mb-2">All Matchups</div>
             {h2h.games.map(g => {
               const aIsT1 = g.team1 === ownerA

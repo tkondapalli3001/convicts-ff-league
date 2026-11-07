@@ -1,5 +1,6 @@
 'use client'
 
+import FilterSheet from '@/components/shared/FilterSheet'
 import { useState, useMemo } from 'react'
 import type { PlayerScoreStat } from '@/lib/data-processing'
 
@@ -98,6 +99,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
       </div>
 
       {/* Filters row */}
+      <FilterSheet summary={`${yearFilter === 'all' ? 'All seasons' : yearFilter} · ${ownerFilter === 'all' ? 'All owners' : ownerFilter}`}>
       <div className="flex flex-wrap gap-3 mb-4 items-start">
         {/* Season filter */}
         <div>
@@ -106,7 +108,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
             <button
               onClick={() => setYearFilter('all')}
               className={[
-                'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+                'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                 yearFilter === 'all'
                   ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
                   : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
@@ -119,7 +121,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
                 key={y}
                 onClick={() => setYearFilter(y)}
                 className={[
-                  'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+                  'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                   yearFilter === y
                     ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
                     : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
@@ -138,7 +140,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
             <button
               onClick={() => setOwnerFilter('all')}
               className={[
-                'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+                'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                 ownerFilter === 'all'
                   ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
                   : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
@@ -151,7 +153,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
                 key={name}
                 onClick={() => setOwnerFilter(name)}
                 className={[
-                  'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+                  'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
                   ownerFilter === name
                     ? 'border-gold text-gold-soft bg-[rgba(201,150,46,0.10)]'
                     : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',
@@ -163,6 +165,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
           </div>
         </div>
       </div>
+      </FilterSheet>
 
       {/* Position filter */}
       <div className="flex gap-[6px] flex-wrap mb-4">
@@ -171,7 +174,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
             key={pos}
             onClick={() => setPosFilter(pos)}
             className={[
-              'px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
+              'min-h-[32px] sm:min-h-0 px-3 py-[4px] rounded-full border text-[11px] font-semibold cursor-pointer transition-all duration-150',
               posFilter === pos
                 ? 'bg-[rgba(201,150,46,0.10)] border-s-gold/60 text-s-gold'
                 : 'bg-s-bg3 border-s-border text-s-text3 hover:border-s-border2 hover:text-s-text2',

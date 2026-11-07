@@ -1,6 +1,7 @@
 'use client'
 
 import { fmtDate } from '@/lib/utils'
+import { useShowMore, ShowMoreButton } from '@/components/shared/ShowMore'
 import type { EnrichedTransaction } from '@/types'
 
 const TYPE_BADGE: Record<string, { label: string; className: string }> = {
@@ -34,6 +35,7 @@ function txSummary(tx: EnrichedTransaction): string {
 }
 
 export default function TransactionTable({ transactions, onClick }: Props) {
+  const { shown, left, more } = useShowMore(transactions)
   if (!transactions.length) {
     return (
       <div className="text-center py-10 text-s-text3 text-[12px]">No transactions match your filters</div>
@@ -42,8 +44,9 @@ export default function TransactionTable({ transactions, onClick }: Props) {
 
   return (
     <div className="bg-s-bg2 border border-s-border rounded-[12px] overflow-hidden">
-      <div className="max-h-[600px] overflow-y-auto">
-        {transactions.map(tx => {
+      {/* Phones scroll the page, not a box inside it */}
+      <div className="sm:max-h-[600px] sm:overflow-y-auto">
+        {shown.map(tx => {
           const badge = TYPE_BADGE[tx.type] ?? TYPE_BADGE.free_agent
           return (
             <div
@@ -74,6 +77,7 @@ export default function TransactionTable({ transactions, onClick }: Props) {
             </div>
           )
         })}
+        <ShowMoreButton left={left} onClick={more} />
       </div>
     </div>
   )

@@ -3,6 +3,7 @@
 import { Matchup } from '@/types'
 import { fmtPts } from '@/lib/utils'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import { useShowMore, ShowMoreButton } from '@/components/shared/ShowMore'
 
 interface Props {
   matchups: Matchup[]
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function GameLogTable({ matchups, onClick }: Props) {
+  const { shown, left, more } = useShowMore(matchups)
   if (!matchups.length) {
     return (
       <div className="text-center py-10 text-s-text3">No matchups match your filters</div>
@@ -18,9 +20,10 @@ export default function GameLogTable({ matchups, onClick }: Props) {
 
   return (
     <div className="gl overflow-hidden relative">
-      <div className="max-h-[600px] overflow-y-auto overflow-x-auto relative z-10" style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* Phones scroll the page, not a box inside it */}
+      <div className="overflow-x-auto sm:max-h-[600px] sm:overflow-y-auto relative z-10" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div className="sm:min-w-[520px]">
-        {matchups.map(g => {
+        {shown.map(g => {
           const winner1 = g.pts1 >= g.pts2
           return (
             <div
@@ -74,6 +77,7 @@ export default function GameLogTable({ matchups, onClick }: Props) {
             </div>
           )
         })}
+        <ShowMoreButton left={left} onClick={more} />
         </div>
       </div>
     </div>
