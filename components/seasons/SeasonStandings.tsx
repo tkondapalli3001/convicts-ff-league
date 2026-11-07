@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
@@ -40,18 +41,21 @@ export default function SeasonStandings({ onYearChange }: Props) {
   const { ownerSeasons, years, matchups, rosterUserMaps } = state
   const router = useRouter()
 
-  const [activeYears, setActiveYears] = useState<Set<number>>(new Set())
+  // '' = the most recent year, 'all' = every year, else one year
+  const [yearParam, setYearParam] = useUrlParam('year', '')
+  const latest = years[years.length - 1]
+  const activeYears = useMemo(() => {
+    if (yearParam === 'all') return new Set(years)
+    const picked = Number(yearParam)
+    return new Set(years.includes(picked) ? [picked] : latest != null ? [latest] : [])
+  }, [yearParam, years, latest])
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
   const [sortDir, setSortDir] = useState<1 | -1>(-1)
 
-  // Default to the most recent year once data loads
+  // The bracket below follows the year on show
   useEffect(() => {
-    if (years.length) {
-      const latest = years[years.length - 1]
-      setActiveYears(new Set([latest]))
-      onYearChange?.(latest)
-    }
-  }, [years.length])  // eslint-disable-line react-hooks/exhaustive-deps
+    if (years.length) onYearChange?.(activeYears.size === 1 ? [...activeYears][0] : null)
+  }, [activeYears, years.length])  // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => (d === 1 ? -1 : 1))
@@ -59,11 +63,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
   }
 
   function toggleYear(y: number) {
-    // Notify the parent outside the state updater — updaters run during
-    // render, where updating another component trips a React error
-    const reset = activeYears.size === 1 && activeYears.has(y)
-    setActiveYears(reset ? new Set(years) : new Set([y]))
-    onYearChange?.(reset ? null : y)
+    setYearParam(activeYears.size === 1 && activeYears.has(y) ? 'all' : String(y))
   }
 
   // Season Luck Index per owner — the shared lib/stats implementation, so it

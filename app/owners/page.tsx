@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
@@ -17,11 +17,12 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'earnings',    label: 'Earnings Ledger'    },
   { id: 'h2h',         label: 'Head-to-Head'       },
 ]
+const TAB_IDS = TABS.map(t => t.id)
 
 export default function OwnersPage() {
   const { state } = useLeague()
   const { loaded, error } = state
-  const [activeTab, setActiveTab] = useState<Tab>('leaderboard')
+  const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'leaderboard', TAB_IDS)
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />

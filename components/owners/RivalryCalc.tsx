@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
 import { USER_ID_TO_OWNER } from '@/lib/league'
@@ -13,8 +14,8 @@ export default function RivalryCalc() {
   const { allMatchups, ownerSeasons } = state
   const router = useRouter()
 
-  const [ownerA, setOwnerA] = useState('')
-  const [ownerB, setOwnerB] = useState('')
+  const [ownerA, setOwnerA] = useUrlParam('a', '')
+  const [ownerB, setOwnerB] = useUrlParam('b', '')
 
   const ownerNames = useMemo(() => {
     return [...new Set(Object.values(USER_ID_TO_OWNER))]

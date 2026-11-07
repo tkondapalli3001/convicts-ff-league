@@ -56,6 +56,8 @@ app/                        Next.js App Router pages (thin render shells only)
   records/page.tsx          Record book, career milestones, streaks, fun facts, trash talk
   players/page.tsx          NFL player stats — win rate, scoring, ownership, transactions
   layout.tsx                Root layout — <LeagueProvider>, site metadata/PWA, fonts
+  page-meta.ts              pageMeta() — a page's title and group-chat preview card; each section's
+                            layout.tsx holds its own
   icon.png, apple-icon.png  Favicon + apple-touch icon (Next file conventions)
   globals.css               Tailwind directives + custom utility classes
 
@@ -102,11 +104,13 @@ hooks/
                             headers (PR · record · all-play · PF · PA), schedules
   useSeasonSchedule.ts      The season's full regular-season schedule (unplayed weeks load once)
   useSeasonTransactions.ts  Season tab → Transactions (past weeks once, current week via the sync)
-  useModalClose.ts          Escape-to-close + body scroll lock shared by every modal
+  useModalClose.ts          Escape, Back button, and body scroll lock shared by every modal
+  useUrlParam.ts            useUrlParam(), useUrlModal() — tabs, weeks, years and open matchups
+                            live in the URL, so links open exactly what was shared
 
 lib/
   league/                   Everything hand-maintained about the league (barrel: @/lib/league)
-    config.ts               LEAGUE_ID, CURRENT_SEASON, SLEEPER_API, BASE_PATH
+    config.ts               LEAGUE_ID, CURRENT_SEASON, SLEEPER_API, BASE_PATH, SITE_URL
     owners.ts               USER_ID_TO_OWNER, DISPLAY_NAME_TO_OWNER, INACTIVE_OWNERS,
                             OWNER_FULL_NAMES, OWNER_COLORS
     history.ts              BUY_INS, NEXT_DRAFT_AT/LABEL, MANUAL_CHAMPS, MANUAL_SHAME,
@@ -281,6 +285,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **The power rating is the original Oberon Mt. formula.** `0.6 × avg + 0.2 × (high + low) + 0.2 × (win% × 200)` with the actual record's win%. The league tried all-play win% in its place and went back (2026-10-01) — keep the original unless the owner asks again. All-play stays a display column.
 - **Live data overlays; it never mutates.** Only the season tab polls, via `useLiveSeason`, which layers fresh league/roster/matchup data over a copy of the global state (`withLiveSeason`) and flattens the season's games once per sync. Facts about past seasons (champ path, honors, career wins) memoize on `live.base`, which polls never change. The global store still loads once. A week is final only once `settings.last_scored_leg` reaches it — never infer "final" from points on the board (a Thursday game puts points up for the whole week).
 - **The search overlay is portaled to `document.body`.** The navbar's `backdrop-filter` makes it the containing block for fixed descendants — rendering the overlay inside the nav clips it. Don't move it back. Every `fixed inset-0` modal portals the same way.
+- **What you're looking at lives in the URL.** People arrive from group-chat links, so tabs, weeks, years, filters that settle arguments, and open matchups go through `useUrlParam` / `useUrlModal`, never plain `useState`. Tabs and filters replace the URL entry; popups add a stop, so Back closes them. Each section's preview card is its `layout.tsx` metadata (`app/page-meta.ts`); pages are client components, so it can't live on the page.
 - **Pages are thin shells.** Computation belongs in `hooks/` or `lib/`. Pages should only call hooks, destructure results, and render JSX.
 
 ---

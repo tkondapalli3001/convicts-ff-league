@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
@@ -370,6 +371,7 @@ export default function RosterView({ data, liveWeek, matchupWeeks, onWeek, onOpe
   const [picked, setPicked] = useState<string | null>(() => {
     try { return typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null } catch { return null }
   })
+  const [linked, setLinked] = useUrlParam('team', '')
 
   if (!rosters.length) {
     return (
@@ -383,11 +385,12 @@ export default function RosterView({ data, liveWeek, matchupWeeks, onWeek, onOpe
   }
 
   const ordered = [...rosters].sort((a, b) => a.standing - b.standing)
-  const team = ordered.find(t => t.owner === picked) ?? ordered[0]
+  const team = ordered.find(t => t.owner === linked) ?? ordered.find(t => t.owner === picked) ?? ordered[0]
   const h = headers[team.owner]
 
   function pick(owner: string) {
     setPicked(owner)
+    setLinked(owner)
     try { window.localStorage.setItem(STORAGE_KEY, owner) } catch { /* private mode — fine */ }
   }
 

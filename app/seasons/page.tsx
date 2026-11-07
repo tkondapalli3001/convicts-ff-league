@@ -1,5 +1,6 @@
 'use client'
 
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { useState } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
@@ -20,11 +21,12 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'finish',    label: 'Finish Tracker' },
   { id: 'avgscore',  label: 'Scoring Trend'  },
 ]
+const TAB_IDS = TABS.map(t => t.id)
 
 export default function SeasonsPage() {
   const { state } = useLeague()
   const { loaded, error, years } = state
-  const [activeTab, setActiveTab] = useState<Tab>('standings')
+  const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'standings', TAB_IDS)
   const [standingsYear, setStandingsYear] = useState<number | null>(null)
 
   if (error) return <ErrorState error={error} />

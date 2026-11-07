@@ -181,3 +181,14 @@ export function getShameLoser(year: number, state: LeagueState) {
   }
   return { year, loser: '—', seed: null }
 }
+
+/** A query string with these params set; null removes one. */
+export function withSearchParams(search: string, updates: Record<string, string | null>): string {
+  const params = new URLSearchParams(search)
+  for (const [key, value] of Object.entries(updates)) {
+    if (value == null || value === '') params.delete(key)
+    else params.set(key, value)
+  }
+  const next = params.toString()
+  return next ? `?${next}` : ''
+}

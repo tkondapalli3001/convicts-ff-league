@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLeague } from '@/context/LeagueContext'
 import { useLiveSeason } from '@/hooks/useLiveSeason'
+import { useUrlModal, useUrlParam } from '@/hooks/useUrlParam'
 import { usePreviewData } from '@/hooks/usePreviewData'
 import { usePowerRankings } from '@/hooks/usePowerRankings'
 import { useTeamRosters } from '@/hooks/useTeamRosters'
@@ -32,16 +32,21 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'draft',    label: 'Draft'          },
 ]
 
+const TAB_IDS = TABS.map(t => t.id)
+const asWeek = (v: string) => (v && Number.isFinite(Number(v)) ? Number(v) : null)
+
 const STATUS_LABEL = { final: 'Final', live: 'In progress', upcoming: 'Regular season' } as const
 
 export default function SeasonPage() {
   const { state } = useLeague()
   const live = useLiveSeason()
-  const [tab, setTab] = useState<Tab>('rankings')
-  const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
+  const [tab, setTab] = useUrlParam<Tab>('tab', 'rankings', TAB_IDS)
+  const [weekParam, setWeekParam] = useUrlParam('week', '')
+  const selectedWeek = asWeek(weekParam)
   // The open matchup is keyed by a team in it, so the Rosters schedule can open any week's game
-  const [openOwner, setOpenOwner] = useState<string | null>(null)
-  const [rosterWeek, setRosterWeek] = useState<number | null>(null)
+  const [openOwner, openMatchup, closeMatchup] = useUrlModal('matchup')
+  const [rosterWeekParam, setRosterWeekParam] = useUrlParam('rosterWeek', '')
+  const rosterWeek = asWeek(rosterWeekParam)
   const { weeks, week, previews, motw } = usePreviewData(live, selectedWeek)
   const rankings = usePowerRankings(live)
   const rosters = useTeamRosters(live, rosterWeek, rankings.rows)
@@ -107,7 +112,7 @@ export default function SeasonPage() {
           {/* Week selector */}
           <div className="mb-6 flex items-center justify-center gap-4">
             <button
-              onClick={() => setSelectedWeek(weeks[idx - 1])}
+              onClick={() => setWeekParam(String(weeks[idx - 1]))}
               disabled={idx <= 0}
               className="rounded-full border border-white/[0.07] bg-white/[0.04] p-2.5 text-s-text3 transition-all hover:border-white/20 hover:text-s-text active:scale-[0.98] disabled:pointer-events-none disabled:opacity-30"
               aria-label="Previous week"
@@ -129,7 +134,7 @@ export default function SeasonPage() {
             </div>
 
             <button
-              onClick={() => setSelectedWeek(weeks[idx + 1])}
+              onClick={() => setWeekParam(String(weeks[idx + 1]))}
               disabled={idx >= weeks.length - 1}
               className="rounded-full border border-white/[0.07] bg-white/[0.04] p-2.5 text-s-text3 transition-all hover:border-white/20 hover:text-s-text active:scale-[0.98] disabled:pointer-events-none disabled:opacity-30"
               aria-label="Next week"
@@ -145,7 +150,7 @@ export default function SeasonPage() {
                   p={previews[motw.index]}
                   reasons={motw.reasons}
                   ammo={motw.ammo}
-                  onOpen={() => setOpenOwner(previews[motw.index].teamA.name)}
+                  onOpen={() => openMatchup(previews[motw.index].teamA.name, { week: String(week) })}
                 />
               )}
               {previews.length > 1 && (
@@ -154,7 +159,7 @@ export default function SeasonPage() {
                   style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.12)' }}
                 >
                   {previews.map((p, i) => i === motw?.index ? null : (
-                    <MatchupRow key={`${p.teamA.name}-${p.teamB.name}`} p={p} onClick={() => setOpenOwner(p.teamA.name)} />
+                    <MatchupRow key={`${p.teamA.name}-${p.teamB.name}`} p={p} onClick={() => openMatchup(p.teamA.name, { week: String(week) })} />
                   ))}
                 </div>
               )}
@@ -173,7 +178,7 @@ export default function SeasonPage() {
           )}
 
           {openIdx >= 0 && (
-            <MatchupModal p={previews[openIdx]} onClose={() => setOpenOwner(null)} />
+            <MatchupModal p={previews[openIdx]} onClose={closeMatchup} />
           )}
         </>
       )}
@@ -189,12 +194,8 @@ export default function SeasonPage() {
           data={rosters}
           liveWeek={live.week}
           matchupWeeks={weeks}
-          onWeek={setRosterWeek}
-          onOpenMatchup={(w, owner) => {
-            setSelectedWeek(w)
-            setOpenOwner(owner)
-            setTab('matchups')
-          }}
+          onWeek={w => setRosterWeekParam(String(w))}
+          onOpenMatchup={(w, owner) => openMatchup(owner, { tab: 'matchups', week: String(w) })}
         />
       )}
 

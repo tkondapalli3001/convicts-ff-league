@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { useLeague } from '@/context/LeagueContext'
 import { usePlayersData } from '@/hooks/usePlayersData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
@@ -25,13 +25,14 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'steals',    label: 'Steals & Busts'   },
   { id: 'strategy',  label: 'Draft Strategy'   },
 ]
+const TAB_IDS = TABS.map(t => t.id)
 
 export default function DraftPage() {
   const { state } = useLeague()
   const { loaded, error } = state
   const { draftStructure, loading: strategyLoading } = usePlayersData()
 
-  const [activeTab, setActiveTab] = useState<Tab>('pickorder')
+  const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'pickorder', TAB_IDS)
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { loadBridges } from '@/lib/sources'
 import {
   BRIDGE_PARTS, careerTotals, scheduleLuckNote, stepRange,
@@ -34,7 +35,7 @@ const wins = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1))
 
 export default function WinsBridge({ ownerName }: { ownerName: string }) {
   const [file, setFile] = useState<BridgeFile | null | undefined>(undefined)
-  const [view, setView] = useState<View>('career')
+  const [viewParam, setViewParam] = useUrlParam('view', 'career')
   const [open, setOpen] = useState<Step | null>(null)
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function WinsBridge({ ownerName }: { ownerName: string }) {
     () => (file?.bridges ?? []).filter(b => b.owner === ownerName).sort((a, b) => b.season - a.season),
     [file, ownerName],
   )
+  const view: View = seasons.some(s => String(s.season) === viewParam) ? Number(viewParam) : 'career'
   const shown = useMemo(() => (view === 'career' ? seasons : seasons.filter(s => s.season === view)), [seasons, view])
   const totals = useMemo<BridgeTotals | null>(
     () => (shown.length === 0 ? null : view === 'career' ? careerTotals(shown) : shown[0]),
@@ -96,7 +98,7 @@ export default function WinsBridge({ ownerName }: { ownerName: string }) {
           <button
             key={t.id}
             type="button"
-            onClick={() => { setView(t.id); setOpen(null) }}
+            onClick={() => { setViewParam(String(t.id)); setOpen(null) }}
             className={`min-h-[30px] border px-3 text-[10px] font-bold uppercase tracking-[2px] transition-colors ${view === t.id ? 'text-s-text' : 'text-s-text3 hover:text-gold-soft'}`}
             style={{ borderColor: view === t.id ? 'rgba(var(--gold-rgb), 0.55)' : 'rgba(var(--gold-rgb), 0.16)' }}
           >

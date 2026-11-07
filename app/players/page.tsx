@@ -1,5 +1,6 @@
 'use client'
 
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { useState, useMemo, useEffect } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { usePlayersData } from '@/hooks/usePlayersData'
@@ -29,12 +30,13 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'ownership',   label: 'Draft Ownership'  },
   { id: 'transactions', label: 'Transactions'    },
 ]
+const TAB_IDS = TABS.map(t => t.id)
 
 export default function PlayersPage() {
   const { state } = useLeague()
   const { loaded, error, years, ownerSeasons } = state
   const { playerWinRates, ownership, playerScores, loading, loadingText, error: dataError } = usePlayersData()
-  const [activeTab, setActiveTab] = useState<Tab>('scoring')
+  const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'scoring', TAB_IDS)
   // Transactions download only once their tab is opened (then stay cached)
   const { transactions, years: txYears, loading: txLoading, loadingText: txLoadingText, error: txError } = useTransactionsData(activeTab === 'transactions')
 

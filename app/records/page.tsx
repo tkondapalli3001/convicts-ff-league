@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { useLeague } from '@/context/LeagueContext'
 import { useRecordsData } from '@/hooks/useRecordsData'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
@@ -28,6 +28,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'funfacts',  label: 'Fun Facts'  },
   { id: 'trashtalk', label: 'Trash Talk' },
 ]
+const TAB_IDS = TABS.map(t => t.id)
 
 export default function RecordsPage() {
   const { state } = useLeague()
@@ -41,7 +42,7 @@ export default function RecordsPage() {
     topWinStreaks, topLossStreaks,
   } = useRecordsData()
 
-  const [activeTab, setActiveTab] = useState<Tab>('extremes')
+  const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'extremes', TAB_IDS)
 
   if (error) return <ErrorState error={error} />
   if (!loaded) return <LoadingSpinner />

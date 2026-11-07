@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { useLeague } from '@/context/LeagueContext'
 
 import { POS_BADGE_CLASSES as POS_COLORS } from '@/lib/positions'
@@ -21,7 +22,9 @@ interface PickResult {
 export default function StealsBusts() {
   const { state } = useLeague()
   const { draftData, matchups, rosterUserMaps, years } = state
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [yearParam, setYearParam] = useUrlParam('year', '')
+  const selectedYear = yearParam ? Number(yearParam) : null
+  const setSelectedYear = (y: number | null) => setYearParam(y == null ? '' : String(y))
 
   const allResults = useMemo<PickResult[]>(() => {
     const results: PickResult[] = []

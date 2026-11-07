@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import { useLeague } from '@/context/LeagueContext'
 import { USER_ID_TO_OWNER } from '@/lib/league'
 import GameLogFilters from '@/components/seasons/GameLogFilters'
@@ -17,16 +18,18 @@ export default function GameLog() {
   const { state } = useLeague()
   const { allMatchups, years, ownerSeasons, matchups, leagues } = state
 
-  // null = untouched → the most recent season
-  const [pickedYears, setPickedYears] = useState<Set<number> | null>(null)
-  const [activeOwners, setActiveOwners] = useState<Set<string>>(new Set())
+  // '' = the most recent season, 'all' = every season, else one season
+  const [yearParam, setYearParam] = useUrlParam('logYear', '')
+  const [ownerParam, setOwnerParam] = useUrlParam('owner', '')
   const [selectedGame, setSelectedGame] = useState<Matchup | null>(null)
 
   const latest = years[years.length - 1]
-  const activeYears = useMemo(
-    () => pickedYears ?? new Set(latest != null ? [latest] : []),
-    [pickedYears, latest],
-  )
+  const activeYears = useMemo(() => {
+    if (yearParam === 'all') return new Set(years)
+    const picked = Number(yearParam)
+    return new Set(years.includes(picked) ? [picked] : latest != null ? [latest] : [])
+  }, [yearParam, years, latest])
+  const activeOwners = useMemo(() => new Set(ownerParam ? [ownerParam] : []), [ownerParam])
 
   const ownerNames = useMemo(
     () => [...new Set(Object.values(USER_ID_TO_OWNER))].filter(n => ownerSeasons[n]).sort(),
@@ -44,10 +47,10 @@ export default function GameLog() {
   }, [allMatchups, activeYears, activeOwners])
 
   function toggleYear(y: number) {
-    setPickedYears(() => (activeYears.size === 1 && activeYears.has(y) ? new Set(years) : new Set([y])))
+    setYearParam(activeYears.size === 1 && activeYears.has(y) ? 'all' : String(y))
   }
   function toggleOwner(name: string) {
-    setActiveOwners(prev => (prev.size === 1 && prev.has(name) ? new Set<string>() : new Set([name])))
+    setOwnerParam(ownerParam === name ? '' : name)
   }
 
   return (

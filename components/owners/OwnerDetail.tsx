@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
+import { useUrlParam } from '@/hooks/useUrlParam'
 import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
 import { fmtPts, fmtMoney, ownerColor, fullNameInitials } from '@/lib/utils'
@@ -15,11 +16,12 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 
 type Tab = 'seasons' | 'bridge' | 'h2h' | 'gamelog'
+const TAB_IDS: readonly Tab[] = ['seasons', 'bridge', 'h2h', 'gamelog']
 
 export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const { state } = useLeague()
   const { loaded, error, ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, draftData, matchups } = state
-  const [tab, setTab] = useState<Tab>('seasons')
+  const [tab, setTab] = useUrlParam<Tab>('tab', 'seasons', TAB_IDS)
 
   // Must be before early returns (React hook rules)
   const profile = useMemo(

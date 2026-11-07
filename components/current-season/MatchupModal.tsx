@@ -8,6 +8,7 @@ import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import FlairBadges from '@/components/current-season/FlairBadges'
 import SmackLine from '@/components/current-season/SmackLine'
 import InfoTip from '@/components/shared/InfoTip'
+import ShareButton from '@/components/shared/ShareButton'
 import { useModalClose } from '@/hooks/useModalClose'
 import { ownerColor, fmtPts, ordinal } from '@/lib/utils'
 import { formatOdds } from '@/lib/current-season'
@@ -125,7 +126,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default function MatchupModal({ p, onClose }: { p: EnrichedPreview; onClose: () => void }) {
-  useModalClose(onClose)
+  useModalClose(onClose, { backButton: false })
   const [roll, setRoll] = useState(0)
 
   const winnerIsA = p.ptsA >= p.ptsB
@@ -168,6 +169,7 @@ export default function MatchupModal({ p, onClose }: { p: EnrichedPreview; onClo
       >
         {/* Header — two teams */}
         <div className="relative border-b" style={{ borderColor: 'rgba(var(--gold-rgb), 0.12)' }}>
+          <ShareButton title={`${p.teamA.name} vs ${p.teamB.name}, week ${p.week}`} className="absolute left-2 top-2 z-10" />
           <button
             onClick={onClose}
             className="absolute right-3 top-3 z-10 p-1.5 text-s-text3 transition-colors hover:text-gold-soft"
