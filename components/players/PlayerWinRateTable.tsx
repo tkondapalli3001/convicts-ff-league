@@ -7,6 +7,10 @@ import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/positions'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 import SortHeader from '@/components/shared/SortHeader'
 import InfoTip from '@/components/shared/InfoTip'
+import type { UncertaintySummary } from '@/lib/stats'
+import uncertainty from '@/public/data/uncertainty.json'
+
+const { players: noise } = uncertainty as UncertaintySummary
 
 const FLEX_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
 
@@ -61,7 +65,9 @@ export default function PlayerWinRateTable({ players, minGames = 10, onPlayerCli
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text2 mb-3">
         Player Win Rate
         <InfoTip term="Player win rate">
-          how often the manager won when the player was in the starting lineup. Players need {minGames}+ starts to show up.
+          how often the manager won when the player was in the starting lineup. Players need {minGames}+ starts to show up. It
+          mostly reflects the team around the player: a player’s odd and even starts barely agree (correlation {noise.oddEvenR >= 0 ? '+' : ''}{noise.oddEvenR.toFixed(2)}),
+          and only {noise.beyondTeam} of {noise.count} differ from what their teams won anyway, where chance alone predicts about {noise.chanceBeyond}.
         </InfoTip>
       </div>
 

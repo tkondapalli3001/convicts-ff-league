@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { Matchup } from '@/types'
 import { fmtPts } from '@/lib/utils'
 import { useModalClose } from '@/hooks/useModalClose'
+import SeriesEdgeTip from './SeriesEdgeTip'
 
 interface Props {
   p1: string
@@ -41,7 +42,9 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
       <div className="bg-s-bg2 border border-s-border rounded-[14px] p-5 max-w-[520px] w-full max-h-[85vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-[14px]">
-          <span className="text-[16px] font-extrabold text-s-text">{title}</span>
+          <span className="text-[16px] font-extrabold text-s-text">
+            {title} <SeriesEdgeTip a={p1} b={p2} winsA={w1} winsB={games.length - w1} />
+          </span>
           <button
             onClick={onClose}
             aria-label="Close"

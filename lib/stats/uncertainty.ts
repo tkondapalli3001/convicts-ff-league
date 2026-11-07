@@ -127,6 +127,31 @@ export function shrinkRate(wins: number, n: number, k: number, mean = 0.5): Shru
   return { rate: a / (a + b), low: betaQuantile(0.025, a, b), high: betaQuantile(0.975, a, b), pAboveHalf: 1 - betaCdf(0.5, a, b) }
 }
 
+/** The summary the site's ? notes quote (public/data/uncertainty.json, from npm run uncertainty). */
+export interface UncertaintySummary {
+  /** Shrinkage strength for career records and for head-to-head series, in games at 50%. */
+  careerK: number
+  h2hK: number
+  sims: number
+  daddies: { count: number; byChance: number }
+  badges: Record<'daddy' | 'heater' | 'cold' | 'champ' | 'last', { wins: number; n: number; rate: number; earned: number | null }>
+  players: { count: number; oddEvenR: number; beyondTeam: number; chanceBeyond: number }
+  /** Season (or 'career') → owner → wins, the average across shuffled schedules, and the percentile. */
+  luck: Record<string, Record<string, ScheduleLuck>>
+}
+
+export interface ScheduleLuck {
+  actual: number
+  avg: number
+  pct: number
+}
+
+/** The sentence behind every luck number. */
+export function scheduleLuckNote(l: ScheduleLuck, sims: number): string {
+  const wins = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1))
+  return `Reshuffling who played whom ${sims.toLocaleString('en-US')} times, with the same scores, averages ${l.avg.toFixed(1)} wins. The actual ${wins(l.actual)} beats ${Math.round(l.pct)}% of those schedules.`
+}
+
 // ── Luck against every schedule ───────────────────────────────────────────────
 
 export interface ScheduleGame {

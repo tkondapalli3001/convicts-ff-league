@@ -4,7 +4,9 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useLeague } from '@/context/LeagueContext'
 import { fmtPts, fmtMoney, ownerColor, fullNameInitials } from '@/lib/utils'
-import { ownerProfile } from '@/lib/stats'
+import { ownerProfile, shrinkRate, wilsonRange, type UncertaintySummary } from '@/lib/stats'
+import uncertainty from '@/public/data/uncertainty.json'
+import InfoTip from '@/components/shared/InfoTip'
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import H2HGrid from './H2HGrid'
@@ -52,8 +54,24 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const SAGE = '#7FA886', BRICK = '#B4636B', GOLD = '#C9A24B'
   const finalsGames = finals.wins + finals.losses
 
-  const statCells: { label: string; value: string; sub?: string; color?: string }[] = [
-    { label: 'Career Record', value: `${profile.wins}–${profile.losses}`, sub: `${pct}% win rate` },
+  // How sure a career record can be: its range, and the rate after pulling it toward .500
+  const careerWins = seasons.reduce((a, s) => a + s.wins + s.ties / 2, 0)
+  const careerGames = seasons.reduce((a, s) => a + s.wins + s.losses + s.ties, 0)
+  const [recordLow, recordHigh] = wilsonRange(careerWins, careerGames)
+  const trueRate = shrinkRate(careerWins, careerGames, (uncertainty as UncertaintySummary).careerK)
+  const whole = (x: number) => Math.round(x * 100)
+
+  const statCells: { label: string; value: string; sub?: string; color?: string; tip?: React.ReactNode }[] = [
+    {
+      label: 'Career Record', value: `${profile.wins}–${profile.losses}`, sub: `${pct}% win rate`,
+      tip: (
+        <InfoTip term="Career record">
+          {careerGames} games leave a 95% range of {whole(recordLow)}–{whole(recordHigh)}%. After pulling the record toward .500, as much as the league’s
+          spread of records says to, the best estimate of the true rate is {whole(trueRate.rate)}% ({whole(trueRate.low)}–{whole(trueRate.high)}%). Chance
+          it’s above .500: {whole(trueRate.pAboveHalf)}%.
+        </InfoTip>
+      ),
+    },
     { label: 'Avg PF / Game', value: profile.pfPerGame.toFixed(1), sub: `${profile.pfPerSeason.toFixed(0)} pts/season` },
     { label: 'Avg PA / Game', value: profile.paPerGame.toFixed(1), sub: `${profile.paPerSeason.toFixed(0)} allowed/season`, color: BRICK },
     { label: 'Net Earnings', value: earnings != null ? fmtMoney(earnings) : 'N/A', color: earnings != null ? (earnings >= 0 ? SAGE : BRICK) : undefined },
@@ -140,7 +158,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
             className="flex flex-col gap-1.5 border-b border-r px-5 py-[22px] transition-colors hover:bg-[rgba(201,150,46,0.04)] sm:px-8"
             style={{ borderColor: 'rgba(var(--gold-rgb), 0.08)' }}
           >
-            <div className="text-[9px] font-bold uppercase tracking-[3px] text-s-text3">{c.label}</div>
+            <div className="text-[9px] font-bold uppercase tracking-[3px] text-s-text3">{c.label}{c.tip}</div>
             <div className="font-display text-[28px] font-bold leading-none sm:text-[34px]" style={{ color: c.color ?? '#EDE9E0' }}>
               {c.value}
             </div>

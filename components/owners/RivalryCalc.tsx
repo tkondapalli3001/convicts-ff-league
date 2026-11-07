@@ -6,6 +6,7 @@ import { useLeague } from '@/context/LeagueContext'
 import { USER_ID_TO_OWNER } from '@/lib/league'
 import { h2hRecord } from '@/lib/stats'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import SeriesEdgeTip from './SeriesEdgeTip'
 
 export default function RivalryCalc() {
   const { state } = useLeague()
@@ -82,7 +83,7 @@ export default function RivalryCalc() {
 
             <div className="text-center flex-shrink-0">
               <div className="text-[11px] font-bold text-s-text3 uppercase tracking-[1px]">
-                {h2h.games.length} games
+                {h2h.games.length} games <SeriesEdgeTip a={ownerA} b={ownerB} winsA={h2h.winsA} winsB={h2h.winsB} />
               </div>
               <div className="text-[20px] text-s-text3 mt-1">⚔️</div>
             </div>

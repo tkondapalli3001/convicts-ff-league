@@ -5,7 +5,14 @@ import { HeartCrack, Zap, Activity, Crown, Trash2, Clover, Armchair } from 'luci
 import { useFunFacts } from '@/hooks/useFunFacts'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import InfoTip from '@/components/shared/InfoTip'
-import { DADDY_MIN_GAMES, DADDY_WIN_RATE } from '@/lib/stats'
+import { DADDY_MIN_GAMES, DADDY_WIN_RATE, scheduleLuckNote, type UncertaintySummary } from '@/lib/stats'
+import uncertaintyData from '@/public/data/uncertainty.json'
+
+const uncertainty = uncertaintyData as UncertaintySummary
+const careerLuckNote = (owner: string) => {
+  const l = uncertainty.luck.career[owner]
+  return l ? `${owner}: ${scheduleLuckNote(l, uncertainty.sims)}` : ''
+}
 
 export default function FunFacts() {
   const { heartbreak, perfectStorm, boomBust, theOwner, lowestWins, luckDuo, byeKings } = useFunFacts()
@@ -146,7 +153,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Who&apos;s Your Daddy? 🍆
           </span>
-          <InfoTip term="Who’s Your Daddy?">managers who’ve won at least {DADDY_WIN_RATE * 100}% of their all-time meetings with one opponent ({DADDY_MIN_GAMES}+ games).</InfoTip>
+          <InfoTip term="Who’s Your Daddy?">managers who’ve won at least {DADDY_WIN_RATE * 100}% of their all-time meetings with one opponent ({DADDY_MIN_GAMES}+ games). Coin flips alone would make {uncertainty.daddies.byChance} of today’s {uncertainty.daddies.count}, and a Daddy won the next meeting {Math.round(uncertainty.badges.daddy.rate * 100)}% of the time ({uncertainty.badges.daddy.wins} of {uncertainty.badges.daddy.n}).</InfoTip>
         </div>
         {theOwner.length === 0 ? (
           <div className="py-6 text-s-text3 text-[12px] text-center">
@@ -182,7 +189,7 @@ export default function FunFacts() {
           <span className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
             Luck of the Draw
           </span>
-          <InfoTip term="Luck of the Draw">career Luck Index — actual wins minus the wins your weekly scoring earned against the whole league (regular season). Positive = luckier than your points deserved.</InfoTip>
+          <InfoTip term="Luck of the Draw">career Luck Index — actual wins minus the wins your weekly scoring earned against the whole league (regular season). Positive = luckier than your points deserved.{luckDuo && <> {careerLuckNote(luckDuo.luckiest.owner)} {careerLuckNote(luckDuo.unluckiest.owner)}</>}</InfoTip>
         </div>
         {!luckDuo ? (
           <div className="text-center py-6 text-s-text3 text-[12px]">No data available</div>

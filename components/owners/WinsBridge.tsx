@@ -3,12 +3,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadBridges } from '@/lib/sources'
 import {
-  BRIDGE_PARTS, careerTotals, stepRange,
+  BRIDGE_PARTS, careerTotals, scheduleLuckNote, stepRange,
+  type UncertaintySummary,
   type BridgeFile, type BridgePart, type BridgeTotals, type Channel, type OwnerSeasonBridge,
 } from '@/lib/stats'
 import SectionCard from '@/components/shared/SectionCard'
 import InfoTip from '@/components/shared/InfoTip'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
+import uncertaintyData from '@/public/data/uncertainty.json'
+
+const uncertainty = uncertaintyData as UncertaintySummary
 
 type View = 'career' | number
 type Step = BridgePart | 'luck'
@@ -81,7 +85,7 @@ export default function WinsBridge({ ownerName }: { ownerName: string }) {
         <InfoTip term="Wins bridge">
           Where the wins came from: an average team’s wins, plus what the draft, pickups, trades and lineup calls added,
           gives expected wins; luck takes it to the record. The parts describe what happened, not skill. In this
-          league none of them repeats from one season to the next (correlation draft {signed(rep.draft.r, 2)}, pickups{' '}
+          league none clearly repeats from one season to the next, though the draft comes closest (correlation draft {signed(rep.draft.r, 2)}, pickups{' '}
           {signed(rep.pickups.r, 2)}, trades {signed(rep.trades.r, 2)}, lineup calls {signed(rep.lineup.r, 2)}, luck{' '}
           {signed(rep.luck.r, 2)}, over {rep.draft.pairs} pairs of seasons).
         </InfoTip>
@@ -175,6 +179,9 @@ function Detail({ step, seasons, career, totals, replacement }: {
     return (
       <div className={shell} style={{ borderColor: HAIRLINE }}>
         <p>{wins(totals.actual)} actual wins against {totals.expected.toFixed(1)} all-play expected wins.</p>
+        {uncertainty.luck[career ? 'career' : seasons[0].season]?.[seasons[0].owner] && (
+          <p className="mt-2 text-[11px] text-s-text3">{scheduleLuckNote(uncertainty.luck[career ? 'career' : seasons[0].season][seasons[0].owner], uncertainty.sims)}</p>
+        )}
         <div className={list}>
           {career
             ? seasons.map(s => (

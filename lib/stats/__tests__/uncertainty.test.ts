@@ -4,8 +4,8 @@ import { join } from 'node:path'
 import { csvRecords } from '@/lib/sources'
 import { hashSeed, rng } from '@/lib/current-season'
 import {
-  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, percentileOf, repeatability, scheduleSamples, shrinkRate, stickVerdict, wilsonRange,
-  type SeasonValue,
+  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, percentileOf, repeatability, scheduleLuckNote, scheduleSamples, shrinkRate, stickVerdict, wilsonRange,
+  type SeasonValue, type UncertaintySummary,
 } from '@/lib/stats'
 import { betaCdf } from '../uncertainty'
 
@@ -126,6 +126,23 @@ describe('the published tables', () => {
     expect(off.map(r => `${r.season} ${r.owner}`)).toEqual([])
     const wrongLuck = seasons.filter(r => Math.abs(Number(r.actual_wins) - Number(r.all_play_expected_wins) - Number(r.luck_index)) > 0.011)
     expect(wrongLuck.map(r => `${r.season} ${r.owner}`)).toEqual([])
+  })
+
+  it('quotes what the tables say', () => {
+    const summary: UncertaintySummary = JSON.parse(readFileSync(join(ROOT, 'public/data/uncertainty.json'), 'utf8'))
+    for (const r of table('schedule_luck.csv')) {
+      const quoted = summary.luck[r.season]?.[r.owner]
+      expect(quoted?.pct, `${r.season} ${r.owner}`).toBe(Number(r.percentile))
+      expect(quoted?.actual, `${r.season} ${r.owner}`).toBe(Number(r.actual_wins))
+    }
+    const daddy = table('badge_tests.csv').find(b => b.badge.includes('Daddy'))!
+    expect(summary.badges.daddy.wins).toBe(Number(daddy.wins))
+    expect(summary.daddies.count).toBe(table('h2h_ranges.csv').filter(p => p.daddy === 'true').length)
+    expect(summary.players.count).toBe(table('player_win_rates.csv').length)
+  })
+
+  it('writes the luck sentence', () => {
+    expect(scheduleLuckNote({ actual: 6, avg: 8.55, pct: 3 }, 10000)).toBe('Reshuffling who played whom 10,000 times, with the same scores, averages 8.6 wins. The actual 6 beats 3% of those schedules.')
   })
 
   it('passes its negative control: no owner controls the points scored against them', () => {

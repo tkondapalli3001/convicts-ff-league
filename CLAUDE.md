@@ -51,7 +51,7 @@ components/                 UI, one folder per page plus shared/layout/search
   seasons/                  SeasonStandings, PlayoffBracket, GameLog (+ Filters, Table,
                             GameDetailModal box score), FinishTracker, AvgScoreChart
   owners/                   OwnerDetail, CareerLeaderboard, AnnualBreakdown (earnings),
-                            H2HGrid, H2HModal, RivalryCalc, WinsBridge (profile tab)
+                            H2HGrid, H2HModal, RivalryCalc, SeriesEdgeTip, WinsBridge (profile tab)
   draft/                    DraftCountdown, StockStandings, PastDrafts, DraftBoardModal,
                             DraftSlotAnalysis, StealsBusts, DraftStructureTable
   records/                  ScoreLeaderboard, StreakList, FunFacts, TrashTalkCard
@@ -195,7 +195,9 @@ public/
                             visit), transactions-<year>.json (lazy, Players → Transactions),
                             players.json (name index), manifest.json (snapshotted seasons);
                             bridges.json (wins bridges, lazy, owner profiles) and track-record.json
-                            (imported at build time by the odds and Power Index ?s) by npm run dataset
+                            (imported at build time by the odds and Power Index ?s) by npm run dataset;
+                            uncertainty.json (imported at build time by the noise ?s) by npm run
+                            uncertainty
   manifest.json             PWA manifest ("Convicts FF" add-to-home-screen)
   icons/, og-card.png       App icons + social share card
 
@@ -251,8 +253,9 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **One version of each rule.** Playoff start week → `playoffStartWeek()`; which weeks hold a season's moves → `transactionWeeks()` (the site and the snapshot script both use it); who owned a draft slot → `draftSlotOwners()`; inactive owners → `INACTIVE_OWNERS`; ordinals, W–L records, dates, signed dollars, and win-% colors → `lib/utils`. Reuse them; don't re-derive.
 - **Never hand-type what the data knows.** Season counts come from the snapshot manifest (footer, site description) or `state.years`; Career Milestones from `careerMilestones()`; the pick-order year from the stock-pick window; the season tab's year from `CURRENT_SEASON`. Hand-typed numbers go stale.
 - **Every number ties out, or its gap is documented.** On every deploy, the control-totals test recomputes each owner-season's record, points for/against and potential points with the site's code and ties them to the totals Sleeper stores on the roster, and ties Sleeper's weekly player and team-defense points to the NFL's box scores (nflverse) rescored with the league's settings. A difference that isn't in `KNOWN_GAPS` / `KNOWN_PLAYER_GAPS` / `KNOWN_DEFENSE_GAPS` (`lib/stats/control-totals.ts`), with its cause, fails the build. Find the cause before adding an entry; never loosen the tolerance to make a test pass.
-- **The snapshot is an accelerator, never a dependency.** If `public/data/manifest.json` fails to load, `LeagueContext` must fall back to full live fetching. Don't break that path (BUILD.md M3 tests it). The footer and site description read the manifest at build time, so the file must exist to build — test the fallback by blocking the request, never by deleting the file. Never edit `public/data/` by hand — regenerate with `npm run snapshot` (`bridges.json`, `track-record.json`: `npm run dataset`), and diff old seasons before committing.
+- **The snapshot is an accelerator, never a dependency.** If `public/data/manifest.json` fails to load, `LeagueContext` must fall back to full live fetching. Don't break that path (BUILD.md M3 tests it). The footer and site description read the manifest at build time, so the file must exist to build — test the fallback by blocking the request, never by deleting the file. Never edit `public/data/` by hand — regenerate with `npm run snapshot` (`bridges.json`, `track-record.json`: `npm run dataset`; `uncertainty.json`: `npm run uncertainty`), and diff old seasons before committing.
 - **Forecasts publish their track record.** The playoff odds and Power Index ?s quote the replayed scores in `public/data/track-record.json`; never hand-type them. A change to the simulator or the Oberon formula means rerunning `npm run dataset` so the quoted record matches what's live. The replay must never peek: a week's forecast uses only earlier weeks and earlier seasons (a test enforces it).
+- **Noise notes quote the data.** The ?s on career records, H2H, Daddy, luck, player win rates and the flair legend read `public/data/uncertainty.json`; never hand-type them.
 - **Say "skill" only where the evidence sticks.** `data/stat_repeatability.csv` is the test: scoring (points for, all-play, potential points) sticks to the owner; win rate, finish, earnings and the rest show no evidence of it. No verdict claims zero, since seven seasons can hide a small effect. Points against is the negative control: if it ever "sticks", the test is broken.
 - **The wins bridge describes; it never claims skill.** Its parts add exactly to the record (tests tie each one to the luck index), but none clearly repeats from one season to the next in this league (`repeatability` in `bridges.json`; the draft comes closest). Keep "skill" wording off it unless a part starts to repeat. Lineup calls are graded on Sleeper's final projections and say so.
 - **Projections degrade gracefully.** `lib/current-season/projections.ts` and `season-stats.ts` hit undocumented Sleeper endpoints; every failure returns null and the season tab renders without projections or season stats (dashes; roster names fall back to the player index). Never let either break the page. Season FPTS are Sleeper's season totals × the league's `scoring_settings` — that matches the points Sleeper credits rostered players to the cent, so don't swap in Sleeper's preset `pts_half_ppr`.

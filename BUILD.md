@@ -25,7 +25,7 @@ Static, client-side-only Next.js 16 app (App Router, `output: 'export'`), deploy
 GitHub Pages at `basePath: /convicts-ff-league`. TypeScript strict · Tailwind (Midnight
 Prime) · Recharts · React Context · Vitest · knip.
 
-- **Health:** 198 tests pass (17 files), the control-total tie-outs included, and the
+- **Health:** 200 tests pass (17 files), the control-total tie-outs included, and the
   deploy runs them before it builds; `npm run build` succeeds (23 static pages); lint 0
   errors (12 known `react-hooks`/`no-img-element` warnings); knip reports zero unused
   files, exports, or dependencies. Snapshots frozen for **2019–2025**
@@ -160,7 +160,7 @@ skill versus luck, with every number proven against a source neither of us contr
    - Oberon picks the next game's winner 52.9% of the time (435 games), record 50.7%,
      scoring average 53.8%: none is clearly better than a coin flip.
    - Not done: the ffsimulator cross-check. It needs R, which isn't installed here.
-4. **Phase 3, uncertainty.** *Analysis done 2026-11-07; nothing on the site changed.*
+4. **Phase 3, uncertainty.** *Done 2026-11-07.*
    `lib/stats/uncertainty.ts` + `npm run uncertainty` (tables in `data/`). Season-centered,
    with significance from shuffling owners within seasons; "sticks" needs p < 0.01 on the
    owner's share, since 23 stats were tested. Findings:
@@ -187,8 +187,11 @@ skill versus luck, with every number proven against a source neither of us contr
      r +0.04; beyond the team's own rate, 5 of 278 clear the bar where chance predicts 14.
    - **Luck:** career percentiles across 10,000 schedules per season, from Teja 9.9 to
      Daniyaal 96.3. Single seasons: 1 of 70 under 5%, 1 over 95%.
-   - **Waiting on the owner:** whether to show any of this on the site. Nothing gets removed
-     without approval.
+   - **Shown 2026-11-07 (owner-approved), behind ?s, nothing removed:** Career Record's range
+     and best estimate; each series' true edge (H2H modal, Rivalry Calculator); Daddy's
+     coin-flip count and next-meeting record; schedule percentiles for luck (Season
+     Standings rows, Luck of the Draw, Wins Bridge); Player Win Rate's note; "Do they predict
+     anything?" on the flair legend; "none clearly repeats" on the Wins Bridge.
    - **Still open from the plan's "done means":** payment records against the earnings
      table, the ffsimulator check (needs R), and each owner signing off on their bridge.
 

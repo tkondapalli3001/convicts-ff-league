@@ -4,12 +4,16 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLeague } from '@/context/LeagueContext'
-import { computeLuckIndex } from '@/lib/stats'
+import { computeLuckIndex, scheduleLuckNote, type UncertaintySummary } from '@/lib/stats'
+import InfoTip from '@/components/shared/InfoTip'
+import uncertaintyData from '@/public/data/uncertainty.json'
 
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import SortHeader from '@/components/shared/SortHeader'
+
+const scheduleLuck = uncertaintyData as UncertaintySummary
 
 type SortKey = 'manager' | 'year' | 'finish' | 'wins' | 'losses' | 'winpct' | 'pf' | 'pa' | 'margin' | 'luck'
 
@@ -189,6 +193,9 @@ export default function SeasonStandings({ onYearChange }: Props) {
                   </td>
                   <td className="font-display text-[17px] font-bold num" style={{ color: r.luck >= 0 ? '#7FA886' : '#B4636B' }}>
                     {r.luck >= 0 ? '+' : ''}{r.luck.toFixed(1)}
+                    {scheduleLuck.luck[r.year]?.[r.manager] && (
+                      <InfoTip term={`${r.manager}’s ${r.year} luck`}>{scheduleLuckNote(scheduleLuck.luck[r.year][r.manager], scheduleLuck.sims)}</InfoTip>
+                    )}
                   </td>
                   <td>
                     {r.playoffs ? (

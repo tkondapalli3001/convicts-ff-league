@@ -13,7 +13,7 @@ import { hashSeed, rng } from '@/lib/current-season'
 import {
   DADDY_MIN_GAMES, DADDY_WIN_RATE, allPlayRecords, buildChampPathGameKeys, chanceOfLopsidedSeries, computeLuckIndex, computePowerRankings, daddyOf, fitShrinkage, gameKey, h2hRecord,
   linkToWins, NO_SIGNAL_STRENGTH, pearson, percentileOf, repeatability, scheduleSamples, shrinkRate, splitHalf, stickVerdict, wilsonRange,
-  type BridgeFile, type LuckGame, type SeasonValue,
+  type BridgeFile, type LuckGame, type ScheduleLuck, type SeasonValue, type UncertaintySummary,
 } from '@/lib/stats'
 
 const ROOT = join(__dirname, '..')
@@ -345,6 +345,7 @@ const SIMS = 10_000
 const careerSamples = new Map<string, Float64Array>()
 const careerActual = new Map<string, number>()
 const luckRows: (string | number)[][] = []
+const luckSummary: Record<string, Record<string, ScheduleLuck>> = {}
 for (const year of years) {
   const reg = regular(year)
   const weeks: LuckGame[][] = [...new Set(reg.map(g => g.week))].sort((a, b) => a - b)
@@ -354,6 +355,7 @@ for (const year of years) {
   for (const [owner, sample] of Object.entries(samples)) {
     const e = luck.get(owner)!
     const sorted = [...sample].sort((a, b) => a - b)
+    ;(luckSummary[year] ??= {})[owner] = { actual: e.actualWins, avg: round(mean(sorted), 2), pct: round(percentileOf(sample, e.actualWins), 1) }
     luckRows.push([year, owner, e.actualWins, round(mean(sorted), 2), e.expectedWins, e.luckIndex, sorted[Math.floor(SIMS * 0.05)], sorted[Math.floor(SIMS * 0.95)], round(percentileOf(sample, e.actualWins), 1)])
     const total = careerSamples.get(owner) ?? careerSamples.set(owner, new Float64Array(SIMS)).get(owner)!
     for (let i = 0; i < SIMS; i++) total[i] += sample[i]
@@ -365,8 +367,30 @@ const careerLuck = [...careerSamples.entries()].map(([owner, sample]) => {
   const actual = careerActual.get(owner)!, avg = mean(sorted)
   return { owner, actual, avg, low: sorted[Math.floor(SIMS * 0.05)], high: sorted[Math.floor(SIMS * 0.95)], pct: percentileOf(sample, actual) }
 }).sort((a, b) => a.pct - b.pct)
+luckSummary.career = Object.fromEntries(careerLuck.map(c => [c.owner, { actual: c.actual, avg: round(c.avg, 2), pct: round(c.pct, 1) }]))
 for (const c of careerLuck) luckRows.push(['career', c.owner, c.actual, round(c.avg, 2), round(c.avg, 2), round(c.actual - c.avg, 2), c.low, c.high, round(c.pct, 1)])
 writeCsv('schedule_luck.csv', ['season', 'owner', 'actual_wins', 'mean_wins_across_schedules', 'all_play_expected_wins', 'luck_index', 'p5_wins', 'p95_wins', 'percentile'], luckRows)
+
+// ── What the site quotes ──────────────────────────────────────────────────────
+const badgeRow = (name: string) => {
+  const b = badgeTests.find(x => x.badge.includes(name))!
+  return { wins: b.wins, n: b.n, rate: round(b.wins / b.n), earned: b.baseline == null ? null : round(b.baseline) }
+}
+const daddyChance = h2hRows.reduce((a, p) => a + chanceOfLopsidedSeries(p.n, DADDY_WIN_RATE, DADDY_MIN_GAMES), 0)
+const summary: UncertaintySummary = {
+  careerK, h2hK, sims: SIMS,
+  daddies: { count: h2hRows.filter(p => p.daddy).length, byChance: round(daddyChance, 1) },
+  badges: { daddy: badgeRow('Daddy'), heater: badgeRow('Heater'), cold: badgeRow('Ice cold'), champ: badgeRow('Defending champ'), last: badgeRow('Last-place') },
+  players: {
+    count: shown.length,
+    oddEvenR: round(pearson(oddEven.map(x => x[0]), oddEven.map(x => x[1])), 2),
+    beyondTeam: playerExcess.filter(z => Math.abs(z) > 1.96).length,
+    chanceBeyond: Math.round(playerExcess.length * 0.05),
+  },
+  luck: luckSummary,
+}
+writeFileSync(join(SNAP, 'uncertainty.json'), JSON.stringify(summary) + '\n')
+console.log(`  ${'../public/data/uncertainty.json'.padEnd(26)}`)
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 console.log('\nDoes it stick to the owner? (season-centered; p from shuffling owners within seasons)')
@@ -375,7 +399,7 @@ for (const s of statRows) {
 }
 console.log(`\nDraft slot (1 = first pick) vs win rate: same season r ${slotLink.sameSeason.toFixed(2)}, n ${slotRows.length}, p ${slotP.toFixed(2)}`)
 console.log(`\nCareer win rate: spread ${careerSpread.observed.toFixed(3)} vs ${careerSpread.chance.toFixed(3)} from chance alone; shrinkage k = ${careerK.toFixed(0)}${careerK >= NO_SIGNAL_STRENGTH ? ' (no signal)' : ''}`)
-console.log(`H2H shrinkage k = ${h2hK.toFixed(0)}${h2hK >= NO_SIGNAL_STRENGTH ? ' (no signal)' : ''}, ${h2hRows.length} pairs, ${h2hRows.filter(p => p.daddy).length} Daddies; coin flips would make ${h2hRows.reduce((a, p) => a + chanceOfLopsidedSeries(p.n, DADDY_WIN_RATE, DADDY_MIN_GAMES), 0).toFixed(1)}`)
+console.log(`H2H shrinkage k = ${h2hK.toFixed(0)}${h2hK >= NO_SIGNAL_STRENGTH ? ' (no signal)' : ''}, ${h2hRows.length} pairs, ${h2hRows.filter(p => p.daddy).length} Daddies; coin flips would make ${daddyChance.toFixed(1)}`)
 console.log('\nBadges and the next game:')
 for (const b of badgeTests) {
   const [lo, hi] = wilsonRange(b.wins, b.n)
