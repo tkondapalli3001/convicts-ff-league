@@ -7,9 +7,8 @@
 //    NFL's box scores (nflverse), rescored with the league's own settings.
 // Every difference must be listed below with its cause, or the tests fail.
 
-import type { LeagueState } from '@/types'
 import type { SnapshotSeason } from '@/lib/sources'
-import { buildOwnerSeasons, playoffStartWeek, resolveOwnerName } from '@/lib/data-processing'
+import { playoffStartWeek, rosterOwnerMap, stateFromSnapshots } from '@/lib/data-processing'
 import { bestLineup, startingSlots } from './lineups'
 
 export type ControlMetric = 'record' | 'pf' | 'pa' | 'ppts'
@@ -90,23 +89,12 @@ function medianResults(season: SnapshotSeason, regularWeeks: number[]): Record<n
  */
 export function seasonControlTotals(season: SnapshotSeason, positions: Record<string, string[]>): ControlTotal[] {
   const year = season.year
-  const users = new Map(season.users.map(u => [u.user_id, u]))
-  const rMap: Record<string, string> = {}
-  for (const r of season.rosters) {
-    const u = users.get(r.owner_id)
-    rMap[String(r.roster_id)] = u ? resolveOwnerName(u.user_id, u.display_name) : `Team ${r.roster_id}`
-  }
+  const rMap = rosterOwnerMap(season.users, season.rosters)
 
   const playoffStart = playoffStartWeek(season.league)
   const weeks = Object.keys(season.matchupsByWeek).map(Number).sort((a, b) => a - b)
   const regularWeeks = weeks.filter(w => w < playoffStart)
-  const state = {
-    leagues: { [year]: season.league },
-    rosterUserMaps: { [year]: rMap },
-    matchups: { [year]: Object.fromEntries(weeks.map(w => [w, { matchups: season.matchupsByWeek[w], isPlayoff: w >= playoffStart }])) },
-    brackets: { [year]: { winners: season.winnersBracket, losers: season.losersBracket } },
-  } as unknown as LeagueState
-  const ownerSeasons = buildOwnerSeasons(state)
+  const ownerSeasons = stateFromSnapshots([season]).ownerSeasons
   const median = season.league.settings.league_average_match ? medianResults(season, regularWeeks) : null
 
   const slots = startingSlots(season.league.roster_positions ?? [])

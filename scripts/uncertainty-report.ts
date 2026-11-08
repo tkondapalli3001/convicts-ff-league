@@ -6,9 +6,9 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { csvRecords, type SnapshotSeason } from '@/lib/sources'
-import type { LeagueState, Matchup } from '@/types'
+import type { Matchup } from '@/types'
 import { EARNINGS_DATA } from '@/lib/league'
-import { buildFlatMatchups, buildOwnerSeasons, playoffStartWeek, resolveOwnerName } from '@/lib/data-processing'
+import { stateFromSnapshots } from '@/lib/data-processing'
 import { hashSeed, rng } from '@/lib/current-season'
 import {
   DADDY_MIN_GAMES, DADDY_WIN_RATE, allPlayRecords, buildChampPathGameKeys, chanceOfLopsidedSeries, computeLuckIndex, computePowerRankings, daddyOf, fitShrinkage, gameKey, h2hRecord,
@@ -33,20 +33,9 @@ function writeCsv(name: string, header: string[], rows: (string | number | boole
 
 const years: number[] = JSON.parse(readFileSync(join(SNAP, 'manifest.json'), 'utf8')).years
 const seasons = years.map(y => JSON.parse(readFileSync(join(SNAP, `season-${y}.json`), 'utf8')) as SnapshotSeason)
-const state = { leagues: {}, rosterUserMaps: {}, matchups: {}, brackets: {} } as unknown as LeagueState
-for (const s of seasons) {
-  const users = new Map(s.users.map(u => [u.user_id, u]))
-  const start = playoffStartWeek(s.league)
-  state.leagues[s.year] = s.league
-  state.rosterUserMaps[s.year] = Object.fromEntries(s.rosters.map(r => {
-    const u = users.get(r.owner_id)
-    return [String(r.roster_id), u ? resolveOwnerName(u.user_id, u.display_name) : `Team ${r.roster_id}`]
-  }))
-  state.matchups[s.year] = Object.fromEntries(Object.keys(s.matchupsByWeek).map(w => [Number(w), { matchups: s.matchupsByWeek[w], isPlayoff: Number(w) >= start }]))
-  state.brackets[s.year] = { winners: s.winnersBracket, losers: s.losersBracket }
-}
-const games = buildFlatMatchups(state)
-const ownerSeasons = buildOwnerSeasons(state)
+const state = stateFromSnapshots(seasons)
+const games = state.allMatchups
+const ownerSeasons = state.ownerSeasons
 const regular = (year: number) => games.filter(g => g.year === year && g.type === 'R')
 const owners = Object.keys(ownerSeasons).sort()
 const bridges: BridgeFile = JSON.parse(readFileSync(join(SNAP, 'bridges.json'), 'utf8'))

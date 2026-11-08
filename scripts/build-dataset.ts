@@ -16,10 +16,10 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { gunzipSync } from 'node:zlib'
 import { csvRecords, type SnapshotSeason } from '@/lib/sources'
-import type { LeagueState, Transaction } from '@/types'
+import type { Transaction } from '@/types'
 import { replaySeason, summarizeTrackRecord, type GamePick, type OddsForecast } from '@/lib/current-season'
 import {
-  buildOwnerSeasons, draftSlotOwners, playoffStartWeek, resolveOwnerName, nflverseStatLine, NFLVERSE_SCORING_COLUMNS, type NflverseRow,
+  draftSlotOwners, playoffStartWeek, rosterOwnerMap, stateFromSnapshots, nflverseStatLine, NFLVERSE_SCORING_COLUMNS, type NflverseRow,
   nflverseDefenseStatLine, NFLVERSE_DEFENSE_COLUMNS, defensePointsAllowed, defenseYardsAllowed,
 } from '@/lib/data-processing'
 import {
@@ -242,13 +242,8 @@ async function main() {
 
   for (const s of seasons) {
     const year = s.year
-    const users = new Map(s.users.map(u => [u.user_id, u]))
-    const ownerOf: Record<number, string> = {}
-    for (const r of s.rosters) {
-      const u = users.get(r.owner_id)
-      ownerOf[r.roster_id] = u ? resolveOwnerName(u.user_id, u.display_name) : `Team ${r.roster_id}`
-    }
-    const rMap = Object.fromEntries(Object.entries(ownerOf).map(([rid, o]) => [rid, o]))
+    const rMap = rosterOwnerMap(s.users, s.rosters)
+    const ownerOf: Record<number, string> = rMap
     const playoffStart = playoffStartWeek(s.league)
     const slots = startingSlots(s.league.roster_positions ?? [])
 
@@ -488,12 +483,7 @@ async function main() {
     // ── track record: replay the season tab's playoff odds and power rankings ─
     {
       const weeks = Object.keys(s.matchupsByWeek).map(Number).sort((a, b) => a - b)
-      const state = {
-        leagues: { [year]: s.league }, rosterUserMaps: { [year]: rMap },
-        matchups: { [year]: Object.fromEntries(weeks.map(w => [w, { matchups: s.matchupsByWeek[w], isPlayoff: w >= playoffStart }])) },
-        brackets: { [year]: { winners: s.winnersBracket, losers: s.losersBracket } },
-      } as unknown as LeagueState
-      const made = new Set(Object.entries(buildOwnerSeasons(state)).filter(([, ss]) => ss.find(x => x.year === year)?.inPlayoffs).map(([owner]) => owner))
+      const made = new Set(Object.entries(stateFromSnapshots([s]).ownerSeasons).filter(([, ss]) => ss.find(x => x.year === year)?.inPlayoffs).map(([owner]) => owner))
       const games = weeks.filter(w => w < playoffStart).flatMap(w => {
         const pairs: Record<number, (typeof s.matchupsByWeek)[string]> = {}
         for (const m of s.matchupsByWeek[w]) if (m.matchup_id != null) (pairs[m.matchup_id] ??= []).push(m)

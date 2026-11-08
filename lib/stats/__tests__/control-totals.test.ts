@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { csvRecords, type SnapshotSeason } from '@/lib/sources'
-import type { LeagueState } from '@/types'
-import { nflverseDefenseStatLine, nflverseStatLine, playoffStartWeek, resolveOwnerName } from '@/lib/data-processing'
+import { nflverseDefenseStatLine, nflverseStatLine, stateFromSnapshots } from '@/lib/data-processing'
 import {
   KNOWN_DEFENSE_GAPS, KNOWN_GAPS, KNOWN_PLAYER_GAPS, computeLuckIndex, gapKey, playerGapKey, scoreStats, seasonControlTotals, BRIDGE_PARTS,
   type BridgeFile,
@@ -151,14 +150,8 @@ describe('every wins bridge ties out to the record and the luck index', () => {
   it("matches the site's luck index: the same expected and actual wins", () => {
     const off: string[] = []
     for (const s of seasons) {
-      const users = new Map(s.users.map(u => [u.user_id, u]))
-      const rMap = Object.fromEntries(s.rosters.map(r => {
-        const u = users.get(r.owner_id)
-        return [String(r.roster_id), u ? resolveOwnerName(u.user_id, u.display_name) : `Team ${r.roster_id}`]
-      }))
-      const start = playoffStartWeek(s.league)
-      const matchups = { [s.year]: Object.fromEntries(Object.entries(s.matchupsByWeek).map(([w, rows]) => [w, { matchups: rows, isPlayoff: Number(w) >= start }])) }
-      for (const l of computeLuckIndex(matchups as unknown as LeagueState['matchups'], { [s.year]: rMap })) {
+      const { matchups, rosterUserMaps } = stateFromSnapshots([s])
+      for (const l of computeLuckIndex(matchups, rosterUserMaps)) {
         const b = file.bridges.find(x => x.season === s.year && x.owner === l.owner)
         if (!b || Math.abs(b.expected - l.expectedWins) > 0.006 || b.actual !== l.actualWins) off.push(`${s.year} ${l.owner}`)
       }
