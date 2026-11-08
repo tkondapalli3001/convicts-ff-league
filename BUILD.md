@@ -108,9 +108,12 @@ Report-only; each is a deliberate design choice, so fixing it changes locked
 architecture or the Midnight Prime palette. **No action without owner sign-off.**
 1. **Color contrast (a11y 96, not 100):** tiny uppercase labels in `#5C6270`, `#8A7439`,
    `#8A4A46` sit below WCAG AA against onyx. Brightening is a theme change — owner call.
-2. **LCP 5.6s (perf 73):** hero renders after the client-side data load — inherent to
-   client-only architecture. Options: prerender hero text from snapshot at build time,
-   or accept it.
+2. **Done 2026-11-08 (owner chose it):** LCP was 5.6s (perf 73) because the hero waited for the
+   data load. The build now works the hero out from the snapshot (`homeHero(stateFromSnapshots())`)
+   and bakes it into Home's HTML; the page reruns the same function once loaded, so nothing
+   changes on screen. Between the title game and the January snapshot the built hero still
+   shows last year's champion until the data arrives (a second or two). Rerun Lighthouse to
+   record the new score.
 3. **Focus traps:** modals close on Escape and announce as dialogs, but Tab can reach the
    page behind. Full trap is a larger change; add only if the owner wants it.
 

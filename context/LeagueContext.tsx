@@ -3,8 +3,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { SLEEPER_API, LEAGUE_ID } from '@/lib/league'
 import { sleepFetch, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket, fetchLosersBracket, fetchDrafts, fetchDraftPicks, loadAllSnapshotSeasons } from '@/lib/sources'
-import { resolveOwnerName, buildFlatMatchups, buildOwnerSeasons, isSeasonComplete, playoffStartWeek } from '@/lib/data-processing'
-import type { LeagueState, LeagueChainEntry, SleeperLeague, SleeperUser, SleeperMatchup } from '@/types'
+import { resolveOwnerName, rosterOwnerMap, buildFlatMatchups, buildOwnerSeasons, isSeasonComplete, playoffStartWeek } from '@/lib/data-processing'
+import type { LeagueState, LeagueChainEntry, SleeperLeague, SleeperMatchup } from '@/types'
 
 // ─── Initial State ─────────────────────────────────────────────────────────────
 
@@ -112,18 +112,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         users[year] = fetchedUsers
         rosters[year] = fetchedRosters
 
-        // Build roster_id → canonical owner name map
-        const userMap: Record<string, SleeperUser> = {}
-        fetchedUsers.forEach(u => { userMap[u.user_id] = u })
-
-        const rMap: Record<string, string> = {}
-        fetchedRosters.forEach(r => {
-          const u = userMap[r.owner_id]
-          rMap[String(r.roster_id)] = u
-            ? resolveOwnerName(u.user_id, u.display_name)
-            : `Team ${r.roster_id}`
-        })
-        rosterUserMaps[year] = rMap
+        rosterUserMaps[year] = rosterOwnerMap(fetchedUsers, fetchedRosters)
 
         // Update ownerAvatarMap. Seasons run oldest → newest, so each
         // owner ends up with their latest picture: the league team photo Sleeper

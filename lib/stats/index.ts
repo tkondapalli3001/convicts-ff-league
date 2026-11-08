@@ -28,5 +28,7 @@ export {
 } from './control-totals'
 export type { ControlTotal, ControlMetric } from './control-totals'
 export type { AllPlayRecord, LuckEntry } from './luck'
+export { homeHero } from './hero'
+export type { HomeHero } from './hero'
 export { scoringStrength } from './scoring-strength'
 export type { ScoringStrength } from './scoring-strength'

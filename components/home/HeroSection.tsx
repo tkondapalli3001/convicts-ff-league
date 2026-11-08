@@ -1,17 +1,5 @@
 import { OWNER_FULL_NAMES } from '@/lib/league'
-
-interface HeroProps {
-  champName: string
-  runnerUpName: string
-  shameName: string
-  /** Season number, e.g. 7 → "Season 7 Champion". */
-  seasonCount: number
-  /** Latest completed season year, e.g. 2025 → kicker date + ghost "25" numeral. */
-  latestYear: number | null
-  totalGames: number
-  managerCount: number
-  yearRange: string
-}
+import type { HomeHero } from '@/lib/stats'
 
 function fullName(name: string): string {
   return OWNER_FULL_NAMES[name] || name
@@ -31,7 +19,7 @@ export default function HeroSection({
   totalGames,
   managerCount,
   yearRange,
-}: HeroProps) {
+}: HomeHero) {
   const ghost = latestYear ? String(latestYear).slice(-2) : ''
 
   return (

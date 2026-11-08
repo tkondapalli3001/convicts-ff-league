@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { csvRecords, type SnapshotSeason } from '@/lib/sources'
-import { buildFlatMatchups, playoffStartWeek, resolveOwnerName } from '@/lib/data-processing'
-import type { LeagueState, Matchup } from '@/types'
+import { stateFromSnapshots } from '@/lib/data-processing'
+import type { Matchup } from '@/types'
 import { hashSeed, rng } from '@/lib/current-season'
 import {
   NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, percentileOf, repeatability, scheduleLuckNote, scheduleSamples, scheduleSeedKey, scheduleWeeks, scoringStrength, shrinkRate, stickVerdict, wilsonRange,
@@ -146,20 +146,9 @@ describe('the published tables', () => {
   it('lets the profile chart redraw the exact schedules the notes quote', () => {
     const summary: UncertaintySummary = JSON.parse(readFileSync(join(ROOT, 'public/data/uncertainty.json'), 'utf8'))
     const years: number[] = JSON.parse(readFileSync(join(ROOT, 'public/data/manifest.json'), 'utf8')).years
-    const state = { leagues: {}, rosterUserMaps: {}, matchups: {}, brackets: {} } as unknown as LeagueState
-    for (const y of years) {
-      const s = JSON.parse(readFileSync(join(ROOT, `public/data/season-${y}.json`), 'utf8')) as SnapshotSeason
-      const users = new Map(s.users.map(u => [u.user_id, u]))
-      const start = playoffStartWeek(s.league)
-      state.leagues[y] = s.league
-      state.rosterUserMaps[y] = Object.fromEntries(s.rosters.map(r => {
-        const u = users.get(r.owner_id)
-        return [String(r.roster_id), u ? resolveOwnerName(u.user_id, u.display_name) : `Team ${r.roster_id}`]
-      }))
-      state.matchups[y] = Object.fromEntries(Object.keys(s.matchupsByWeek).map(w => [Number(w), { matchups: s.matchupsByWeek[w], isPlayoff: Number(w) >= start }]))
-      state.brackets[y] = { winners: s.winnersBracket, losers: s.losersBracket }
-    }
-    const games: Matchup[] = buildFlatMatchups(state)
+    const games: Matchup[] = stateFromSnapshots(
+      years.map(y => JSON.parse(readFileSync(join(ROOT, `public/data/season-${y}.json`), 'utf8')) as SnapshotSeason),
+    ).allMatchups
     for (const y of years) {
       const samples = scheduleSamples(scheduleWeeks(games.filter(g => g.year === y && g.type === 'R')), summary.sims, rng(hashSeed(scheduleSeedKey(y))))
       for (const [owner, sample] of Object.entries(samples)) {

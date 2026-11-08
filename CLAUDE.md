@@ -46,7 +46,9 @@ A data-heavy archive and live-season companion for a Sleeper Fantasy Football le
 
 ```
 app/                        Next.js App Router pages (thin render shells only)
-  page.tsx                  Home — hero, quick stats, career standings, HOF/Shame
+  page.tsx                  Home — the one server shell: works out the hero from public/data/ at
+                            build time (homeHero(stateFromSnapshots())) so it's in the HTML, then
+                            renders components/home/HomePage
   [season]/page.tsx         The season tab at /<CURRENT_SEASON> (/2026) — one static page,
                             renders components/current-season/SeasonPage
   owners/page.tsx           Career leaderboard, earnings ledger, rivalry calculator
@@ -68,7 +70,8 @@ components/                 UI, one folder per page plus shared/layout/search
                             MatchupOfTheWeek, MatchupRow + MatchupModal, FlairBadges + FlairLegend,
                             SmackLine, RosterView, SeasonTransactions, SeasonDraftBoard, SyncStatus,
                             YourMatchupCard, OddsByWeekChart (under Power Rankings)
-  home/                     HeroSection, CareerStandingsTable, HallOfFameCard, WallOfShameCard,
+  home/                     HomePage (Home itself: hero first, the rest once data loads),
+                            HeroSection, CareerStandingsTable, HallOfFameCard, WallOfShameCard,
                             HomeYourMatchup
   seasons/                  SeasonStandings, PlayoffBracket, GameLog (+ Filters, Table,
                             GameDetailModal box score), FinishTracker, AvgScoreChart,
@@ -147,6 +150,8 @@ lib/
     draft-slots.ts          draftSlotOwners() — the one "who owned slot N" answer;
                             buildDraftSlotRows() for Slot Analysis
     draft-board.ts          buildDraftBoard() — rounds × slots grid
+    snapshot-state.ts       rosterOwnerMap() (roster → owner, LeagueContext uses it too);
+                            stateFromSnapshots() — the store from public/data/ alone, for build time
     transactions.ts         enrichTransaction() — owner + player names on a move
     nflverse.ts             nflverseStatLine(), nflverseDefenseStatLine() — nflverse box scores (a
                             player's, a team defense's) as Sleeper stat lines
@@ -175,6 +180,9 @@ lib/
     bridge.ts               The wins bridge: average team → draft → pickups → trades → lineup
                             calls → expected wins → luck → record (Shapley over all-play wins);
                             npm run dataset writes it, profiles read it
+    hero.ts                 homeHero() — Home's champion, runner-up, toilet bowl and archive size;
+                            the build and the loaded page both run it, so the hero never changes
+                            on load
     scoring-strength.ts     scoringStrength() — points per game above each week's league average,
                             with a 95% range (Seasons → Scoring Trend)
     uncertainty.ts          wilsonRange(), fitShrinkage()/shrinkRate(), scheduleSamples(),
