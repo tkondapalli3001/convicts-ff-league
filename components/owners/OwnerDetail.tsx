@@ -11,6 +11,7 @@ import uncertainty from '@/public/data/uncertainty.json'
 import InfoTip from '@/components/shared/InfoTip'
 import FinishBadge from '@/components/shared/FinishBadge'
 import WinPctBadge from '@/components/shared/WinPctBadge'
+import StatRows, { type StatField } from '@/components/shared/StatRows'
 import H2HGrid from './H2HGrid'
 import WinsBridge from './WinsBridge'
 import ScheduleLuckChart from './ScheduleLuckChart'
@@ -19,6 +20,30 @@ import ErrorState from '@/components/shared/ErrorState'
 
 type Tab = 'seasons' | 'bridge' | 'h2h' | 'gamelog'
 const TAB_IDS: readonly Tab[] = ['seasons', 'bridge', 'h2h', 'gamelog']
+
+function PlayoffChip({ made }: { made: boolean }) {
+  return made
+    ? <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#7FA886', background: 'rgba(127,168,134,0.12)' }}>● Clinched</span>
+    : <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}>✕ Elim.</span>
+}
+
+// Season Log on phones: record, PF/Gm and margin up front, the rest a tap away
+type SeasonRow = { wins: number; losses: number; pf: number; pa: number; inPlayoffs: boolean }
+const perGame = (s: SeasonRow, pts: number) => (s.wins + s.losses > 0 ? (pts / (s.wins + s.losses)).toFixed(1) : '—')
+const SEASON_FIELDS: StatField<SeasonRow>[] = [
+  { label: 'Record', value: s => <><span style={{ color: '#7FA886' }}>{s.wins}</span>–<span style={{ color: '#B4636B' }}>{s.losses}</span></> },
+  { label: 'PF/Gm', value: s => perGame(s, s.pf) },
+  {
+    label: '+/−',
+    value: s => {
+      const m = s.pf - s.pa
+      return <span style={{ color: m >= 0 ? '#7FA886' : '#B4636B' }}>{m >= 0 ? '+' : ''}{m.toFixed(1)}</span>
+    },
+  },
+  { label: 'Win%', value: s => <WinPctBadge pct={(s.wins / (s.wins + s.losses || 1) * 100).toFixed(1)} /> },
+  { label: 'PA/Gm', value: s => <span style={{ color: '#B4636B' }}>{perGame(s, s.pa)}</span> },
+  { label: 'Playoffs', value: s => <PlayoffChip made={s.inPlayoffs} /> },
+]
 
 export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   const { state } = useLeague()
@@ -227,7 +252,21 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
       {/* Season Log */}
       {tab === 'seasons' && (
         <>
-          <div className="overflow-x-auto gl">
+          <StatRows
+            className="gl"
+            rows={seasons}
+            rowKey={s => String(s.year)}
+            owner={() => null}
+            leadLabel="Season"
+            lead={s => (
+              <span className="flex items-center gap-2">
+                <span className="font-display text-[17px] font-bold text-s-text2">{s.year}</span>
+                <FinishBadge finish={s.finish} />
+              </span>
+            )}
+            fields={SEASON_FIELDS}
+          />
+          <div className="hidden overflow-x-auto gl sm:block">
             <table className="w-full border-collapse min-w-[500px]">
               <thead>
                 <tr>
@@ -246,16 +285,12 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                       <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{s.wins}</td>
                       <td className="font-display text-[17px] font-bold" style={{ color: '#B4636B' }}>{s.losses}</td>
                       <td><WinPctBadge pct={spct} /></td>
-                      <td className="text-right font-display text-[17px] font-semibold text-s-text2 num">{s.wins + s.losses > 0 ? (s.pf / (s.wins + s.losses)).toFixed(1) : '—'}</td>
-                      <td className="text-right font-display text-[17px] font-semibold num" style={{ color: '#B4636B' }}>{s.wins + s.losses > 0 ? (s.pa / (s.wins + s.losses)).toFixed(1) : '—'}</td>
+                      <td className="text-right font-display text-[17px] font-semibold text-s-text2 num">{perGame(s, s.pf)}</td>
+                      <td className="text-right font-display text-[17px] font-semibold num" style={{ color: '#B4636B' }}>{perGame(s, s.pa)}</td>
                       <td className="text-right font-display text-[17px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#B4636B' }}>
                         {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
                       </td>
-                      <td className="text-right">
-                        {s.inPlayoffs
-                          ? <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#7FA886', background: 'rgba(127,168,134,0.12)' }}>● Clinched</span>
-                          : <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}>✕ Elim.</span>}
-                      </td>
+                      <td className="text-right"><PlayoffChip made={s.inPlayoffs} /></td>
                     </tr>
                   )
                 })}

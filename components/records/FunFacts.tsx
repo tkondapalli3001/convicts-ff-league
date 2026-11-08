@@ -39,13 +39,13 @@ export default function FunFacts() {
             <span className="w-5 text-s-text3 text-[10px] num flex-shrink-0">{i + 1}</span>
             <OwnerAvatar name={entry.owner} size="sm" />
             <span className="font-bold text-s-text w-[62px] flex-shrink-0">{entry.owner}</span>
-            <span className="whitespace-nowrap text-[12px]">
+            <span className="min-w-0 text-[12px]">
               <span className="text-loss font-bold num">{entry.pts.toFixed(2)}</span>
               <span className="text-s-text3 mx-1">lost to</span>
               <span className="text-s-text2 font-semibold">{entry.opp}</span>
               <span className="text-s-text3 num ml-1">{entry.oppPts.toFixed(2)}</span>
             </span>
-            <span className="text-s-text3 text-[10px] ml-auto whitespace-nowrap">
+            <span className="text-s-text3 text-[10px] ml-auto flex-shrink-0 whitespace-nowrap">
               {entry.year} Wk{entry.week}
             </span>
           </div>
@@ -101,13 +101,13 @@ export default function FunFacts() {
             <span className="w-5 text-s-text3 text-[10px] num flex-shrink-0">{i + 1}</span>
             <OwnerAvatar name={entry.owner} size="sm" />
             <span className="font-bold text-s-text w-[62px] flex-shrink-0">{entry.owner}</span>
-            <span className="whitespace-nowrap text-[12px]">
+            <span className="min-w-0 text-[12px]">
               <span className="text-gold-bright font-bold num">{entry.pts.toFixed(2)}</span>
               <span className="text-s-text3 mx-1">beat</span>
               <span className="text-s-text2 font-semibold">{entry.opp}</span>
               <span className="text-s-text3 num ml-1">{entry.oppPts.toFixed(2)}</span>
             </span>
-            <span className="text-s-text3 text-[10px] ml-auto whitespace-nowrap">
+            <span className="text-s-text3 text-[10px] ml-auto flex-shrink-0 whitespace-nowrap">
               {entry.year} Wk{entry.week}
             </span>
           </div>
