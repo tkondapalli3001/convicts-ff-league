@@ -26,7 +26,7 @@ function Movement({ n }: { n: number | null }) {
   return (
     <span
       className="w-6 text-[10px] font-bold"
-      style={{ color: up ? '#7FA886' : '#BA6A72' }}
+      style={{ color: up ? '#7FA886' : '#BC6C74' }}
       aria-label={`${up ? 'up' : 'down'} ${Math.abs(n)}`}
     >
       {up ? '▲' : '▼'}{Math.abs(n)}
@@ -63,7 +63,7 @@ const PHONE_FIELDS: StatField<PowerRankingRow>[] = [
   { label: 'Standing', value: r => ordinal(r.standing) },
   { label: 'All-Play %', value: r => pct3(r.allPlayPct) },
   { label: 'High', value: r => <span style={{ color: '#7FA886' }}>{r.high.toFixed(1)}</span> },
-  { label: 'Low', value: r => <span style={{ color: '#BA6A72' }}>{r.low.toFixed(1)}</span> },
+  { label: 'Low', value: r => <span style={{ color: '#BC6C74' }}>{r.low.toFixed(1)}</span> },
 ]
 
 /** Power Rankings tab: Oberon Mt. power ratings with week-over-week movement and streak flair. */
@@ -163,7 +163,7 @@ export default function PowerRankingsTable({ rows, throughWeek, badges }: {
                   <td className={`${num} text-s-text2`}>{ordinal(r.standing)}</td>
                   <td className={`${num} text-s-text2`}>{r.avg.toFixed(1)}</td>
                   <td className={num} style={{ color: '#7FA886' }}>{r.high.toFixed(1)}</td>
-                  <td className={num} style={{ color: '#BA6A72' }}>{r.low.toFixed(1)}</td>
+                  <td className={num} style={{ color: '#BC6C74' }}>{r.low.toFixed(1)}</td>
                   <td className={`${num} text-s-text2`}>
                     {fmtRecord(r.allPlayWins, r.allPlayLosses, r.allPlayTies)}
                     <span className="ml-2 text-[14px] font-medium text-s-text3">{pct3(r.allPlayPct)}</span>

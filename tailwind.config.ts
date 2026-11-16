@@ -25,7 +25,7 @@ const config: Config = {
         's-muted':    '#5C6270',
         's-gold':     '#C9962E',
         's-green':    '#7FA886',  // sage win
-        's-red':      '#BA6A72',  // brick loss
+        's-red':      '#BC6C74',  // brick loss
         // Midnight Prime — precise tokens for new chrome + future pages
         'gold':        '#C9962E',
         'gold-soft':   '#C9A24B',
@@ -34,7 +34,7 @@ const config: Config = {
         'panel':       'rgba(10,10,12,0.7)',
         'panel-2':     'rgba(10,10,12,0.5)',
         'win':         '#7FA886',
-        'loss':        '#BA6A72',
+        'loss':        '#BC6C74',
       },
       fontFamily: {
         sans: ['var(--font-archivo)', 'system-ui', '-apple-system', 'sans-serif'],

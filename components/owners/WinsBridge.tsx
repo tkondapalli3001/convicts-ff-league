@@ -18,7 +18,7 @@ const uncertainty = uncertaintyData as UncertaintySummary
 type View = 'career' | number
 type Step = BridgePart | 'luck'
 
-const SAGE = '#7FA886', BRICK = '#BA6A72'
+const SAGE = '#7FA886', BRICK = '#BC6C74'
 const HAIRLINE = 'rgba(var(--gold-rgb), 0.10)'
 
 const LABEL: Record<Step, string> = { draft: 'Draft', pickups: 'Pickups', trades: 'Trades', lineup: 'Lineup calls', luck: 'Luck' }

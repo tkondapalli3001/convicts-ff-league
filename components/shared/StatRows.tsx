@@ -107,7 +107,7 @@ export default function StatRows<T, K extends string = string>({ rows, rowKey, o
                 <button
                   type="button"
                   onClick={() => sort.onSort(f.sortKey as K)}
-                  className={`min-h-[28px] text-right ${LABEL}`}
+                  className={`min-h-[28px] min-w-[28px] text-right ${LABEL}`}
                   style={active ? { color: '#C9A24B' } : undefined}
                 >
                   {f.label}

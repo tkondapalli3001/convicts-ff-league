@@ -12,7 +12,7 @@ function FinishDot({ finish, year, totalTeams }: { finish: number | null | undef
   if (finish === 3)
     return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[rgba(201,150,46,0.10)] text-[#93803F] flex-shrink-0" title={`${year}: 3rd`}>3</span>
   if (finish >= totalTeams)
-    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[rgba(180,99,107,0.12)] text-[#BA6A72] flex-shrink-0" title={`${year}: 🚽 Last`}>{finish}</span>
+    return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[rgba(180,99,107,0.12)] text-[#BC6C74] flex-shrink-0" title={`${year}: 🚽 Last`}>{finish}</span>
   if (finish <= Math.floor(totalTeams / 2))
     return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-s-bg4 text-s-text2 flex-shrink-0" title={`${year}: ${finish}th`}>{finish}</span>
   return <span className="w-[30px] h-[30px] rounded-[6px] inline-flex items-center justify-center text-[11px] font-extrabold bg-[#15202b] text-s-text2 flex-shrink-0" title={`${year}: ${finish}th`}>{finish}</span>
@@ -28,7 +28,7 @@ export default function FinishTracker() {
     { label: '3rd',   className: 'bg-[rgba(201,150,46,0.10)] text-[#93803F]' },
     { label: 'Mid',   className: 'bg-s-bg4 text-s-text2' },
     { label: 'Low',   className: 'bg-[#15202b] text-s-text3' },
-    { label: 'Last',  className: 'bg-[rgba(180,99,107,0.12)] text-[#BA6A72]' },
+    { label: 'Last',  className: 'bg-[rgba(180,99,107,0.12)] text-[#BC6C74]' },
   ]
 
   return (

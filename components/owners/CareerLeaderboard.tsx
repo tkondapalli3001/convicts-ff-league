@@ -25,7 +25,7 @@ function phoneFields(playoffOnly: boolean): StatField<LeaderboardRow, SortKey>[]
     { label: 'Avg Fin', sortKey: 'avgFinish', value: d => (d.avgFinish != null ? d.avgFinish.toFixed(1) : '—') },
     ...(playoffOnly ? [] : [{ label: 'Playoffs', sortKey: 'playoffApps' as const, value: (d: LeaderboardRow) => `${d.playoffApps}/${d.numSeasons}` }]),
     { label: '🚽 Shame', sortKey: 'shame', value: d => (d.shame > 0 ? <span className="font-bold text-loss">{d.shame}×</span> : muted) },
-    { label: 'Net $', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#BA6A72' }}>{fmtMoney(d.earn)}</span> : muted) },
+    { label: 'Net $', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#BC6C74' }}>{fmtMoney(d.earn)}</span> : muted) },
   ]
 }
 
@@ -153,7 +153,7 @@ export default function CareerLeaderboard() {
                     </td>
                   <td className="font-display text-[17px] font-semibold text-s-text2">{d.numSeasons}</td>
                   <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{d.allW}</td>
-                  <td className="font-display text-[17px] font-bold" style={{ color: '#BA6A72' }}>{d.allL}</td>
+                  <td className="font-display text-[17px] font-bold" style={{ color: '#BC6C74' }}>{d.allL}</td>
                   <td><WinPctBadge pct={pct} /></td>
                   <td className="font-display text-[17px] font-semibold text-s-text2 num">{d.avgPF.toFixed(1)}</td>
                   <td className="font-display text-[17px] font-semibold text-s-text2 num">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
@@ -162,7 +162,7 @@ export default function CareerLeaderboard() {
                   <td className="text-center font-display text-[16px] font-bold">{d.shame > 0 ? <span className="text-loss">{d.shame}×</span> : <span className="text-[#5C6270]">—</span>}</td>
                   <td className="font-display text-[17px] font-bold num">
                     {d.earn != null ? (
-                      <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#BA6A72' }}>{d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}</span>
+                      <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#BC6C74' }}>{d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}</span>
                     ) : (
                       <span className="text-[#5C6270]">—</span>
                     )}

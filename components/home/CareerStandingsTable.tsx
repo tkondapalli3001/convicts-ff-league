@@ -46,7 +46,7 @@ const PHONE_FIELDS: StatField<CareerStats, SortKey>[] = [
   { label: 'Win%', sortKey: 'winpct', value: d => <span className="font-bold" style={{ color: winPctColor(d.winpct) }}>{(d.winpct * 100).toFixed(1)}%</span> },
   { label: 'Titles', sortKey: 'champs', value: d => (d.champs > 0 ? <span className="font-bold text-gold-soft">{fmtChamps(d.champs)}×</span> : <span className="text-[#5C6270]">—</span>) },
   { label: 'Avg PPG', sortKey: 'avgPPG', value: d => d.avgPFperGame.toFixed(1) },
-  { label: 'Net', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#BA6A72' }}>{fmtMoney(d.earn)}</span> : <span className="text-[#5C6270]">—</span>) },
+  { label: 'Net', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#BC6C74' }}>{fmtMoney(d.earn)}</span> : <span className="text-[#5C6270]">—</span>) },
   { label: 'Seasons', value: d => d.numSeasons },
 ]
 const PHONE_SORTS: { key: SortKey; label: string }[] = [
@@ -194,7 +194,7 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
                 </td>
                 <td className="text-right font-display text-[17px] font-bold num">
                   {d.earn != null ? (
-                    <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#BA6A72' }}>
+                    <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#BC6C74' }}>
                       {d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}
                     </span>
                   ) : (

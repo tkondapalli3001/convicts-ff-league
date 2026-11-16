@@ -28,11 +28,11 @@ Tokens live in `tailwind.config.ts`. Two families:
 |---|---|---|
 | `gold` | `#C9962E` | Hairline rules, borders, active tab underline, monogram |
 | `gold-soft` | `#C9A24B` | Section headings, secondary gold text, icons |
-| `gold-dim` | `#8A7439` | Muted gold (years, kbd hints, tags) |
+| `gold-dim` | `#93803F` | Muted gold (years, kbd hints, tags); 5:1 on cards |
 | `gold-bright` | `#E8CE8A` | Emphasized values (good win%, record values, HOF names) |
 | `panel` / `panel-2` | `rgba(10,10,12,0.7/0.5)` | Hero side panels, search strip, tab bars |
 | `win` | `#7FA886` | Win / positive (muted sage green) |
-| `loss` | `#B4636B` | Loss / negative / shame (muted brick red) |
+| `loss` | `#BC6C74` | Loss / negative / shame (muted brick red); 5.2:1 on cards |
 
 **Legacy `s-` palette** — remapped onto Midnight Prime so un-migrated markup
 shifts with the theme (don't reintroduce the old Statmuse values):
@@ -41,9 +41,9 @@ shifts with the theme (don't reintroduce the old Statmuse values):
 |---|---|---|
 | `s-bg` | `#050506` | Page background (Pure Onyx) |
 | `s-bg2` / `s-bg3` / `s-bg4` | `#070708` / `#0B0B0D` / `#121216` | Nav / card / raised panel |
-| `s-text` / `s-text2` / `s-text3` / `s-muted` | `#EDE9E0` / `#9AA0AC` / `#5C6270` / `#3A4150` | Text hierarchy: bright → faint |
+| `s-text` / `s-text2` / `s-text3` / `s-muted` | `#EDE9E0` / `#9AA0AC` / `#7E8493` / `#5C6270` | Text hierarchy: bright → faint. `s-text3` is the dimmest colour real text may use (5.3:1 on cards); `s-muted` (3.2:1) is for dashes, placeholders and rank numerals only |
 | `s-gold` | `#C9962E` | Alias of `gold` |
-| `s-green` / `s-red` | `#7FA886` / `#B4636B` | Alias of `win` / `loss` |
+| `s-green` / `s-red` | `#7FA886` / `#BC6C74` | Alias of `win` / `loss` |
 
 **Variable-alpha gold** comes from CSS RGB tuples in `globals.css`:
 `--gold-rgb: 230,190,90` (light gold — hairline borders `0.08–0.20`) and
@@ -81,7 +81,7 @@ locally or fold into the gold palette.
   `inset 0 0 0 1px rgba(255,255,255,0.14)`; shame-context avatars at `opacity:0.75`.
 - **Motion (respect `prefers-reduced-motion`):** `animate-gold-pulse` (hero name
   opacity breathe, 5s) and staggered `animate-fade-in*` entrances. Hover = gold
-  wash on interactive rows; nav links `#5C6270`→`gold-soft`.
+  wash on interactive rows; nav links `s-text3`→`gold-soft`.
 - Keyboard focus: global `:focus-visible` gold ring in `globals.css`.
 
 ## Global chrome

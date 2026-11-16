@@ -106,16 +106,17 @@ blank states.
 ### M4 — Deferred owner-decision findings *(no deadline)*
 Report-only; each is a deliberate design choice, so fixing it changes locked
 architecture or the Midnight Prime palette. **No action without owner sign-off.**
-1. **Color contrast (a11y 96, not 100):** tiny uppercase labels in `#5C6270`, `#8A7439`,
-   `#8A4A46` sit below WCAG AA against onyx. Brightening is a theme change — owner call.
+1. **Done 2026-11-16 (design pass):** tiny labels failed contrast (`#5C6270` 3.2:1, `#8A7439` 4.3:1,
+   `#8A4A46` 2.9:1). `s-text3` is now `#7E8493`, `gold-dim` `#93803F`, `loss` `#BC6C74`; the old
+   gray stays as `s-muted` for dashes and rank numerals only.
 2. **Done 2026-11-08 (owner chose it):** LCP was 5.6s (perf 73) because the hero waited for the
    data load. The build now works the hero out from the snapshot (`homeHero(stateFromSnapshots())`)
    and bakes it into Home's HTML; the page reruns the same function once loaded, so nothing
    changes on screen. Between the title game and the January snapshot the built hero still
    shows last year's champion until the data arrives (a second or two). Rerun Lighthouse to
    record the new score.
-3. **Focus traps:** modals close on Escape and announce as dialogs, but Tab can reach the
-   page behind. Full trap is a larger change; add only if the owner wants it.
+3. **Done 2026-11-16 (design pass):** every popup takes keyboard focus, keeps Tab inside and
+   hands focus back on close (`useFocusTrap` in `hooks/useModalClose.ts`).
 
 ### D — The deeper version *(owner-approved 2026-10-20)*
 The goal: answer who in this league is actually good, and how much of each result was
@@ -210,6 +211,30 @@ From a 375px walk of every page. Phones only; desktop keeps its tables and navba
 7. **Done:** charts the league can't get elsewhere. Playoff odds by week under Power Rankings (one team in gold, any team a tap away; the last point is today's odds). Record vs. every shuffled schedule on each profile's Season Log (career or any season). Scoring strength with 95% ranges beside Scoring Trend.
 
 Ruled out: a backend, accounts, push notifications, a visit counter, and preview cards with live scores (they'd need a scheduled rebuild).
+
+### F — The design pass *(owner-directed 2026-11-16)*
+A senior-designer walk of every page at 375, 512, 640, 700, 768, 1024 and 1280px, judged against:
+a premium sports almanac for ten friends on phones, where the answer reads at a glance, nothing
+looks clickable that isn't, and no screen is blank while it loads.
+- **Done (L1, one commit):** the contrast floor; focus trap on all popups and search; skip link;
+  card titles as headings; `data-press` (only sortable headers and profile rows show a pointer,
+  and they work from the keyboard); one-line card headers on phones; units as small labels beside
+  record numbers; 23 older cards onto the 6px gold-hairline card; copy trims (2026 sub-line,
+  Season Standings title, bracket hint); tap targets and tap feedback.
+- **Done (L2, one revertible commit each):** the top nav fits 640-1279px with search pinned;
+  every page paints its title and tabs before the data loads.
+- **Tested and kept:** live matchup rows give both scores equal weight on purpose (a mid-week
+  lead means little while players are yet to play).
+- **Proposed, owner's call (L3):**
+  1. "Which one are you?" as a one-time bottom sheet instead of a card on every tab; today it
+     fills most of the first phone screen until answered.
+  2. Home on phones in season: lead with the week (your matchup, or the Matchup of the Week)
+     and move the champion hero below it. Purpose 1 is the weekly companion.
+  3. Tablets (640-1023px) get the phone's bottom bar instead of the compact top nav.
+  4. The kicker's position chip (`#6e7681`, 3.8:1) is in the functional position palette; lifting
+     it means changing that palette.
+  5. The 2026 tab says the week three times (kicker, sync line, week picker); fold the sync
+     line into the kicker.
 
 ### Done
 - **2026-08-14 —** 2026 buy-in (`2026: 150`).

@@ -295,7 +295,7 @@ export default function SearchOverlay({ onClose }: Props) {
                           </div>
                         </div>
                         <div className="text-[12px] font-bold flex-shrink-0"
-                          style={{ color: stat.winRate >= 0.6 ? '#E8CE8A' : stat.winRate >= 0.45 ? '#9AA0AC' : '#BA6A72' }}>
+                          style={{ color: stat.winRate >= 0.6 ? '#E8CE8A' : stat.winRate >= 0.45 ? '#9AA0AC' : '#BC6C74' }}>
                           {(stat.winRate * 100).toFixed(0)}%
                         </div>
                       </button>

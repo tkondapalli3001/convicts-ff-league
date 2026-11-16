@@ -41,7 +41,7 @@ function perGame(total: number, r: Row): string {
 }
 
 function signed(n: number) {
-  return <span className="font-bold" style={{ color: n >= 0 ? '#7FA886' : '#BA6A72' }}>{n >= 0 ? '+' : ''}{n.toFixed(1)}</span>
+  return <span className="font-bold" style={{ color: n >= 0 ? '#7FA886' : '#BC6C74' }}>{n >= 0 ? '+' : ''}{n.toFixed(1)}</span>
 }
 
 function luckNote(r: Row) {
@@ -67,7 +67,7 @@ const PHONE_FIELDS: StatField<Row, SortKey>[] = [
   { label: 'PF/Gm', sortKey: 'pf', value: r => perGame(r.pf, r) },
   { label: 'Luck', sortKey: 'luck', tip: { term: 'Luck Index', text: LUCK_TIP }, value: r => signed(r.luck), rowTip: luckNote },
   { label: 'Win%', value: r => <WinPctBadge pct={(r.winpct * 100).toFixed(1)} /> },
-  { label: 'PA/Gm', sortKey: 'pa', value: r => <span style={{ color: '#BA6A72' }}>{perGame(r.pa, r)}</span> },
+  { label: 'PA/Gm', sortKey: 'pa', value: r => <span style={{ color: '#BC6C74' }}>{perGame(r.pa, r)}</span> },
   { label: '+/−/Gm', sortKey: 'margin', value: r => signed(r.margin) },
   { label: 'Playoffs', value: r => <PlayoffChip playoffs={r.playoffs} /> },
 ]
@@ -256,14 +256,14 @@ export default function SeasonStandings({ onYearChange }: Props) {
                   <td className="font-display text-[17px] font-bold text-s-text2">{r.year}</td>
                   <td><FinishBadge finish={r.finish} /></td>
                   <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{r.wins}</td>
-                  <td className="font-display text-[17px] font-bold" style={{ color: '#BA6A72' }}>{r.losses}</td>
+                  <td className="font-display text-[17px] font-bold" style={{ color: '#BC6C74' }}>{r.losses}</td>
                   <td><WinPctBadge pct={pct} /></td>
                   <td className="font-display text-[17px] font-semibold text-s-text2 num">{r.wins + r.losses > 0 ? (r.pf / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="font-display text-[17px] font-semibold num" style={{ color: '#BA6A72' }}>{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
-                  <td className="font-display text-[17px] font-bold num" style={{ color: r.margin >= 0 ? '#7FA886' : '#BA6A72' }}>
+                  <td className="font-display text-[17px] font-semibold num" style={{ color: '#BC6C74' }}>{r.wins + r.losses > 0 ? (r.pa / (r.wins + r.losses)).toFixed(1) : '—'}</td>
+                  <td className="font-display text-[17px] font-bold num" style={{ color: r.margin >= 0 ? '#7FA886' : '#BC6C74' }}>
                     {r.margin >= 0 ? '+' : ''}{r.margin.toFixed(1)}
                   </td>
-                  <td className="font-display text-[17px] font-bold num" style={{ color: r.luck >= 0 ? '#7FA886' : '#BA6A72' }}>
+                  <td className="font-display text-[17px] font-bold num" style={{ color: r.luck >= 0 ? '#7FA886' : '#BC6C74' }}>
                     {r.luck >= 0 ? '+' : ''}{r.luck.toFixed(1)}
                     {luckNote(r)}
                   </td>

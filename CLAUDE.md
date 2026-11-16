@@ -88,8 +88,9 @@ components/                 UI, one folder per page plus shared/layout/search
                             (Players → Transactions and the season tab's Transactions)
   search/                   GlobalSearch (⌘K trigger), SearchOverlay, SearchStrip (home),
                             AnswerCard, ManagerCard, PlayerCard
-  layout/                   Navbar, BottomBar (phones: Home · season · Me · Owners · More), Brand,
-                            Footer, nav-items.ts
+  layout/                   Navbar (640px up; search pinned, links compact below lg), BottomBar
+                            (phones: Home · season · Me · Owners · More), Brand, Footer,
+                            PressKeys (Enter/Space presses anything marked data-press), nav-items.ts
   shared/                   Reusable primitives: PageHeader, PillTabs, SectionCard, StatChip,
                             RecordItem, OwnerAvatar, PlayerHeadshot, FinishBadge, WinPctBadge,
                             SortHeader, InfoTip, LoadingSpinner, ErrorState, ShareButton,
@@ -115,7 +116,8 @@ hooks/
                             headers (PR · record · all-play · PF · PA), schedules
   useSeasonSchedule.ts      The season's full regular-season schedule (unplayed weeks load once)
   useSeasonTransactions.ts  Season tab → Transactions (past weeks once, current week via the sync)
-  useModalClose.ts          Escape, Back button, and body scroll lock shared by every modal
+  useModalClose.ts          Escape, Back button, body scroll lock and the focus trap (useFocusTrap:
+                            focus in, Tab stays in, focus back on close) shared by every popup
   useMe.ts                  "Pick who you are": no login, remembered on the device
   useMyColumn.ts            Draft boards open on your column
   useUrlParam.ts            useUrlParam(), useUrlModal() — tabs, weeks, years and open matchups
@@ -311,6 +313,8 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **Live data overlays; it never mutates.** Only the season tab and Home's your-matchup card (for someone who has picked who they are) poll, via `useLiveSeason`, which layers fresh league/roster/matchup data over a copy of the global state (`withLiveSeason`) and flattens the season's games once per sync. Facts about past seasons (champ path, honors, career wins) memoize on `live.base`, which polls never change. The global store still loads once. A week is final only once `settings.last_scored_leg` reaches it — never infer "final" from points on the board (a Thursday game puts points up for the whole week).
 - **The search overlay is portaled to `document.body`.** The navbar's `backdrop-filter` makes it the containing block for fixed descendants — rendering the overlay inside the nav clips it. Don't move it back. Every `fixed inset-0` modal portals the same way.
 - **What you're looking at lives in the URL.** People arrive from group-chat links, so tabs, weeks, years, filters that settle arguments, and open matchups go through `useUrlParam` / `useUrlModal`, never plain `useState`. Tabs and filters replace the URL entry; popups add a stop, so Back closes them. Each section's preview card is its `layout.tsx` metadata (`app/page-meta.ts`); pages are client components, so it can't live on the page.
+- **Only what can be pressed looks pressable.** A sortable `<th>` or a row that opens something carries `data-press tabIndex={0}`: that gives it the pointer, the hover, and Enter/Space (`PressKeys`). Plain rows and headers get neither. Every popup has `role="dialog"`, which is how `useFocusTrap` finds it.
+- **The title and tabs never wait for data.** Each page renders its `PageHeader` and `PillTabs` before the store loads, with the spinner under them, in the same tree position as the loaded page so the header doesn't remount. Home does the same with its hero.
 - **Pages are thin shells.** Computation belongs in `hooks/` or `lib/`. Pages should only call hooks, destructure results, and render JSX.
 
 ---
@@ -322,7 +326,7 @@ display numerals, editorial restraint. **No glassmorphism, blur-on-cards, orb gl
 rounded corners.** Full spec + canonical patterns live in `DESIGN.md`.
 
 - **Theme:** Dark mode only. Tokens in `tailwind.config.ts`: precise `gold` / `gold-soft` / `gold-dim` / `gold-bright`, `panel` / `panel-2`, `win` / `loss`, plus the legacy `s-` palette **remapped onto Midnight Prime** (e.g. `s-bg` = onyx `#050506`, `s-text` = warm off-white `#EDE9E0`, `s-green`/`s-red` = sage/brick) so un-migrated markup shifts with the theme.
-- **Key colors:** page `#050506`, nav `#070708`, cards `#0B0B0D`; gold `#C9962E` (hairlines/active underline), `#E8CE8A` (emphasized values), text `#EDE9E0`→`#9AA0AC`→`#5C6270`; sage `#7FA886` win / brick `#B4636B` loss. Gold hairlines = `rgba(var(--gold-rgb),0.08–0.20)`; hover wash = `rgba(var(--gold2-rgb),0.04–0.05)` (RGB tuples in `globals.css`). Position colors (`lib/positions.ts`) and `OWNER_COLORS` (`lib/league/owners.ts`) are **functional palettes — never theme-swap or redefine them locally.**
+- **Key colors:** page `#050506`, nav `#070708`, cards `#0B0B0D`; gold `#C9962E` (hairlines/active underline), `#E8CE8A` (emphasized values), text `#EDE9E0`→`#9AA0AC`→`#7E8493`; sage `#7FA886` win / brick `#BC6C74` loss. **Text never goes dimmer than `s-text3`** (4.5:1 is the floor for small text; `s-muted` `#5C6270` is for dashes, placeholders and rank numerals, and no opacity-faded text). Avatar initials are onyx ink on the solid owner colour. Gold hairlines = `rgba(var(--gold-rgb),0.08–0.20)`; hover wash = `rgba(var(--gold2-rgb),0.04–0.05)` (RGB tuples in `globals.css`). Position colors (`lib/positions.ts`) and `OWNER_COLORS` (`lib/league/owners.ts`) are **functional palettes — never theme-swap or redefine them locally.**
 - **Typography:** `Barlow Condensed` (display/numerals — all big numbers, names, titles, table numerals; uppercase, tight leading) + `Archivo` (UI/body; tiny uppercase tracked labels). Loaded via `next/font` in `layout.tsx` as `--font-barlow` / `--font-archivo`; use `font-display` for Barlow. **Inter is gone.**
 - **Shape tokens:** cards `6px` radius via `.gl` / `.bento-card` (onyx + 1px gold hairline, no blur), chips/badges square or `2px`, pills `rounded-full`, avatars `50%`. Depth comes from borders + background steps, not shadows.
 - **Shared primitives:** `PageHeader` (gold-dash kicker + hero-gradient title), `PillTabs` (gold-underline tabs), `SectionCard` (onyx card + gold/brick dash header), `StatChip` (hairline stat-band cell), `RecordItem`, `OwnerAvatar` (gold-ring for champions), `PlayerHeadshot`, `FinishBadge` (square chip), `WinPctBadge`, `SortHeader` (sortable `<th>` — never define header components inside a table's render; its `tip` adds a definition), `InfoTip` (? icon whose definition pops up on hover/tap; portaled so table scrollers can't clip it). Use these instead of re-rolling the markup.

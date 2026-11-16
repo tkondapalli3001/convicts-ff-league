@@ -15,7 +15,7 @@ function TeamMeta({ team, badges, align }: { team: TeamPreview; badges: Badge[];
         {team.wins}–{team.losses}
         {team.seed > 0 && <> · {ordinal(team.seed)}</>}
         {team.streak && team.streak.len >= 2 && (
-          <span style={{ color: team.streak.type === 'W' ? '#7FA886' : '#BA6A72' }}>
+          <span style={{ color: team.streak.type === 'W' ? '#7FA886' : '#BC6C74' }}>
             {' '}· {team.streak.type}{team.streak.len}
           </span>
         )}

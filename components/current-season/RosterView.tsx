@@ -32,7 +32,7 @@ function InjuryTag({ status }: { status: string | null }) {
       className="flex-shrink-0 rounded-[2px] border px-1 py-px text-[9px] font-bold tracking-[0.5px]"
       style={mild
         ? { color: '#C9A24B', borderColor: 'rgba(var(--gold-rgb), 0.3)' }
-        : { color: '#BA6A72', borderColor: 'rgba(180,99,107,0.35)' }}
+        : { color: '#BC6C74', borderColor: 'rgba(180,99,107,0.35)' }}
       title={status}
     >
       {label}
@@ -463,7 +463,7 @@ export default function RosterView({ data, liveWeek, matchupWeeks, onWeek, onOpe
                   {h?.teamName ?? team.owner}
                 </div>
                 {h?.teamName && (
-                  <Link href={`/owners/${encodeURIComponent(team.owner)}`} className="inline-flex min-h-[28px] items-center text-[11px] font-semibold text-s-text2 sm:hidden">
+                  <Link href={`/owners/${encodeURIComponent(team.owner)}`} className="inline-flex min-h-[28px] min-w-[28px] items-center text-[11px] font-semibold text-s-text2 sm:hidden">
                     {team.owner}
                   </Link>
                 )}

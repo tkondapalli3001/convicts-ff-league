@@ -54,7 +54,7 @@ export default function ScoreLeaderboard({ title, scores, variant, countByOwner 
               style={
                 s.result === 'W'
                   ? { color: '#7FA886', background: 'rgba(127,168,134,0.12)' }
-                  : { color: '#BA6A72', background: 'rgba(180,99,107,0.12)' }
+                  : { color: '#BC6C74', background: 'rgba(180,99,107,0.12)' }
               }
             >
               {s.result}

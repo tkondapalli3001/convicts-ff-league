@@ -86,7 +86,7 @@ export function timeAgo(ms: number): string {
 export function winPctColor(fraction: number): string {
   if (fraction >= 0.55) return '#E8CE8A'
   if (fraction >= 0.45) return '#9AA0AC'
-  return '#BA6A72'
+  return '#BC6C74'
 }
 
 // ─── Champion / Shame lookups ─────────────────────────────────────────────────
