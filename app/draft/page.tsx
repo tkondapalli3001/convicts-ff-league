@@ -35,19 +35,24 @@ export default function DraftPage() {
   const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'pickorder', TAB_IDS)
 
   if (error) return <ErrorState error={error} />
-  if (!loaded) return <LoadingSpinner />
 
-  return (
-    <div className="animate-fade-in">
+  // The title and tabs paint at once; only what's under them waits for data
+  const shell = (
+    <>
       <PageHeader
         kicker="The Draft Room"
         title="Draft Hub"
         subtitle={`Draft history, ${STOCK_PICK_SEASON} pick order standings, slot vs outcome analysis, and historical steals & busts`}
       />
-
       <DraftCountdown />
-
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+    </>
+  )
+  if (!loaded) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
+
+  return (
+    <div className="animate-fade-in">
+      {shell}
 
       {/* ── PICK ORDER TAB ───────────────────────────────────────── */}
       {activeTab === 'pickorder' && (

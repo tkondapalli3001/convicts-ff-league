@@ -45,17 +45,23 @@ export default function RecordsPage() {
   const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'extremes', TAB_IDS)
 
   if (error) return <ErrorState error={error} />
-  if (!loaded) return <LoadingSpinner />
+
+  // The title and tabs paint at once; only what's under them waits for data
+  const shell = (
+    <>
+      <PageHeader
+        kicker={loaded ? `The Record Book · ${years.length} Seasons` : 'The Record Book'}
+        title="League Records"
+        subtitle={loaded ? `All-time milestones, extremes & fun stats across ${years.length} seasons` : 'All-time milestones, extremes & fun stats'}
+      />
+      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+    </>
+  )
+  if (!loaded) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
 
   return (
     <div className="animate-fade-in">
-      <PageHeader
-        kicker={`The Record Book · ${years.length} Seasons`}
-        title="League Records"
-        subtitle={`All-time milestones, extremes & fun stats across ${years.length} seasons`}
-      />
-
-      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+      {shell}
 
       {/* ── EXTREMES TAB ─────────────────────────────────────────── */}
       {activeTab === 'extremes' && (

@@ -25,17 +25,23 @@ export default function OwnersPage() {
   const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'leaderboard', TAB_IDS)
 
   if (error) return <ErrorState error={error} />
-  if (!loaded) return <LoadingSpinner />
 
-  return (
-    <div className="animate-fade-in">
+  // The title and tabs paint at once; only what's under them waits for data
+  const shell = (
+    <>
       <PageHeader
         kicker="The Managers"
         title="Owner Profiles"
         subtitle="Tap any row to drill into career stats, H2H records & game log"
       />
-
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+    </>
+  )
+  if (!loaded) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
+
+  return (
+    <div className="animate-fade-in">
+      {shell}
 
       {activeTab === 'leaderboard' && <CareerLeaderboard />}
       {activeTab === 'earnings' && <AnnualBreakdown />}

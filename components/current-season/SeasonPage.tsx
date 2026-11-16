@@ -12,6 +12,7 @@ import { useSeasonTransactions } from '@/hooks/useSeasonTransactions'
 import LoadingSpinner from '@/components/shared/LoadingSpinner'
 import ErrorState from '@/components/shared/ErrorState'
 import PageHeader from '@/components/shared/PageHeader'
+import { CURRENT_SEASON } from '@/lib/league'
 import PillTabs from '@/components/shared/PillTabs'
 import MatchupRow from '@/components/current-season/MatchupRow'
 import MatchupModal from '@/components/current-season/MatchupModal'
@@ -58,7 +59,16 @@ export default function SeasonPage() {
   const moves = useSeasonTransactions(live, tab === 'transactions')
 
   if (state.error) return <ErrorState error={state.error} />
-  if (!state.loaded) return <LoadingSpinner />
+  // The title and tabs paint at once; only what's under them waits for data
+  if (!state.loaded) {
+    return (
+      <div className="animate-fade-in">
+        <PageHeader kicker={`The ${CURRENT_SEASON} Season`} title={String(CURRENT_SEASON)} />
+        <PillTabs tabs={TABS} active={tab} onChange={setTab} />
+        <LoadingSpinner />
+      </div>
+    )
+  }
 
   // The newest league in the chain — the tab's season, even before its draft
   const latestSeason = Math.max(...Object.keys(state.leagues).map(Number))

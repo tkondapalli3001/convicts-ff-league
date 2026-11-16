@@ -68,7 +68,19 @@ export default function PlayersPage() {
   }, [transactions, activeYears, activeOwners, activeTypes])
 
   if (error) return <ErrorState error={error} />
-  if (!loaded) return <LoadingSpinner />
+
+  // The title and tabs paint at once; only what's under them waits for data
+  const shell = (
+    <>
+      <PageHeader
+        kicker="The Player Database"
+        title="Players"
+        subtitle="Player performance, draft tendencies, and transactions across all seasons"
+      />
+      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+    </>
+  )
+  if (!loaded) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
 
   const canonicalNames = [...new Set(Object.values(USER_ID_TO_OWNER))]
   const ownerNames = canonicalNames.filter(n => ownerSeasons[n]).sort()
@@ -107,13 +119,7 @@ export default function PlayersPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader
-        kicker="The Player Database"
-        title="Players"
-        subtitle="Player performance, draft tendencies, and transactions across all seasons"
-      />
-
-      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+      {shell}
 
       {/* Loading state for draft/player data */}
       {activeTab !== 'transactions' && activeTab !== 'scoring' && loading && (

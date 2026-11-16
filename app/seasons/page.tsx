@@ -31,16 +31,22 @@ export default function SeasonsPage() {
   const [standingsYear, setStandingsYear] = useState<number | null>(null)
 
   if (error) return <ErrorState error={error} />
-  if (!loaded) return <LoadingSpinner />
+
+  // The title and tabs paint at once; only what's under them waits for data
+  const shell = (
+    <>
+      <PageHeader kicker="The Season Archive" title="Seasons" subtitle="Year-by-year standings, every game, and scoring trends" />
+      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+    </>
+  )
+  if (!loaded) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
 
   const sortedYears = [...years].sort((a, b) => b - a)
   const selectedYear = standingsYear ?? sortedYears[0]
 
   return (
     <div className="animate-fade-in">
-      <PageHeader kicker="The Season Archive" title="Seasons" subtitle="Year-by-year standings, every game, and scoring trends" />
-
-      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
+      {shell}
 
       {/* ── STANDINGS TAB ─────────────────────────────────────────── */}
       {activeTab === 'standings' && (
