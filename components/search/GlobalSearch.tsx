@@ -50,12 +50,12 @@ export default function GlobalSearch() {
       <button
         onClick={() => setOpen(true)}
         disabled={!ready}
-        className="disabled:opacity-40 flex items-center justify-center gap-2 w-11 h-11 md:w-auto md:h-auto md:justify-start md:px-3 md:py-[7px] md:border md:border-[rgba(230,190,90,0.18)] md:rounded-[2px] text-gold-soft md:text-s-text3 md:hover:text-gold-soft md:hover:border-[rgba(230,190,90,0.35)] transition-colors whitespace-nowrap"
+        className="disabled:opacity-40 flex items-center justify-center gap-2 w-11 h-11 lg:w-auto lg:h-auto lg:justify-start lg:px-3 lg:py-[7px] lg:border lg:border-[rgba(230,190,90,0.18)] lg:rounded-[2px] text-gold-soft lg:text-s-text3 lg:hover:text-gold-soft lg:hover:border-[rgba(230,190,90,0.35)] transition-colors whitespace-nowrap"
         aria-label="Search the league"
       >
         <Search size={13} className="flex-shrink-0" />
-        <span className="hidden md:block text-[10px] font-semibold tracking-[1.5px] uppercase">Ask anything</span>
-        <kbd className="hidden md:block px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono text-s-text3 border border-[rgba(230,190,90,0.18)]">⌘K</kbd>
+        <span className="hidden lg:block text-[10px] font-semibold tracking-[1.5px] uppercase">Ask anything</span>
+        <kbd className="hidden lg:block px-1.5 py-0.5 rounded-[2px] text-[9px] font-mono text-s-text3 border border-[rgba(230,190,90,0.18)]">⌘K</kbd>
       </button>
 
       {open && <SearchOverlay onClose={() => setOpen(false)} />}

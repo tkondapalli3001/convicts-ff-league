@@ -21,19 +21,20 @@ export default function Navbar() {
       className="sticky top-0 z-50 bg-s-bg2 border-b"
       style={{ borderColor: 'rgba(var(--gold-rgb), 0.14)', paddingTop: 'env(safe-area-inset-top)' }}
     >
-      <div className="max-w-[1200px] mx-auto flex items-center px-3 sm:px-0 sm:overflow-x-auto scrollbar-none">
+      <div className="max-w-[1200px] mx-auto flex items-center px-3 sm:px-0">
 
         {/* Brand */}
         <Link
           href="/"
-          className="px-2 sm:px-6 py-3 flex-shrink-0 sm:border-r"
+          className="px-2 py-3 flex-shrink-0 sm:border-r sm:px-4 lg:px-5"
           style={{ borderColor: 'rgba(var(--gold-rgb), 0.10)' }}
         >
           <Brand />
         </Link>
 
-        {/* Nav links — desktop only; phones use the bottom bar */}
-        <div className="hidden sm:flex">
+        {/* Nav links — tablets and up; phones use the bottom bar. Compact below lg so all
+            seven fit a tablet; if they ever don't, the links scroll and search stays put. */}
+        <div className="hidden min-w-0 flex-1 overflow-x-auto scrollbar-none sm:flex">
           {NAV_ITEMS.map(item => {
             const isActive =
               item.href === '/'
@@ -44,8 +45,8 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={[
-                  'px-4 pt-[19px] pb-[17px] text-[10px] whitespace-nowrap uppercase',
-                  'tracking-[2.5px] border-b-2 transition-colors duration-150',
+                  'px-2.5 pt-[19px] pb-[17px] text-[10px] whitespace-nowrap uppercase lg:px-3.5',
+                  'tracking-[1.5px] border-b-2 transition-colors duration-150 lg:tracking-[2.5px]',
                   isActive
                     ? 'text-s-text font-bold border-gold'
                     : 'text-s-text3 font-semibold border-transparent hover:text-gold-soft',
@@ -58,9 +59,9 @@ export default function Navbar() {
         </div>
 
         {/* Search + status */}
-        <div className="ml-auto pl-2 sm:px-5 flex-shrink-0 flex items-center gap-4">
+        <div className="ml-auto pl-2 flex-shrink-0 flex items-center gap-3 sm:px-3 lg:px-4">
           <GlobalSearch />
-          <div className="hidden lg:block text-[9px] font-semibold tracking-[2px] uppercase text-s-text3 whitespace-nowrap">
+          <div className="hidden xl:block text-[9px] font-semibold tracking-[2px] uppercase text-s-text3 whitespace-nowrap">
             {statusText}
           </div>
         </div>
