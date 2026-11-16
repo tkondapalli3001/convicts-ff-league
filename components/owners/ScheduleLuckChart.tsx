@@ -13,7 +13,7 @@ import uncertaintyData from '@/public/data/uncertainty.json'
 const U = uncertaintyData as UncertaintySummary
 const GOLD = '#C9962E'
 const MUTED = '#3A4150'
-const AXIS = '#5C6270'
+const AXIS = '#7E8493'
 
 const wins = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1))
 

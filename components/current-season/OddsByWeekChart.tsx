@@ -10,7 +10,7 @@ import { DEFAULT_SIMS, formatOdds, type WeekOdds } from '@/lib/current-season'
 
 const GOLD = '#E8CE8A'
 const MUTED = '#3A4150'
-const AXIS = '#5C6270'
+const AXIS = '#7E8493'
 const GRID = '#241f14'
 
 /**

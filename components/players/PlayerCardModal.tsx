@@ -25,7 +25,7 @@ export default function PlayerCardModal({ player, onClose }: Props) {
     ? '#7FA886'
     : player.winRate >= 0.4
     ? '#9AA0AC'
-    : '#B4636B'
+    : '#BA6A72'
 
   // Portaled to body: the page's animate-fade-in transform would otherwise
   // become the containing block for this fixed overlay and clip it.
@@ -113,7 +113,7 @@ export default function PlayerCardModal({ player, onClose }: Props) {
               <tbody>
                 {[...player.yearStats].reverse().map(ys => {
                   const yr = ys.wins / ys.games
-                  const yColor = yr >= 0.6 ? '#7FA886' : yr >= 0.4 ? '#9AA0AC' : '#B4636B'
+                  const yColor = yr >= 0.6 ? '#7FA886' : yr >= 0.4 ? '#9AA0AC' : '#BA6A72'
                   return (
                     <tr key={ys.year} className="border-t border-s-border/40">
                       <td className="py-1.5 font-bold text-s-text3">{ys.year}</td>

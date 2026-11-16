@@ -105,7 +105,7 @@ export default function HeroSection({
               </div>
             </div>
             <div className="px-[22px] py-4 transition-colors hover:bg-[rgba(180,90,90,0.05)]">
-              <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[3px] text-[#8A4A46]">
+              <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[3px] text-loss">
                 Toilet Bowl Loser
               </div>
               <div className="font-display text-[27px] font-bold uppercase leading-none tracking-[1px] text-loss">
@@ -128,7 +128,7 @@ export default function HeroSection({
           </div>
         </div>
         <div className="px-[18px] py-3.5">
-          <div className="mb-1 text-[9px] font-bold uppercase tracking-[2.5px] text-[#8A4A46]">Toilet Bowl</div>
+          <div className="mb-1 text-[9px] font-bold uppercase tracking-[2.5px] text-loss">Toilet Bowl</div>
           <div className="font-display text-[22px] font-bold uppercase leading-none text-loss">{shameName}</div>
         </div>
       </div>

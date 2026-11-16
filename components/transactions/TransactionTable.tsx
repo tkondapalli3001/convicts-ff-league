@@ -43,7 +43,7 @@ export default function TransactionTable({ transactions, onClick }: Props) {
   }
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] overflow-hidden">
+    <div className="gl overflow-hidden">
       {/* Phones scroll the page, not a box inside it */}
       <div className="sm:max-h-[600px] sm:overflow-y-auto">
         {shown.map(tx => {

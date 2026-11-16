@@ -20,7 +20,7 @@ export default function AvgScoreChart() {
 
   if (!mounted || !years.length) {
     return (
-      <div className="h-[200px] bg-s-bg3 rounded-[10px] animate-pulse" />
+      <div className="h-[200px] bg-s-bg3 rounded-[6px] animate-pulse" />
     )
   }
 
@@ -35,12 +35,12 @@ export default function AvgScoreChart() {
             <CartesianGrid stroke="#241f14" strokeDasharray="3 3" />
             <XAxis
               dataKey="year"
-              tick={{ fill: '#5C6270', fontSize: 11 }}
+              tick={{ fill: '#7E8493', fontSize: 11 }}
               axisLine={{ stroke: '#241f14' }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: '#5C6270', fontSize: 11 }}
+              tick={{ fill: '#7E8493', fontSize: 11 }}
               axisLine={{ stroke: '#241f14' }}
               tickLine={false}
               domain={['auto', 'auto']}

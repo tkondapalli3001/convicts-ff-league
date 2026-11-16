@@ -51,7 +51,7 @@ export default function MostTradedPlayersTable({ transactions, playerWinRates }:
   if (topTraded.length === 0) return null
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px] mb-3">
+    <div className="gl p-[18px] mb-3">
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text2">
           Most Traded Players

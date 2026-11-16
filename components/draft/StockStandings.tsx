@@ -70,13 +70,13 @@ export default function StockStandings({ picks }: Props) {
           <thead>
             <tr>
               <th className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border w-12">Pick</th>
-              <th onClick={() => toggleSort('owner')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{icon('owner')}</th>
-              <th onClick={() => toggleSort('ticker')} className="text-left px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Stock Pick{icon('ticker')}</th>
-              <th onClick={() => toggleSort('roi')} className="text-right px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">ROI{icon('roi')}</th>
-              <th onClick={() => toggleSort('startPrice')} className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2 whitespace-nowrap">
+              <th data-press tabIndex={0} onClick={() => toggleSort('owner')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{icon('owner')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleSort('ticker')} className="text-left px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Stock Pick{icon('ticker')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleSort('roi')} className="text-right px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">ROI{icon('roi')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleSort('startPrice')} className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2 whitespace-nowrap">
                 Open {startLabel}{icon('startPrice')}
               </th>
-              <th onClick={() => toggleSort('endPrice')} className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2 whitespace-nowrap">
+              <th data-press tabIndex={0} onClick={() => toggleSort('endPrice')} className="text-right px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2 whitespace-nowrap">
                 Close {endLabel}{icon('endPrice')}
               </th>
             </tr>

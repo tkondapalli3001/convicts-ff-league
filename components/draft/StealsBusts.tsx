@@ -191,11 +191,11 @@ function PickList({ title, emoji, picks, isSteal, tip }: {
             <thead>
               <tr>
                 <th className="text-left px-4 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border">#</th>
-                <th onClick={() => toggleSort('playerName')} className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Player{icon('playerName')}</th>
-                <th onClick={() => toggleSort('owner')} className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{icon('owner')}</th>
-                <th onClick={() => toggleSort('pickNo')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Pick{icon('pickNo')}</th>
-                <th onClick={() => toggleSort('totalPts')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Pts{icon('totalPts')}</th>
-                <th onClick={() => toggleSort('value')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Value{icon('value')}</th>
+                <th data-press tabIndex={0} onClick={() => toggleSort('playerName')} className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Player{icon('playerName')}</th>
+                <th data-press tabIndex={0} onClick={() => toggleSort('owner')} className="text-left px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{icon('owner')}</th>
+                <th data-press tabIndex={0} onClick={() => toggleSort('pickNo')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Pick{icon('pickNo')}</th>
+                <th data-press tabIndex={0} onClick={() => toggleSort('totalPts')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Pts{icon('totalPts')}</th>
+                <th data-press tabIndex={0} onClick={() => toggleSort('value')} className="text-center px-3 py-2 text-[9px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Value{icon('value')}</th>
               </tr>
             </thead>
             <tbody>

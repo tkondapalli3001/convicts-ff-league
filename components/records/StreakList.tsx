@@ -33,7 +33,7 @@ export default function StreakList({ title, streaks, variant }: Props) {
           <span className="w-[80px] flex-shrink-0 text-[13px] font-bold text-s-text">{owner}</span>
           <span
             className="w-9 flex-shrink-0 font-display text-[32px] font-bold leading-none"
-            style={{ color: isWin ? '#7FA886' : '#B4636B' }}
+            style={{ color: isWin ? '#7FA886' : '#BA6A72' }}
           >
             {streak}
           </span>

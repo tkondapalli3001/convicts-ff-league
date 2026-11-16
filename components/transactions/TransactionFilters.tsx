@@ -38,7 +38,7 @@ export default function TransactionFilters({
   ].filter(Boolean).join(' · ')
 
   return (
-    <FilterSheet summary={summary} result={`Show ${shown} move${shown === 1 ? '' : 's'}`} className="gl relative overflow-hidden rounded-[12px] p-[14px] mb-4">
+    <FilterSheet summary={summary} result={`Show ${shown} move${shown === 1 ? '' : 's'}`} className="gl relative overflow-hidden rounded-[6px] p-[14px] mb-4">
       {/* Type filter */}
       <div className="mb-3 relative z-10">
         <div className="text-[9px] font-bold tracking-[2px] uppercase text-gold-soft mb-2">Type</div>

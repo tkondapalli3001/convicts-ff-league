@@ -136,7 +136,7 @@ export default function StatRows<T, K extends string = string>({ rows, rowKey, o
               type="button"
               onClick={() => toggle(key)}
               aria-expanded={isOpen}
-              className="grid min-h-[48px] w-full items-center gap-x-1 px-3 py-2 text-left"
+              className="grid min-h-[48px] w-full items-center gap-x-1 px-3 py-2 text-left transition-colors active:bg-[rgba(201,150,46,0.07)]"
               style={grid}
             >
               <span className="min-w-0">{lead(row, i)}</span>

@@ -24,24 +24,24 @@ const TAB_IDS: readonly Tab[] = ['seasons', 'bridge', 'h2h', 'gamelog']
 function PlayoffChip({ made }: { made: boolean }) {
   return made
     ? <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#7FA886', background: 'rgba(127,168,134,0.12)' }}>● Clinched</span>
-    : <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}>✕ Elim.</span>
+    : <span className="inline-flex items-center gap-1 rounded-[2px] px-2 py-[3px] text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#BA6A72', background: 'rgba(180,99,107,0.12)' }}>✕ Elim.</span>
 }
 
 // Season Log on phones: record, PF/Gm and margin up front, the rest a tap away
 type SeasonRow = { wins: number; losses: number; pf: number; pa: number; inPlayoffs: boolean }
 const perGame = (s: SeasonRow, pts: number) => (s.wins + s.losses > 0 ? (pts / (s.wins + s.losses)).toFixed(1) : '—')
 const SEASON_FIELDS: StatField<SeasonRow>[] = [
-  { label: 'Record', value: s => <><span style={{ color: '#7FA886' }}>{s.wins}</span>–<span style={{ color: '#B4636B' }}>{s.losses}</span></> },
+  { label: 'Record', value: s => <><span style={{ color: '#7FA886' }}>{s.wins}</span>–<span style={{ color: '#BA6A72' }}>{s.losses}</span></> },
   { label: 'PF/Gm', value: s => perGame(s, s.pf) },
   {
     label: '+/−',
     value: s => {
       const m = s.pf - s.pa
-      return <span style={{ color: m >= 0 ? '#7FA886' : '#B4636B' }}>{m >= 0 ? '+' : ''}{m.toFixed(1)}</span>
+      return <span style={{ color: m >= 0 ? '#7FA886' : '#BA6A72' }}>{m >= 0 ? '+' : ''}{m.toFixed(1)}</span>
     },
   },
   { label: 'Win%', value: s => <WinPctBadge pct={(s.wins / (s.wins + s.losses || 1) * 100).toFixed(1)} /> },
-  { label: 'PA/Gm', value: s => <span style={{ color: '#B4636B' }}>{perGame(s, s.pa)}</span> },
+  { label: 'PA/Gm', value: s => <span style={{ color: '#BA6A72' }}>{perGame(s, s.pa)}</span> },
   { label: 'Playoffs', value: s => <PlayoffChip made={s.inPlayoffs} /> },
 ]
 
@@ -82,7 +82,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
   ]
 
   // ── Owner stat grid (design 4a) — 12 cells, semantically coloured Barlow values ──────
-  const SAGE = '#7FA886', BRICK = '#B4636B', GOLD = '#C9A24B'
+  const SAGE = '#7FA886', BRICK = '#BA6A72', GOLD = '#C9A24B'
   const finalsGames = finals.wins + finals.losses
 
   // How sure a career record can be: its range, and the rate after pulling it toward .500
@@ -139,7 +139,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div className="flex items-center gap-4 sm:gap-6">
             <div
-              className="flex h-[60px] w-[60px] flex-shrink-0 items-center justify-center rounded-full font-display text-[22px] font-extrabold text-white sm:h-[76px] sm:w-[76px] sm:text-[28px]"
+              className="flex h-[60px] w-[60px] flex-shrink-0 items-center justify-center rounded-full font-display text-[22px] font-extrabold text-[#0B0B0D] sm:h-[76px] sm:w-[76px] sm:text-[28px]"
               style={{
                 background: ownerColor(ownerName),
                 boxShadow: '0 0 0 2px #050506, 0 0 0 3.5px #C9962E, 0 0 24px rgba(201,150,46,0.35)',
@@ -174,7 +174,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
               </span>
             ))}
             {earnings != null && (
-              <span className="border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[2px] sm:px-4 sm:py-2" style={{ color: earnings >= 0 ? '#7FA886' : '#B4636B', borderColor: earnings >= 0 ? 'rgba(127,168,134,0.35)' : 'rgba(180,90,90,0.35)' }}>
+              <span className="border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[2px] sm:px-4 sm:py-2" style={{ color: earnings >= 0 ? '#7FA886' : '#BA6A72', borderColor: earnings >= 0 ? 'rgba(127,168,134,0.35)' : 'rgba(180,90,90,0.35)' }}>
                 {fmtMoney(earnings)} Net
               </span>
             )}
@@ -283,11 +283,11 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                       <td className="font-display text-[17px] font-bold text-s-text2">{s.year}</td>
                       <td><FinishBadge finish={s.finish} /></td>
                       <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{s.wins}</td>
-                      <td className="font-display text-[17px] font-bold" style={{ color: '#B4636B' }}>{s.losses}</td>
+                      <td className="font-display text-[17px] font-bold" style={{ color: '#BA6A72' }}>{s.losses}</td>
                       <td><WinPctBadge pct={spct} /></td>
                       <td className="text-right font-display text-[17px] font-semibold text-s-text2 num">{perGame(s, s.pf)}</td>
-                      <td className="text-right font-display text-[17px] font-semibold num" style={{ color: '#B4636B' }}>{perGame(s, s.pa)}</td>
-                      <td className="text-right font-display text-[17px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#B4636B' }}>
+                      <td className="text-right font-display text-[17px] font-semibold num" style={{ color: '#BA6A72' }}>{perGame(s, s.pa)}</td>
+                      <td className="text-right font-display text-[17px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#BA6A72' }}>
                         {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
                       </td>
                       <td className="text-right"><PlayoffChip made={s.inPlayoffs} /></td>
@@ -335,7 +335,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 <span className="w-[44px] flex-shrink-0 font-display text-[15px] font-semibold text-s-text3 sm:w-[52px] sm:text-[16px]">{fmtPts(oppPts)}</span>
                 <span
                   className="flex-shrink-0 rounded-[2px] px-[6px] py-[1px] text-[10px] font-extrabold"
-                  style={won ? { color: '#7FA886', background: 'rgba(127,168,134,0.12)' } : { color: '#B4636B', background: 'rgba(180,99,107,0.12)' }}
+                  style={won ? { color: '#7FA886', background: 'rgba(127,168,134,0.12)' } : { color: '#BA6A72', background: 'rgba(180,99,107,0.12)' }}
                 >
                   {won ? 'W' : 'L'}
                 </span>
@@ -345,7 +345,7 @@ export default function OwnerDetail({ ownerName }: { ownerName: string }) {
                 >
                   {g.type === 'R' ? 'REG' : 'PLY'}
                 </span>
-                <span className="ml-auto flex-shrink-0 font-display text-[16px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#B4636B' }}>
+                <span className="ml-auto flex-shrink-0 font-display text-[16px] font-bold num" style={{ color: margin >= 0 ? '#7FA886' : '#BA6A72' }}>
                   {margin >= 0 ? '+' : ''}{margin.toFixed(1)}
                 </span>
               </div>

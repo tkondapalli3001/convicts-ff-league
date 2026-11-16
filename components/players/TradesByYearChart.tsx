@@ -39,7 +39,7 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
   const total = data.reduce((s, d) => s + d.count, 0)
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px] mb-4">
+    <div className="gl p-[18px] mb-4">
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3">
@@ -59,13 +59,13 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
         <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -20 }} barSize={28}>
           <XAxis
             dataKey="year"
-            tick={{ fill: '#5C6270', fontSize: 11, fontWeight: 600 }}
+            tick={{ fill: '#7E8493', fontSize: 11, fontWeight: 600 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fill: '#5C6270', fontSize: 10 }}
+            tick={{ fill: '#7E8493', fontSize: 10 }}
             axisLine={false}
             tickLine={false}
           />
@@ -95,7 +95,7 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
               dataKey="count"
               position="top"
               formatter={(val: number) => (val > 0 ? val : '')}
-              style={{ fill: '#5C6270', fontSize: 10, fontWeight: 700 }}
+              style={{ fill: '#7E8493', fontSize: 10, fontWeight: 700 }}
             />
           </Bar>
         </BarChart>

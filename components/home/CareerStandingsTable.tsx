@@ -29,7 +29,7 @@ function CareerAvatar({ name, isChamp, url, size }: { name: string; isChamp: boo
   }
   return (
     <div
-      className="flex flex-shrink-0 items-center justify-center rounded-full font-extrabold leading-none text-white"
+      className="flex flex-shrink-0 items-center justify-center rounded-full font-extrabold leading-none text-[#0B0B0D]"
       style={{ width: size, height: size, fontSize: Math.round(size * 0.32), background: ownerColor(name), boxShadow: shadow }}
     >
       {fullNameInitials(name)}
@@ -44,9 +44,9 @@ function fmtChamps(n: number): string {
 const PHONE_FIELDS: StatField<CareerStats, SortKey>[] = [
   { label: 'W–L', sortKey: 'wins', value: d => <span className="font-bold text-s-text">{fmtRecord(d.allW, d.allL)}</span> },
   { label: 'Win%', sortKey: 'winpct', value: d => <span className="font-bold" style={{ color: winPctColor(d.winpct) }}>{(d.winpct * 100).toFixed(1)}%</span> },
-  { label: 'Titles', sortKey: 'champs', value: d => (d.champs > 0 ? <span className="font-bold text-gold-soft">{fmtChamps(d.champs)}×</span> : <span className="text-[#3A4150]">—</span>) },
+  { label: 'Titles', sortKey: 'champs', value: d => (d.champs > 0 ? <span className="font-bold text-gold-soft">{fmtChamps(d.champs)}×</span> : <span className="text-[#5C6270]">—</span>) },
   { label: 'Avg PPG', sortKey: 'avgPPG', value: d => d.avgPFperGame.toFixed(1) },
-  { label: 'Net', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>{fmtMoney(d.earn)}</span> : <span className="text-[#3A4150]">—</span>) },
+  { label: 'Net', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#BA6A72' }}>{fmtMoney(d.earn)}</span> : <span className="text-[#5C6270]">—</span>) },
   { label: 'Seasons', value: d => d.numSeasons },
 ]
 const PHONE_SORTS: { key: SortKey; label: string }[] = [
@@ -123,7 +123,7 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
         sort={{ key: sortKey, dir: sortDir === 'asc' ? 1 : -1, onSort: toggleSort, options: PHONE_SORTS }}
         lead={(d, i) => (
           <span className="flex items-center gap-1.5">
-            <span className="w-4 flex-shrink-0 text-center font-display text-[15px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#5C6270' }}>
+            <span className="w-4 flex-shrink-0 text-center font-display text-[15px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#7E8493' }}>
               {i + 1}
             </span>
             <CareerAvatar name={d.name} isChamp={d.champs > 0} url={state.ownerAvatarMap?.[d.name]} size={24} />
@@ -140,27 +140,27 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
             <tr>
               <th className="!text-center" style={{ width: 48 }}>No.</th>
               <th>Manager</th>
-              <th onClick={() => toggleSort('wins')} style={sortHeadStyle('wins')}>
+              <th data-press tabIndex={0} onClick={() => toggleSort('wins')} style={sortHeadStyle('wins')}>
                 W–L{arrow('wins')}
               </th>
-              <th onClick={() => toggleSort('winpct')} style={sortHeadStyle('winpct')}>
+              <th data-press tabIndex={0} onClick={() => toggleSort('winpct')} style={sortHeadStyle('winpct')}>
                 Win%{arrow('winpct')}
               </th>
-              <th onClick={() => toggleSort('avgPPG')} className="!text-right" style={sortHeadStyle('avgPPG')}>
+              <th data-press tabIndex={0} onClick={() => toggleSort('avgPPG')} className="!text-right" style={sortHeadStyle('avgPPG')}>
                 Avg PPG{arrow('avgPPG')}
               </th>
-              <th onClick={() => toggleSort('champs')} className="!text-center" style={sortHeadStyle('champs')}>
+              <th data-press tabIndex={0} onClick={() => toggleSort('champs')} className="!text-center" style={sortHeadStyle('champs')}>
                 Titles{arrow('champs')}
               </th>
-              <th onClick={() => toggleSort('earn')} className="!text-right" style={sortHeadStyle('earn')}>
+              <th data-press tabIndex={0} onClick={() => toggleSort('earn')} className="!text-right" style={sortHeadStyle('earn')}>
                 Net{arrow('earn')}
               </th>
             </tr>
           </thead>
           <tbody>
             {displayData.map((d, i) => (
-              <tr key={d.name} onClick={() => goToOwner(d.name)}>
-                <td className="text-center font-display text-[17px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#3A4150' }}>
+              <tr key={d.name} data-press tabIndex={0} onClick={() => goToOwner(d.name)}>
+                <td className="text-center font-display text-[17px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#5C6270' }}>
                   {String(i + 1).padStart(2, '0')}
                 </td>
                 <td>
@@ -176,7 +176,7 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
                 </td>
                 <td className="font-display text-[17px] font-bold">
                   <span className="text-s-text">{d.allW}</span>
-                  <span className="mx-[3px] text-[#3A4150]">–</span>
+                  <span className="mx-[3px] text-[#5C6270]">–</span>
                   <span className="text-[#7A828F]">{d.allL}</span>
                 </td>
                 <td className="font-display text-[17px] font-bold" style={{ color: winPctColor(d.winpct) }}>
@@ -189,16 +189,16 @@ export default function CareerStandingsTable({ data }: { data: CareerStats[] }) 
                   {d.champs > 0 ? (
                     <span className="text-gold-soft">{fmtChamps(d.champs)}×</span>
                   ) : (
-                    <span className="text-[#3A4150]">—</span>
+                    <span className="text-[#5C6270]">—</span>
                   )}
                 </td>
                 <td className="text-right font-display text-[17px] font-bold num">
                   {d.earn != null ? (
-                    <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>
+                    <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#BA6A72' }}>
                       {d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}
                     </span>
                   ) : (
-                    <span className="text-[#3A4150]">—</span>
+                    <span className="text-[#5C6270]">—</span>
                   )}
                 </td>
               </tr>

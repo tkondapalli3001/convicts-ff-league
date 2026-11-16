@@ -12,6 +12,8 @@ interface Props {
  * dividers — the row owns its bottom divider + gold hover wash.
  */
 export default function RecordItem({ label, value, context }: Props) {
+  // "102.10 pts": the number big, the unit as a small label beside it
+  const unit = String(value).match(/^(.*\d)\s+([a-z]+)$/i)
   return (
     <div
       className="flex items-center justify-between gap-4 border-b px-5 py-[13px] transition-colors last:border-b-0 hover:bg-[rgba(201,150,46,0.05)]"
@@ -22,7 +24,12 @@ export default function RecordItem({ label, value, context }: Props) {
         <div className="mt-1 text-[10px] leading-snug tracking-[0.5px] text-s-text3">{context}</div>
       </div>
       <div className="flex-shrink-0 font-display text-[28px] font-bold leading-none text-gold-bright num">
-        {value}
+        {unit ? (
+          <>
+            {unit[1]}
+            <span className="ml-1.5 font-sans text-[10px] font-bold uppercase tracking-[1.5px] text-gold-dim">{unit[2]}</span>
+          </>
+        ) : value}
       </div>
     </div>
   )

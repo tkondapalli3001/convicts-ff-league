@@ -84,7 +84,7 @@ export default function PlayerOwnershipTable({ ownership }: Props) {
   const sort = { sortKey, sortDir, onSort: handleSort }
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
+    <div className="gl p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text2 mb-3">
         Draft Ownership — most-drafted players across all seasons
       </div>

@@ -3,7 +3,8 @@ import coreWebVitals from 'eslint-config-next/core-web-vitals'
 const config = [
   ...coreWebVitals,
   {
-    ignores: ['out/**', '.next/**', 'node_modules/**', 'scripts/**'],
+    // .claude/ holds tool worktrees (whole copies of the repo, build output included), never source
+    ignores: ['out/**', '.next/**', 'node_modules/**', 'scripts/**', '.claude/**'],
   },
   {
     rules: {

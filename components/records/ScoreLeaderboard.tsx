@@ -36,7 +36,7 @@ export default function ScoreLeaderboard({ title, scores, variant, countByOwner 
             className="flex items-center gap-3 border-b px-5 py-2 transition-colors last:border-b-0 hover:bg-[rgba(201,150,46,0.05)]"
             style={{ borderColor: 'rgba(255,255,255,0.04)' }}
           >
-            <span className="w-5 flex-shrink-0 font-display text-[15px] font-bold text-[#3A4150]">{rank + 1}</span>
+            <span className="w-5 flex-shrink-0 font-display text-[15px] font-bold text-[#5C6270]">{rank + 1}</span>
             <OwnerAvatar name={s.owner} size="sm" />
             <div className="min-w-0 flex-1 sm:w-[70px] sm:flex-none">
               <div className="truncate text-[12px] font-bold text-s-text">{s.owner}</div>
@@ -54,7 +54,7 @@ export default function ScoreLeaderboard({ title, scores, variant, countByOwner 
               style={
                 s.result === 'W'
                   ? { color: '#7FA886', background: 'rgba(127,168,134,0.12)' }
-                  : { color: '#B4636B', background: 'rgba(180,99,107,0.12)' }
+                  : { color: '#BA6A72', background: 'rgba(180,99,107,0.12)' }
               }
             >
               {s.result}

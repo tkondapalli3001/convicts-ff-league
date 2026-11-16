@@ -26,7 +26,7 @@ export default function StatChip({
       <div className="text-[9px] font-bold uppercase tracking-[2px] text-s-text3 sm:tracking-[3px]">
         {label}
       </div>
-      <div className="font-display text-[30px] font-bold leading-none text-s-text sm:text-[44px]">
+      <div className="mt-auto font-display text-[30px] font-bold leading-none text-s-text sm:text-[44px]">
         {value}
       </div>
       {sub && (

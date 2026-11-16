@@ -67,7 +67,7 @@ export default function RivalryCalc() {
       {h2h && h2h.games.length > 0 && (
         <div>
           {/* H2H Record scoreboard */}
-          <div className="flex items-center justify-between gap-4 mb-5 px-4 py-4 bg-s-bg3 rounded-[12px]">
+          <div className="flex items-center justify-between gap-4 mb-5 px-4 py-4 bg-s-bg3 rounded-[6px]">
             <div
               className="text-center cursor-pointer group flex-1"
               onClick={() => router.push(`/owners/${encodeURIComponent(ownerA)}`)}
@@ -106,7 +106,7 @@ export default function RivalryCalc() {
 
           {/* Stat cards */}
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-s-bg3 rounded-[10px] p-3 text-center">
+            <div className="bg-s-bg3 rounded-[6px] p-3 text-center">
               <div className="text-[9px] text-s-text3 uppercase tracking-[1.5px] mb-2">Avg Score</div>
               <div className="flex items-end justify-center gap-3">
                 <div>
@@ -120,7 +120,7 @@ export default function RivalryCalc() {
                 </div>
               </div>
             </div>
-            <div className="bg-s-bg3 rounded-[10px] p-3 text-center">
+            <div className="bg-s-bg3 rounded-[6px] p-3 text-center">
               <div className="text-[9px] text-s-text3 uppercase tracking-[1.5px] mb-2">Highest Score</div>
               <div className="flex items-end justify-center gap-3">
                 <div>
@@ -144,7 +144,7 @@ export default function RivalryCalc() {
             const ptsB = aIsT1 ? g.pts2 : g.pts1
             const aWon = ptsA >= ptsB
             return (
-              <div className="bg-s-bg3 rounded-[10px] p-3 mb-3">
+              <div className="bg-s-bg3 rounded-[6px] p-3 mb-3">
                 <div className="text-[9px] text-s-text3 uppercase tracking-[1.5px] mb-3">Most Recent Matchup</div>
                 <div className="flex items-center justify-between">
                   <div className="text-center">

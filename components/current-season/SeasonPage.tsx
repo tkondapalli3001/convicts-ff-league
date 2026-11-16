@@ -82,7 +82,6 @@ export default function SeasonPage() {
       <PageHeader
         kicker={preseason ? `The ${latestSeason} Preseason` : live.live ? `Week ${live.week} · Live from Sleeper` : `The ${season} Season`}
         title={String(Number.isFinite(latestSeason) ? latestSeason : season)}
-        subtitle="Power rankings, matchups, rosters, every move, and the draft — synced with Sleeper"
       />
 
       <PillTabs tabs={TABS} active={tab} onChange={setTab} />

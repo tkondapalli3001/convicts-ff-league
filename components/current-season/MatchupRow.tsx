@@ -15,7 +15,7 @@ function TeamMeta({ team, badges, align }: { team: TeamPreview; badges: Badge[];
         {team.wins}–{team.losses}
         {team.seed > 0 && <> · {ordinal(team.seed)}</>}
         {team.streak && team.streak.len >= 2 && (
-          <span style={{ color: team.streak.type === 'W' ? '#7FA886' : '#B4636B' }}>
+          <span style={{ color: team.streak.type === 'W' ? '#7FA886' : '#BA6A72' }}>
             {' '}· {team.streak.type}{team.streak.len}
           </span>
         )}
@@ -36,12 +36,12 @@ export default function MatchupRow({ p, onClick }: { p: EnrichedPreview; onClick
   const played = p.status === 'final'
   const scored = p.status !== 'upcoming'
   const nameColor = (isA: boolean) =>
-    played && (isA ? winnerIsA : !winnerIsA) ? ownerColor(isA ? p.teamA.name : p.teamB.name) : played ? '#5C6270' : '#EDE9E0'
+    played && (isA ? winnerIsA : !winnerIsA) ? ownerColor(isA ? p.teamA.name : p.teamB.name) : played ? '#7E8493' : '#EDE9E0'
 
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-2 border-b px-3 py-4 text-left transition-colors last:border-b-0 hover:bg-[rgba(201,150,46,0.05)] sm:gap-4 sm:px-6 sm:py-5"
+      className="flex w-full items-center gap-2 border-b px-3 py-4 text-left transition-colors last:border-b-0 hover:bg-[rgba(201,150,46,0.05)] active:bg-[rgba(201,150,46,0.08)] sm:gap-4 sm:px-6 sm:py-5"
       style={{ borderColor: 'rgba(255,255,255,0.04)' }}
     >
       {/* Team A (right-aligned toward the center) */}
@@ -62,9 +62,9 @@ export default function MatchupRow({ p, onClick }: { p: EnrichedPreview; onClick
       <div className="flex min-w-[80px] flex-shrink-0 flex-col items-center sm:min-w-[168px]">
         {scored ? (
           <div className="flex items-baseline gap-1 whitespace-nowrap font-display font-bold leading-none sm:gap-1.5">
-            <span className="text-[18px] sm:text-[28px]" style={{ color: !played || winnerIsA ? '#EDE9E0' : '#5C6270' }}>{fmtPts(p.ptsA)}</span>
-            <span className="text-[12px] text-[#3A4150] sm:text-[16px]">–</span>
-            <span className="text-[18px] sm:text-[28px]" style={{ color: !played || !winnerIsA ? '#EDE9E0' : '#5C6270' }}>{fmtPts(p.ptsB)}</span>
+            <span className="text-[18px] sm:text-[28px]" style={{ color: !played || winnerIsA ? '#EDE9E0' : '#7E8493' }}>{fmtPts(p.ptsA)}</span>
+            <span className="text-[12px] text-[#5C6270] sm:text-[16px]">–</span>
+            <span className="text-[18px] sm:text-[28px]" style={{ color: !played || !winnerIsA ? '#EDE9E0' : '#7E8493' }}>{fmtPts(p.ptsB)}</span>
           </div>
         ) : (
           <span className="font-display text-[18px] font-bold tracking-[2px] text-gold-dim sm:text-[26px]">VS</span>

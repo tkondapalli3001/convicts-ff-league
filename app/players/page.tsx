@@ -117,13 +117,13 @@ export default function PlayersPage() {
 
       {/* Loading state for draft/player data */}
       {activeTab !== 'transactions' && activeTab !== 'scoring' && loading && (
-        <div className="flex items-center gap-3 px-4 py-3 gl rounded-[10px] mb-4 text-[12px] text-s-text2">
+        <div className="flex items-center gap-3 px-4 py-3 gl rounded-[6px] mb-4 text-[12px] text-s-text2">
           <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
           {loadingText}
         </div>
       )}
       {activeTab !== 'transactions' && activeTab !== 'scoring' && dataError && (
-        <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[10px] mb-4 text-[12px] text-s-red">
+        <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[6px] mb-4 text-[12px] text-s-red">
           Failed to load draft data: {dataError}
         </div>
       )}
@@ -144,13 +144,13 @@ export default function PlayersPage() {
       {activeTab === 'transactions' && (
         <div>
           {txLoading && (
-            <div className="flex items-center gap-3 px-4 py-3 gl rounded-[10px] mb-4 text-[12px] text-s-text2">
+            <div className="flex items-center gap-3 px-4 py-3 gl rounded-[6px] mb-4 text-[12px] text-s-text2">
               <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
               {txLoadingText}
             </div>
           )}
           {txError && (
-            <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[10px] mb-4 text-[12px] text-s-red">
+            <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[6px] mb-4 text-[12px] text-s-red">
               Failed to load transactions: {txError}
             </div>
           )}

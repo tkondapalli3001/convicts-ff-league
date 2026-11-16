@@ -32,7 +32,7 @@ export default function SyncStatus({ label, syncedAt, syncing, stale, onRefresh 
     <div className="mb-4 flex items-center justify-end gap-2 text-[10px] font-semibold uppercase tracking-[1.5px] text-s-text3">
       <span
         className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${stale ? '' : 'animate-gold-pulse'}`}
-        style={{ background: stale ? '#B4636B' : '#7FA886' }}
+        style={{ background: stale ? '#BA6A72' : '#7FA886' }}
         aria-hidden
       />
       <span className="min-w-0 text-right leading-snug">

@@ -25,7 +25,7 @@ export default function HallOfFameCard({ years }: { years: number[] }) {
         style={{ borderColor: 'rgba(var(--gold-rgb), 0.16)' }}
       >
         <span className="h-px w-5 bg-gold" />
-        <div className="text-metal text-[13px] font-bold uppercase tracking-[4px]">Hall of Fame</div>
+        <h2 className="text-metal text-[13px] font-bold uppercase tracking-[4px]">Hall of Fame</h2>
       </div>
 
       <div className="py-1.5">
@@ -40,7 +40,7 @@ export default function HallOfFameCard({ years }: { years: number[] }) {
             >
               <span className="w-9 flex-shrink-0 text-[10px] font-bold tracking-[1px] text-gold-dim">{year}</span>
               <div
-                className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold text-white"
+                className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold text-[#0B0B0D]"
                 style={{ background: champClr, boxShadow: '0 0 0 1px rgba(var(--gold-rgb), 0.35)' }}
               >
                 {avatarLetters(c.winner)}

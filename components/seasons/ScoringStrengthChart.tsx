@@ -53,7 +53,7 @@ export default function ScoringStrengthChart() {
             </Link>
             <div className="relative h-[32px]" aria-hidden>
               <span className="absolute inset-y-1 w-px" style={{ left: x(0), background: 'rgba(var(--gold-rgb), 0.30)' }} />
-              <span className="absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full" style={{ left: x(r.low), right: `calc(100% - ${x(r.high)})`, background: '#5C6270' }} />
+              <span className="absolute top-1/2 h-[2px] -translate-y-1/2 rounded-full" style={{ left: x(r.low), right: `calc(100% - ${x(r.high)})`, background: '#7E8493' }} />
               <span className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ left: x(r.avg), background: GOLD, boxShadow: '0 0 0 2px #0B0B0D' }} />
             </div>
             <span className="text-right font-display text-[16px] font-semibold text-s-text2 num">

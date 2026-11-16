@@ -66,7 +66,7 @@ export default function ManagerCard({ data, playerWinRates = [], onClose }: { da
             </div>
           ) : (
             <div
-              className="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-[18px] font-black text-white"
+              className="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-[18px] font-black text-[#0B0B0D]"
               style={{
                 background: `linear-gradient(135deg, ${color} 0%, ${color}88 100%)`,
                 boxShadow: `0 0 0 3px #1a1d23, 0 0 24px ${color}55`,

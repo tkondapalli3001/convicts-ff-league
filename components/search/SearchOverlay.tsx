@@ -7,6 +7,7 @@ import { useLeague } from '@/context/LeagueContext'
 import { useCareerStats } from '@/hooks/useCareerStats'
 import { useRecordsData } from '@/hooks/useRecordsData'
 import { usePlayersData } from '@/hooks/usePlayersData'
+import { useFocusTrap } from '@/hooks/useModalClose'
 import { ownerColor, fullNameInitials } from '@/lib/utils'
 import { OWNER_FULL_NAMES, USER_ID_TO_OWNER } from '@/lib/league'
 import { buildEntityIndex, answerQuery } from '@/lib/search'
@@ -43,6 +44,7 @@ export default function SearchOverlay({ onClose }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { inputRef.current?.focus() }, [])
+  useFocusTrap()
 
   // Lock page scroll while open
   useEffect(() => {
@@ -153,14 +155,17 @@ export default function SearchOverlay({ onClose }: Props) {
   // become the containing block for this fixed overlay and clip it to the nav.
   return createPortal(
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Search the league"
       className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-3 pb-[calc(32px+env(safe-area-inset-bottom))] sm:px-4 sm:pt-[10vh] sm:pb-8 overflow-y-auto animate-fade-in"
-      style={{ background: 'rgba(2, 6, 23, 0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+      style={{ background: 'rgba(5, 5, 6, 0.82)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
       onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="w-full max-w-[640px]">
         {/* ── Input ─────────────────────────────────────────────── */}
         <div className="flex items-center gap-3 bento-card px-4 py-3.5 border-gold/40">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="flex-shrink-0" style={{ color: '#6e7681' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="flex-shrink-0" style={{ color: '#7E8493' }} aria-hidden>
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.2" />
             <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
           </svg>
@@ -169,6 +174,7 @@ export default function SearchOverlay({ onClose }: Props) {
             value={query}
             onChange={e => { setQuery(e.target.value); setSelected(null); setFocusIdx(-1) }}
             onKeyDown={handleKeyDown}
+            aria-label="Ask anything about the league"
             placeholder="Ask anything about the league…"
             className="flex-1 bg-transparent text-[16px] text-s-text placeholder:text-s-text3 outline-none sm:text-[15px]"
             autoComplete="off"
@@ -253,7 +259,7 @@ export default function SearchOverlay({ onClose }: Props) {
                         onMouseDown={e => { e.preventDefault(); selectEntry({ kind: 'manager', name: m.name }) }}
                         className={['w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
                           isFocused ? 'bg-s-bg3' : 'hover:bg-s-bg3/60'].join(' ')}>
-                        <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-black text-white"
+                        <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-black text-[#0B0B0D]"
                           style={{ background: `linear-gradient(135deg, ${color} 0%, ${color}88 100%)` }}>
                           {fullNameInitials(m.name)}
                         </div>
@@ -289,7 +295,7 @@ export default function SearchOverlay({ onClose }: Props) {
                           </div>
                         </div>
                         <div className="text-[12px] font-bold flex-shrink-0"
-                          style={{ color: stat.winRate >= 0.6 ? '#E8CE8A' : stat.winRate >= 0.45 ? '#9AA0AC' : '#B4636B' }}>
+                          style={{ color: stat.winRate >= 0.6 ? '#E8CE8A' : stat.winRate >= 0.45 ? '#9AA0AC' : '#BA6A72' }}>
                           {(stat.winRate * 100).toFixed(0)}%
                         </div>
                       </button>

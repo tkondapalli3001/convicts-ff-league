@@ -250,13 +250,12 @@ function MatchupCard({
             style={won ? { background: 'rgba(127,168,134,0.12)' } : undefined}
           >
             <span className={`text-[12px] font-semibold truncate ${won ? 'text-s-text' : 'text-s-text3'}`}>{name}</span>
-            <span className="flex-shrink-0 font-display text-[15px] font-bold" style={{ color: won ? '#7FA886' : '#5C6270' }}>
+            <span className="flex-shrink-0 font-display text-[15px] font-bold" style={{ color: won ? '#7FA886' : '#7E8493' }}>
               {score != null ? score.toFixed(2) : winnerName != null ? '—' : 'TBD'}
             </span>
           </div>
         ))}
       </div>
-      <div className="text-[9px] text-s-text3/60 text-right mt-1.5 tracking-wide">tap for details</div>
     </div>
   )
 }
@@ -371,7 +370,7 @@ export default function PlayoffBracket({ year }: Props) {
         <div className="text-[10px] font-bold tracking-[3px] uppercase text-gold-soft mb-1">
           {year} Playoff Bracket
         </div>
-        <div className="text-[9px] text-s-text3/50 mb-4">Tap any matchup to view game details</div>
+        <div className="mb-4 text-[11px] text-s-text3">Tap any matchup to view game details</div>
 
         <div className="overflow-x-auto">
           <div style={{ minWidth: rounds.length * 170 + (rounds.length - 1) * 32 }}>

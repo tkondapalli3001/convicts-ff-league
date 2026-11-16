@@ -29,13 +29,13 @@ export default function SectionCard({ title, action, brick, className, children 
         className="flex items-center justify-between gap-3 border-b px-5 pb-3 pt-[18px]"
         style={{ borderColor: headBorder }}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
           <span className="h-px w-5 flex-shrink-0" style={{ background: dash }} />
-          <div className={`text-[11px] font-bold uppercase tracking-[4px] ${brick ? 'text-loss' : 'text-gold-soft'}`}>
+          <h2 className={`text-[11px] font-bold uppercase tracking-[2.5px] sm:tracking-[4px] ${brick ? 'text-loss' : 'text-gold-soft'}`}>
             {title}
-          </div>
+          </h2>
         </div>
-        {action && <div className="flex-shrink-0">{action}</div>}
+        {action && <div className="flex-shrink-0 whitespace-nowrap">{action}</div>}
       </div>
       {children}
     </div>

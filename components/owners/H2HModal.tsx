@@ -39,7 +39,7 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
       className="fixed inset-0 bg-black/80 z-[500] flex items-center justify-center p-4"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-s-bg2 border border-s-border rounded-[14px] p-5 max-w-[520px] w-full max-h-[85vh] overflow-y-auto">
+      <div className="gl p-5 max-w-[520px] w-full max-h-[85vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-[14px]">
           <span className="text-[16px] font-extrabold text-s-text">
@@ -55,7 +55,7 @@ export default function H2HModal({ p1, p2, games, onClose }: Props) {
         </div>
 
         {/* Game rows */}
-        <div className="overflow-x-auto sm:max-h-[400px] sm:overflow-y-auto rounded-[10px] bg-s-bg2 border border-s-border" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="overflow-x-auto sm:max-h-[400px] sm:overflow-y-auto rounded-[6px] bg-s-bg2 border border-s-border" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="min-w-[420px]">
           {rows.map(({ g, p1Pts, p2Pts, p1Won, margin }) => (
             <div

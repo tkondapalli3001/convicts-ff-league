@@ -27,7 +27,7 @@ export default function AnswerCard({ answer }: { answer: Exclude<Answer, { kind:
           {answer.owner && (
             <button onClick={() => router.push(`/owners/${encodeURIComponent(answer.owner!)}`)}>
               <div
-                className="w-11 h-11 rounded-full flex items-center justify-center text-[14px] font-black text-white"
+                className="w-11 h-11 rounded-full flex items-center justify-center text-[14px] font-black text-[#0B0B0D]"
                 style={{ background: `linear-gradient(135deg, ${accent} 0%, ${accent}88 100%)`, boxShadow: `0 0 16px ${accent}44` }}
               >
                 {fullNameInitials(answer.owner)}
@@ -98,7 +98,7 @@ export default function AnswerCard({ answer }: { answer: Exclude<Answer, { kind:
           onClick={() => router.push(`/owners/${encodeURIComponent(a)}`)}
         >
           <div
-            className="w-11 h-11 mx-auto mb-2 rounded-full flex items-center justify-center text-[13px] font-black text-white"
+            className="w-11 h-11 mx-auto mb-2 rounded-full flex items-center justify-center text-[13px] font-black text-[#0B0B0D]"
             style={{ background: `linear-gradient(135deg, ${colorA} 0%, ${colorA}88 100%)`, boxShadow: `0 0 14px ${colorA}44` }}
           >
             {fullNameInitials(a)}
@@ -117,7 +117,7 @@ export default function AnswerCard({ answer }: { answer: Exclude<Answer, { kind:
           onClick={() => router.push(`/owners/${encodeURIComponent(b)}`)}
         >
           <div
-            className="w-11 h-11 mx-auto mb-2 rounded-full flex items-center justify-center text-[13px] font-black text-white"
+            className="w-11 h-11 mx-auto mb-2 rounded-full flex items-center justify-center text-[13px] font-black text-[#0B0B0D]"
             style={{ background: `linear-gradient(135deg, ${colorB} 0%, ${colorB}88 100%)`, boxShadow: `0 0 14px ${colorB}44` }}
           >
             {fullNameInitials(b)}

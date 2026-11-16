@@ -23,6 +23,8 @@ export default function SortHeader<K extends string>({ k, label, sortKey, sortDi
   const active = sortKey === k
   return (
     <th
+      data-press
+      tabIndex={0}
       onClick={() => onSort(k)}
       aria-sort={active ? (sortDir === 1 ? 'ascending' : 'descending') : undefined}
       className={className}

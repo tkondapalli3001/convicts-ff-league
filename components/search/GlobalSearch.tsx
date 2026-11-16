@@ -15,9 +15,11 @@ export function openLeagueSearch() {
 export default function GlobalSearch() {
   const { state } = useLeague()
   const [open, setOpen] = useState(false)
+  const ready = state.loaded
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (!ready) return
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         setOpen(o => !o)
@@ -34,22 +36,21 @@ export default function GlobalSearch() {
       }
       if (e.key === 'Escape' && open) setOpen(false)
     }
-    function onOpenEvent() { setOpen(true) }
+    function onOpenEvent() { if (ready) setOpen(true) }
     document.addEventListener('keydown', onKey)
     window.addEventListener(OPEN_SEARCH_EVENT, onOpenEvent)
     return () => {
       document.removeEventListener('keydown', onKey)
       window.removeEventListener(OPEN_SEARCH_EVENT, onOpenEvent)
     }
-  }, [open])
-
-  if (!state.loaded) return null
+  }, [open, ready])
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center justify-center gap-2 w-11 h-11 md:w-auto md:h-auto md:justify-start md:px-3 md:py-[7px] md:border md:border-[rgba(230,190,90,0.18)] md:rounded-[2px] text-gold-soft md:text-s-text3 md:hover:text-gold-soft md:hover:border-[rgba(230,190,90,0.35)] transition-colors whitespace-nowrap"
+        disabled={!ready}
+        className="disabled:opacity-40 flex items-center justify-center gap-2 w-11 h-11 md:w-auto md:h-auto md:justify-start md:px-3 md:py-[7px] md:border md:border-[rgba(230,190,90,0.18)] md:rounded-[2px] text-gold-soft md:text-s-text3 md:hover:text-gold-soft md:hover:border-[rgba(230,190,90,0.35)] transition-colors whitespace-nowrap"
         aria-label="Search the league"
       >
         <Search size={13} className="flex-shrink-0" />

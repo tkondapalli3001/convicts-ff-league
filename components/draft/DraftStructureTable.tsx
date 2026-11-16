@@ -43,7 +43,7 @@ export default function DraftStructureTable({ data }: Props) {
 
   if (!data.length) {
     return (
-      <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
+      <div className="gl p-[18px]">
         <div className="text-center py-8 text-s-text3 text-[12px]">No draft structure data available</div>
       </div>
     )
@@ -53,7 +53,7 @@ export default function DraftStructureTable({ data }: Props) {
   const selectedEntry = data.find(e => e.strategy === selectedStrategy) ?? null
 
   return (
-    <div className="bg-s-bg2 border border-s-border rounded-[12px] p-[18px]">
+    <div className="gl p-[18px]">
       <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text2 mb-1">
         Draft Strategy vs Season Outcome
         <InfoTip term="Draft strategy">
@@ -72,7 +72,7 @@ export default function DraftStructureTable({ data }: Props) {
             <div
               key={entry.strategy}
               onClick={() => setSelectedStrategy(isSelected ? null : entry.strategy)}
-              className={`rounded-[10px] p-4 border cursor-pointer transition-all duration-150 ${
+              className={`rounded-[6px] p-4 border cursor-pointer transition-all duration-150 ${
                 isSelected
                   ? 'border-gold bg-[rgba(201,150,46,0.10)] ring-1 ring-[rgba(201,150,46,0.4)]'
                   : isBest
@@ -116,7 +116,7 @@ export default function DraftStructureTable({ data }: Props) {
 
       {/* Instance detail panel */}
       {selectedEntry && (
-        <div className="mb-4 rounded-[10px] border border-[rgba(230,190,90,0.3)] bg-[#0B0B0D] p-4">
+        <div className="mb-4 rounded-[6px] border border-[rgba(230,190,90,0.3)] bg-[#0B0B0D] p-4">
           <div className="text-[10px] font-bold tracking-[2px] uppercase text-gold-soft mb-3">
             {selectedEntry.strategy} · {selectedEntry.examples.length} instance{selectedEntry.examples.length !== 1 ? 's' : ''}
           </div>
@@ -166,9 +166,9 @@ export default function DraftStructureTable({ data }: Props) {
       <table className="w-full border-collapse text-[12px]">
         <thead>
           <tr className="text-[10px] font-bold tracking-[1px] uppercase text-s-text3 border-b border-s-border">
-            <th onClick={() => toggleStratSort('strategy')} className="text-left py-[5px] pr-3 cursor-pointer select-none hover:text-s-text2">Strategy{stratIcon('strategy')}</th>
-            <th onClick={() => toggleStratSort('avgWins')} className="text-right py-[5px] pr-3 cursor-pointer select-none hover:text-s-text2">Avg W{stratIcon('avgWins')}</th>
-            <th onClick={() => toggleStratSort('avgFinish')} className="text-right py-[5px] cursor-pointer select-none hover:text-s-text2">Avg Finish{stratIcon('avgFinish')}</th>
+            <th data-press tabIndex={0} onClick={() => toggleStratSort('strategy')} className="text-left py-[5px] pr-3 cursor-pointer select-none hover:text-s-text2">Strategy{stratIcon('strategy')}</th>
+            <th data-press tabIndex={0} onClick={() => toggleStratSort('avgWins')} className="text-right py-[5px] pr-3 cursor-pointer select-none hover:text-s-text2">Avg W{stratIcon('avgWins')}</th>
+            <th data-press tabIndex={0} onClick={() => toggleStratSort('avgFinish')} className="text-right py-[5px] cursor-pointer select-none hover:text-s-text2">Avg Finish{stratIcon('avgFinish')}</th>
           </tr>
         </thead>
         <tbody>

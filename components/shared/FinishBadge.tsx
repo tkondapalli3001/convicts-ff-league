@@ -18,13 +18,13 @@ export default function FinishBadge({ finish }: Props) {
     )
   if (finish === 3)
     return (
-      <span className={base} style={{ color: '#8A7439', borderColor: 'rgba(var(--gold-rgb), 0.16)' }}>3rd</span>
+      <span className={base} style={{ color: '#93803F', borderColor: 'rgba(var(--gold-rgb), 0.16)' }}>3rd</span>
     )
   if (finish)
     return (
       <span className={base} style={{ color: '#9AA0AC', borderColor: 'rgba(255,255,255,0.10)' }}>{finish}th</span>
     )
   return (
-    <span className={base} style={{ color: '#3A4150', borderColor: 'rgba(255,255,255,0.08)' }}>—</span>
+    <span className={base} style={{ color: '#5C6270', borderColor: 'rgba(255,255,255,0.08)' }}>—</span>
   )
 }

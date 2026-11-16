@@ -49,8 +49,8 @@ export default function OwnerAvatar({ name, size = 'md', className = '' }: Props
     <div
       className={`rounded-full flex items-center justify-center font-extrabold flex-shrink-0 ${box} ${text} ${className}`}
       style={{
-        background: `linear-gradient(135deg, ${color} 0%, ${color}88 100%)`,
-        color: '#ffffff',
+        background: color,
+        color: '#0B0B0D',
         boxShadow: `0 0 0 2px #050506, 0 0 14px ${color}40`,
         letterSpacing: '-0.02em',
       }}

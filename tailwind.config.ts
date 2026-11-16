@@ -21,20 +21,20 @@ const config: Config = {
         's-border2':  '#2a2418',
         's-text':     '#EDE9E0',  // warm off-white
         's-text2':    '#9AA0AC',
-        's-text3':    '#5C6270',
-        's-muted':    '#3A4150',
+        's-text3':    '#7E8493',
+        's-muted':    '#5C6270',
         's-gold':     '#C9962E',
         's-green':    '#7FA886',  // sage win
-        's-red':      '#B4636B',  // brick loss
+        's-red':      '#BA6A72',  // brick loss
         // Midnight Prime — precise tokens for new chrome + future pages
         'gold':        '#C9962E',
         'gold-soft':   '#C9A24B',
-        'gold-dim':    '#8A7439',
+        'gold-dim':    '#93803F',
         'gold-bright': '#E8CE8A',
         'panel':       'rgba(10,10,12,0.7)',
         'panel-2':     'rgba(10,10,12,0.5)',
         'win':         '#7FA886',
-        'loss':        '#B4636B',
+        'loss':        '#BA6A72',
       },
       fontFamily: {
         sans: ['var(--font-archivo)', 'system-ui', '-apple-system', 'sans-serif'],

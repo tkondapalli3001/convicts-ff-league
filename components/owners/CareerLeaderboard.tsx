@@ -12,7 +12,7 @@ import { fmtMoney, fmtRecord, winPctColor } from '@/lib/utils'
 
 type SortKey = keyof LeaderboardRow
 
-const muted = <span className="text-[#3A4150]">—</span>
+const muted = <span className="text-[#5C6270]">—</span>
 
 /** Phones: a clear, objective leaderboard — record, Win%, titles. The rest is a tap away. */
 function phoneFields(playoffOnly: boolean): StatField<LeaderboardRow, SortKey>[] {
@@ -25,7 +25,7 @@ function phoneFields(playoffOnly: boolean): StatField<LeaderboardRow, SortKey>[]
     { label: 'Avg Fin', sortKey: 'avgFinish', value: d => (d.avgFinish != null ? d.avgFinish.toFixed(1) : '—') },
     ...(playoffOnly ? [] : [{ label: 'Playoffs', sortKey: 'playoffApps' as const, value: (d: LeaderboardRow) => `${d.playoffApps}/${d.numSeasons}` }]),
     { label: '🚽 Shame', sortKey: 'shame', value: d => (d.shame > 0 ? <span className="font-bold text-loss">{d.shame}×</span> : muted) },
-    { label: 'Net $', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>{fmtMoney(d.earn)}</span> : muted) },
+    { label: 'Net $', sortKey: 'earn', value: d => (d.earn != null ? <span className="font-bold" style={{ color: d.earn >= 0 ? '#C9A24B' : '#BA6A72' }}>{fmtMoney(d.earn)}</span> : muted) },
   ]
 }
 
@@ -90,7 +90,7 @@ export default function CareerLeaderboard() {
         <button
           onClick={() => setPlayoffOnly(p => !p)}
           className={[
-            'rounded-[2px] border px-3 py-[5px] text-[10px] font-bold uppercase tracking-[1.5px] transition-colors duration-150',
+            'min-h-[32px] rounded-[2px] border px-3 py-[5px] text-[10px] font-bold uppercase tracking-[1.5px] transition-colors duration-150 sm:min-h-0',
             playoffOnly ? 'border-gold text-gold-soft' : 'text-s-text3 hover:text-gold-soft',
           ].join(' ')}
           style={playoffOnly ? undefined : { borderColor: 'rgba(var(--gold-rgb), 0.18)' }}
@@ -108,7 +108,7 @@ export default function CareerLeaderboard() {
         sort={{ key: sortKey, dir: sortDir, onSort: handleSort, options: phoneSorts(playoffOnly) }}
         lead={(d, i) => (
           <span className="flex items-center gap-1.5">
-            <span className="w-4 flex-shrink-0 text-center font-display text-[15px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#5C6270' }}>
+            <span className="w-4 flex-shrink-0 text-center font-display text-[15px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#7E8493' }}>
               {i + 1}
             </span>
             <OwnerAvatar name={d.name} size="xs" />
@@ -141,8 +141,8 @@ export default function CareerLeaderboard() {
               {sorted.map((d, i) => {
                 const pct = (d.winpct * 100).toFixed(1)
                 return (
-                  <tr key={d.name} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}>
-                    <td className="text-center font-display text-[17px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#3A4150' }}>
+                  <tr key={d.name} data-press tabIndex={0} onClick={() => router.push(`/owners/${encodeURIComponent(d.name)}`)}>
+                    <td className="text-center font-display text-[17px] font-bold" style={{ color: i < 3 ? '#C9A24B' : '#5C6270' }}>
                       {String(i + 1).padStart(2, '0')}
                     </td>
                     <td className="sticky-owner sticky left-0 z-[1] border-r border-white/[0.06] font-bold text-s-text">
@@ -153,18 +153,18 @@ export default function CareerLeaderboard() {
                     </td>
                   <td className="font-display text-[17px] font-semibold text-s-text2">{d.numSeasons}</td>
                   <td className="font-display text-[17px] font-bold" style={{ color: '#7FA886' }}>{d.allW}</td>
-                  <td className="font-display text-[17px] font-bold" style={{ color: '#B4636B' }}>{d.allL}</td>
+                  <td className="font-display text-[17px] font-bold" style={{ color: '#BA6A72' }}>{d.allL}</td>
                   <td><WinPctBadge pct={pct} /></td>
                   <td className="font-display text-[17px] font-semibold text-s-text2 num">{d.avgPF.toFixed(1)}</td>
                   <td className="font-display text-[17px] font-semibold text-s-text2 num">{d.avgFinish != null ? d.avgFinish.toFixed(1) : '—'}</td>
                   {!playoffOnly && <td className="font-display text-[17px] font-semibold text-s-text2 num">{d.playoffApps}/{d.numSeasons}</td>}
-                  <td className="text-center font-display text-[16px] font-bold">{d.champs > 0 ? <span className="text-gold-soft">{d.champs}×</span> : <span className="text-[#3A4150]">—</span>}</td>
-                  <td className="text-center font-display text-[16px] font-bold">{d.shame > 0 ? <span className="text-loss">{d.shame}×</span> : <span className="text-[#3A4150]">—</span>}</td>
+                  <td className="text-center font-display text-[16px] font-bold">{d.champs > 0 ? <span className="text-gold-soft">{d.champs}×</span> : <span className="text-[#5C6270]">—</span>}</td>
+                  <td className="text-center font-display text-[16px] font-bold">{d.shame > 0 ? <span className="text-loss">{d.shame}×</span> : <span className="text-[#5C6270]">—</span>}</td>
                   <td className="font-display text-[17px] font-bold num">
                     {d.earn != null ? (
-                      <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#B4636B' }}>{d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}</span>
+                      <span style={{ color: d.earn >= 0 ? '#C9A24B' : '#BA6A72' }}>{d.earn >= 0 ? '+' : '−'}${Math.abs(d.earn)}</span>
                     ) : (
-                      <span className="text-[#3A4150]">—</span>
+                      <span className="text-[#5C6270]">—</span>
                     )}
                   </td>
                 </tr>

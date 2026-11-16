@@ -25,7 +25,7 @@ export default function WallOfShameCard({ years }: { years: number[] }) {
         style={{ borderColor: 'rgba(180,90,90,0.20)' }}
       >
         <span className="h-px w-5" style={{ background: '#8A4A46' }} />
-        <div className="text-[13px] font-bold uppercase tracking-[4px] text-loss">Wall of Shame</div>
+        <h2 className="text-[13px] font-bold uppercase tracking-[4px] text-loss">Wall of Shame</h2>
       </div>
 
       <div className="py-1.5">
@@ -38,11 +38,11 @@ export default function WallOfShameCard({ years }: { years: number[] }) {
               onClick={() => router.push(`/owners/${encodeURIComponent(s.loser)}`)}
               className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left sm:gap-3.5 sm:px-6 transition-colors hover:bg-[rgba(180,90,90,0.05)]"
             >
-              <span className="w-9 flex-shrink-0 text-[10px] font-bold tracking-[1px]" style={{ color: '#8A4A46' }}>
+              <span className="w-9 flex-shrink-0 text-[10px] font-bold tracking-[1px]" style={{ color: '#BA6A72' }}>
                 {year}
               </span>
               <div
-                className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold text-white"
+                className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold text-[#0B0B0D]"
                 style={{ background: shameClr, opacity: 0.75 }}
               >
                 {avatarLetters(s.loser)}
@@ -51,7 +51,7 @@ export default function WallOfShameCard({ years }: { years: number[] }) {
                 {s.loser}
               </span>
               {seed != null && (
-                <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#8A4A46' }}>
+                <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-[1px]" style={{ color: '#BA6A72' }}>
                   Seed #{seed}
                 </span>
               )}

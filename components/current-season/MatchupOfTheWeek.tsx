@@ -78,12 +78,12 @@ export default function MatchupOfTheWeek({ p, reasons, ammo, onOpen }: {
     >
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3 sm:px-7" style={{ borderColor: 'rgba(var(--gold-rgb), 0.16)' }}>
         <div className="flex items-center gap-2.5">
-          <span className="h-px w-5 bg-gold" />
-          <span className="text-[11px] font-bold uppercase tracking-[3px] text-gold-soft sm:text-[13px] sm:tracking-[4px]">
+          <span className="hidden h-px w-5 bg-gold sm:block" />
+          <h2 className="whitespace-nowrap text-[11px] font-bold uppercase tracking-[1.5px] text-gold-soft sm:text-[13px] sm:tracking-[4px]">
             ★ Matchup of the Week
-          </span>
+          </h2>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-[2px] text-s-text3 sm:text-[12px]">
+        <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[1px] text-s-text3 sm:text-[12px] sm:tracking-[2px]">
           Week {p.week}{p.status === 'live' ? ' · Live' : p.status === 'final' ? ' · Final' : ''}
         </span>
       </div>

@@ -32,7 +32,7 @@ function InjuryTag({ status }: { status: string | null }) {
       className="flex-shrink-0 rounded-[2px] border px-1 py-px text-[9px] font-bold tracking-[0.5px]"
       style={mild
         ? { color: '#C9A24B', borderColor: 'rgba(var(--gold-rgb), 0.3)' }
-        : { color: '#B4636B', borderColor: 'rgba(180,99,107,0.35)' }}
+        : { color: '#BA6A72', borderColor: 'rgba(180,99,107,0.35)' }}
       title={status}
     >
       {label}
@@ -154,7 +154,7 @@ function PlayerRow({ slot, p, stat, current }: { slot: string | null; p: RosterP
             className="flex w-11 flex-shrink-0 items-center justify-center text-[10px] font-bold tracking-[0.5px]"
             style={p
               ? { background: `${color}26`, color, boxShadow: `inset 3px 0 0 ${color}` }
-              : { color: '#5C6270' }}
+              : { color: '#7E8493' }}
           >
             {label}
           </span>
@@ -463,7 +463,7 @@ export default function RosterView({ data, liveWeek, matchupWeeks, onWeek, onOpe
                   {h?.teamName ?? team.owner}
                 </div>
                 {h?.teamName && (
-                  <Link href={`/owners/${encodeURIComponent(team.owner)}`} className="mt-0.5 inline-block text-[11px] font-semibold text-s-text2 sm:hidden">
+                  <Link href={`/owners/${encodeURIComponent(team.owner)}`} className="inline-flex min-h-[28px] items-center text-[11px] font-semibold text-s-text2 sm:hidden">
                     {team.owner}
                   </Link>
                 )}

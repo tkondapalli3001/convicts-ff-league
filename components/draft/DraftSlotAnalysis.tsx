@@ -91,9 +91,9 @@ export default function DraftSlotAnalysis() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th onClick={() => toggleSlotSort('slot')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Slot{sIcon('slot')}</th>
-              <th onClick={() => toggleSlotSort('avgFinish')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Avg Finish{sIcon('avgFinish')}</th>
-              <th onClick={() => toggleSlotSort('playoffs')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Made Playoffs{sIcon('playoffs')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleSlotSort('slot')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Slot{sIcon('slot')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleSlotSort('avgFinish')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Avg Finish{sIcon('avgFinish')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleSlotSort('playoffs')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Made Playoffs{sIcon('playoffs')}</th>
             </tr>
           </thead>
           <tbody>
@@ -198,9 +198,9 @@ export default function DraftSlotAnalysis() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th onClick={() => toggleMgrSort('owner')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{mIcon('owner')}</th>
-              <th onClick={() => toggleMgrSort('avgSlot')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Avg Slot{mIcon('avgSlot')}</th>
-              <th onClick={() => toggleMgrSort('count')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2"># Drafts{mIcon('count')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleMgrSort('owner')} className="text-left px-4 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Manager{mIcon('owner')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleMgrSort('avgSlot')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2">Avg Slot{mIcon('avgSlot')}</th>
+              <th data-press tabIndex={0} onClick={() => toggleMgrSort('count')} className="text-center px-3 py-3 text-[10px] font-bold tracking-[2px] uppercase text-s-text3 border-b border-s-border cursor-pointer select-none hover:text-s-text2"># Drafts{mIcon('count')}</th>
             </tr>
           </thead>
           <tbody>
@@ -236,7 +236,7 @@ export default function DraftSlotAnalysis() {
             onClick={() => setSelectedManager(null)}
           >
             <div
-              className="bg-s-bg2 border border-s-border rounded-[14px] p-6 max-w-sm w-full mx-4"
+              className="gl p-6 max-w-sm w-full mx-4"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-1">

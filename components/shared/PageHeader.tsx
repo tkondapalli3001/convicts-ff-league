@@ -2,7 +2,7 @@
 
 interface Props {
   title: string
-  subtitle: React.ReactNode
+  subtitle?: React.ReactNode
   /** Optional gold kicker line above the title, e.g. "THE RECORD BOOK · 7 SEASONS". */
   kicker?: string
 }
@@ -36,9 +36,11 @@ export default function PageHeader({ title, subtitle, kicker }: Props) {
       <h1 className="text-hero-gold font-display text-[32px] font-extrabold uppercase leading-[0.95] tracking-[1px] sm:text-[56px] sm:tracking-[2px] lg:text-[64px]">
         {title}
       </h1>
-      <p className="mt-3 hidden text-[12px] font-medium uppercase tracking-[1.5px] text-s-text2 sm:block">
-        {subtitle}
-      </p>
+      {subtitle && (
+        <p className="mt-3 hidden text-[12px] font-medium uppercase tracking-[1.5px] text-s-text2 sm:block">
+          {subtitle}
+        </p>
+      )}
     </div>
   )
 }
