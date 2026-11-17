@@ -113,8 +113,8 @@ architecture or the Midnight Prime palette. **No action without owner sign-off.*
    data load. The build now works the hero out from the snapshot (`homeHero(stateFromSnapshots())`)
    and bakes it into Home's HTML; the page reruns the same function once loaded, so nothing
    changes on screen. Between the title game and the January snapshot the built hero still
-   shows last year's champion until the data arrives (a second or two). Rerun Lighthouse to
-   record the new score.
+   shows last year's champion until the data arrives (a second or two). Measured 2026-11-16:
+   Home's LCP is 1.0s (scores under "Lighthouse" in section F).
 3. **Done 2026-11-16 (design pass):** every popup takes keyboard focus, keeps Tab inside and
    hands focus back on close (`useFocusTrap` in `hooks/useModalClose.ts`).
 
@@ -225,6 +225,25 @@ looks clickable that isn't, and no screen is blank while it loads.
   every page paints its title and tabs before the data loads.
 - **Tested and kept:** live matchup rows give both scores equal weight on purpose (a mid-week
   lead means little while players are yet to play).
+- **Lighthouse 13.6, phone profile, live site, 2026-11-16 (week 10, in season):**
+
+  | Page | Perf | A11y | Best practices | SEO | LCP | Blocking time | Layout shift |
+  |---|---|---|---|---|---|---|---|
+  | Home | 84 | 100 | 100 | 100 | 1.0s | 620ms | 0 |
+  | 2026 → Power Rankings | 65 | 100 | 100 | 100 | 2.9s | 3,960ms | 0.025 |
+  | 2026 → Matchups | 54 | 100 | 100 | 100 | 6.8s | 1,010ms | 0.057 |
+  | Owners | 97 | 100 | 100 | 100 | 2.2s | 140ms | 0.016 |
+
+  Before the pass, Home was perf 73 / a11y 96 with a 5.6s LCP. The first run this day had Home
+  at 70 / 96: the week card had brought the odds-by-week work (a simulation per week played) onto
+  Home, one 3.9s task. That work is now opt-in (`usePreviewData(..., { oddsHistory })`) and only
+  the Power Rankings tab asks for it; the Wall of Shame initials were the a11y miss.
+  Two things still cost points, both on the season tab:
+  1. Power Rankings: the odds-by-week chart is one 3.6s task under Lighthouse's 4x slowdown.
+     Moving the simulations to a Web Worker (or drawing the chart after the table) would clear it.
+  2. Matchups: the biggest element (Matchup of the Week) can't paint until Sleeper answers, so
+     LCP is 6.8s. A placeholder of the same size, like Home's, would cut the shift; the wait is
+     the live data itself.
 - **Done 2026-11-16 (owner said do all five of the L3 proposals):**
   1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
      not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the
