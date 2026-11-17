@@ -225,25 +225,56 @@ looks clickable that isn't, and no screen is blank while it loads.
   every page paints its title and tabs before the data loads.
 - **Tested and kept:** live matchup rows give both scores equal weight on purpose (a mid-week
   lead means little while players are yet to play).
-- **Lighthouse 13.6, phone profile, live site, 2026-11-16 (week 10, in season):**
+- **Lighthouse 13.6, phone profile (slow 4G, 4x CPU slowdown), live site, 2026-11-17, every tab,
+  one run each (scores move a few points between runs):** accessibility, best practices and SEO
+  are **100 on all 28 pages**.
 
-  | Page | Perf | A11y | Best practices | SEO | LCP | Blocking time | Layout shift |
-  |---|---|---|---|---|---|---|---|
-  | Home | 84 | 100 | 100 | 100 | 1.0s | 620ms | 0 |
-  | 2026 → Power Rankings | 65 | 100 | 100 | 100 | 2.9s | 3,960ms | 0.025 |
-  | 2026 → Matchups | 54 | 100 | 100 | 100 | 6.8s | 1,010ms | 0.057 |
-  | Owners | 97 | 100 | 100 | 100 | 2.2s | 140ms | 0.016 |
+  | Page | Perf | LCP | Blocking time | Layout shift |
+  |---|---|---|---|---|
+  | Home | 90 | 1.0s | 410ms | 0 |
+  | 2026 → Power Rankings | 73 | 2.9s | 1,010ms | 0 |
+  | 2026 → Matchups | 56 | 7.0s | 840ms | 0.018 |
+  | 2026 → Rosters | 57 | 6.8s | 860ms | 0.003 |
+  | 2026 → Transactions | 76 | 2.9s | 790ms | 0 |
+  | 2026 → Draft | 77 | 2.9s | 750ms | 0 |
+  | Owners → Career Leaderboard | 91 | 2.2s | 320ms | 0 |
+  | Owners → Earnings Ledger | 96 | 2.2s | 160ms | 0 |
+  | Owners → Head-to-Head | 96 | 2.3s | 160ms | 0 |
+  | Owner profile (Teja) | 77 | 1.0s | 1,060ms | 0 |
+  | Seasons → Standings | 70 | 3.0s | 1,250ms | 0 |
+  | Seasons → Game Log | 85 | 2.9s | 400ms | 0 |
+  | Seasons → Finish Tracker | 78 | 5.0s | 210ms | 0 |
+  | Seasons → Scoring Trend | 73 | 5.2s | 350ms | 0 |
+  | Records → Extremes | 80 | 5.1s | 110ms | 0 |
+  | Records → Records | 96 | 2.2s | 190ms | 0 |
+  | Records → Streaks | 96 | 2.2s | 180ms | 0 |
+  | Records → Fun Facts | 65 | 5.1s | 630ms | 0 |
+  | Records → Trash Talk | 97 | 2.3s | 110ms | 0 |
+  | Players → Scoring | 68 | 5.2s | 510ms | 0 |
+  | Players → Win Rate | 92 | 2.9s | 200ms | 0 |
+  | Players → Draft Ownership | 72 | 5.2s | 360ms | 0 |
+  | Players → Transactions | 87 | 2.9s | 300ms | 0 |
+  | Draft → Pick Order | 86 | 2.3s | 520ms | 0 |
+  | Draft → Past Drafts | 91 | 2.3s | 320ms | 0 |
+  | Draft → Slot Analysis | 71 | 5.0s | 410ms | 0 |
+  | Draft → Steals & Busts | 82 | 2.3s | 640ms | 0 |
+  | Draft → Draft Strategy | 69 | 5.1s | 490ms | 0 |
 
-  Before the pass, Home was perf 73 / a11y 96 with a 5.6s LCP. The first run this day had Home
-  at 70 / 96: the week card had brought the odds-by-week work (a simulation per week played) onto
-  Home, one 3.9s task. That work is now opt-in (`usePreviewData(..., { oddsHistory })`) and only
-  the Power Rankings tab asks for it; the Wall of Shame initials were the a11y miss.
-  Two things still cost points, both on the season tab:
-  1. Power Rankings: the odds-by-week chart is one 3.6s task under Lighthouse's 4x slowdown.
-     Moving the simulations to a Web Worker (or drawing the chart after the table) would clear it.
-  2. Matchups: the biggest element (Matchup of the Week) can't paint until Sleeper answers, so
-     LCP is 6.8s. A placeholder of the same size, like Home's, would cut the shift; the wait is
-     the live data itself.
+  Before the pass, Home was perf 73 / a11y 96 with a 5.6s LCP. What the sweep changed:
+  - The odds-by-week chart (a simulation per week played) was one 3.6-3.9s task. It's now opt-in
+    (`usePreviewData(..., { oddsHistory })`, Power Rankings only) and runs in a Web Worker
+    (`lib/current-season/odds-worker.ts` via `hooks/useOddsHistory.ts`, main-thread fallback).
+    Power Rankings' blocking time went 3,960ms → 1,010ms; Home's 3,970ms → 410ms.
+  - The store asks Sleeper for the newest league alongside the snapshot files, and for a live
+    season's users, rosters, weeks, brackets and drafts in one burst (was three rounds).
+  - Layout shift: `main` is a screen tall so the footer can't be shoved down; loading notes on
+    Players take the content's place instead of sitting above it.
+  - A11y misses fixed: Wall of Shame initials, draft-board cell text, three unlabelled selects.
+  What the numbers mean: on a normal connection the Matchups content painted at 1.3s (Lighthouse's
+  observed figure). The 5-7s LCPs are its slow-phone estimate for pages whose biggest element is
+  data: ~300KB of scripts plus ~260KB of season files over slow 4G before anything can draw.
+  Pages whose biggest element is the title score higher for the same wait. Getting under that
+  needs data in the HTML (what Home's hero does), page by page.
 - **Done 2026-11-16 (owner said do all five of the L3 proposals):**
   1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
      not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the
