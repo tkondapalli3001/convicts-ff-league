@@ -41,6 +41,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'trashtalk', label: 'Trash Talk' },
 ]
 const TAB_IDS = TABS.map(t => t.id)
+const NO_AVATARS: Record<string, string> = {}
 
 function extremes({ highScore, lowScore, maxMargin, minMargin, highPF, lowPF, biggestPlayoffBlowout, topRivalry, rv1, rv2, high140, low80 }: ExtremesData) {
   return (
@@ -95,27 +96,23 @@ export default function RecordsPage({ built }: { built: BuiltExtremes | null }) 
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
     </>
   )
-  if (!loaded) {
-    // Extremes is baked into the HTML; another tab (or a deep link to one) waits on the spinner
-    const baked = built && activeTab === 'extremes'
-    return (
-      <div className="animate-fade-in">
-        {shell}
-        {baked ? (
-          <>
-            <div data-baked><BuiltAvatars.Provider value={built.avatars}>{extremes(built.records)}</BuiltAvatars.Provider></div>
-            <div data-baked-fallback><LoadingSpinner /></div>
-          </>
-        ) : <LoadingSpinner />}
-      </div>
-    )
-  }
+  // Extremes is baked into the HTML from the build; every other tab waits on the spinner
+  if (!loaded && !(built && activeTab === 'extremes')) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
 
   return (
     <div className="animate-fade-in">
       {shell}
 
-      {activeTab === 'extremes' && extremes(recs)}
+      {/* Same elements before and after the load (only their values update), so nothing repaints.
+          data-baked lets a deep link to another tab hide this until the page takes over (globals.css). */}
+      {activeTab === 'extremes' && (
+        <div data-baked={loaded ? undefined : ''}>
+          <BuiltAvatars.Provider value={built?.avatars ?? NO_AVATARS}>
+            {extremes(loaded || !built ? recs : built.records)}
+          </BuiltAvatars.Provider>
+        </div>
+      )}
+      {!loaded && <div data-baked-fallback><LoadingSpinner /></div>}
 
       {/* ── RECORDS TAB ──────────────────────────────────────────── */}
       {activeTab === 'records' && (
