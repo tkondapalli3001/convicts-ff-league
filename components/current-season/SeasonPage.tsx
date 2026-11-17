@@ -52,7 +52,7 @@ export default function SeasonPage() {
   const [openOwner, openMatchup, closeMatchup] = useUrlModal('matchup')
   const [rosterWeekParam, setRosterWeekParam] = useUrlParam('rosterWeek', '')
   const rosterWeek = asWeek(rosterWeekParam)
-  const { weeks, week, previews, motw, oddsHistory } = usePreviewData(live, selectedWeek)
+  const { weeks, week, previews, motw, oddsHistory } = usePreviewData(live, selectedWeek, { oddsHistory: tab === 'rankings' })
   const { me } = useMe()
   const rankings = usePowerRankings(live)
   const rosters = useTeamRosters(live, rosterWeek, rankings.rows)

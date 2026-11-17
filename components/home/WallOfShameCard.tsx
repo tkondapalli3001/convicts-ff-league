@@ -43,7 +43,7 @@ export default function WallOfShameCard({ years }: { years: number[] }) {
               </span>
               <div
                 className="flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full text-[9px] font-extrabold text-[#0B0B0D]"
-                style={{ background: shameClr, opacity: 0.75 }}
+                style={{ background: shameClr }}
               >
                 {avatarLetters(s.loser)}
               </div>

@@ -75,8 +75,8 @@ export function yourMatchup(previews: EnrichedPreview[], me: string): YourMatchu
   }
 }
 
-/** Matchups on the season tab. `selectedWeek` null = the current week. */
-export function usePreviewData(live: LiveSeason, selectedWeek: number | null): PreviewData {
+/** Matchups on the season tab. `selectedWeek` null = the current week. `oddsHistory` also works out the odds-by-week chart. */
+export function usePreviewData(live: LiveSeason, selectedWeek: number | null, { oddsHistory: wantHistory = false }: { oddsHistory?: boolean } = {}): PreviewData {
   const { state, base, season, games, projections, extraPlayers, transactions } = live
 
   const weeks = useMemo(() => (season ? getSeasonWeeks(state, season) : []), [state, season])
@@ -195,9 +195,10 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
   }, [state, season, games, week, live.week, luck, champPath, honors, careerBefore, projections, extraPlayers, transactions, dayKey, schedule, history])
 
   // Everyone's odds entering each week so far: the same calculation, so the last point is today's odds.
-  // Each week's simulation is cached, so polling doesn't rerun them.
+  // Each week's simulation is cached, so polling doesn't rerun them. It's a full simulation per week
+  // played (seconds of work on a phone), so only the screen that draws the chart asks for it.
   const oddsHistory = useMemo<WeekOdds[]>(() => {
-    if (!season) return []
+    if (!season || !wantHistory) return []
     const lastFinal = lastFinalWeek(state, season)
     return oddsByWeek({
       season,
@@ -209,7 +210,7 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null): P
       teamNames: Object.values(state.rosterUserMaps[season] ?? {}),
       throughWeek: live.week ?? lastFinal + 1,
     })
-  }, [state, season, games, schedule, history, live.week])
+  }, [state, season, games, schedule, history, live.week, wantHistory])
 
   return { weeks, week, previews, motw, oddsHistory }
 }
