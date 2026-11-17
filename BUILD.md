@@ -91,7 +91,7 @@ on an owner decision.
    `CURRENT_SEASON = 2027` (the tab moves to `/2027`; no folder rename). Run
    `npm run snapshot -- --players-only` so rookies have names. Check `/2027` at 375px.
 
-### M3 — Degraded-mode check *(after any change to data loading; last passed 2026-10-09)*
+### M3 — Degraded-mode check *(after any change to data loading; last passed 2026-11-17)*
 Block a request in the browser (Chrome DevTools → Network → Block request URL/domain)
 and reload. Block it; never delete the file — the footer and site description read
 `public/data/manifest.json` at build time, so the build needs it. Fix only crashes or
@@ -102,6 +102,12 @@ blank states.
    on the production build: every page loads straight from Sleeper (~180 requests;
    Players → Transactions reads every season live in ~12 s), and every archive page's
    text matches the snapshot-backed site, 2021's 18th week of moves included.
+   **Passed again 2026-11-17** after the store started asking Sleeper for more at once: Home
+   loads from Sleeper alone (234 requests, no snapshot files), and 24 pages (every archive
+   tab, two profiles, Home) match the snapshot-backed site's text exactly at 1280px.
+3. **Sleeper down** (`api.sleeper.app`) — **passed 2026-11-17**: Home renders all of history
+   from the snapshot in under a second; the season tab shows the newest snapshotted season
+   (2025's final Power Rankings) instead of crashing.
 
 ### M4 — Deferred owner-decision findings *(no deadline)*
 Report-only; each is a deliberate design choice, so fixing it changes locked
