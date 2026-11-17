@@ -295,6 +295,16 @@ looks clickable that isn't, and no screen is blank while it loads.
   Matchups 57 (6.8s), Rosters 58 (6.3s), Seasons Standings 77 (3.0s), Players Scoring 67 (5.3s),
   Fun Facts 76 (5.5s), Draft Strategy 81 (4.5s), Draft Slots 77 (5.2s). Single runs swung up to
   20 points (Seasons 69-89), so compare medians only.
+- **Baking pilot, Records → Extremes (owner-approved 2026-11-17):** the build runs `computeRecords()`
+  on `stateFromSnapshots()` (`app/built-state.ts`) and renders the tab into the HTML; once loaded,
+  the same elements take the store's values (baked and loaded text identical, 112 lines). A deep
+  link to another tab hides the baked part (`data-deeplink` + `data-baked` in `globals.css`).
+  Lighthouse, live, medians: before 66 (LCP 4.6s); after, two sets of three: 100 and 98 (LCP
+  1.0s; one run in six still 5.2s, one 3.0s). Part of the TBT drop (799 → ~100ms) is the other
+  session's worker fix landing the same hour. Known gap: four owners changed their picture in
+  2026, which the snapshot can't know, so their old picture shows until the data arrives.
+  The first deploy rebuilt the tab on load and measured worse (LCP 5.5s); keep the baked and
+  loaded elements the same.
 - **Done 2026-11-16 (owner said do all five of the L3 proposals):**
   1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
      not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the
