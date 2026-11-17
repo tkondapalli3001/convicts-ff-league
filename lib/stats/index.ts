@@ -21,6 +21,8 @@ export {
 export {
   NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, linkToWins, pearson, percentileOf, repeatability, scheduleSamples, scheduleSeedKey, scheduleWeeks, scheduleLuckNote, shrinkRate, splitHalf, stickVerdict, wilsonRange,
 } from './uncertainty'
+export { ownerScheduleBars } from './schedule-bars'
+export type { ScheduleBar, ScheduleBarsInput } from './schedule-bars'
 export type { Repeatability, ScheduleGame as LuckGame, ScheduleLuck, SeasonValue, ShrunkRate, UncertaintySummary, WinLink } from './uncertainty'
 export type { BridgePart, Channel, BridgePlayer, BridgeTotals, BridgeStep, OwnerSeasonBridge, BridgeFile, WeekTeam } from './bridge'
 export {

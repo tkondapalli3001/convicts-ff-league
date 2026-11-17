@@ -5,15 +5,13 @@
 // Started by hooks/useOddsHistory.ts, which falls back to the main thread.
 
 import { oddsByWeek, type OddsByWeekInput, type WeekOdds } from './odds-by-week'
-
-export interface OddsRequest { id: number; input: OddsByWeekInput }
-export interface OddsReply { id: number; odds: WeekOdds[] }
+import type { WorkerReply, WorkerRequest } from '@/hooks/useWorker'
 
 const scope = self as unknown as {
-  onmessage: ((e: MessageEvent<OddsRequest>) => void) | null
-  postMessage: (reply: OddsReply) => void
+  onmessage: ((e: MessageEvent<WorkerRequest<OddsByWeekInput>>) => void) | null
+  postMessage: (reply: WorkerReply<WeekOdds[]>) => void
 }
 
 scope.onmessage = e => {
-  scope.postMessage({ id: e.data.id, odds: oddsByWeek(e.data.input) })
+  scope.postMessage({ id: e.data.id, output: oddsByWeek(e.data.input) })
 }

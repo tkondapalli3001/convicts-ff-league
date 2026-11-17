@@ -5,8 +5,8 @@ import { useLeague } from '@/context/LeagueContext'
 import { useUrlParam } from '@/hooks/useUrlParam'
 import SectionCard from '@/components/shared/SectionCard'
 import InfoTip from '@/components/shared/InfoTip'
-import { scheduleSamples, scheduleSeedKey, scheduleWeeks, type UncertaintySummary } from '@/lib/stats'
-import { hashSeed, rng } from '@/lib/current-season'
+import { scheduleWeeks, type ScheduleBarsInput, type UncertaintySummary } from '@/lib/stats'
+import { useScheduleBars } from '@/hooks/useScheduleBars'
 import uncertaintyData from '@/public/data/uncertainty.json'
 import LazyChart from '@/components/shared/LazyChart'
 
@@ -31,19 +31,17 @@ export default function ScheduleLuckChart({ ownerName }: { ownerName: string }) 
   const choice = choices.includes(pick) ? pick : 'career'
   const quoted = U.luck[choice]?.[ownerName]
 
-  // Wins under every shuffle, summed across seasons for the career view
-  const bars = useMemo(() => {
-    const picked = choice === 'career' ? years : [Number(choice)]
-    const total = new Float64Array(U.sims)
-    for (const y of picked) {
-      const reg = state.allMatchups.filter(g => g.year === y && g.type === 'R')
-      const sample = scheduleSamples(scheduleWeeks(reg), U.sims, rng(hashSeed(scheduleSeedKey(y))))[ownerName]
-      if (sample) for (let i = 0; i < U.sims; i++) total[i] += sample[i]
-    }
-    const counts = new Map<number, number>()
-    for (const v of total) counts.set(v, (counts.get(v) ?? 0) + 1)
-    return [...counts.entries()].sort((a, b) => a[0] - b[0]).map(([w, n]) => ({ wins: w, share: (n / U.sims) * 100 }))
-  }, [choice, years, ownerName, state.allMatchups])
+  // Wins under every shuffle, summed across seasons for the career view. The
+  // shuffles run in a worker (useScheduleBars); the bars arrive a beat after the headline.
+  const input = useMemo<ScheduleBarsInput>(() => ({
+    owner: ownerName,
+    sims: U.sims,
+    seasons: (choice === 'career' ? years : [Number(choice)]).map(year => ({
+      year,
+      weeks: scheduleWeeks(state.allMatchups.filter(g => g.year === year && g.type === 'R')),
+    })),
+  }), [choice, years, ownerName, state.allMatchups])
+  const bars = useScheduleBars(quoted && years.length ? input : null)
 
   if (!quoted || !years.length) return null
   const sims = U.sims.toLocaleString('en-US')
@@ -76,7 +74,7 @@ export default function ScheduleLuckChart({ ownerName }: { ownerName: string }) 
       </div>
 
       <div className="h-[180px] px-1 pb-3 pt-2 sm:h-[220px] sm:px-3" role="img" aria-label={`${ownerName} won ${wins(quoted.actual)}; across ${sims} shuffled schedules the average is ${quoted.avg.toFixed(1)}, and the actual record beats ${Math.round(quoted.pct)}% of them.`}>
-          <LazyChart>{({ BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer }) => (
+          {bars.length > 0 && <LazyChart>{({ BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer }) => (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={bars} margin={{ top: 8, right: 12, left: -6, bottom: 0 }} barCategoryGap={2}>
                 <XAxis dataKey="wins" tickFormatter={wins} tick={{ fill: AXIS, fontSize: 11 }} axisLine={{ stroke: '#241f14' }} tickLine={false} interval="preserveStartEnd" minTickGap={12} />
@@ -99,7 +97,7 @@ export default function ScheduleLuckChart({ ownerName }: { ownerName: string }) 
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          )}</LazyChart>
+          )}</LazyChart>}
       </div>
     </SectionCard>
   )

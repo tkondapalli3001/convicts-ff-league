@@ -284,9 +284,13 @@ looks clickable that isn't, and no screen is blank while it loads.
   - 2026-11-17: Recharts (~100 KB gzipped) no longer ships with Seasons, Players, the season tab
     or profiles; the four charts draw through `components/shared/LazyChart`, inside their fixed
     boxes. Seasons now loads 281 KB of script, Players 276 KB. Lighthouse reruns that day were
-    too noisy to compare (Home's blocking time doubled with no code change). Next candidate if
-    wanted: the profile's schedule chart reruns 10,000 shuffles per season on the main thread
-    (~120 ms on a desktop, ~500 ms at phone speed); it could join the odds worker.
+    too noisy to compare (Home's blocking time doubled with no code change).
+  - 2026-11-17: the odds worker had never run in production. Turbopack (Next 16.2.4) copied
+    `odds-worker.ts` as a raw .ts file, the browser couldn't run it, and the hook fell back to
+    the main thread every time. Workers are now bundled by esbuild before each dev and build
+    (`scripts/build-workers.mjs` → `public/workers/`, tagged per build). The profile's schedule
+    chart (10,000 shuffles per season, ~120 ms on a desktop, ~500 ms at phone speed) moved into
+    its own worker. Both checked on the production build: each worker loads (200) and answers.
   Three runs each, medians (2026-11-17): Home 92 (1.0s LCP), 2026 Power Rankings 77 (2.9s),
   Matchups 57 (6.8s), Rosters 58 (6.3s), Seasons Standings 77 (3.0s), Players Scoring 67 (5.3s),
   Fun Facts 76 (5.5s), Draft Strategy 81 (4.5s), Draft Slots 77 (5.2s). Single runs swung up to

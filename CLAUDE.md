@@ -108,8 +108,11 @@ hooks/
   usePlayersData.ts         NFL player stats (names from lib/sources/players)
   useTransactionsData.ts    Players → Transactions: every season's moves (snapshot files for
                             finished seasons, Sleeper for the live one); cached per visit
-  useOddsHistory.ts         The odds-by-week chart's simulations, run in a Web Worker (falls back to
-                            the main thread); only Power Rankings asks for them
+  useWorker.ts              Runs a pure function in a Web Worker (bundle in public/workers/), falling
+                            back to the main thread; useOddsHistory and useScheduleBars wrap it
+  useOddsHistory.ts         The odds-by-week chart's simulations, in the odds worker; only Power
+                            Rankings asks for them
+  useScheduleBars.ts        The profile's schedule chart bars, in the schedule worker
   useLiveSeason.ts          Season tab's live sync — polls Sleeper, overlays the global store,
                             hands out the season's flattened games and the un-overlaid base store
   usePreviewData.ts         Season tab → Matchups: previews, playoff stakes, flair, Matchup of
@@ -197,6 +200,8 @@ lib/
                             draw the same shuffles),
                             repeatability(), splitHalf(), stickVerdict() — how sure each number
                             can be (npm run uncertainty)
+    schedule-bars.ts        ownerScheduleBars() — the profile chart's wins under every shuffled
+                            schedule; schedule-worker.ts is its Web Worker entry (a knip entry)
   current-season/           The season tab's engine (barrel: @/lib/current-season)
     build-preview.ts        buildWeekPreviews(), computeStandings(), season/week selection
     live.ts                 syncLiveSeason() polling pass, withLiveSeason() overlay,
@@ -206,8 +211,8 @@ lib/
                             sentences; formatOdds()
     odds-by-week.ts         stakesEntering() — the tab's odds entering any week (the matchup
                             cards and the chart both call it); oddsByWeek() — the season's line
-    odds-worker.ts          Web Worker entry: runs oddsByWeek() off the main thread (started by URL
-                            from hooks/useOddsHistory.ts; a knip entry for that reason)
+    odds-worker.ts          Web Worker entry: runs oddsByWeek() off the main thread (bundled by
+                            scripts/build-workers.mjs; a knip entry for that reason)
     playoff-odds.ts         simulatePlayoffOdds() — seeded 10,000-season simulation;
                             fitScoringModel() learns weekly swing + regression from history
     playoff-scenarios.ts    playoffScenarios() — exact conditions (every outcome enumerated
@@ -264,6 +269,9 @@ scripts/
   snapshot-history.mjs      npm run snapshot — freezes completed seasons to public/data/;
                             `-- --players-only` rebuilds just players.json. Reads the week
                             rule from lib/data-processing/season-settings.ts (type stripping)
+  build-workers.mjs         Runs before dev and build: esbuild bundles each Web Worker entry into
+                            public/workers/ (generated, not committed). Turbopack copies a
+                            `new Worker(new URL(...))` target as raw .ts, which can't run
   luck-index.mjs            node scripts/luck-index.mjs <leagueId> — any league's luck index,
                             run through lib/stats/luck.ts itself (Node 22.18+ type stripping)
 ```
@@ -307,7 +315,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **Never hand-type what the data knows.** Season counts come from the snapshot manifest (footer, site description) or `state.years`; Career Milestones from `careerMilestones()`; the pick-order year from the stock-pick window; the season tab's year from `CURRENT_SEASON`. Hand-typed numbers go stale.
 - **Every number ties out, or its gap is documented.** On every deploy, the control-totals test recomputes each owner-season's record, points for/against and potential points with the site's code and ties them to the totals Sleeper stores on the roster, and ties Sleeper's weekly player and team-defense points to the NFL's box scores (nflverse) rescored with the league's settings. A difference that isn't in `KNOWN_GAPS` / `KNOWN_PLAYER_GAPS` / `KNOWN_DEFENSE_GAPS` (`lib/stats/control-totals.ts`), with its cause, fails the build. Find the cause before adding an entry; never loosen the tolerance to make a test pass.
 - **The snapshot is an accelerator, never a dependency.** If `public/data/manifest.json` fails to load, `LeagueContext` must fall back to full live fetching. Don't break that path (BUILD.md M3 tests it). The footer and site description read the manifest at build time, so the file must exist to build — test the fallback by blocking the request, never by deleting the file. Never edit `public/data/` by hand — regenerate with `npm run snapshot` (`bridges.json`, `track-record.json`: `npm run dataset`; `uncertainty.json`: `npm run uncertainty`), and diff old seasons before committing.
-- **Charts redraw what the notes quote.** The odds chart's points come from `stakesEntering()`, so its last point is the odds on the matchup cards; the profile's schedule chart reruns `npm run uncertainty`'s seeded shuffles (a test holds every season's percentile equal to `uncertainty.json`). Don't fork either calculation for a chart. The odds chart's simulations run in a Web Worker through the same `oddsByWeek()`; anything heavy enough to freeze a phone (a simulation per week) goes there, and only the screen that draws it asks for it.
+- **Charts redraw what the notes quote.** The odds chart's points come from `stakesEntering()`, so its last point is the odds on the matchup cards; the profile's schedule chart reruns `npm run uncertainty`'s seeded shuffles (a test holds every season's percentile equal to `uncertainty.json`). Don't fork either calculation for a chart. Both charts' simulations run in Web Workers through the same functions (`oddsByWeek()`, `ownerScheduleBars()`), via `useWorker`; anything heavy enough to freeze a phone goes there, and only the screen that draws it asks for it. A new worker entry goes in `scripts/build-workers.mjs` and knip's entries, and loads from `public/workers/`; never `new Worker(new URL(...))`, which Turbopack leaves unbundled.
 - **Forecasts publish their track record.** The playoff odds and Power Index ?s quote the replayed scores in `public/data/track-record.json`; never hand-type them. A change to the simulator or the Oberon formula means rerunning `npm run dataset` so the quoted record matches what's live. The replay must never peek: a week's forecast uses only earlier weeks and earlier seasons (a test enforces it).
 - **Noise notes quote the data.** The ?s on career records, H2H, Daddy, luck, player win rates and the flair legend read `public/data/uncertainty.json`; never hand-type them.
 - **Say "skill" only where the evidence sticks.** `data/stat_repeatability.csv` is the test: scoring (points for, all-play, potential points) sticks to the owner; win rate, finish, earnings and the rest show no evidence of it. No verdict claims zero, since seven seasons can hide a small effect. Points against is the negative control: if it ever "sticks", the test is broken.

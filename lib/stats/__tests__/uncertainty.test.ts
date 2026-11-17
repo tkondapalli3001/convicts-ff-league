@@ -6,7 +6,7 @@ import { stateFromSnapshots } from '@/lib/data-processing'
 import type { Matchup } from '@/types'
 import { hashSeed, rng } from '@/lib/current-season'
 import {
-  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, percentileOf, repeatability, scheduleLuckNote, scheduleSamples, scheduleSeedKey, scheduleWeeks, scoringStrength, shrinkRate, stickVerdict, wilsonRange,
+  NO_SIGNAL_STRENGTH, chanceOfLopsidedSeries, fitShrinkage, ownerScheduleBars, percentileOf, repeatability, scheduleLuckNote, scheduleSamples, scheduleSeedKey, scheduleWeeks, scoringStrength, shrinkRate, stickVerdict, wilsonRange,
   type SeasonValue, type UncertaintySummary,
 } from '@/lib/stats'
 import { betaCdf } from '../uncertainty'
@@ -155,6 +155,22 @@ describe('the published tables', () => {
         const quoted = summary.luck[y][owner]
         expect(Math.round(percentileOf(sample, quoted.actual) * 10) / 10, `${y} ${owner}`).toBe(quoted.pct)
       }
+    }
+  })
+
+  it('draws career bars that average what the notes quote', () => {
+    const summary: UncertaintySummary = JSON.parse(readFileSync(join(ROOT, 'public/data/uncertainty.json'), 'utf8'))
+    const years: number[] = JSON.parse(readFileSync(join(ROOT, 'public/data/manifest.json'), 'utf8')).years
+    const games: Matchup[] = stateFromSnapshots(
+      years.map(y => JSON.parse(readFileSync(join(ROOT, `public/data/season-${y}.json`), 'utf8')) as SnapshotSeason),
+    ).allMatchups
+    for (const [owner, quoted] of Object.entries(summary.luck.career)) {
+      const seasons = years.filter(y => summary.luck[y]?.[owner])
+        .map(year => ({ year, weeks: scheduleWeeks(games.filter(g => g.year === year && g.type === 'R')) }))
+      const bars = ownerScheduleBars({ owner, sims: summary.sims, seasons })
+      expect(bars.reduce((a, b) => a + b.share, 0), owner).toBeCloseTo(100, 6)
+      const avg = bars.reduce((a, b) => a + b.wins * b.share, 0) / 100
+      expect(Math.round(avg * 100) / 100, owner).toBe(quoted.avg)
     }
   })
 
