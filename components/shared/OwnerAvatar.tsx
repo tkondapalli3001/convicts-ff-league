@@ -1,8 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { ownerColor, fullNameInitials } from '@/lib/utils'
+
+/** Pictures worked out at build time, for markup baked into the HTML; the store's win once loaded. */
+export const BuiltAvatars = createContext<Record<string, string>>({})
 
 interface Props {
   name: string
@@ -21,10 +24,11 @@ const SIZES: Record<string, { box: string; text: string }> = {
 
 export default function OwnerAvatar({ name, size = 'md', className = '' }: Props) {
   const { state } = useLeague()
+  const built = useContext(BuiltAvatars)
   const [imgError, setImgError] = useState(false)
   const color = ownerColor(name)
   const initials = fullNameInitials(name)
-  const avatarUrl = state.ownerAvatarMap?.[name]
+  const avatarUrl = state.loaded ? state.ownerAvatarMap?.[name] : built[name]
   const { box, text } = SIZES[size]
 
   if (avatarUrl && !imgError) {

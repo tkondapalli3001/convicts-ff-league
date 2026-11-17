@@ -1,7 +1,6 @@
-export { resolveOwnerName } from './resolve-owner'
 export { buildFlatMatchups, flattenSeasonMatchups } from './build-matchups'
 export { buildOwnerSeasons } from './build-seasons'
-export { rosterOwnerMap, stateFromSnapshots } from './snapshot-state'
+export { ownerAvatars, rosterOwnerMap, stateFromSnapshots } from './snapshot-state'
 export { isSeasonComplete, playoffStartWeek, transactionWeeks } from './season-settings'
 export { enrichTransaction } from './transactions'
 export {

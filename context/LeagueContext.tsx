@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { SLEEPER_API, LEAGUE_ID } from '@/lib/league'
 import { sleepFetch, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket, fetchLosersBracket, fetchDrafts, fetchDraftPicks, loadAllSnapshotSeasons } from '@/lib/sources'
-import { resolveOwnerName, rosterOwnerMap, buildFlatMatchups, buildOwnerSeasons, isSeasonComplete, playoffStartWeek } from '@/lib/data-processing'
+import { ownerAvatars, rosterOwnerMap, buildFlatMatchups, buildOwnerSeasons, isSeasonComplete, playoffStartWeek } from '@/lib/data-processing'
 import type { LeagueState, LeagueChainEntry, SleeperLeague, SleeperMatchup, SleeperUser, SleeperRoster, BracketGame, SleeperDraft } from '@/types'
 
 // ─── Initial State ─────────────────────────────────────────────────────────────
@@ -110,7 +110,6 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       const rosterUserMaps: LeagueState['rosterUserMaps'] = {}
       const matchups: LeagueState['matchups'] = {}
       const brackets: LeagueState['brackets'] = {}
-      const ownerAvatarMap: LeagueState['ownerAvatarMap'] = {}
       const draftData: LeagueState['draftData'] = {}
 
       for (const { id, year, data } of chain) {
@@ -152,16 +151,6 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
 
         rosterUserMaps[year] = rosterOwnerMap(fetchedUsers, fetchedRosters)
 
-        // Update ownerAvatarMap. Seasons run oldest → newest, so each
-        // owner ends up with their latest picture: the league team photo Sleeper
-        // shows inside the league when they've set one, else the account avatar.
-        fetchedUsers.forEach(u => {
-          const name = resolveOwnerName(u.user_id, u.display_name)
-          const teamPic = u.metadata?.avatar?.startsWith('https://') ? u.metadata.avatar : null
-          const pic = teamPic ?? (u.avatar ? `https://sleepercdn.com/avatars/${u.avatar}` : null)
-          if (pic && name) ownerAvatarMap[name] = pic
-        })
-
         matchups[year] = {}
         if (snap) {
           for (const [w, m] of Object.entries(snap.matchupsByWeek)) {
@@ -196,6 +185,8 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       // leagueChain/leagues/matchups so live features (the season tab, draft
       // countdown) keep working.
       const completedYears = years.filter(y => isSeasonComplete(leagues[y]))
+      // Each owner's latest picture (chain is oldest → newest)
+      const ownerAvatarMap = ownerAvatars(chain.map(c => users[c.year]))
 
       // Build derived data
       const partialState: LeagueState = {

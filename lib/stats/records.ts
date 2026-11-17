@@ -3,6 +3,13 @@ import { buildConsolationGameKeys, excludeManualGames, gameKey } from './game-fi
 
 export type RecordsData = ReturnType<typeof computeRecords>
 
+/** How many of these scores each owner has, most first. */
+export function countByOwner(scores: { owner: string }[]): [string, number][] {
+  const map: Record<string, number> = {}
+  scores.forEach(s => { map[s.owner] = (map[s.owner] || 0) + 1 })
+  return Object.entries(map).sort((a, b) => b[1] - a[1])
+}
+
 type RecordsState = Pick<
   LeagueState,
   'allMatchups' | 'ownerSeasons' | 'brackets' | 'rosterUserMaps' | 'leagues'
@@ -45,12 +52,6 @@ export function computeRecords(state: RecordsState) {
 
   const high140 = validScores.filter(s => s.pts >= 140).sort((a, b) => b.pts - a.pts)
   const low80   = validScores.filter(s => s.pts <= 80 && !consolationGameKeys.has(gameKey(s.year, s.week, s.owner, s.opp))).sort((a, b) => a.pts - b.pts)
-
-  const countByOwner = (scores: typeof validScores) => {
-    const map: Record<string, number> = {}
-    scores.forEach(s => { map[s.owner] = (map[s.owner] || 0) + 1 })
-    return Object.entries(map).sort((a, b) => b[1] - a[1])
-  }
 
   const h2hCount: Record<string, number> = {}
   filteredMatchups.forEach(g => {

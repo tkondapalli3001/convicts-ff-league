@@ -191,3 +191,8 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Markup baked at build time is the default tab's: a deep link to another tab hides it and shows the spinner until the page takes over */
+[data-baked-fallback] { display: none; }
+html[data-deeplink] [data-baked] { display: none; }
+html[data-deeplink] [data-baked-fallback] { display: block; }
