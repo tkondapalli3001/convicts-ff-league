@@ -8,6 +8,6 @@ export {
 } from './sleeper'
 export { loadSnapshotManifest, loadSnapshotTransactions, loadAllSnapshotSeasons, loadBridges } from './snapshot'
 export type { SnapshotSeason, SnapshotManifest, PlayerIndex } from './snapshot'
-export { getPlayersCache, playerDisplayName } from './players'
+export { getPlayersCache, playerDisplayName, playersFromIndex } from './players'
 export { csvRecords } from './csv'
 export type { PlayerMetadata } from './players'

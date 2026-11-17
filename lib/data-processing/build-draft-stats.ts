@@ -1,4 +1,5 @@
 import type { LeagueState, DraftPick, PlayerStat, OwnerSeason } from '@/types'
+import { USER_ID_TO_OWNER } from '@/lib/league'
 import type { PlayerMetadata } from '@/lib/sources'
 import { playerDisplayName } from '@/lib/sources'
 import { isSeasonComplete } from './season-settings'
@@ -145,6 +146,84 @@ export function computePlayerScores(
   }
 
   return Object.values(accum)
+}
+
+// ─── Players → Scoring: the Top 25 ──
+
+export type ScoringSortKey = 'rank' | 'name' | 'position' | 'totalPoints' | 'games' | 'avgPPG'
+
+/** What the Scoring table is showing: its filters and sort. */
+export interface ScoringView {
+  year: number | 'all'
+  owner: string | 'all'
+  pos: string
+  sortKey: ScoringSortKey
+  sortDir: 1 | -1
+}
+
+/** How the table opens (the build bakes this view into the HTML). */
+export const DEFAULT_SCORING_VIEW: ScoringView = { year: 'all', owner: 'all', pos: 'ALL', sortKey: 'totalPoints', sortDir: -1 }
+
+export interface ScoringRow {
+  player_id: string
+  name: string
+  position: string
+  team: string
+  totalPoints: number
+  games: number
+  avgPPG: number
+}
+
+const FLEX_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
+
+/** The 25 rows the Scoring table shows for one view. */
+export function scoringRows(playerScores: PlayerScoreStat[], { year, owner, pos, sortKey, sortDir }: ScoringView): ScoringRow[] {
+  return playerScores
+    .filter(p => {
+      if (pos === 'ALL') return true
+      if (pos === 'FLEX') return FLEX_POSITIONS.has(p.position)
+      return p.position === pos
+    })
+    .map(p => {
+      let totalPoints = 0
+      let games = 0
+      for (const [o, yearMap] of Object.entries(p.byOwnerYear)) {
+        if (owner !== 'all' && o !== owner) continue
+        for (const [yr, { pts, games: g }] of Object.entries(yearMap)) {
+          if (year !== 'all' && Number(yr) !== year) continue
+          totalPoints += pts
+          games += g
+        }
+      }
+      return {
+        player_id: p.player_id,
+        name: p.name,
+        position: p.position,
+        team: p.team,
+        totalPoints,
+        games,
+        avgPPG: games > 0 ? totalPoints / games : 0,
+      }
+    })
+    .filter(r => r.games > 0 && r.totalPoints > 0)
+    .sort((a, b) => {
+      const av = a[sortKey === 'rank' ? 'totalPoints' : sortKey]
+      const bv = b[sortKey === 'rank' ? 'totalPoints' : sortKey]
+      if (typeof av === 'string') return (av as string).localeCompare(bv as string) * sortDir
+      return ((av as number) - (bv as number)) * sortDir
+    })
+    .slice(0, 25)
+}
+
+/** The position chips: the fixed order, keeping the positions anyone started. */
+export function scoringPositions(playerScores: PlayerScoreStat[]): string[] {
+  const set = new Set(playerScores.map(p => p.position).filter(Boolean))
+  return ['ALL', 'QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DEF'].filter(p => p === 'ALL' || p === 'FLEX' || set.has(p))
+}
+
+/** Owner filter names on the Players page: every canonical owner with a completed season, A–Z. */
+export function playerPageOwners(ownerSeasons: LeagueState['ownerSeasons']): string[] {
+  return [...new Set(Object.values(USER_ID_TO_OWNER))].filter(n => ownerSeasons[n]).sort()
 }
 
 // ─── Draft Ownership ──────────────────────────────────────────────────────────

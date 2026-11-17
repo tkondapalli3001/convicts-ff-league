@@ -1,5 +1,5 @@
 import { SLEEPER_API } from '@/lib/league'
-import { loadPlayerIndex } from './snapshot'
+import { loadPlayerIndex, type PlayerIndex } from './snapshot'
 
 export interface PlayerMetadata {
   full_name?: string
@@ -24,15 +24,17 @@ function fetchFullDump(): Promise<Record<string, PlayerMetadata>> {
     .catch(() => ({}))
 }
 
+/** players.json's compact rows as player records (the build reads the file itself and calls this too). */
+export function playersFromIndex(index: PlayerIndex): Record<string, PlayerMetadata> {
+  const out: Record<string, PlayerMetadata> = {}
+  for (const [id, [name, position, team]] of Object.entries(index)) {
+    out[id] = { full_name: name, position, team: team ?? undefined }
+  }
+  return out
+}
+
 export function getPlayersCache(): Promise<Record<string, PlayerMetadata>> {
-  _cache ??= loadPlayerIndex().then(index => {
-    if (!index) return fetchFullDump()
-    const out: Record<string, PlayerMetadata> = {}
-    for (const [id, [name, position, team]] of Object.entries(index)) {
-      out[id] = { full_name: name, position, team: team ?? undefined }
-    }
-    return out
-  })
+  _cache ??= loadPlayerIndex().then(index => (index ? playersFromIndex(index) : fetchFullDump()))
   return _cache
 }
 

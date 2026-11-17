@@ -312,7 +312,12 @@ looks clickable that isn't, and no screen is blank while it loads.
     with the data. `?year=` now also counts as a deep link.
     **Owners → Career Leaderboard (2026-11-17):** `careerBoards()` bakes both views (all games,
     playoffs only), so the toggle works before the data arrives. Baked and loaded text identical
-    (750 chars), same element after the load. Next: Players → Scoring, Draft → Pick Order.
+    (750 chars), same element after the load.
+    **Players → Scoring (2026-11-17):** every player's scoring is ~150 KB, too much for the HTML,
+    so only the opening view (top 25, all seasons, all owners, all positions) is baked
+    (`scoringRows()`, now in `lib/data-processing`). Another filter or sort before the data
+    arrives says "Loading scoring data…" instead of answering from the 25. Baked and loaded text
+    identical (1,000 chars), same element after the load. Next: Draft → Pick Order.
 - **Done 2026-11-16 (owner said do all five of the L3 proposals):**
   1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
      not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the

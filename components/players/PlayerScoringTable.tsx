@@ -2,41 +2,37 @@
 
 import FilterSheet from '@/components/shared/FilterSheet'
 import { useState, useMemo } from 'react'
-import type { PlayerScoreStat } from '@/lib/data-processing'
+import { DEFAULT_SCORING_VIEW, scoringPositions, scoringRows, type PlayerScoreStat, type ScoringRow, type ScoringSortKey } from '@/lib/data-processing'
 
 import { POS_TEXT_CLASSES as POS_COLORS } from '@/lib/positions'
 import PlayerHeadshot from '@/components/shared/PlayerHeadshot'
 import SortHeader from '@/components/shared/SortHeader'
 
-const FLEX_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
-
 const TH_LEFT = 'cursor-pointer select-none text-left'
 const TH_RIGHT = 'cursor-pointer select-none text-right'
 
-type SortKey = 'rank' | 'name' | 'position' | 'totalPoints' | 'games' | 'avgPPG'
+type SortKey = ScoringSortKey
+
+/** The opening view worked out at build time (app/players/page.tsx), so the table is in the HTML. */
+export interface BakedScoring {
+  positions: string[]
+  top: ScoringRow[]
+}
 
 interface Props {
-  playerScores: PlayerScoreStat[]
+  /** Null until the store and player names load; until then the baked opening view shows */
+  playerScores: PlayerScoreStat[] | null
+  baked?: BakedScoring | null
   years: number[]
   ownerNames: string[]
 }
 
-interface Row {
-  player_id: string
-  name: string
-  position: string
-  team: string
-  totalPoints: number
-  games: number
-  avgPPG: number
-}
-
-export default function PlayerScoringTable({ playerScores, years, ownerNames }: Props) {
-  const [yearFilter, setYearFilter] = useState<number | 'all'>('all')
-  const [ownerFilter, setOwnerFilter] = useState<string | 'all'>('all')
-  const [posFilter, setPosFilter] = useState<string>('ALL')
-  const [sortKey, setSortKey] = useState<SortKey>('totalPoints')
-  const [sortDir, setSortDir] = useState<1 | -1>(-1)
+export default function PlayerScoringTable({ playerScores, baked, years, ownerNames }: Props) {
+  const [yearFilter, setYearFilter] = useState<number | 'all'>(DEFAULT_SCORING_VIEW.year)
+  const [ownerFilter, setOwnerFilter] = useState<string | 'all'>(DEFAULT_SCORING_VIEW.owner)
+  const [posFilter, setPosFilter] = useState<string>(DEFAULT_SCORING_VIEW.pos)
+  const [sortKey, setSortKey] = useState<SortKey>(DEFAULT_SCORING_VIEW.sortKey)
+  const [sortDir, setSortDir] = useState<1 | -1>(DEFAULT_SCORING_VIEW.sortDir)
 
   const sortedYears = useMemo(() => [...years].sort((a, b) => b - a), [years])
 
@@ -45,50 +41,18 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
     else { setSortKey(k); setSortDir(-1) }
   }
 
-  const rows = useMemo<Row[]>(() => {
-    return playerScores
-      .filter(p => {
-        if (posFilter === 'ALL') return true
-        if (posFilter === 'FLEX') return FLEX_POSITIONS.has(p.position)
-        return p.position === posFilter
-      })
-      .map(p => {
-        let totalPoints = 0
-        let games = 0
-        for (const [owner, yearMap] of Object.entries(p.byOwnerYear)) {
-          if (ownerFilter !== 'all' && owner !== ownerFilter) continue
-          for (const [yr, { pts, games: g }] of Object.entries(yearMap)) {
-            if (yearFilter !== 'all' && Number(yr) !== yearFilter) continue
-            totalPoints += pts
-            games += g
-          }
-        }
-        return {
-          player_id: p.player_id,
-          name: p.name,
-          position: p.position,
-          team: p.team,
-          totalPoints,
-          games,
-          avgPPG: games > 0 ? totalPoints / games : 0,
-        }
-      })
-      .filter(r => r.games > 0 && r.totalPoints > 0)
-      .sort((a, b) => {
-        const av = a[sortKey === 'rank' ? 'totalPoints' : sortKey]
-        const bv = b[sortKey === 'rank' ? 'totalPoints' : sortKey]
-        if (typeof av === 'string') return (av as string).localeCompare(bv as string) * sortDir
-        return ((av as number) - (bv as number)) * sortDir
-      })
-      .slice(0, 25)
-  }, [playerScores, yearFilter, ownerFilter, posFilter, sortKey, sortDir])
+  // Until the data loads only the opening view is known; any other view waits (null)
+  const rows = useMemo<ScoringRow[] | null>(() => {
+    const view = { year: yearFilter, owner: ownerFilter, pos: posFilter, sortKey, sortDir }
+    if (playerScores) return scoringRows(playerScores, view)
+    const opening = (Object.keys(view) as (keyof typeof view)[]).every(k => view[k] === DEFAULT_SCORING_VIEW[k])
+    return opening ? baked?.top ?? null : null
+  }, [playerScores, baked, yearFilter, ownerFilter, posFilter, sortKey, sortDir])
 
-  const positions = useMemo(() => {
-    const set = new Set(playerScores.map(p => p.position).filter(Boolean))
-    return ['ALL', 'QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DEF'].filter(p =>
-      p === 'ALL' || p === 'FLEX' || set.has(p)
-    )
-  }, [playerScores])
+  const positions = useMemo(
+    () => (playerScores ? scoringPositions(playerScores) : baked?.positions ?? ['ALL']),
+    [playerScores, baked],
+  )
 
   const sort = { sortKey, sortDir, onSort: handleSort }
 
@@ -198,7 +162,7 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => {
+            {rows?.map((r, i) => {
               const posColor = POS_COLORS[r.position] ?? 'text-s-text3'
               return (
                 <tr
@@ -225,9 +189,10 @@ export default function PlayerScoringTable({ playerScores, years, ownerNames }: 
             })}
           </tbody>
         </table>
-        {rows.length === 0 && (
+        {rows?.length === 0 && (
           <div className="text-center py-8 text-s-text3 text-[12px]">No scoring data for this filter</div>
         )}
+        {!rows && <div className="text-center py-8 text-s-text3 text-[12px]">Loading scoring data…</div>}
       </div>
     </div>
   )

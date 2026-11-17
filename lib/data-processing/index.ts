@@ -7,8 +7,11 @@ export {
   nflverseStatLine, NFLVERSE_SCORING_COLUMNS, nflverseDefenseStatLine, NFLVERSE_DEFENSE_COLUMNS, defensePointsAllowed, defenseYardsAllowed,
 } from './nflverse'
 export type { NflverseRow } from './nflverse'
-export { computePlayerWinRates, computeDraftOwnership, computeDraftStructure, computePlayerScores } from './build-draft-stats'
-export type { OwnershipEntry, DraftStructureEntry, DraftStrategy, PlayerScoreStat } from './build-draft-stats'
+export {
+  computePlayerWinRates, computeDraftOwnership, computeDraftStructure, computePlayerScores,
+  DEFAULT_SCORING_VIEW, playerPageOwners, scoringPositions, scoringRows,
+} from './build-draft-stats'
+export type { OwnershipEntry, DraftStructureEntry, DraftStrategy, PlayerScoreStat, ScoringRow, ScoringSortKey } from './build-draft-stats'
 export { buildDraftSlotRows, draftSlotOwners } from './draft-slots'
 export { buildDraftBoard } from './draft-board'
 export type { DraftBoardData } from './draft-board'
