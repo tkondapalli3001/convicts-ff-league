@@ -6,8 +6,8 @@ export const POS_COLORS: Record<string, string> = {
   RB: '#2ea043',
   WR: '#58a6ff',
   TE: '#a371f7',
-  K: '#6e7681',
-  DEF: '#6e7681',
+  K: '#94a3b8',
+  DEF: '#94a3b8',
 }
 
 /** Tailwind text-color classes, for position labels in tables. */
