@@ -170,7 +170,7 @@ skill versus luck, with every number proven against a source neither of us contr
      simulated (2026 has none); it scored 0.149, in line with the rest.
    - Oberon picks the next game's winner 52.9% of the time (435 games), record 50.7%,
      scoring average 53.8%: none is clearly better than a coin flip.
-   - Not done: the ffsimulator cross-check. It needs R, which isn't installed here.
+   - Dropped (owner, 2026-11-17): the ffsimulator cross-check.
 4. **Phase 3, uncertainty.** *Done 2026-11-07.*
    `lib/stats/uncertainty.ts` + `npm run uncertainty` (tables in `data/`). Season-centered,
    with significance from shuffling owners within seasons; "sticks" needs p < 0.01 on the
@@ -203,8 +203,8 @@ skill versus luck, with every number proven against a source neither of us contr
      coin-flip count and next-meeting record; schedule percentiles for luck (Season
      Standings rows, Luck of the Draw, Wins Bridge); Player Win Rate's note; "Do they predict
      anything?" on the flair legend; "none clearly repeats" on the Wins Bridge.
-   - **Still open from the plan's "done means":** payment records against the earnings
-     table, the ffsimulator check (needs R), and each owner signing off on their bridge.
+   - **Closed 2026-11-17 (owner):** payment records match the earnings table; the
+     ffsimulator check and owner sign-off on bridges are dropped. Phase D is complete.
 
 ### E — The mobile overhaul *(owner-approved 2026-11-07)*
 From a 375px walk of every page. Phones only; desktop keeps its tables and navbar. No page or URL goes away, and nothing is cut.
