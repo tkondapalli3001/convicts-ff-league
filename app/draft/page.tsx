@@ -48,21 +48,25 @@ export default function DraftPage() {
       <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
     </>
   )
-  if (!loaded) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
+  // Pick Order comes from the league's own files (lib/league/stock-picks.ts), so it's in the
+  // HTML and never waits; every other tab waits on the spinner
+  if (!loaded && activeTab !== 'pickorder') return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
 
   return (
     <div className="animate-fade-in">
       {shell}
 
       {/* ── PICK ORDER TAB ───────────────────────────────────────── */}
+      {/* data-baked lets a deep link hide this until the page takes over (globals.css) */}
       {activeTab === 'pickorder' && (
-        <>
+        <div data-baked={loaded ? undefined : ''}>
           <div className="text-[11px] text-s-text3 mb-3">
             {fmtDate(MARKET_BENCHMARK.startDate, 'short', false)} → {fmtDate(MARKET_BENCHMARK.endDate, 'short', false)} · Best ROI drafts first
           </div>
           <StockStandings picks={STOCK_PICKS} />
-        </>
+        </div>
       )}
+      {!loaded && <div data-baked-fallback><LoadingSpinner /></div>}
 
       {/* ── PAST DRAFTS TAB ──────────────────────────────────────── */}
       {activeTab === 'history' && <PastDrafts />}

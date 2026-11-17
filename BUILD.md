@@ -317,7 +317,11 @@ looks clickable that isn't, and no screen is blank while it loads.
     so only the opening view (top 25, all seasons, all owners, all positions) is baked
     (`scoringRows()`, now in `lib/data-processing`). Another filter or sort before the data
     arrives says "Loading scoring data…" instead of answering from the 25. Baked and loaded text
-    identical (1,000 chars), same element after the load. Next: Draft → Pick Order.
+    identical (1,000 chars), same element after the load.
+    **Draft → Pick Order (2026-11-17):** comes from `lib/league/stock-picks.ts`, not the store, so
+    it now renders without waiting (no build step needed). Baked and loaded text identical (552
+    chars). All five archive default tabs are now in the HTML. Not yet measured live with
+    Lighthouse.
 - **Done 2026-11-16 (owner said do all five of the L3 proposals):**
   1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
      not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the
