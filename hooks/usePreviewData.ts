@@ -9,13 +9,14 @@ import {
   smackFacts, projectTeam, startersByRoster, lastFinalWeek, playerLookup,
   seasonHonors, powerRanksThrough, seasonExtremes, lineupRegrets, careerWinsBefore,
   injuryReport, weeklyMoves, matchupBadges, pickMatchupOfTheWeek,
-  stakesEntering, oddsByWeek,
+  stakesEntering,
 } from '@/lib/current-season'
 import type {
-  MatchupPreview, TeamStakes, WeekOdds, Badge, PowerRankPoint, MatchupOfTheWeek,
+  MatchupPreview, TeamStakes, WeekOdds, OddsByWeekInput, Badge, PowerRankPoint, MatchupOfTheWeek,
 } from '@/lib/current-season'
 import type { LiveSeason } from '@/hooks/useLiveSeason'
 import { useSeasonSchedule } from '@/hooks/useSeasonSchedule'
+import { useOddsHistory } from '@/hooks/useOddsHistory'
 
 export interface EnrichedPreview extends MatchupPreview {
   /** Today's group-chat ammo, in order — the modal pages through it. */
@@ -195,12 +196,12 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null, { 
   }, [state, season, games, week, live.week, luck, champPath, honors, careerBefore, projections, extraPlayers, transactions, dayKey, schedule, history])
 
   // Everyone's odds entering each week so far: the same calculation, so the last point is today's odds.
-  // Each week's simulation is cached, so polling doesn't rerun them. It's a full simulation per week
-  // played (seconds of work on a phone), so only the screen that draws the chart asks for it.
-  const oddsHistory = useMemo<WeekOdds[]>(() => {
-    if (!season || !wantHistory) return []
+  // It's a full simulation per week played (seconds of work on a phone), so only the screen that
+  // draws the chart asks for it, and it runs in a worker (useOddsHistory).
+  const oddsInput = useMemo<OddsByWeekInput | null>(() => {
+    if (!season || !wantHistory) return null
     const lastFinal = lastFinalWeek(state, season)
-    return oddsByWeek({
+    return {
       season,
       finalGames: games.filter(m => m.week <= lastFinal),
       schedule,
@@ -209,8 +210,9 @@ export function usePreviewData(live: LiveSeason, selectedWeek: number | null, { 
       regEnd: playoffStartWeek(state.leagues[season]) - 1,
       teamNames: Object.values(state.rosterUserMaps[season] ?? {}),
       throughWeek: live.week ?? lastFinal + 1,
-    })
+    }
   }, [state, season, games, schedule, history, live.week, wantHistory])
+  const oddsHistory = useOddsHistory(oddsInput)
 
   return { weeks, week, previews, motw, oddsHistory }
 }

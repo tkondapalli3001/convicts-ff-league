@@ -64,8 +64,11 @@ export interface WeekOdds {
   status: Record<string, PlayoffStatus>
 }
 
+/** What oddsByWeek() needs; plain data, so it can cross to a Web Worker. */
+export type OddsByWeekInput = SeasonInput & { throughWeek: number }
+
 /** Each team's playoff odds entering every week from 1 through `throughWeek` (capped at the regular season). */
-export function oddsByWeek(input: SeasonInput & { throughWeek: number }): WeekOdds[] {
+export function oddsByWeek(input: OddsByWeekInput): WeekOdds[] {
   const out: WeekOdds[] = []
   for (let week = 1; week <= Math.min(input.throughWeek, input.regEnd); week++) {
     const stakes = stakesEntering({ ...input, week })

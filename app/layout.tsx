@@ -71,7 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PressKeys />
         <LeagueProvider>
           <Navbar />
-          <main id="main" tabIndex={-1} className="max-w-[1200px] mx-auto px-4 pb-16 pt-6 outline-none">
+          <main id="main" tabIndex={-1} className="max-w-[1200px] mx-auto min-h-[100svh] px-4 pb-16 pt-6 outline-none">
             {children}
           </main>
           <Footer />

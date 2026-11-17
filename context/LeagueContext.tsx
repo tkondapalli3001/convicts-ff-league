@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { SLEEPER_API, LEAGUE_ID } from '@/lib/league'
 import { sleepFetch, fetchUsers, fetchRosters, fetchMatchupsForWeek, fetchWinnersBracket, fetchLosersBracket, fetchDrafts, fetchDraftPicks, loadAllSnapshotSeasons } from '@/lib/sources'
 import { resolveOwnerName, rosterOwnerMap, buildFlatMatchups, buildOwnerSeasons, isSeasonComplete, playoffStartWeek } from '@/lib/data-processing'
-import type { LeagueState, LeagueChainEntry, SleeperLeague, SleeperMatchup } from '@/types'
+import type { LeagueState, LeagueChainEntry, SleeperLeague, SleeperMatchup, SleeperUser, SleeperRoster, BracketGame, SleeperDraft } from '@/types'
 
 // ─── Initial State ─────────────────────────────────────────────────────────────
 
@@ -59,6 +59,11 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       // instant, zero Sleeper calls. Only non-snapshotted seasons are fetched
       // live below. If the snapshot is missing entirely, everything falls
       // through to the live-fetch path unchanged.
+      // The newest league is asked for at once, alongside the snapshot files
+      // rather than after them: it's needed either way, and it's a round trip saved.
+      const head: Promise<{ lg: SleeperLeague } | { err: unknown }> =
+        sleepFetch<SleeperLeague>(`${SLEEPER_API}/league/${LEAGUE_ID}`).then(lg => ({ lg }), (err: unknown) => ({ err }))
+
       const snapshots = await loadAllSnapshotSeasons()
       const snapshotById = new Map(snapshots.map(s => [s.league.league_id, s]))
 
@@ -69,7 +74,14 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       let lid: string | null = LEAGUE_ID
       while (lid && lid !== '0' && !snapshotById.has(lid)) {
         try {
-          const lg: SleeperLeague = await sleepFetch<SleeperLeague>(`${SLEEPER_API}/league/${lid}`)
+          let lg: SleeperLeague
+          if (lid === LEAGUE_ID) {
+            const first = await head
+            if ('err' in first) throw first.err
+            lg = first.lg
+          } else {
+            lg = await sleepFetch<SleeperLeague>(`${SLEEPER_API}/league/${lid}`)
+          }
           const yr = parseInt(lg.season)
           if (!liveEntries.find(c => c.id === lid || c.year === yr)) {
             liveEntries.push({ id: lid, year: yr, data: lg })
@@ -106,9 +118,35 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
         const snap = snapshotById.get(id)
         setLoadingText(snap ? `Restoring ${year} season...` : `Loading ${year} season...`)
 
-        const [fetchedUsers, fetchedRosters] = snap
-          ? [snap.users, snap.rosters]
-          : await Promise.all([fetchUsers(id), fetchRosters(id)])
+        // Week count — same logic for both sources
+        const lgStatus = data.status || 'complete'
+        const regWeeks = playoffStartWeek(data)
+        let totalWeeks = 0
+        if (lgStatus !== 'pre_draft' && lgStatus !== 'drafting') {
+          totalWeeks = data.settings?.leg > 0 ? data.settings.leg : 17
+        }
+
+        // A live season's pieces are asked for together: one round trip, where
+        // it used to be three (people, then weeks, then brackets and drafts).
+        let fetchedUsers: SleeperUser[], fetchedRosters: SleeperRoster[]
+        let live: { weeks: SleeperMatchup[][]; winners: BracketGame[]; losers: BracketGame[]; drafts: SleeperDraft[] } | null = null
+        if (snap) {
+          fetchedUsers = snap.users
+          fetchedRosters = snap.rosters
+        } else {
+          const weekNumbers = Array.from({ length: totalWeeks }, (_, i) => i + 1)
+          const [u, r, weeks, winners, losers, drafts] = await Promise.all([
+            fetchUsers(id),
+            fetchRosters(id),
+            Promise.all(weekNumbers.map(week => fetchMatchupsForWeek(id, week).catch(() => [] as SleeperMatchup[]))),
+            fetchWinnersBracket(id).catch(() => [] as BracketGame[]),
+            fetchLosersBracket(id).catch(() => [] as BracketGame[]),
+            fetchDrafts(id).catch(() => [] as SleeperDraft[]),
+          ])
+          fetchedUsers = u
+          fetchedRosters = r
+          live = { weeks, winners, losers, drafts }
+        }
         users[year] = fetchedUsers
         rosters[year] = fetchedRosters
 
@@ -124,43 +162,22 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
           if (pic && name) ownerAvatarMap[name] = pic
         })
 
-        // Matchups — same week-count logic for both sources
-        const lgStatus = data.status || 'complete'
-        const regWeeks = playoffStartWeek(data)
-        let totalWeeks = 0
-        if (lgStatus !== 'pre_draft' && lgStatus !== 'drafting') {
-          totalWeeks = data.settings?.leg > 0 ? data.settings.leg : 17
-        }
-
         matchups[year] = {}
         if (snap) {
           for (const [w, m] of Object.entries(snap.matchupsByWeek)) {
             const week = Number(w)
             matchups[year][week] = { matchups: m as SleeperMatchup[], isPlayoff: week >= regWeeks }
           }
-        } else {
-          const weekPromises: Promise<void>[] = []
-          for (let w = 1; w <= totalWeeks; w++) {
-            const week = w
-            weekPromises.push(
-              fetchMatchupsForWeek(id, week)
-                .then(m => { matchups[year][week] = { matchups: m, isPlayoff: week >= regWeeks } })
-                .catch(() => { matchups[year][week] = { matchups: [], isPlayoff: week >= regWeeks } })
-            )
-          }
-          await Promise.all(weekPromises)
+        } else if (live) {
+          live.weeks.forEach((m, i) => { matchups[year][i + 1] = { matchups: m, isPlayoff: i + 1 >= regWeeks } })
         }
 
         // Brackets + draft
         if (snap) {
           brackets[year] = { winners: snap.winnersBracket, losers: snap.losersBracket }
           if (snap.draft) draftData[year] = snap.draft
-        } else {
-          const [winners, losers, drafts] = await Promise.all([
-            fetchWinnersBracket(id).catch(() => []),
-            fetchLosersBracket(id).catch(() => []),
-            fetchDrafts(id).catch(() => []),
-          ])
+        } else if (live) {
+          const { winners, losers, drafts } = live
           brackets[year] = { winners, losers }
 
           if (drafts.length > 0) {
