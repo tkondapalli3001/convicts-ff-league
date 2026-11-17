@@ -1,7 +1,7 @@
 // Barrel — import from '@/lib/stats', not the individual files.
 export { gameKey, buildChampPathGameKeys } from './game-filters'
-export { buildCareerStats, careerLeaderboard, careerMilestones } from './career'
-export type { CareerStats, LeaderboardRow } from './career'
+export { buildCareerStats, careerBoards, careerMilestones } from './career'
+export type { CareerBoards, CareerStats, LeaderboardRow } from './career'
 export { ownerProfile } from './owner-profile'
 export type { OwnerProfile } from './owner-profile'
 export { h2hRecord, h2hVsAll, daddyOf, DADDY_WIN_RATE, DADDY_MIN_GAMES } from './h2h'

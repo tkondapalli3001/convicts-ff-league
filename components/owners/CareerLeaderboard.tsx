@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useLeague } from '@/context/LeagueContext'
-import { careerLeaderboard, type LeaderboardRow } from '@/lib/stats'
+import type { CareerBoards, LeaderboardRow } from '@/lib/stats'
 import WinPctBadge from '@/components/shared/WinPctBadge'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
 import SortHeader from '@/components/shared/SortHeader'
@@ -45,9 +44,8 @@ function phoneSorts(playoffOnly: boolean): { key: SortKey; label: string }[] {
   ]
 }
 
-export default function CareerLeaderboard() {
-  const { state } = useLeague()
-  const { ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues } = state
+/** `boards` is careerBoards(): from the build until the store loads, then from the store. */
+export default function CareerLeaderboard({ boards }: { boards: CareerBoards }) {
   const [sortKey, setSortKey] = useState<SortKey>('winpct')
   // 1 = ascending (↑), -1 = descending (↓), like every SortHeader table
   const [sortDir, setSortDir] = useState<1 | -1>(-1)
@@ -60,10 +58,7 @@ export default function CareerLeaderboard() {
     else { setSortKey(k); setSortDir(k === 'name' ? 1 : -1) }
   }
 
-  const data = useMemo(
-    () => careerLeaderboard({ ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues }, playoffOnly),
-    [ownerSeasons, allMatchups, brackets, rosterUserMaps, leagues, playoffOnly],
-  )
+  const data = playoffOnly ? boards.playoffs : boards.all
 
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => {

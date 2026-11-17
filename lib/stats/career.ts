@@ -197,6 +197,13 @@ export function careerLeaderboard(
     })
 }
 
+/** Both views of the board (all games, playoffs only): the build bakes them and the page reruns this once loaded. */
+export interface CareerBoards { all: LeaderboardRow[]; playoffs: LeaderboardRow[] }
+
+export function careerBoards(state: Parameters<typeof careerLeaderboard>[0]): CareerBoards {
+  return { all: careerLeaderboard(state, false), playoffs: careerLeaderboard(state, true) }
+}
+
 // ─── Records → Career Milestones ──────────────────────────────────────────────
 
 export interface Milestone {

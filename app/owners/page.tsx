@@ -1,51 +1,14 @@
-'use client'
+import OwnersPage, { type BuiltBoards } from '@/components/owners/OwnersPage'
+import { careerBoards } from '@/lib/stats'
+import { builtState } from '../built-state'
 
-import { useUrlParam } from '@/hooks/useUrlParam'
-import { useLeague } from '@/context/LeagueContext'
-import LoadingSpinner from '@/components/shared/LoadingSpinner'
-import ErrorState from '@/components/shared/ErrorState'
-import PillTabs from '@/components/shared/PillTabs'
-import PageHeader from '@/components/shared/PageHeader'
-import CareerLeaderboard from '@/components/owners/CareerLeaderboard'
-import AnnualBreakdown from '@/components/owners/AnnualBreakdown'
-import RivalryCalc from '@/components/owners/RivalryCalc'
+// Owners → Career Leaderboard from the snapshot, worked out at build time so it's in
+// the HTML and paints before any data loads; the page reruns the same function once loaded.
+function builtBoards(): BuiltBoards | null {
+  const state = builtState()
+  return state ? { avatars: state.ownerAvatarMap, boards: careerBoards(state) } : null
+}
 
-type Tab = 'leaderboard' | 'earnings' | 'h2h'
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'leaderboard', label: 'Career Leaderboard' },
-  { id: 'earnings',    label: 'Earnings Ledger'    },
-  { id: 'h2h',         label: 'Head-to-Head'       },
-]
-const TAB_IDS = TABS.map(t => t.id)
-
-export default function OwnersPage() {
-  const { state } = useLeague()
-  const { loaded, error } = state
-  const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'leaderboard', TAB_IDS)
-
-  if (error) return <ErrorState error={error} />
-
-  // The title and tabs paint at once; only what's under them waits for data
-  const shell = (
-    <>
-      <PageHeader
-        kicker="The Managers"
-        title="Owner Profiles"
-        subtitle="Tap any row to drill into career stats, H2H records & game log"
-      />
-      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
-    </>
-  )
-  if (!loaded) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
-
-  return (
-    <div className="animate-fade-in">
-      {shell}
-
-      {activeTab === 'leaderboard' && <CareerLeaderboard />}
-      {activeTab === 'earnings' && <AnnualBreakdown />}
-      {activeTab === 'h2h' && <RivalryCalc />}
-    </div>
-  )
+export default function Page() {
+  return <OwnersPage built={builtBoards()} />
 }

@@ -309,8 +309,10 @@ looks clickable that isn't, and no screen is blank while it loads.
     **Seasons → Standings (2026-11-17):** `seasonStandings()` (`lib/stats/standings.ts`, luck
     included) baked; SeasonStandings takes it as a prop. Baked and loaded text identical (938
     chars); the table is the same element after the load; the bracket (below the fold) arrives
-    with the data. `?year=` now also counts as a deep link. Next: Owners → Career Leaderboard,
-    Players → Scoring, Draft → Pick Order.
+    with the data. `?year=` now also counts as a deep link.
+    **Owners → Career Leaderboard (2026-11-17):** `careerBoards()` bakes both views (all games,
+    playoffs only), so the toggle works before the data arrives. Baked and loaded text identical
+    (750 chars), same element after the load. Next: Players → Scoring, Draft → Pick Order.
 - **Done 2026-11-16 (owner said do all five of the L3 proposals):**
   1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
      not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the
