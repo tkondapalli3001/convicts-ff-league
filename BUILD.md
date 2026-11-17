@@ -305,6 +305,12 @@ looks clickable that isn't, and no screen is blank while it loads.
   2026, which the snapshot can't know, so their old picture shows until the data arrives.
   The first deploy rebuilt the tab on load and measured worse (LCP 5.5s); keep the baked and
   loaded elements the same.
+  - Owner said bake the other archive default tabs, one page at a time, text checked each time.
+    **Seasons → Standings (2026-11-17):** `seasonStandings()` (`lib/stats/standings.ts`, luck
+    included) baked; SeasonStandings takes it as a prop. Baked and loaded text identical (938
+    chars); the table is the same element after the load; the bracket (below the fold) arrives
+    with the data. `?year=` now also counts as a deep link. Next: Owners → Career Leaderboard,
+    Players → Scoring, Draft → Pick Order.
 - **Done 2026-11-16 (owner said do all five of the L3 proposals):**
   1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
      not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the

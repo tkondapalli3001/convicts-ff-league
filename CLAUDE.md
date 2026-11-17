@@ -54,12 +54,17 @@ app/                        Next.js App Router pages (thin render shells only)
   owners/page.tsx           Career leaderboard, earnings ledger, rivalry calculator
   owners/[name]/page.tsx    Individual owner profile (season log, H2H, game log)
   seasons/page.tsx          Standings + playoff bracket, Game Log (every game + box scores),
-                            finish tracker, scoring trend
+                            finish tracker, scoring trend. Server shell: bakes Standings into the
+                            HTML (seasonStandings(builtState())), renders components/seasons/SeasonsPage
   draft/page.tsx            Draft countdown, pick order (stock picks), past boards, slot analysis,
                             steals & busts, draft strategy
-  records/page.tsx          Record book, career milestones, streaks, fun facts, trash talk
+  records/page.tsx          Record book, career milestones, streaks, fun facts, trash talk. Server
+                            shell: bakes Extremes into the HTML, renders components/records/RecordsPage
   players/page.tsx          NFL player stats — win rate, scoring, ownership, transactions
-  layout.tsx                Root layout — <LeagueProvider>, site metadata/PWA, fonts
+  built-state.ts            builtState() — stateFromSnapshots() read from public/data/ at build time,
+                            for the pages that bake their default tab into the HTML
+  layout.tsx                Root layout — <LeagueProvider>, site metadata/PWA, fonts; the deep-link
+                            script (data-deeplink hides baked markup on a ?tab= or ?year= link)
   page-meta.ts              pageMeta() — a page's title and group-chat preview card; each section's
                             layout.tsx holds its own
   icon.png, apple-icon.png  Favicon + apple-touch icon (Next file conventions)
@@ -74,7 +79,7 @@ components/                 UI, one folder per page plus shared/layout/search
                             HeroSection, CareerStandingsTable, HallOfFameCard, WallOfShameCard,
                             HomeThisWeek (under 1024px, in season: your matchup or the Matchup of
                             the Week, above the hero; holds its place while loading)
-  seasons/                  SeasonStandings, PlayoffBracket, GameLog (+ Filters, Table,
+  seasons/                  SeasonsPage (the page itself), SeasonStandings, PlayoffBracket, GameLog (+ Filters, Table,
                             GameDetailModal box score), FinishTracker, AvgScoreChart,
                             ScoringStrengthChart (Scoring Trend tab)
   owners/                   OwnerDetail, CareerLeaderboard, AnnualBreakdown (earnings),
@@ -193,6 +198,8 @@ lib/
     hero.ts                 homeHero() — Home's champion, runner-up, toilet bowl and archive size;
                             the build and the loaded page both run it, so the hero never changes
                             on load
+    standings.ts            seasonStandings() — Seasons → Standings: every completed owner-season
+                            with its luck (the build bakes it; the page reruns it once loaded)
     scoring-strength.ts     scoringStrength() — points per game above each week's league average,
                             with a 95% range (Seasons → Scoring Trend)
     uncertainty.ts          wilsonRange(), fitShrinkage()/shrinkRate(), scheduleSamples(),
@@ -329,7 +336,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **The search overlay is portaled to `document.body`.** The navbar's `backdrop-filter` makes it the containing block for fixed descendants — rendering the overlay inside the nav clips it. Don't move it back. Every `fixed inset-0` modal portals the same way.
 - **What you're looking at lives in the URL.** People arrive from group-chat links, so tabs, weeks, years, filters that settle arguments, and open matchups go through `useUrlParam` / `useUrlModal`, never plain `useState`. Tabs and filters replace the URL entry; popups add a stop, so Back closes them. Each section's preview card is its `layout.tsx` metadata (`app/page-meta.ts`); pages are client components, so it can't live on the page.
 - **Only what can be pressed looks pressable.** A sortable `<th>` or a row that opens something carries `data-press tabIndex={0}`: that gives it the pointer, the hover, and Enter/Space (`PressKeys`). Plain rows and headers get neither. Every popup has `role="dialog"`, which is how `useFocusTrap` finds it.
-- **The title and tabs never wait for data.** Each page renders its `PageHeader` and `PillTabs` before the store loads, with the spinner under them, in the same tree position as the loaded page so the header doesn't remount. Home does the same with its hero.
+- **The title and tabs never wait for data.** Each page renders its `PageHeader` and `PillTabs` before the store loads, with the spinner under them, in the same tree position as the loaded page so the header doesn't remount. Home does the same with its hero. A baked tab (Records → Extremes, Seasons → Standings) goes further: the server shell runs the same `lib/stats` function on `builtState()` and passes only its output (never the whole store) to the client page, which renders the same elements before and after the load, only their values changing (rebuilding them on load made the largest paint later). Wrap it in `data-baked` with a `data-baked-fallback` spinner beside it, give it `BuiltAvatars`, and check the baked text equals the loaded text.
 - **Recharts never ships with a page.** Every chart draws through `components/shared/LazyChart` (a render prop handing over the Recharts module), inside its own fixed-height box, so ~100 KB loads only when a chart is on screen and nothing moves when it arrives. Never import from `'recharts'` directly (type imports are fine).
 - **Pages are thin shells.** Computation belongs in `hooks/` or `lib/`. Pages should only call hooks, destructure results, and render JSX.
 

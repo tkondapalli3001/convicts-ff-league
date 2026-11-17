@@ -4,8 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useUrlParam } from '@/hooks/useUrlParam'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useLeague } from '@/context/LeagueContext'
-import { computeLuckIndex, scheduleLuckNote, type UncertaintySummary } from '@/lib/stats'
+import { scheduleLuckNote, type StandingsData, type UncertaintySummary } from '@/lib/stats'
 import InfoTip from '@/components/shared/InfoTip'
 import uncertaintyData from '@/public/data/uncertainty.json'
 
@@ -85,12 +84,13 @@ const PHONE_SORTS: { key: SortKey; label: string }[] = [
 ]
 
 interface Props {
+  /** seasonStandings(): from the build until the store loads, then from the store */
+  data: StandingsData
   onYearChange?: (year: number | null) => void
 }
 
-export default function SeasonStandings({ onYearChange }: Props) {
-  const { state } = useLeague()
-  const { ownerSeasons, years, matchups, rosterUserMaps } = state
+export default function SeasonStandings({ data, onYearChange }: Props) {
+  const { years, seasons } = data
   const router = useRouter()
 
   // '' = the most recent year, 'all' = every year, else one year
@@ -119,37 +119,13 @@ export default function SeasonStandings({ onYearChange }: Props) {
     setYearParam(activeYears.size === 1 && activeYears.has(y) ? 'all' : String(y))
   }
 
-  // Season Luck Index per owner — the shared lib/stats implementation, so it
-  // matches Records, search, and the season tab
-  const luckMap = useMemo<Record<string, number>>(() => {
-    const result: Record<string, number> = {}
-    for (const year of years) {
-      for (const e of computeLuckIndex(matchups, rosterUserMaps, year)) result[`${e.owner}:${year}`] = e.luckIndex
-    }
-    return result
-  }, [matchups, rosterUserMaps, years])
-
   const rows = useMemo<Row[]>(() => {
     const result: Row[] = []
-    for (const [name, seasons] of Object.entries(ownerSeasons)) {
-      seasons.forEach(s => {
-        if (!activeYears.has(s.year)) return
-        const games = s.wins + s.losses
-        const margin = games > 0 ? parseFloat(((s.pf - s.pa) / games).toFixed(2)) : 0
-        result.push({
-          manager: name,
-          year: s.year,
-          finish: s.finish,
-          wins: s.wins,
-          losses: s.losses,
-          winpct: s.wins / (s.wins + s.losses || 1),
-          pf: s.pf,
-          pa: s.pa,
-          margin,
-          playoffs: s.inPlayoffs,
-          luck: luckMap[`${name}:${s.year}`] ?? 0,
-        })
-      })
+    for (const s of seasons) {
+      if (!activeYears.has(s.year)) continue
+      const games = s.wins + s.losses
+      const margin = games > 0 ? parseFloat(((s.pf - s.pa) / games).toFixed(2)) : 0
+      result.push({ ...s, winpct: s.wins / (s.wins + s.losses || 1), margin })
     }
 
     result.sort((a, b) => {
@@ -159,7 +135,7 @@ export default function SeasonStandings({ onYearChange }: Props) {
       return ((av as number) - (bv as number)) * sortDir
     })
     return result
-  }, [ownerSeasons, activeYears, sortKey, sortDir, luckMap])
+  }, [seasons, activeYears, sortKey, sortDir])
 
   const sort = { sortKey, sortDir, onSort: handleSort }
 

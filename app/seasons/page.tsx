@@ -1,79 +1,14 @@
-'use client'
+import SeasonsPage, { type BuiltStandings } from '@/components/seasons/SeasonsPage'
+import { seasonStandings } from '@/lib/stats'
+import { builtState } from '../built-state'
 
-import { useUrlParam } from '@/hooks/useUrlParam'
-import { useState } from 'react'
-import { useLeague } from '@/context/LeagueContext'
-import LoadingSpinner from '@/components/shared/LoadingSpinner'
-import ErrorState from '@/components/shared/ErrorState'
-import PillTabs from '@/components/shared/PillTabs'
-import PageHeader from '@/components/shared/PageHeader'
-import SeasonStandings from '@/components/seasons/SeasonStandings'
-import PlayoffBracket from '@/components/seasons/PlayoffBracket'
-import AvgScoreChart from '@/components/seasons/AvgScoreChart'
-import ScoringStrengthChart from '@/components/seasons/ScoringStrengthChart'
-import FinishTracker from '@/components/seasons/FinishTracker'
-import GameLog from '@/components/seasons/GameLog'
+// Seasons → Standings from the snapshot, worked out at build time so it's in the
+// HTML and paints before any data loads; the page reruns the same function once loaded.
+function builtStandings(): BuiltStandings | null {
+  const state = builtState()
+  return state ? { avatars: state.ownerAvatarMap, standings: seasonStandings(state) } : null
+}
 
-type Tab = 'standings' | 'gamelog' | 'finish' | 'avgscore'
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'standings', label: 'Standings'      },
-  { id: 'gamelog',   label: 'Game Log'       },
-  { id: 'finish',    label: 'Finish Tracker' },
-  { id: 'avgscore',  label: 'Scoring Trend'  },
-]
-const TAB_IDS = TABS.map(t => t.id)
-
-export default function SeasonsPage() {
-  const { state } = useLeague()
-  const { loaded, error, years } = state
-  const [activeTab, setActiveTab] = useUrlParam<Tab>('tab', 'standings', TAB_IDS)
-  const [standingsYear, setStandingsYear] = useState<number | null>(null)
-
-  if (error) return <ErrorState error={error} />
-
-  // The title and tabs paint at once; only what's under them waits for data
-  const shell = (
-    <>
-      <PageHeader kicker="The Season Archive" title="Seasons" subtitle="Year-by-year standings, every game, and scoring trends" />
-      <PillTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
-    </>
-  )
-  if (!loaded) return <div className="animate-fade-in">{shell}<LoadingSpinner /></div>
-
-  const sortedYears = [...years].sort((a, b) => b - a)
-  const selectedYear = standingsYear ?? sortedYears[0]
-
-  return (
-    <div className="animate-fade-in">
-      {shell}
-
-      {/* ── STANDINGS TAB ─────────────────────────────────────────── */}
-      {activeTab === 'standings' && (
-        <>
-          <SeasonStandings onYearChange={setStandingsYear} />
-          <div className="mt-6">
-            <div className="text-[10px] font-bold tracking-[2.5px] uppercase text-s-text3 mb-3">
-              Playoff Bracket · {selectedYear}
-            </div>
-            <PlayoffBracket year={selectedYear} />
-          </div>
-        </>
-      )}
-
-      {/* ── GAME LOG TAB ──────────────────────────────────────────── */}
-      {activeTab === 'gamelog' && <GameLog />}
-
-      {/* ── FINISH TRACKER TAB ────────────────────────────────────── */}
-      {activeTab === 'finish' && <FinishTracker />}
-
-      {/* ── AVG SCORE TAB ─────────────────────────────────────────── */}
-      {activeTab === 'avgscore' && (
-        <>
-          <AvgScoreChart />
-          <ScoringStrengthChart />
-        </>
-      )}
-    </div>
-  )
+export default function Page() {
+  return <SeasonsPage built={builtStandings()} />
 }
