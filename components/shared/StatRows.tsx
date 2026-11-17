@@ -97,23 +97,24 @@ export default function StatRows<T, K extends string = string>({ rows, rowKey, o
       )}
 
       {/* Column labels */}
-      <div className="grid items-center gap-x-1 border-b px-3 pb-1 pt-1" style={{ ...grid, borderColor: 'rgba(var(--gold-rgb), 0.14)' }}>
-        <span className={LABEL}>{leadLabel}</span>
+      <div className="grid items-start gap-x-1 border-b px-3 pb-1 pt-1" style={{ ...grid, borderColor: 'rgba(var(--gold-rgb), 0.14)' }}>
+        <span className={`flex min-h-[28px] items-center ${LABEL}`}>{leadLabel}</span>
         {visible.map(f => {
           const active = shows(f)
           return (
-            <span key={f.label} className="text-right leading-tight">
+            // Every label sits in the same 28px box, so they share a line; a ? sits beside its label, or under it when there is no room
+            <span key={f.label} className="flex flex-wrap items-center justify-end leading-tight">
               {sort && f.sortKey ? (
                 <button
                   type="button"
                   onClick={() => sort.onSort(f.sortKey as K)}
-                  className={`min-h-[28px] min-w-[28px] text-right ${LABEL}`}
+                  className={`flex min-h-[28px] min-w-[28px] items-center justify-end text-right ${LABEL}`}
                   style={active ? { color: '#C9A24B' } : undefined}
                 >
                   {f.label}
                 </button>
               ) : (
-                <span className={LABEL}>{f.label}</span>
+                <span className={`flex min-h-[28px] items-center ${LABEL}`}>{f.label}</span>
               )}
               {f.tip && <InfoTip term={f.tip.term}>{f.tip.text}</InfoTip>}
             </span>
