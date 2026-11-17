@@ -1,10 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList,
-} from 'recharts'
 import type { EnrichedTransaction } from '@/types'
+import LazyChart from '@/components/shared/LazyChart'
 
 interface Props {
   transactions: EnrichedTransaction[]
@@ -55,51 +53,55 @@ export default function TradesByYearChart({ transactions, activeYears, activeOwn
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={180}>
-        <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -20 }} barSize={28}>
-          <XAxis
-            dataKey="year"
-            tick={{ fill: '#7E8493', fontSize: 11, fontWeight: 600 }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            allowDecimals={false}
-            tick={{ fill: '#7E8493', fontSize: 10 }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <Tooltip
-            cursor={{ fill: 'rgba(201, 150, 46, 0.08)' }}
-            contentStyle={{
-              background: '#0B0B0D',
-              border: '1px solid rgba(230,190,90,0.16)',
-              borderRadius: 6,
-              fontSize: 12,
-              color: '#EDE9E0',
-            }}
-            itemStyle={{ color: '#EDE9E0' }}
-            labelStyle={{ color: '#9AA0AC' }}
-            formatter={(val: number) => [val, 'Trades']}
-            labelFormatter={(label) => `${label} Season`}
-          />
-          <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-            {data.map((entry) => (
-              <Cell
-                key={entry.year}
-                fill={entry.count > 0 ? '#C9A24B' : '#241f14'}
-                fillOpacity={entry.count > 0 ? 0.85 : 1}
+      <div className="h-[180px]">
+        <LazyChart>{({ BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList }) => (
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -20 }} barSize={28}>
+              <XAxis
+                dataKey="year"
+                tick={{ fill: '#7E8493', fontSize: 11, fontWeight: 600 }}
+                axisLine={false}
+                tickLine={false}
               />
-            ))}
-            <LabelList
-              dataKey="count"
-              position="top"
-              formatter={(val: number) => (val > 0 ? val : '')}
-              style={{ fill: '#7E8493', fontSize: 10, fontWeight: 700 }}
-            />
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+              <YAxis
+                allowDecimals={false}
+                tick={{ fill: '#7E8493', fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                cursor={{ fill: 'rgba(201, 150, 46, 0.08)' }}
+                contentStyle={{
+                  background: '#0B0B0D',
+                  border: '1px solid rgba(230,190,90,0.16)',
+                  borderRadius: 6,
+                  fontSize: 12,
+                  color: '#EDE9E0',
+                }}
+                itemStyle={{ color: '#EDE9E0' }}
+                labelStyle={{ color: '#9AA0AC' }}
+                formatter={(val: number) => [val, 'Trades']}
+                labelFormatter={(label) => `${label} Season`}
+              />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                {data.map((entry) => (
+                  <Cell
+                    key={entry.year}
+                    fill={entry.count > 0 ? '#C9A24B' : '#241f14'}
+                    fillOpacity={entry.count > 0 ? 0.85 : 1}
+                  />
+                ))}
+                <LabelList
+                  dataKey="count"
+                  position="top"
+                  formatter={(val: number) => (val > 0 ? val : '')}
+                  style={{ fill: '#7E8493', fontSize: 10, fontWeight: 700 }}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}</LazyChart>
+      </div>
     </div>
   )
 }

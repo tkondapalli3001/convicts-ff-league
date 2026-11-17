@@ -36,7 +36,7 @@ A data-heavy archive and live-season companion for a Sleeper Fantasy Football le
 | Styling | Tailwind CSS — Midnight Prime onyx/gold palette: `gold*` + legacy `s-` tokens (see `tailwind.config.ts`) |
 | State | React Context (`LeagueContext`) — all data loaded once on mount |
 | Data | Static season snapshots (`public/data/`) + Sleeper API for the live season — client-side, no backend |
-| Charts | Recharts |
+| Charts | Recharts, loaded only when a chart draws (`LazyChart`) |
 | Tooling | Vitest (unit tests + tie-outs), ESLint 9, knip (unused files/exports/deps), tsx (runs the dataset script) |
 | Deploy | GitHub Pages via `.github/workflows/deploy.yml`, `basePath: /convicts-ff-league` |
 
@@ -95,7 +95,7 @@ components/                 UI, one folder per page plus shared/layout/search
   shared/                   Reusable primitives: PageHeader, PillTabs, SectionCard, StatChip,
                             RecordItem, OwnerAvatar, PlayerHeadshot, FinishBadge, WinPctBadge,
                             SortHeader, InfoTip, LoadingSpinner, ErrorState, ShareButton,
-                            PickYourself, StatRows, BottomSheet, FilterSheet, ShowMore
+                            PickYourself, StatRows, BottomSheet, FilterSheet, ShowMore, LazyChart
 
 context/
   LeagueContext.tsx         Global store — loads the snapshot, walks the live league chain,
@@ -322,6 +322,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **What you're looking at lives in the URL.** People arrive from group-chat links, so tabs, weeks, years, filters that settle arguments, and open matchups go through `useUrlParam` / `useUrlModal`, never plain `useState`. Tabs and filters replace the URL entry; popups add a stop, so Back closes them. Each section's preview card is its `layout.tsx` metadata (`app/page-meta.ts`); pages are client components, so it can't live on the page.
 - **Only what can be pressed looks pressable.** A sortable `<th>` or a row that opens something carries `data-press tabIndex={0}`: that gives it the pointer, the hover, and Enter/Space (`PressKeys`). Plain rows and headers get neither. Every popup has `role="dialog"`, which is how `useFocusTrap` finds it.
 - **The title and tabs never wait for data.** Each page renders its `PageHeader` and `PillTabs` before the store loads, with the spinner under them, in the same tree position as the loaded page so the header doesn't remount. Home does the same with its hero.
+- **Recharts never ships with a page.** Every chart draws through `components/shared/LazyChart` (a render prop handing over the Recharts module), inside its own fixed-height box, so ~100 KB loads only when a chart is on screen and nothing moves when it arrives. Never import from `'recharts'` directly (type imports are fine).
 - **Pages are thin shells.** Computation belongs in `hooks/` or `lib/`. Pages should only call hooks, destructure results, and render JSX.
 
 ---

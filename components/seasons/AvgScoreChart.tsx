@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useLeague } from '@/context/LeagueContext'
+import LazyChart from '@/components/shared/LazyChart'
 
 export default function AvgScoreChart() {
   const { state } = useLeague()
@@ -30,42 +30,44 @@ export default function AvgScoreChart() {
         Average Score by Season (Points Per Team Per Game)
       </div>
       <div className="h-[200px] relative z-10">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid stroke="#241f14" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="year"
-              tick={{ fill: '#7E8493', fontSize: 11 }}
-              axisLine={{ stroke: '#241f14' }}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fill: '#7E8493', fontSize: 11 }}
-              axisLine={{ stroke: '#241f14' }}
-              tickLine={false}
-              domain={['auto', 'auto']}
-            />
-            <Tooltip
-              contentStyle={{
-                background: '#0B0B0D',
-                border: '1px solid #241f14',
-                borderRadius: 8,
-                color: '#EDE9E0',
-                fontSize: 12,
-              }}
-              formatter={(val: number) => [`${val.toFixed(2)} pts`, 'Avg']}
-            />
-            <Line
-              type="monotone"
-              dataKey="avg"
-              stroke="#C9962E"
-              strokeWidth={2}
-              dot={{ fill: '#C9962E', r: 4, strokeWidth: 0 }}
-              activeDot={{ r: 6, fill: '#E8CE8A' }}
-              fill="rgba(201,150,46,0.1)"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <LazyChart>{({ LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer }) => (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid stroke="#241f14" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="year"
+                tick={{ fill: '#7E8493', fontSize: 11 }}
+                axisLine={{ stroke: '#241f14' }}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fill: '#7E8493', fontSize: 11 }}
+                axisLine={{ stroke: '#241f14' }}
+                tickLine={false}
+                domain={['auto', 'auto']}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: '#0B0B0D',
+                  border: '1px solid #241f14',
+                  borderRadius: 8,
+                  color: '#EDE9E0',
+                  fontSize: 12,
+                }}
+                formatter={(val: number) => [`${val.toFixed(2)} pts`, 'Avg']}
+              />
+              <Line
+                type="monotone"
+                dataKey="avg"
+                stroke="#C9962E"
+                strokeWidth={2}
+                dot={{ fill: '#C9962E', r: 4, strokeWidth: 0 }}
+                activeDot={{ r: 6, fill: '#E8CE8A' }}
+                fill="rgba(201,150,46,0.1)"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}</LazyChart>
       </div>
     </div>
   )

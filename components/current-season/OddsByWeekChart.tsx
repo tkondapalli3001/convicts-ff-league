@@ -1,12 +1,12 @@
 'use client'
 
 import { useMemo } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import SectionCard from '@/components/shared/SectionCard'
 import InfoTip from '@/components/shared/InfoTip'
 import { useMe } from '@/hooks/useMe'
 import { useUrlParam } from '@/hooks/useUrlParam'
 import { DEFAULT_SIMS, formatOdds, type WeekOdds } from '@/lib/current-season'
+import LazyChart from '@/components/shared/LazyChart'
 
 const GOLD = '#E8CE8A'
 const MUTED = '#3A4150'
@@ -45,30 +45,32 @@ export default function OddsByWeekChart({ data }: { data: WeekOdds[] }) {
       </div>
 
       <div className="h-[220px] px-1 pt-2 sm:h-[260px] sm:px-3" role="img" aria-label={`${team}'s playoff odds entering each week: ${data.map(d => `week ${d.week} ${fmt(d)}`).join(', ')}`}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={rows} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
-              <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="week" tick={{ fill: AXIS, fontSize: 11 }} axisLine={{ stroke: GRID }} tickLine={false} interval="preserveStartEnd" />
-              <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={v => `${v}%`} tick={{ fill: AXIS, fontSize: 11 }} axisLine={false} tickLine={false} width={44} />
-              <Tooltip
-                cursor={{ stroke: 'rgba(var(--gold-rgb), 0.35)' }}
-                content={({ active, label }) => {
-                  const d = data.find(x => `W${x.week}` === label)
-                  if (!active || !d) return null
-                  return (
-                    <div className="rounded-[4px] px-3 py-2 text-[12px]" style={{ background: '#16161B', border: '1px solid rgba(var(--gold-rgb), 0.24)' }}>
-                      <div className="text-[9px] font-bold uppercase tracking-[1.5px] text-s-text3">Entering week {d.week}</div>
-                      <div className="font-bold text-s-text">{team} {fmt(d)}</div>
-                    </div>
-                  )
-                }}
-              />
-              {teams.filter(t => t !== team).map(t => (
-                <Line key={t} dataKey={t} stroke={MUTED} strokeWidth={1.5} dot={false} activeDot={false} isAnimationActive={false} />
-              ))}
-              <Line dataKey={team} stroke={GOLD} strokeWidth={2.5} dot={{ r: 3, fill: GOLD, strokeWidth: 0 }} activeDot={{ r: 5, fill: GOLD, stroke: '#0B0B0D', strokeWidth: 2 }} isAnimationActive={false} />
-            </LineChart>
-          </ResponsiveContainer>
+          <LazyChart>{({ LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer }) => (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={rows} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
+                <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="week" tick={{ fill: AXIS, fontSize: 11 }} axisLine={{ stroke: GRID }} tickLine={false} interval="preserveStartEnd" />
+                <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={v => `${v}%`} tick={{ fill: AXIS, fontSize: 11 }} axisLine={false} tickLine={false} width={44} />
+                <Tooltip
+                  cursor={{ stroke: 'rgba(var(--gold-rgb), 0.35)' }}
+                  content={({ active, label }) => {
+                    const d = data.find(x => `W${x.week}` === label)
+                    if (!active || !d) return null
+                    return (
+                      <div className="rounded-[4px] px-3 py-2 text-[12px]" style={{ background: '#16161B', border: '1px solid rgba(var(--gold-rgb), 0.24)' }}>
+                        <div className="text-[9px] font-bold uppercase tracking-[1.5px] text-s-text3">Entering week {d.week}</div>
+                        <div className="font-bold text-s-text">{team} {fmt(d)}</div>
+                      </div>
+                    )
+                  }}
+                />
+                {teams.filter(t => t !== team).map(t => (
+                  <Line key={t} dataKey={t} stroke={MUTED} strokeWidth={1.5} dot={false} activeDot={false} isAnimationActive={false} />
+                ))}
+                <Line dataKey={team} stroke={GOLD} strokeWidth={2.5} dot={{ r: 3, fill: GOLD, strokeWidth: 0 }} activeDot={{ r: 5, fill: GOLD, stroke: '#0B0B0D', strokeWidth: 2 }} isAnimationActive={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}</LazyChart>
       </div>
 
       {/* Pick a team: the legend and the selector in one */}

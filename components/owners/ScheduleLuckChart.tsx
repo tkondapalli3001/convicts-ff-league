@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo } from 'react'
-import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { useLeague } from '@/context/LeagueContext'
 import { useUrlParam } from '@/hooks/useUrlParam'
 import SectionCard from '@/components/shared/SectionCard'
@@ -9,6 +8,7 @@ import InfoTip from '@/components/shared/InfoTip'
 import { scheduleSamples, scheduleSeedKey, scheduleWeeks, type UncertaintySummary } from '@/lib/stats'
 import { hashSeed, rng } from '@/lib/current-season'
 import uncertaintyData from '@/public/data/uncertainty.json'
+import LazyChart from '@/components/shared/LazyChart'
 
 const U = uncertaintyData as UncertaintySummary
 const GOLD = '#C9962E'
@@ -76,28 +76,30 @@ export default function ScheduleLuckChart({ ownerName }: { ownerName: string }) 
       </div>
 
       <div className="h-[180px] px-1 pb-3 pt-2 sm:h-[220px] sm:px-3" role="img" aria-label={`${ownerName} won ${wins(quoted.actual)}; across ${sims} shuffled schedules the average is ${quoted.avg.toFixed(1)}, and the actual record beats ${Math.round(quoted.pct)}% of them.`}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={bars} margin={{ top: 8, right: 12, left: -6, bottom: 0 }} barCategoryGap={2}>
-              <XAxis dataKey="wins" tickFormatter={wins} tick={{ fill: AXIS, fontSize: 11 }} axisLine={{ stroke: '#241f14' }} tickLine={false} interval="preserveStartEnd" minTickGap={12} />
-              <YAxis tickFormatter={v => `${v}%`} tick={{ fill: AXIS, fontSize: 11 }} axisLine={false} tickLine={false} width={44} />
-              <Tooltip
-                cursor={{ fill: 'rgba(var(--gold2-rgb), 0.06)' }}
-                content={({ active, payload }) => {
-                  const d = payload?.[0]?.payload as { wins: number; share: number } | undefined
-                  if (!active || !d) return null
-                  return (
-                    <div className="rounded-[4px] px-3 py-2 text-[12px]" style={{ background: '#16161B', border: '1px solid rgba(var(--gold-rgb), 0.24)' }}>
-                      <div className="font-bold text-s-text">{wins(d.wins)} wins{d.wins === quoted.actual ? ' (actual)' : ''}</div>
-                      <div className="text-s-text3">{d.share < 0.1 ? '<0.1' : d.share.toFixed(1)}% of schedules</div>
-                    </div>
-                  )
-                }}
-              />
-              <Bar dataKey="share" radius={[2, 2, 0, 0]} isAnimationActive={false}>
-                {bars.map(b => <Cell key={b.wins} fill={b.wins === quoted.actual ? GOLD : MUTED} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <LazyChart>{({ BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer }) => (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={bars} margin={{ top: 8, right: 12, left: -6, bottom: 0 }} barCategoryGap={2}>
+                <XAxis dataKey="wins" tickFormatter={wins} tick={{ fill: AXIS, fontSize: 11 }} axisLine={{ stroke: '#241f14' }} tickLine={false} interval="preserveStartEnd" minTickGap={12} />
+                <YAxis tickFormatter={v => `${v}%`} tick={{ fill: AXIS, fontSize: 11 }} axisLine={false} tickLine={false} width={44} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(var(--gold2-rgb), 0.06)' }}
+                  content={({ active, payload }) => {
+                    const d = payload?.[0]?.payload as { wins: number; share: number } | undefined
+                    if (!active || !d) return null
+                    return (
+                      <div className="rounded-[4px] px-3 py-2 text-[12px]" style={{ background: '#16161B', border: '1px solid rgba(var(--gold-rgb), 0.24)' }}>
+                        <div className="font-bold text-s-text">{wins(d.wins)} wins{d.wins === quoted.actual ? ' (actual)' : ''}</div>
+                        <div className="text-s-text3">{d.share < 0.1 ? '<0.1' : d.share.toFixed(1)}% of schedules</div>
+                      </div>
+                    )
+                  }}
+                />
+                <Bar dataKey="share" radius={[2, 2, 0, 0]} isAnimationActive={false}>
+                  {bars.map(b => <Cell key={b.wins} fill={b.wins === quoted.actual ? GOLD : MUTED} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}</LazyChart>
       </div>
     </SectionCard>
   )
