@@ -98,7 +98,7 @@ export default function SeasonDraftBoard({ year, draft, picks, rMap }: {
                         title={`${round}.${String(inRound).padStart(2, '0')} · ${pick.metadata.first_name ?? ''} ${pick.metadata.last_name ?? ''} · ${pos}${traded ? ` · picked by ${picker}` : ''}`}
                       >
                         <div className="flex items-center justify-between text-[9px] font-bold">
-                          <span className="text-s-text3">{round}.{String(inRound).padStart(2, '0')}</span>
+                          <span className="text-s-text2">{round}.{String(inRound).padStart(2, '0')}</span>
                           <span style={{ color }}>{pos}</span>
                         </div>
                         <div className="mt-0.5 max-w-[92px] break-words text-[10px] leading-tight text-s-text2">
@@ -107,7 +107,7 @@ export default function SeasonDraftBoard({ year, draft, picks, rMap }: {
                         <div className="max-w-[92px] break-words font-display text-[15px] font-bold uppercase leading-tight text-s-text">
                           {pick.metadata.last_name || pick.player_id}
                         </div>
-                        <div className="mt-0.5 flex items-center gap-1 text-[9px] text-s-text3">
+                        <div className="mt-0.5 flex items-center gap-1 text-[9px] text-s-text2">
                           {pick.metadata.team && <span>{pick.metadata.team}</span>}
                           {pick.is_keeper && <span className="font-bold text-gold-soft">KEEP</span>}
                           {traded && <span className="truncate text-gold-dim">→ {picker}</span>}

@@ -121,13 +121,7 @@ export default function PlayersPage() {
     <div className="animate-fade-in">
       {shell}
 
-      {/* Loading state for draft/player data */}
-      {activeTab !== 'transactions' && activeTab !== 'scoring' && loading && (
-        <div className="flex items-center gap-3 px-4 py-3 gl rounded-[6px] mb-4 text-[12px] text-s-text2">
-          <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
-          {loadingText}
-        </div>
-      )}
+      {/* A loading note takes the table's place rather than sitting above it, so nothing jumps when the data lands */}
       {activeTab !== 'transactions' && activeTab !== 'scoring' && dataError && (
         <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[6px] mb-4 text-[12px] text-s-red">
           Failed to load draft data: {dataError}
@@ -135,7 +129,12 @@ export default function PlayersPage() {
       )}
 
       {activeTab === 'winrate' && (
-        <PlayerWinRateTable players={playerWinRates} onPlayerClick={setSelectedPlayer} />
+        loading && !playerWinRates.length
+          ? <div className="flex items-center gap-3 px-4 py-3 gl rounded-[6px] mb-4 text-[12px] text-s-text2">
+              <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
+              {loadingText}
+            </div>
+          : <PlayerWinRateTable players={playerWinRates} onPlayerClick={setSelectedPlayer} />
       )}
       {activeTab === 'scoring' && (
         playerScores.length === 0
@@ -144,17 +143,11 @@ export default function PlayersPage() {
       )}
       {activeTab === 'ownership' && (
         loading && !ownership.length
-          ? <div className="text-s-text3 text-[12px] text-center py-12">Loading draft picks…</div>
+          ? <div className="text-s-text3 text-[12px] text-center py-12">{loadingText || 'Loading draft picks…'}</div>
           : <PlayerOwnershipTable ownership={ownership} />
       )}
       {activeTab === 'transactions' && (
         <div>
-          {txLoading && (
-            <div className="flex items-center gap-3 px-4 py-3 gl rounded-[6px] mb-4 text-[12px] text-s-text2">
-              <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
-              {txLoadingText}
-            </div>
-          )}
           {txError && (
             <div className="px-4 py-3 bg-[#220000] border border-[rgba(180,99,107,0.3)] rounded-[6px] mb-4 text-[12px] text-s-red">
               Failed to load transactions: {txError}
@@ -172,6 +165,13 @@ export default function PlayersPage() {
             onAllYears={() => setActiveYears(new Set(txYears))}
             shown={filteredTx.length}
           />
+          {/* Under the filters, in the chart's place: the filters don't move when the moves arrive */}
+          {txLoading && (
+            <div className="flex items-center gap-3 px-4 py-3 gl rounded-[6px] mb-4 text-[12px] text-s-text2">
+              <div className="w-4 h-4 border-2 border-s-border2 border-t-s-gold rounded-full animate-spin flex-shrink-0" />
+              {txLoadingText}
+            </div>
+          )}
           {!txLoading && (
             <TradesByYearChart
               transactions={transactions}
@@ -186,10 +186,14 @@ export default function PlayersPage() {
               playerWinRates={playerWinRates}
             />
           )}
-          <div className="text-[10px] text-s-text3 mb-2">
-            {filteredTx.length} transactions · {tradeCount} trades · {waiverCount} waiver moves
-          </div>
-          <TransactionTable transactions={filteredTx} onClick={setSelectedTx} />
+          {!txLoading && (
+            <>
+              <div className="text-[10px] text-s-text3 mb-2">
+                {filteredTx.length} transactions · {tradeCount} trades · {waiverCount} waiver moves
+              </div>
+              <TransactionTable transactions={filteredTx} onClick={setSelectedTx} />
+            </>
+          )}
           <TransactionDetailModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
         </div>
       )}

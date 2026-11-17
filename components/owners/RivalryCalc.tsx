@@ -38,12 +38,12 @@ export default function RivalryCalc() {
 
       {/* Pickers */}
       <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <select value={ownerA} onChange={e => setOwnerA(e.target.value)} className={selectCls}>
+        <select aria-label="First manager" value={ownerA} onChange={e => setOwnerA(e.target.value)} className={selectCls}>
           <option value="">Select Manager A</option>
           {ownerNames.filter(n => n !== ownerB).map(n => <option key={n} value={n}>{n}</option>)}
         </select>
         <span className="text-s-text3 font-bold text-[13px]">vs</span>
-        <select value={ownerB} onChange={e => setOwnerB(e.target.value)} className={selectCls}>
+        <select aria-label="Second manager" value={ownerB} onChange={e => setOwnerB(e.target.value)} className={selectCls}>
           <option value="">Select Manager B</option>
           {ownerNames.filter(n => n !== ownerA).map(n => <option key={n} value={n}>{n}</option>)}
         </select>

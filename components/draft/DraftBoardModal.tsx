@@ -113,7 +113,7 @@ export default function DraftBoardModal({ year, draft, picks, rMap, onClose }: P
                               {playerName}
                             </span>
                             {pick.metadata.team && (
-                              <span className="text-[9px] text-s-text3">{pick.metadata.team}</span>
+                              <span className="text-[9px] text-s-text2">{pick.metadata.team}</span>
                             )}
                           </div>
                         </td>
