@@ -225,16 +225,19 @@ looks clickable that isn't, and no screen is blank while it loads.
   every page paints its title and tabs before the data loads.
 - **Tested and kept:** live matchup rows give both scores equal weight on purpose (a mid-week
   lead means little while players are yet to play).
-- **Proposed, owner's call (L3):**
-  1. "Which one are you?" as a one-time bottom sheet instead of a card on every tab; today it
-     fills most of the first phone screen until answered.
-  2. Home on phones in season: lead with the week (your matchup, or the Matchup of the Week)
-     and move the champion hero below it. Purpose 1 is the weekly companion.
-  3. Tablets (640-1023px) get the phone's bottom bar instead of the compact top nav.
-  4. The kicker's position chip (`#6e7681`, 3.8:1) is in the functional position palette; lifting
-     it means changing that palette.
-  5. The 2026 tab says the week three times (kicker, sync line, week picker); fold the sync
-     line into the kicker.
+- **Done 2026-11-16 (owner said do all five of the L3 proposals):**
+  1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
+     not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the
+     bottom bar asks again.
+  2. Under 1024px, in season, Home leads with the week: your matchup once you've picked, the
+     Matchup of the Week until then, with the champion hero below. A placeholder holds the
+     card's place while data loads (the build knows a season is on when the snapshot lacks
+     `CURRENT_SEASON`), so the hero doesn't jump. Desktop Home is unchanged and no longer syncs.
+  3. The bottom bar is the navigation up to 1023px; the navbar carries links from 1024px. The
+     compact tablet top nav from earlier the same day is gone; search stays pinned.
+  4. Kicker and defense chips use the slate the tables already used (`#94a3b8`), up from 3.8:1.
+  5. The season tab says the week once: status in the kicker, sync age and the refresh button
+     at the end of the kicker line. The separate sync row is gone (one row higher on every tab).
 
 ### Done
 - **2026-08-14 —** 2026 buy-in (`2026: 150`).

@@ -61,7 +61,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${archivo.variable} ${barlow.variable}`}>
-      <body className="bg-s-bg text-s-text min-h-screen font-sans antialiased pb-[calc(53px+env(safe-area-inset-bottom))] sm:pb-0">
+      <body className="bg-s-bg text-s-text min-h-screen font-sans antialiased pb-[calc(53px+env(safe-area-inset-bottom))] lg:pb-0">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[200] focus:rounded-[2px] focus:border focus:border-gold focus:bg-s-bg2 focus:px-4 focus:py-2.5 focus:text-[11px] focus:font-bold focus:uppercase focus:tracking-[2px] focus:text-gold-soft"

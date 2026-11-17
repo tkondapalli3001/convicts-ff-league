@@ -72,7 +72,8 @@ components/                 UI, one folder per page plus shared/layout/search
                             YourMatchupCard, OddsByWeekChart (under Power Rankings)
   home/                     HomePage (Home itself: hero first, the rest once data loads),
                             HeroSection, CareerStandingsTable, HallOfFameCard, WallOfShameCard,
-                            HomeYourMatchup
+                            HomeThisWeek (under 1024px, in season: your matchup or the Matchup of
+                            the Week, above the hero; holds its place while loading)
   seasons/                  SeasonStandings, PlayoffBracket, GameLog (+ Filters, Table,
                             GameDetailModal box score), FinishTracker, AvgScoreChart,
                             ScoringStrengthChart (Scoring Trend tab)
@@ -88,8 +89,8 @@ components/                 UI, one folder per page plus shared/layout/search
                             (Players → Transactions and the season tab's Transactions)
   search/                   GlobalSearch (⌘K trigger), SearchOverlay, SearchStrip (home),
                             AnswerCard, ManagerCard, PlayerCard
-  layout/                   Navbar (640px up; search pinned, links compact below lg), BottomBar
-                            (phones: Home · season · Me · Owners · More), Brand, Footer,
+  layout/                   Navbar (links from 1024px; search pinned), BottomBar (under 1024px:
+                            Home · season · Me · Owners · More), Brand, Footer,
                             PressKeys (Enter/Space presses anything marked data-press), nav-items.ts
   shared/                   Reusable primitives: PageHeader, PillTabs, SectionCard, StatChip,
                             RecordItem, OwnerAvatar, PlayerHeadshot, FinishBadge, WinPctBadge,
@@ -119,6 +120,8 @@ hooks/
   useModalClose.ts          Escape, Back button, body scroll lock and the focus trap (useFocusTrap:
                             focus in, Tab stays in, focus back on close) shared by every popup
   useMe.ts                  "Pick who you are": no login, remembered on the device
+  useBelowLg.ts             True under 1024px, where the bottom bar is the navigation (false on the
+                            server): gates sheets and Home's live card off desktops
   useMyColumn.ts            Draft boards open on your column
   useUrlParam.ts            useUrlParam(), useUrlModal() — tabs, weeks, years and open matchups
                             live in the URL, so links open exactly what was shared
@@ -310,7 +313,7 @@ All data is **client-side only** — no SSR, no API routes, no server components
 - **Stakes account for every other game.** Never claim a result "climbs to 3rd" or "clinches" from one game alone. Playoff odds are simulations and always labeled as odds (`lib/current-season/playoff-odds.ts`); clinch/elimination sentences are exact (`playoff-scenarios.ts`) — true in every outcome, with a tie in wins never counted for or against a team (points for can't be known ahead). If any remaining week's pairings are missing, show no stakes rather than simulate a partial schedule.
 - **One luck formula.** Luck Index = actual wins (ties ½) − Σ weekly all-play expected wins ((teams outscored + ½ tied) / (teams that played − 1)), regular season only. It lives only in `lib/stats/luck.ts` — never recompute luck or all-play inline.
 - **The power rating is the original Oberon Mt. formula.** `0.6 × avg + 0.2 × (high + low) + 0.2 × (win% × 200)` with the actual record's win%. The league tried all-play win% in its place and went back (2026-10-01) — keep the original unless the owner asks again. All-play stays a display column.
-- **Live data overlays; it never mutates.** Only the season tab and Home's your-matchup card (for someone who has picked who they are) poll, via `useLiveSeason`, which layers fresh league/roster/matchup data over a copy of the global state (`withLiveSeason`) and flattens the season's games once per sync. Facts about past seasons (champ path, honors, career wins) memoize on `live.base`, which polls never change. The global store still loads once. A week is final only once `settings.last_scored_leg` reaches it — never infer "final" from points on the board (a Thursday game puts points up for the whole week).
+- **Live data overlays; it never mutates.** Only the season tab and Home's this-week card (under 1024px, where Home leads with the week) poll, via `useLiveSeason`, which layers fresh league/roster/matchup data over a copy of the global state (`withLiveSeason`) and flattens the season's games once per sync. Facts about past seasons (champ path, honors, career wins) memoize on `live.base`, which polls never change. The global store still loads once. A week is final only once `settings.last_scored_leg` reaches it — never infer "final" from points on the board (a Thursday game puts points up for the whole week).
 - **The search overlay is portaled to `document.body`.** The navbar's `backdrop-filter` makes it the containing block for fixed descendants — rendering the overlay inside the nav clips it. Don't move it back. Every `fixed inset-0` modal portals the same way.
 - **What you're looking at lives in the URL.** People arrive from group-chat links, so tabs, weeks, years, filters that settle arguments, and open matchups go through `useUrlParam` / `useUrlModal`, never plain `useState`. Tabs and filters replace the URL entry; popups add a stop, so Back closes them. Each section's preview card is its `layout.tsx` metadata (`app/page-meta.ts`); pages are client components, so it can't live on the page.
 - **Only what can be pressed looks pressable.** A sortable `<th>` or a row that opens something carries `data-press tabIndex={0}`: that gives it the pointer, the hover, and Enter/Space (`PressKeys`). Plain rows and headers get neither. Every popup has `role="dialog"`, which is how `useFocusTrap` finds it.
@@ -332,6 +335,8 @@ rounded corners.** Full spec + canonical patterns live in `DESIGN.md`.
 - **Shared primitives:** `PageHeader` (gold-dash kicker + hero-gradient title), `PillTabs` (gold-underline tabs), `SectionCard` (onyx card + gold/brick dash header), `StatChip` (hairline stat-band cell), `RecordItem`, `OwnerAvatar` (gold-ring for champions), `PlayerHeadshot`, `FinishBadge` (square chip), `WinPctBadge`, `SortHeader` (sortable `<th>` — never define header components inside a table's render; its `tip` adds a definition), `InfoTip` (? icon whose definition pops up on hover/tap; portaled so table scrollers can't clip it). Use these instead of re-rolling the markup.
 - **Wide tables become rows on phones.** `StatRows` sits next to the table (`hidden sm:block`): a few numbers up front, the rest a tap away, every sort still there. The owner chose the numbers: Power Rankings shows Power Index, PF/Gm, all-play; the career tables show record, Win%, titles; a profile's Season Log shows record, PF/Gm, +/−. Don't add columns without asking. Any table without phone rows scrolls sideways (`overflow-x-auto`) when it has more to show; never clip columns or text off a card to make it fit (owner, 2026-11-07).
 - **Phones scroll the page, never a box inside it.** A scroll box gets `sm:max-h-… sm:overflow-y-auto`; long lists use `useShowMore` (a hundred rows at a time). Long filter lists sit behind `FilterSheet` (one Filters button, a bottom sheet); a single row of quick chips (positions, years) stays inline. Chips are 32px tall on phones.
+- **Two navigation ranges.** Under 1024px (`lg`) the bottom bar is the navigation, sheets rise from the bottom, and Home leads with the week; from 1024px the navbar carries the links and Home leads with the champion. Layout inside a page still switches at `sm` (640px): phone rows vs tables, `FilterSheet`. The "Which one are you?" ask is one sheet, once (`PickYourselfSheet`), on Home and the season tab; never a card in the page.
+- **The season tab says the week once.** The kicker carries week and status; the sync readout (`SyncStatus`) sits at the end of the kicker line via `PageHeader`'s `aside`. Don't add another status row.
 - **Mobile first — most of the league is on phones.** No text under 9px; tap targets ≥ ~28px (`InfoTip` pads its 13px icon, schedule rows are whole-row buttons); form fields 16px on phones (iOS zooms into anything smaller); let names and context lines wrap instead of truncating when they carry the information. Check every page at 375px.
 - **Definitions go behind a ?, legends stay footnotes.** Any text that defines a term or a stat (a column, a card's criteria, a formula) is an `InfoTip` beside the term — never a footnote or caption. Emoji legends (`FlairLegend`) stay as visible footnotes; instructions ("Tap a matchup…") stay as text.
 - **No HTML entities in multi-line JSX text.** SWC drops the leading space of a line-ending text run that contains one (`all {n} teams … doesn&apos;t count` rendered "all 9teams"). Write a literal ’ or end the run on the same line.

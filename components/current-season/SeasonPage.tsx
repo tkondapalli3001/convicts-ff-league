@@ -25,7 +25,7 @@ import SeasonTransactions from '@/components/current-season/SeasonTransactions'
 import SeasonDraftBoard from '@/components/current-season/SeasonDraftBoard'
 import SyncStatus from '@/components/current-season/SyncStatus'
 import YourMatchupCard from '@/components/current-season/YourMatchupCard'
-import { PickYourselfPrompt } from '@/components/shared/PickYourself'
+import { PickYourselfSheet } from '@/components/shared/PickYourself'
 
 type Tab = 'rankings' | 'matchups' | 'rosters' | 'transactions' | 'draft'
 
@@ -90,8 +90,9 @@ export default function SeasonPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        kicker={preseason ? `The ${latestSeason} Preseason` : live.live ? `Week ${live.week} · Live from Sleeper` : `The ${season} Season`}
+        kicker={preseason ? `The ${latestSeason} Preseason` : live.live ? `Week ${live.week} · ${STATUS_LABEL[live.status]}` : `The ${season} Season`}
         title={String(Number.isFinite(latestSeason) ? latestSeason : season)}
+        aside={live.live ? <SyncStatus syncedAt={live.syncedAt} syncing={live.syncing} stale={live.stale} onRefresh={live.refresh} /> : undefined}
       />
 
       <PillTabs tabs={TABS} active={tab} onChange={setTab} />
@@ -111,20 +112,10 @@ export default function SeasonPage() {
         </div>
       )}
 
-      {live.live && (
-        <SyncStatus
-          label={`Week ${live.week} · ${STATUS_LABEL[live.status]}`}
-          syncedAt={live.syncedAt}
-          syncing={live.syncing}
-          stale={live.stale}
-          onRefresh={live.refresh}
-        />
-      )}
-
       {/* Your game first, above the rankings the league argues about */}
       {live.live && (tab === 'rankings' || tab === 'matchups') && (
         <>
-          <PickYourselfPrompt className="mb-4 sm:hidden" />
+          {!openOwner && <PickYourselfSheet />}
           {mine && (
             <YourMatchupCard
               m={mine}

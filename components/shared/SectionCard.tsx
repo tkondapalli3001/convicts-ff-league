@@ -30,8 +30,8 @@ export default function SectionCard({ title, action, brick, className, children 
         style={{ borderColor: headBorder }}
       >
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="h-px w-5 flex-shrink-0" style={{ background: dash }} />
-          <h2 className={`text-[11px] font-bold uppercase tracking-[2.5px] sm:tracking-[4px] ${brick ? 'text-loss' : 'text-gold-soft'}`}>
+          <span className="hidden h-px w-5 flex-shrink-0 sm:block" style={{ background: dash }} />
+          <h2 className={`text-[11px] font-bold uppercase tracking-[2px] sm:tracking-[4px] ${brick ? 'text-loss' : 'text-gold-soft'}`}>
             {title}
           </h2>
         </div>

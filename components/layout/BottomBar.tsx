@@ -19,8 +19,8 @@ const CELL = 'flex min-h-[52px] flex-1 flex-col items-center justify-center gap-
 type Sheet = 'more' | 'pick'
 
 /**
- * Phone navigation: Home · season · Me · Owners · More, in thumb reach. Wider
- * screens use the navbar. The sheet is portaled, like every overlay. Its links
+ * Phone and tablet navigation: Home · season · Me · Owners · More, in thumb reach.
+ * From 1024px the navbar carries the links. The sheet is portaled, like every overlay. Its links
  * replace the history entry the sheet added, so Back doesn't stop on a closed
  * sheet.
  */
@@ -55,7 +55,7 @@ export default function BottomBar() {
     <>
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-40 flex border-t sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 flex border-t lg:hidden"
         style={{ background: '#070708', borderColor: 'rgba(var(--gold-rgb), 0.16)', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {barLink(home)}

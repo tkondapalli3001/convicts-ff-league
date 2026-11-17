@@ -91,7 +91,9 @@ locally or fold into the gold palette.
   (5px tracking, small-metal gradient).
 - **Navbar** (`layout/Navbar.tsx`): onyx `#070708`, bottom gold hairline, active
   item = white + 2px gold underline, `<GlobalSearch/>` at right.
-- **Mobile top bar** (`layout/MobileMenu.tsx`): 44px hamburger (gold-soft) + 44px
+- **Under 1024px** the bottom bar (`layout/BottomBar.tsx`: Home · season · Me · Owners · More) is
+  the navigation and the navbar keeps only brand + search; the note below predates it.
+- **Mobile top bar** (`layout/MobileMenu.tsx`, retired): 44px hamburger (gold-soft) + 44px
   search icon. Hamburger opens a portaled drawer. **No bottom tab bar.**
 - **Search strip** (`search/SearchStrip.tsx`, home only): full-width gold-hairline
   strip on `panel-2` with gold dash, placeholder, and `⌘K` hint; opens the search overlay.

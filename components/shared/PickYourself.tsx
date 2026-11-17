@@ -3,8 +3,10 @@
 import { useMemo } from 'react'
 import { useLeague } from '@/context/LeagueContext'
 import { useMe } from '@/hooks/useMe'
+import { useBelowLg } from '@/hooks/useBelowLg'
 import { INACTIVE_OWNERS, USER_ID_TO_OWNER } from '@/lib/league'
 import OwnerAvatar from '@/components/shared/OwnerAvatar'
+import BottomSheet from '@/components/shared/BottomSheet'
 
 /** The owners someone can be: this league's active managers, A–Z. */
 function useActiveOwners(): string[] {
@@ -39,20 +41,30 @@ export function OwnerPicker({ onPicked }: { onPicked?: (owner: string) => void }
   )
 }
 
-/** The one-time ask, shown until someone answers or says not now. */
-export function PickYourselfPrompt({ className }: { className?: string }) {
+/**
+ * The one-time ask: a sheet the first time someone lands on Home or the season
+ * tab, wherever the bottom bar is the navigation. Picking, "Not now", Back or
+ * a tap outside all answer it for good; "Me" in the bottom bar asks again.
+ */
+export function PickYourselfSheet() {
+  const { state } = useLeague()
   const { me, setMe } = useMe()
-  if (me !== null) return null
+  const below = useBelowLg()
+  if (me !== null || !below || !state.loaded) return null
   return (
-    <div className={`rounded-[6px] p-4 ${className ?? ''}`} style={{ background: '#0B0B0D', border: '1px solid rgba(var(--gold-rgb), 0.20)' }}>
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <div className="text-[11px] font-bold uppercase tracking-[2.5px] text-gold-soft">Which one are you?</div>
-        <button type="button" onClick={() => setMe('')} className="min-h-[28px] flex-shrink-0 px-1 text-[10px] uppercase tracking-[1px] text-s-text3 hover:text-s-text2">
+    <BottomSheet title="Which one are you?" onClose={() => setMe('')}>
+      <div className="p-4">
+        <p className="mb-4 text-[12px] leading-snug text-s-text2">Your matchup comes first from here on. It’s only remembered on this device.</p>
+        <OwnerPicker />
+        <button
+          type="button"
+          onClick={() => setMe('')}
+          className="mt-4 min-h-[44px] w-full rounded-[2px] border text-[10px] font-bold uppercase tracking-[2px] text-s-text2 transition-colors hover:text-gold-soft"
+          style={{ borderColor: 'rgba(var(--gold-rgb), 0.18)' }}
+        >
           Not now
         </button>
       </div>
-      <p className="mb-3 text-[12px] leading-snug text-s-text2">Your matchup comes first from here on. It’s only remembered on this device.</p>
-      <OwnerPicker />
-    </div>
+    </BottomSheet>
   )
 }

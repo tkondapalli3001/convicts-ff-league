@@ -1,5 +1,4 @@
-// Midnight Prime brand lockup — monogram + wordmark. Between 640 and 767px the
-// wordmark steps aside so the nav links fit; the monogram carries the brand.
+// Midnight Prime brand lockup — monogram + wordmark, in the navbar at every width.
 
 interface BrandProps {
   /** 'sm' = compact mobile lockup (26px monogram); default = desktop (32px). */
@@ -33,7 +32,7 @@ export default function Brand({ size = 'md' }: BrandProps) {
 
       {/* Wordmark */}
       <span
-        className={`text-metal font-bold uppercase leading-none whitespace-nowrap sm:max-md:hidden ${wordSize}`}
+        className={`text-metal font-bold uppercase leading-none whitespace-nowrap ${wordSize}`}
       >
         Convicts FF
       </span>

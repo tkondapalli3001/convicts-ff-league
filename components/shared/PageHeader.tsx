@@ -5,6 +5,8 @@ interface Props {
   subtitle?: React.ReactNode
   /** Optional gold kicker line above the title, e.g. "THE RECORD BOOK · 7 SEASONS". */
   kicker?: string
+  /** Sits at the far end of the kicker line (the season tab's sync readout). */
+  aside?: React.ReactNode
 }
 
 /**
@@ -12,7 +14,7 @@ interface Props {
  * radial wash, an optional gold-dash kicker, a hero-gradient Barlow title, and a tracked
  * sub-line. Rendered first in every page, so it bleeds to the content edges under the navbar.
  */
-export default function PageHeader({ title, subtitle, kicker }: Props) {
+export default function PageHeader({ title, subtitle, kicker, aside }: Props) {
   return (
     <div
       className="-mx-4 -mt-6 mb-3 overflow-hidden border-b px-4 pb-4 pt-5 sm:mb-6 sm:px-8 sm:pb-9 sm:pt-12"
@@ -28,9 +30,10 @@ export default function PageHeader({ title, subtitle, kicker }: Props) {
             className="h-px w-8 sm:w-12"
             style={{ background: 'linear-gradient(to right, transparent, #C9962E)' }}
           />
-          <span className="text-[9px] font-bold uppercase tracking-[4px] text-gold-soft sm:text-[10px] sm:tracking-[6px]">
+          <span className={`whitespace-nowrap text-[9px] font-bold uppercase text-gold-soft sm:text-[10px] sm:tracking-[6px] ${aside ? 'tracking-[2.5px]' : 'tracking-[4px]'}`}>
             {kicker}
           </span>
+          {aside && <span className="ml-auto flex-shrink-0">{aside}</span>}
         </div>
       )}
       <h1 className="text-hero-gold font-display text-[32px] font-extrabold uppercase leading-[0.95] tracking-[1px] sm:text-[56px] sm:tracking-[2px] lg:text-[64px]">

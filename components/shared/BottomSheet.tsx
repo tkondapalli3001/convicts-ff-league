@@ -5,7 +5,7 @@ import { X } from 'lucide-react'
 import { useModalClose } from '@/hooks/useModalClose'
 
 /**
- * A phone sheet that rises from the bottom: the bottom bar's More menu and the
+ * A sheet that rises from the bottom, on phones and tablets: the bottom bar's More menu and the
  * Filters button use it. Portaled like every overlay; Escape, Back and a tap
  * outside close it.
  */
@@ -21,7 +21,7 @@ export default function BottomSheet({ title, onClose, children }: {
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-[100] flex items-end sm:hidden"
+      className="fixed inset-0 z-[100] flex items-end lg:hidden"
       style={{ background: 'rgba(3,3,4,0.7)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
