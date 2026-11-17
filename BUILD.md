@@ -55,7 +55,7 @@ Prime) · Recharts · React Context · Vitest · knip.
 | `npm run dataset` | Rebuild the tidy history tables in `data/` (`-- --cache <dir>` reuses downloads) |
 | `npm run uncertainty` | Rebuild the noise tables in `data/` from committed files; prints the summary |
 | `npm run snapshot` | Freeze completed seasons into `public/data/` (post-season ritual) |
-| `npm run snapshot -- --players-only` | Rebuild only `players.json` (after each draft) |
+| `npm run snapshot -- --players-only` | Rebuild only `players.json` and `users-current.json` (after each draft; rerun if an owner changes their picture mid-season) |
 | `node scripts/luck-index.mjs <leagueId>` | Any league's Luck Index via `lib/stats/luck.ts` |
 
 ---
@@ -89,7 +89,8 @@ on an owner decision.
    `lib/league/history.ts`) once the league sets them — the Draft Hub countdown returns.
 3. **After the draft:** in `lib/league/config.ts`, set `LEAGUE_ID` to the new league and
    `CURRENT_SEASON = 2027` (the tab moves to `/2027`; no folder rename). Run
-   `npm run snapshot -- --players-only` so rookies have names. Check `/2027` at 375px.
+   `npm run snapshot -- --players-only` so rookies have names and baked pages show this
+   year's pictures. Check `/2027` at 375px.
 
 ### M3 — Degraded-mode check *(after any change to data loading; last passed 2026-11-17)*
 Block a request in the browser (Chrome DevTools → Network → Block request URL/domain)
@@ -301,8 +302,9 @@ looks clickable that isn't, and no screen is blank while it loads.
   link to another tab hides the baked part (`data-deeplink` + `data-baked` in `globals.css`).
   Lighthouse, live, medians: before 66 (LCP 4.6s); after, two sets of three: 100 and 98 (LCP
   1.0s; one run in six still 5.2s, one 3.0s). Part of the TBT drop (799 → ~100ms) is the other
-  session's worker fix landing the same hour. Known gap: four owners changed their picture in
-  2026, which the snapshot can't know, so their old picture shows until the data arrives.
+  session's worker fix landing the same hour. Known gap (fixed below): four owners changed their
+  picture in 2026, which the snapshot couldn't know, so their old picture showed until the data
+  arrived.
   The first deploy rebuilt the tab on load and measured worse (LCP 5.5s); keep the baked and
   loaded elements the same.
   - Owner said bake the other archive default tabs, one page at a time, text checked each time.
@@ -322,6 +324,11 @@ looks clickable that isn't, and no screen is blank while it loads.
     it now renders without waiting (no build step needed). Baked and loaded text identical (552
     chars). All five archive default tabs are now in the HTML. Not yet measured live with
     Lighthouse.
+  - **Avatar gap fixed (owner OK'd 2026-11-17):** `npm run snapshot` (both modes) now also writes
+    `users-current.json`, the current league's users untouched; `builtState()` takes pictures
+    from it after the snapshot seasons. Baked and loaded pictures match for all 10 owners. The
+    same run refreshed `players.json` (38 players added, 25 removed, none in league history; 120
+    team or name updates such as "Chris Godwin Jr.").
 - **Done 2026-11-16 (owner said do all five of the L3 proposals):**
   1. "Which one are you?" is a one-time bottom sheet on Home and the season tab (under 1024px),
      not a card on every tab. Picking, "Not now", Back or a tap outside all answer it; "Me" in the

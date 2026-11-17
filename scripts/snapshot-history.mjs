@@ -5,13 +5,16 @@
 // live. Run once after each season ends, then commit the output:
 //
 //   npm run snapshot                     all completed seasons + players.json
-//   npm run snapshot -- --players-only   rebuild players.json only (run after
-//                                        each draft so rookies have names)
+//   npm run snapshot -- --players-only   rebuild players.json and users-current.json
+//                                        only (run after each draft so rookies have
+//                                        names and the build has this year's pictures)
 //
 // Per season: season-<year>.json (league, users, rosters, matchups, brackets,
 // draft — loaded on every visit) and transactions-<year>.json (only the
 // Players → Transactions tab needs them, so they load lazily). players.json is
 // a trimmed name index standing in for Sleeper's ~15 MB player dump.
+// users-current.json is the current league's users (raw): only the build reads
+// it, so pages baked into the HTML show each owner's latest picture.
 //
 // Raw Sleeper API shapes are stored untouched so downstream processing in
 // lib/data-processing is byte-identical whether data came from the snapshot
@@ -166,11 +169,19 @@ async function writePlayersIndex(years) {
   console.log(` → players.json (${Object.keys(players).length} players, ${kb} KB)`)
 }
 
+/** The current league's users, untouched — their pictures as of this run. */
+async function writeCurrentUsers() {
+  const users = await fetchJson(`${SLEEPER_API}/league/${LEAGUE_ID}/users`)
+  const kb = writeJson('users-current.json', users)
+  console.log(` → users-current.json (${users.length} users, ${kb} KB)`)
+}
+
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true })
 
   if (process.argv.includes('--players-only')) {
     await writePlayersIndex(readJson('manifest.json').years)
+    await writeCurrentUsers()
     return
   }
 
@@ -194,6 +205,7 @@ async function main() {
   console.log(`manifest.json: ${years.join(', ')}`)
 
   await writePlayersIndex(years)
+  await writeCurrentUsers()
 }
 
 main().catch(err => {
